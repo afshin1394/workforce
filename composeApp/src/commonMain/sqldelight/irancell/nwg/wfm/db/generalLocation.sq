@@ -1,0 +1,17 @@
+
+CREATE TABLE  GeneralLocation(
+ latitude TEXT NOT NULL,
+ longitude TEXT NOT NULL,
+ datetime TEXT NOT NULL,
+ isSent INTEGER
+);
+
+insert:
+INSERT INTO GeneralLocation (longitude,latitude,datetime,isSent)
+VALUES (?, ?,?,?);
+
+
+
+update:
+UPDATE GeneralLocation
+SET isSent = 1;

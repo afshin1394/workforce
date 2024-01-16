@@ -6,6 +6,7 @@ plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsCompose)
     id("dev.icerock.mobile.multiplatform-resources")
+    alias(libs.plugins.sqlDelight)
 
 }
 
@@ -50,12 +51,22 @@ kotlin {
                 implementation(compose.ui)
                 @OptIn(ExperimentalComposeLibrary::class)
                 implementation(compose.components.resources)
+
                 implementation(libs.napier)
 
                 implementation(libs.voyager.navigator)
                 implementation(libs.voyager.bottomSheet.navigator)
                 implementation(libs.voyager.transitions)
+
                 implementation(libs.moko.mvvm)
+                implementation(libs.moko.permission)
+                implementation(libs.moko.permission.compose)
+
+                implementation(libs.essenty.lifecycle)
+
+//                implementation(libs.sqldelight.coroutine.extension)
+
+
 
 
             }
@@ -71,36 +82,45 @@ kotlin {
                 implementation(libs.androidx.appcompat)
                 implementation(libs.androidx.activity.compose)
                 implementation(libs.compose.ui.tooling)
+                implementation(libs.play.service.location)
+//                implementation(libs.sqlDelight.driver.android)
+                implementation(libs.sqlDelight.driver.android)
 
             }
 
 
         }
+
+
         val iosArm64Main by getting {
-            dependsOn(commonMain)
+//            dependsOn(commonMain)
 
             dependencies {
+                implementation(libs.sqlDelight.driver.native)
 
             }
         }
         val iosArm64Test by getting {
-            dependsOn(commonMain)
+//            dependsOn(commonMain)
 
             dependencies {
+                implementation(libs.sqlDelight.driver.native)
 
             }
         }
         val iosX64Main by getting {
-            dependsOn(commonMain)
+//            dependsOn(commonMain)
 
             dependencies {
+                implementation(libs.sqlDelight.driver.native)
 
             }
         }
         val iosSimulatorArm64Main by getting {
-            dependsOn(commonMain)
+//            dependsOn(commonMain)
 
             dependencies {
+                implementation(libs.sqlDelight.driver.native)
 
             }
         }
@@ -146,4 +166,11 @@ dependencies {
 
 multiplatformResources {
     multiplatformResourcesPackage = "irancell.nwg.wfm"
+}
+sqldelight {
+    databases {
+        create("WFMDatabase") {
+            packageName.set("irancell.nwg.wfm.db")
+        }
+    }
 }

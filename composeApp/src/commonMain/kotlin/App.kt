@@ -18,6 +18,7 @@ import org.jetbrains.compose.resources.painterResource
 @OptIn(ExperimentalResourceApi::class)
 @Composable
 fun App() {
+
     MaterialTheme {
         var showContent by remember { mutableStateOf(false) }
         val greeting = remember { Greeting().greet() }

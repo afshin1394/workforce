@@ -19,6 +19,10 @@ moko-version = "0.23.0"
 voyager = "1.0.0"
 moko-mvvm = "0.16.1"
 napier = "2.6.1"
+moko-permission = "0.17.0"
+essenty = "2.0.0-dev04"
+play-service-location = "21.0.1"
+sqlDelight = "2.0.1"
 
 
 [libraries]
@@ -41,12 +45,24 @@ moko-classpath =  {group = "dev.icerock.moko", name = "resources-generator", ver
 moko-resource = {group = "dev.icerock.moko", name = "resources", version.ref = "moko-version"}
 moko-resource-compose = {group = "dev.icerock.moko", name = "resources-compose", version.ref = "moko-version"}
 moko-mvvm = { module = "dev.icerock.moko:mvvm-compose", version.ref = "moko-mvvm" }
+moko-permission = { module = "dev.icerock.moko:permissions", version.ref = "moko-permission" }
+moko-permission-compose = { module = "dev.icerock.moko:permissions-compose", version.ref = "moko-permission" }
+moko-permission-test = { module = "dev.icerock.moko:permissions-test", version.ref = "moko-permission" }
 
 voyager-navigator = { module = "cafe.adriel.voyager:voyager-navigator", version.ref = "voyager" }
 voyager-screen-model = { module = "cafe.adriel.voyager:voyager-screenmodel", version.ref = "voyager" }
 voyager-livedata = { module = "cafe.adriel.voyager:voyager-livedata", version.ref = "voyager" }
 voyager-bottomSheet_navigator = { module = "cafe.adriel.voyager:voyager-bottom-sheet-navigator", version.ref = "voyager" }
 voyager-transitions = { module = "cafe.adriel.voyager:voyager-transitions", version.ref = "voyager" }
+
+essenty-lifecycle = { module = "com.arkivanov.essenty:lifecycle", version.ref = "essenty" }
+play-service-location = { module = "com.google.android.gms:play-services-location", version.ref = "play-service-location" }
+sqldelight-coroutine-extension = { module = "app.cash.sqldelight:coroutines-extensions", version.ref = "sqlDelight" }
+sqlDelight-driver-sqlite = { module = "app.cash.sqldelight:sqlite-driver", version.ref = "sqlDelight" }
+sqlDelight-driver-android = { module = "app.cash.sqldelight:android-driver", version.ref = "sqlDelight" }
+sqlDelight-driver-native = { module = "app.cash.sqldelight:native-driver", version.ref = "sqlDelight" }
+sqlDelight-driver-js = { module = "app.cash.sqldelight:web-worker-driver", version.ref = "sqlDelight" }
+
 
 
 
@@ -59,6 +75,7 @@ androidApplication = { id = "com.android.application", version.ref = "agp" }
 androidLibrary = { id = "com.android.library", version.ref = "agp" }
 jetbrainsCompose = { id = "org.jetbrains.compose", version.ref = "compose-plugin" }
 kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
+sqlDelight = { id = "app.cash.sqldelight", version.ref = "sqlDelight" }
 
 
 [bundles]
