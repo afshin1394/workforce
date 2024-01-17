@@ -1,8 +1,8 @@
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
-data class GeneralLocation(var latitude: Double, var longitude: Double)
+import irancell.nwg.wfm.db.GeneralLocation
 
-expect class Location  (update : (GeneralLocation) -> Unit) {
-
-
+expect class Location  (){
+    companion object {
+        fun start(update: (GeneralLocation) -> Unit)
+        fun stop()
+    }
 }

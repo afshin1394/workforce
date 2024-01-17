@@ -10,3 +10,9 @@ actual class DatabaseDriverFactory constructor () {
         )
     }
 }
+actual fun createDriver(): SqlDriver {
+    return NativeSqliteDriver(
+        schema = WFMDatabase.Schema,
+        name = "WFMDatabase.db"
+    )
+}

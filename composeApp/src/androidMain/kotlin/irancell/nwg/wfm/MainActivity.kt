@@ -8,6 +8,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.fragment.app.FragmentActivity
 import cafe.adriel.voyager.navigator.Navigator
+import di.appModule
+import org.koin.core.context.startKoin
 import presentation.screens.splash.compose.SplashScreen
 
 class MainActivity : FragmentActivity() {
@@ -15,8 +17,10 @@ class MainActivity : FragmentActivity() {
         super.onCreate(savedInstanceState)
 
         setContent {
+            startKoin{
+                modules(appModule())
+            }
             Navigator(SplashScreen())
-//            App()
         }
     }
 }

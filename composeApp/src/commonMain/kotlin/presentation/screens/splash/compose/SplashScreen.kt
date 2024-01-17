@@ -29,6 +29,7 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 
 
 import com.irancell.nwg.wfm.presentation.theme.spacing2X
+import data.GeneralLocationRepositoryImpl
 import dev.icerock.moko.permissions.compose.BindEffect
 import dev.icerock.moko.permissions.compose.PermissionsControllerFactory
 import dev.icerock.moko.permissions.compose.rememberPermissionsControllerFactory
@@ -38,6 +39,9 @@ import io.github.aakira.napier.Napier
 import irancell.nwg.wfm.MR
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.datetime.Clock
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 import openAppSettings
 import presentation.screens.splash.events.PermissionEvent
 import presentation.screens.splash.viewmodel.SplashScreenVM
@@ -51,7 +55,7 @@ class SplashScreen() : Screen {
 
     @Composable
     override fun Content() {
-        Napier.e("in Content")
+        Napier.e("current" +DateTime.getFormattedDate(Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()) .toString()))
         val scope = rememberCoroutineScope()
         val navigator = LocalNavigator.currentOrThrow
         val loginScreen = rememberScreen(com.irancell.nwg.wfm.presentation.nav.Screen.Auth.Login)

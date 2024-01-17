@@ -70,19 +70,7 @@ class LoginScreen : Screen {
         Scaffold(snackbarHost = {
             SnackbarHost(hostState = snackbarHostState)
         }) {
-            scope.launch {
-                 Location{
-                     Napier.log(LogLevel.ASSERT, "GENERALLOCATION", message = it.latitude.toString())
-                     scope.launch {
-                         snackbarHostState.showSnackbar(
-                             message = it.latitude.toString(),
-                             duration = SnackbarDuration.Short,
-                         )
-                     }
-                 }
 
-
-            }
 
 
 

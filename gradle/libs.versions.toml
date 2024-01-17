@@ -23,6 +23,9 @@ moko-permission = "0.17.0"
 essenty = "2.0.0-dev04"
 play-service-location = "21.0.1"
 sqlDelight = "2.0.1"
+kotlinx-datetime = "0.5.0"
+koin = "3.5.3"
+koin-compose = "1.1.0"
 
 
 [libraries]
@@ -62,6 +65,18 @@ sqlDelight-driver-sqlite = { module = "app.cash.sqldelight:sqlite-driver", versi
 sqlDelight-driver-android = { module = "app.cash.sqldelight:android-driver", version.ref = "sqlDelight" }
 sqlDelight-driver-native = { module = "app.cash.sqldelight:native-driver", version.ref = "sqlDelight" }
 sqlDelight-driver-js = { module = "app.cash.sqldelight:web-worker-driver", version.ref = "sqlDelight" }
+
+
+kotlin-x-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinx-datetime" }
+
+
+
+koin-android = { module = "io.insert-koin:koin-android", version.ref = "koin" }
+koin-core = { module = "io.insert-koin:koin-core", version.ref = "koin" }
+koin-compose = { module = "io.insert-koin:koin-compose", version.ref = "koin-compose"}
+
+
+
 
 
 

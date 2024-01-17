@@ -18,8 +18,10 @@ import com.irancell.nwg.wfm.presentation.screens.main.events.MainEvent
 import com.irancell.nwg.wfm.presentation.screens.main.viewmodel.MainScreenVM
 import com.irancell.nwg.wfm.presentation.theme.*
 import com.irancell.nwg.wfm.ui.compose.TicketListScreen
+import io.github.aakira.napier.LogLevel
 import io.github.aakira.napier.Napier
 import kotlinx.coroutines.launch
+import org.koin.compose.koinInject
 import presentation.components.CustomTopAppBar
 import presentation.components.DrawerBody
 import presentation.components.DrawerHeader
@@ -42,7 +44,9 @@ class MainScreen constructor(
     override fun Content() {
 
         val navigator = LocalNavigator.currentOrThrow
-        val viewModel = remember { MainScreenVM() }
+        val viewModel : MainScreenVM = koinInject()
+        Napier.log(LogLevel.ASSERT,"MainScreenVM", message = viewModel.toString())
+//        val viewModel = remember { MainScreenVM() }
         val availability by viewModel.availability.collectAsState()
 
         val ticketInfoScreen =

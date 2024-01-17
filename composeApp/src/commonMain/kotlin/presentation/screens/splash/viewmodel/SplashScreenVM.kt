@@ -33,7 +33,7 @@ class SplashScreenVM(
     val permissions = listOf<Permission>(
         Permission.CAMERA,
         Permission.COARSE_LOCATION,
-        Permission.LOCATION
+        Permission.LOCATION,
     )
 
      fun checkPermissions(process : () -> Unit) {

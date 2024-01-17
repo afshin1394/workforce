@@ -64,8 +64,11 @@ kotlin {
 
                 implementation(libs.essenty.lifecycle)
 
-//                implementation(libs.sqldelight.coroutine.extension)
+                implementation(libs.kotlin.x.datetime)
 
+
+                implementation(libs.koin.core)
+                implementation(libs.koin.compose)
 
 
 
@@ -83,8 +86,8 @@ kotlin {
                 implementation(libs.androidx.activity.compose)
                 implementation(libs.compose.ui.tooling)
                 implementation(libs.play.service.location)
-//                implementation(libs.sqlDelight.driver.android)
                 implementation(libs.sqlDelight.driver.android)
+                implementation(libs.koin.android)
 
             }
 

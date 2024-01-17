@@ -1,7 +1,11 @@
 package com.irancell.nwg.wfm.presentation.screens.main.viewmodel
 
+import irancell.nwg.wfm.GpsTrackingService
+import Location
+import androidx.compose.material3.SnackbarDuration
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.rememberCoroutineScope
 
 import com.irancell.nwg.wfm.presentation.components.FilterSectionItem
 import com.irancell.nwg.wfm.presentation.model.FilterType
@@ -9,21 +13,58 @@ import com.irancell.nwg.wfm.presentation.model.SelectableItem
 import com.irancell.nwg.wfm.presentation.model.StateFilter
 import com.irancell.nwg.wfm.presentation.model.Task
 import com.irancell.nwg.wfm.presentation.screens.main.events.MainEvent
+import data.GeneralLocationRepositoryImpl
 import dev.icerock.moko.mvvm.viewmodel.ViewModel
+import io.github.aakira.napier.LogLevel
+import io.github.aakira.napier.Napier
+import irancell.nwg.wfm.db.GeneralLocation
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+import kotlinx.datetime.Clock
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
+import utils.getCurrentDate
 
 class MainScreenVM(
-
-
+    private val generalLocationRepositoryImpl: GeneralLocationRepositoryImpl
 ) : ViewModel() {
 
-    private val _availability  = MutableStateFlow(false)
+    private val _availability = MutableStateFlow(false)
     val availability = _availability.asStateFlow()
-
-    fun changeAvailability(){
+    fun changeAvailability() {
+        Napier.log(LogLevel.ASSERT, "injection", message = generalLocationRepositoryImpl.toString())
         _availability.update { !it }
+        if (_availability.value) {
+            GpsTrackingService.startLocationTracker()
+
+//            Location.start {
+//                viewModelScope.launch {
+//                    delay(2000)
+//                    generalLocationRepositoryImpl.insert(
+//                        GeneralLocation(
+//                            it.latitude, it.longitude,
+//                            getCurrentDate(),
+//                            0
+//                        )
+//                    )
+//                }
+//                Napier.log(LogLevel.ASSERT, "GENERALLOCATION", message = it.latitude.toString())
+//            }
+        } else {
+            GpsTrackingService.stopLocationTracker()
+
+            val list = generalLocationRepositoryImpl.selectAll()
+            for (generalLocation in list) {
+                Napier.log(LogLevel.ASSERT,tag = "size", message =  generalLocation.toString())
+
+            }
+
+        }
+
+
     }
 
     private val initialTasks = arrayListOf(
