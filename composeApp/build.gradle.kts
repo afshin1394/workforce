@@ -1,5 +1,4 @@
 import org.jetbrains.compose.ExperimentalComposeLibrary
-import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
@@ -70,6 +69,11 @@ kotlin {
                 implementation(libs.koin.core)
                 implementation(libs.koin.compose)
 
+                implementation(libs.kotlin.arrow.core)
+
+                implementation(libs.ktor.client.core)
+                implementation(libs.ktor.client.content.negotiation)
+                implementation(libs.kotlin.serialization)
 
 
             }
@@ -88,42 +92,54 @@ kotlin {
                 implementation(libs.play.service.location)
                 implementation(libs.sqlDelight.driver.android)
                 implementation(libs.koin.android)
+                implementation(libs.ktor.client.okhttp)
+                implementation(libs.ktor.client.logging)
+//mapbox
+//implementation("com.mapbox.maps:android:11.1.0")
+//// If you're using compose also add the compose extension
+// implementation("com.mapbox.extension:maps-compose:11.1.0")
+
+
+//osmdroid
+                 implementation ("org.osmdroid:osmdroid-android:6.1.6")
 
             }
-
-
         }
 
 
         val iosArm64Main by getting {
-//            dependsOn(commonMain)
+            dependsOn(commonMain)
 
             dependencies {
                 implementation(libs.sqlDelight.driver.native)
+                implementation(libs.ktor.client.darwin)
 
             }
         }
         val iosArm64Test by getting {
-//            dependsOn(commonMain)
+            dependsOn(commonMain)
 
             dependencies {
                 implementation(libs.sqlDelight.driver.native)
+                implementation(libs.ktor.client.darwin)
 
             }
         }
         val iosX64Main by getting {
-//            dependsOn(commonMain)
+            dependsOn(commonMain)
 
             dependencies {
                 implementation(libs.sqlDelight.driver.native)
+                implementation(libs.ktor.client.darwin)
 
             }
         }
         val iosSimulatorArm64Main by getting {
-//            dependsOn(commonMain)
+            dependsOn(commonMain)
 
             dependencies {
                 implementation(libs.sqlDelight.driver.native)
+                implementation(libs.ktor.client.darwin)
 
             }
         }
@@ -163,6 +179,9 @@ android {
 
 }
 dependencies {
+    implementation(libs.androidx.appcompat)
+    implementation(libs.androidx.material)
+    implementation(libs.androidx.constraintlayout)
     debugImplementation(libs.compose.ui.tooling)
     commonMainApi(libs.bundles.moko.resources)
 }
@@ -177,3 +196,7 @@ sqldelight {
         }
     }
 }
+
+
+
+

@@ -5,5 +5,4 @@ expect class GpsTrackingService {
         fun startLocationTracker()
         fun stopLocationTracker()
     }
-
 }

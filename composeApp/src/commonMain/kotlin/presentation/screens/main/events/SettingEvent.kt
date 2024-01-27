@@ -1,7 +1,7 @@
-package com.irancell.nwg.wfm.presentation.screens.main.events
+package presentation.screens.main.events
 
 
-sealed interface SettingEvent : Event{
-    object Default : SettingEvent
-    object ChangeLanguage : SettingEvent
+sealed interface SettingEvent : Event {
+   data object Default : SettingEvent
+   data object ChangeLanguage : SettingEvent
 }

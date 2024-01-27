@@ -15,7 +15,7 @@ import com.irancell.nwg.wfm.presentation.model.Task
 import com.irancell.nwg.wfm.presentation.components.CustomSearchBar
 import com.irancell.nwg.wfm.presentation.components.FilterRow
 import presentation.components.ticketCard
-import com.irancell.nwg.wfm.presentation.screens.main.events.MainEvent
+import presentation.screens.main.events.MainEvent
 import presentation.theme.backgroundBackground3
 import com.irancell.nwg.wfm.presentation.theme.spacing15X
 import com.irancell.nwg.wfm.presentation.theme.spacing2X

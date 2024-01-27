@@ -16,7 +16,7 @@ fun DrawerBody( onItemClick: (navRoute : Screen.Main.Menu) -> Unit={}) {
     Column(modifier = Modifier.padding(end =  spacing1X)) {
         DrawerMenuItem(modifier = Modifier
             .fillMaxWidth()
-            .padding(start = spacing2X),MR.images.settings, "My Tickets") {
+            .padding(start = spacing2X),MR.images.home, "My Tickets") {
             onItemClick(Screen.Main.Menu.MyTickets)
         }
         DrawerMenuItem(modifier = Modifier
@@ -30,6 +30,11 @@ fun DrawerBody( onItemClick: (navRoute : Screen.Main.Menu) -> Unit={}) {
             .padding(start = spacing2X),MR.images.about, "About") {
             onItemClick(Screen.Main.Menu.About)
 
+        }
+        DrawerMenuItem(modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = spacing2X),MR.images.location, "GpsTracker") {
+            onItemClick(Screen.Main.Menu.GpsTrackingReport)
         }
         DrawerMenuItem(modifier = Modifier
             .fillMaxWidth()

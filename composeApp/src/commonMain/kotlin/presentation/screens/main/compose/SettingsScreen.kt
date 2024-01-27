@@ -17,7 +17,7 @@ import com.irancell.nwg.wfm.presentation.components.*
 import presentation.model.ItemComponentModel
 import com.irancell.nwg.wfm.presentation.model.SelectableItem
 import com.irancell.nwg.wfm.presentation.screens.main.components.SwitchItem
-import com.irancell.nwg.wfm.presentation.screens.main.events.SettingEvent
+import presentation.screens.main.events.SettingEvent
 import com.irancell.nwg.wfm.presentation.screens.main.viewmodel.SettingScreenVM
 import presentation.theme.subtleDefault
 import presentation.theme.surfaceDefault

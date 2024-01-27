@@ -1,5 +1,6 @@
 package com.irancell.nwg.wfm.presentation.components
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -12,6 +13,7 @@ import androidx.compose.ui.text.style.TextAlign
 
 import presentation.model.ItemComponentModel
 import com.irancell.nwg.wfm.presentation.theme.*
+import dev.icerock.moko.resources.compose.painterResource
 
 import presentation.theme.body_large
 import presentation.theme.body_small
@@ -75,12 +77,13 @@ fun ItemComponent(modifier: Modifier = Modifier,itemComponentModel : ItemCompone
         }
 
 
-
-//        Image(
-//            painter = painterResource(id = itemComponentModel.resId),
-//            contentDescription = "",
-//            modifier = modifier.weight(.1f),
-//        )
+         if (itemComponentModel.hasImage) {
+             Image(
+                 painter = painterResource(itemComponentModel.imageResource),
+                 contentDescription = "",
+                 modifier = modifier.weight(.1f),
+             )
+         }
     }
 
 

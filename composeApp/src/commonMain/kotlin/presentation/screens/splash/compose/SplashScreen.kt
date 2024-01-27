@@ -37,25 +37,29 @@ import dev.icerock.moko.resources.compose.painterResource
 import io.github.aakira.napier.LogLevel
 import io.github.aakira.napier.Napier
 import irancell.nwg.wfm.MR
+import irancell.nwg.wfm.openAppSettings
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
-import openAppSettings
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 import presentation.screens.splash.events.PermissionEvent
 import presentation.screens.splash.viewmodel.SplashScreenVM
 import presentation.theme.body_large
 import presentation.theme.body_small
 import presentation.theme.h4
-import provideLifeCycleOwner
 
-class SplashScreen() : Screen {
+class SplashScreen() : Screen , KoinComponent{
 
 
     @Composable
     override fun Content() {
-        Napier.e("current" +DateTime.getFormattedDate(Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()) .toString()))
+        val dataSyncRepository : GeneralLocationRepositoryImpl by inject()
+
+
+        Napier.e("dataSyncRepository" +dataSyncRepository)
         val scope = rememberCoroutineScope()
         val navigator = LocalNavigator.currentOrThrow
         val loginScreen = rememberScreen(com.irancell.nwg.wfm.presentation.nav.Screen.Auth.Login)

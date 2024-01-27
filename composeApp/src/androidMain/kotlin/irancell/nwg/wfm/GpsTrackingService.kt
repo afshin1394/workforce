@@ -1,6 +1,5 @@
 package irancell.nwg.wfm
 
-import Location
 import android.annotation.SuppressLint
 import android.app.AlarmManager
 import android.app.Notification
@@ -16,7 +15,8 @@ import android.os.SystemClock
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import data.GeneralLocationRepositoryImpl
+import domain.usecase.usecase.SendLocationToServerUseCase
+import domain.usecase.usecase.StoreLocationDataUseCase
 import io.github.aakira.napier.LogLevel
 import io.github.aakira.napier.Napier
 import irancell.nwg.wfm.db.GeneralLocation
@@ -26,19 +26,20 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
-import org.koin.android.ext.android.get
-import org.koin.android.ext.android.inject
-import provideAppContext
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
+import utils.AsyncStatus
 import utils.getCurrentDate
 import java.util.concurrent.TimeUnit
 
-actual class GpsTrackingService : Service() {
+actual class GpsTrackingService : Service() , KoinComponent {
 
 
     lateinit var pendingIntent: PendingIntent
     private var lat: Double = 0.0
     private var lon: Double = 0.0
-    private val generalLocationRepositoryImpl: GeneralLocationRepositoryImpl by inject()
+    val storeLocationDataUseCase : StoreLocationDataUseCase by inject()
+    val sendLocationToServerUseCase : SendLocationToServerUseCase by inject()
 
    actual companion object {
         lateinit var gpsTrackingIntent : Intent
@@ -114,14 +115,70 @@ actual class GpsTrackingService : Service() {
         scope.launch {
             Napier.log(LogLevel.ASSERT, tag = "serviice", message = "Launch")
 
-            generalLocationRepositoryImpl.insert(
+            storeLocationDataUseCase(
                 GeneralLocation(
                     lat.toString(),
                     lon.toString(),
                     getCurrentDate(),
                     0
                 )
+            ).collect{
+                when(it.status){
+                    AsyncStatus.ERROR -> {
+                        val errorMessage = it.message!!
+                        Napier.log(
+                            LogLevel.ASSERT,
+                            tag = "serviice",
+                            message = it.message
+                        )
+                    }
+                    AsyncStatus.LOADING -> {
+                    }
+                    AsyncStatus.SUCCESS -> {
+                        Napier.log(
+                            LogLevel.ASSERT,
+                            tag = "serviice",
+                            message = "success"
+                        )
+                    }
+                }
+            }
+            Napier.log(
+                LogLevel.ASSERT,
+                tag = "serviice",
+                message = sendLocationToServerUseCase.toString()
             )
+            sendLocationToServerUseCase(
+                GeneralLocation(
+                    lat.toString(),
+                    lon.toString(),
+                    getCurrentDate(),
+                    0
+                )
+            ).collect{
+                when(it.status){
+                    AsyncStatus.ERROR -> {
+                        val errorMessage = it.message!!
+                        Napier.log(
+                            LogLevel.ASSERT,
+                            tag = "serviice",
+                            message = it.message
+                        )
+                    }
+                    AsyncStatus.LOADING -> {
+                    }
+                    AsyncStatus.SUCCESS -> {
+                        Napier.log(
+                            LogLevel.ASSERT,
+                            tag = "serviice",
+                            message = "success"
+                        )
+                    }
+                }
+            }
+
+
+
 //            Log.i("locationServicess", "onStartCommand:  latitude:" + lat + "longitude" + lon)
 //            isWifi(this@SendGpsService).let {
 //                if (it) {
@@ -155,7 +212,7 @@ actual class GpsTrackingService : Service() {
         val alarmManager = getSystemService(ALARM_SERVICE) as AlarmManager
         val currentTimeMillis = SystemClock.elapsedRealtime()
         val intervalMillis = TimeUnit.SECONDS.toMillis(5)
-        Napier.log(LogLevel.ASSERT, tag = "serviice", message = "SetExact")
+        Napier.log(LogLevel.ASSERT, tag = "serviice", message = "Alarm lat: $lat  + lon: $lon" )
 
         alarmManager.setExact(
             AlarmManager.ELAPSED_REALTIME_WAKEUP,

@@ -23,11 +23,11 @@ DELETE FROM GeneralLocation WHERE isSent = 1;
 
 
 selectAllNotSentLocation:
-SELECT * FROM GeneralLocation WHERE isSent = 0;
+SELECT * FROM GeneralLocation WHERE isSent = 0 ORDER BY datetime ASC ;
 
 
 selectAll:
-SELECT * FROM GeneralLocation;
+SELECT * FROM GeneralLocation ORDER BY datetime ASC ;
 
 deleteAllSent:
 DELETE FROM GeneralLocation WHERE isSent = 1;

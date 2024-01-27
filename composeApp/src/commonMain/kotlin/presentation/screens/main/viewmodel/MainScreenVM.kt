@@ -1,67 +1,88 @@
-package com.irancell.nwg.wfm.presentation.screens.main.viewmodel
+package presentation.screens.main.viewmodel
 
 import irancell.nwg.wfm.GpsTrackingService
-import Location
-import androidx.compose.material3.SnackbarDuration
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.rememberCoroutineScope
 
 import com.irancell.nwg.wfm.presentation.components.FilterSectionItem
 import com.irancell.nwg.wfm.presentation.model.FilterType
 import com.irancell.nwg.wfm.presentation.model.SelectableItem
 import com.irancell.nwg.wfm.presentation.model.StateFilter
 import com.irancell.nwg.wfm.presentation.model.Task
-import com.irancell.nwg.wfm.presentation.screens.main.events.MainEvent
-import data.GeneralLocationRepositoryImpl
+import presentation.screens.main.events.MainEvent
 import dev.icerock.moko.mvvm.viewmodel.ViewModel
-import io.github.aakira.napier.LogLevel
-import io.github.aakira.napier.Napier
-import irancell.nwg.wfm.db.GeneralLocation
-import kotlinx.coroutines.delay
+import domain.usecase.usecase.GetAvailabilityUseCase
+import domain.usecase.usecase.StoreAvailabilityUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.datetime.Clock
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toLocalDateTime
-import utils.getCurrentDate
+import utils.AsyncStatus
+import utils.BaseViewModel
+import utils.ViewStates
 
 class MainScreenVM(
-    private val generalLocationRepositoryImpl: GeneralLocationRepositoryImpl
-) : ViewModel() {
-
+   private val storeAvailabilityUseCase: StoreAvailabilityUseCase,
+   private val getAvailabilityUseCase: GetAvailabilityUseCase,
+) : BaseViewModel() {
     private val _availability = MutableStateFlow(false)
     val availability = _availability.asStateFlow()
+    init {
+        viewModelScope.launch {
+            getAvailabilityUseCase(
+                Unit
+            ).collect {
+                when (it.status) {
+                    AsyncStatus.ERROR -> {
+                        state.update { ViewStates.Loading }
+                        val errorMessage = it.message!!
+                        error.update { errorMessage }
+                    }
+
+                    AsyncStatus.LOADING -> {
+                    }
+
+                    AsyncStatus.SUCCESS -> {
+                        state.update { ViewStates.Success }
+                        it.data?.let { available ->
+                                _availability.update { available }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+
     fun changeAvailability() {
-        Napier.log(LogLevel.ASSERT, "injection", message = generalLocationRepositoryImpl.toString())
-        _availability.update { !it }
-        if (_availability.value) {
-            GpsTrackingService.startLocationTracker()
+        viewModelScope.launch {
+            _availability.update { !it }
 
-//            Location.start {
-//                viewModelScope.launch {
-//                    delay(2000)
-//                    generalLocationRepositoryImpl.insert(
-//                        GeneralLocation(
-//                            it.latitude, it.longitude,
-//                            getCurrentDate(),
-//                            0
-//                        )
-//                    )
-//                }
-//                Napier.log(LogLevel.ASSERT, "GENERALLOCATION", message = it.latitude.toString())
-//            }
-        } else {
-            GpsTrackingService.stopLocationTracker()
+            storeAvailabilityUseCase(
+                _availability.value
+            ).collect{
+                when (it.status) {
+                    AsyncStatus.ERROR -> {
+                        state.update { ViewStates.Loading }
+                        it.message?.let{ string ->
+                            error.update { string }
+                        }
+                    }
 
-            val list = generalLocationRepositoryImpl.selectAll()
-            for (generalLocation in list) {
-                Napier.log(LogLevel.ASSERT,tag = "size", message =  generalLocation.toString())
+                    AsyncStatus.LOADING -> {
+                    }
+
+                    AsyncStatus.SUCCESS -> {
+                        state.update { ViewStates.Success }
+                    }
+                }
+            }
+            if (_availability.value) {
+                GpsTrackingService.startLocationTracker()
+            } else {
+                GpsTrackingService.stopLocationTracker()
 
             }
-
         }
 
 

@@ -10,12 +10,12 @@ import cafe.adriel.voyager.core.registry.rememberScreen
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-
+import com.irancell.nwg.wfm.presentation.nav.Screen.Main.*
 import com.irancell.nwg.wfm.presentation.components.*
 import com.irancell.nwg.wfm.presentation.model.BottomSheetDoubleActionModel
 import com.irancell.nwg.wfm.presentation.screens.main.components.*
-import com.irancell.nwg.wfm.presentation.screens.main.events.MainEvent
-import com.irancell.nwg.wfm.presentation.screens.main.viewmodel.MainScreenVM
+import presentation.screens.main.events.MainEvent
+import presentation.screens.main.viewmodel.MainScreenVM
 import com.irancell.nwg.wfm.presentation.theme.*
 import com.irancell.nwg.wfm.ui.compose.TicketListScreen
 import io.github.aakira.napier.LogLevel
@@ -52,12 +52,14 @@ class MainScreen constructor(
         val ticketInfoScreen =
             rememberScreen(com.irancell.nwg.wfm.presentation.nav.Screen.TicketProcess.TicketInfo)
         val notificationScreen =
-            rememberScreen(com.irancell.nwg.wfm.presentation.nav.Screen.Main.Notification)
+            rememberScreen(Notification)
         val accountScreen =
-            rememberScreen(com.irancell.nwg.wfm.presentation.nav.Screen.Main.AccountInfo)
+            rememberScreen(AccountInfo)
         val settingsScreen =
-            rememberScreen(com.irancell.nwg.wfm.presentation.nav.Screen.Main.Menu.Settings)
-        val aboutScreen = rememberScreen(com.irancell.nwg.wfm.presentation.nav.Screen.Main.Menu.About)
+            rememberScreen(Menu.Settings)
+        val aboutScreen = rememberScreen(Menu.About)
+        val gpsTrackingReportScreen = rememberScreen(Menu.GpsTrackingReport)
+
         val scope = rememberCoroutineScope()
         val scaffoldState = rememberBottomSheetScaffoldState();
         val events by viewModel.events
@@ -112,6 +114,7 @@ class MainScreen constructor(
                 MainEvent.Accept -> {
                     ""
                 }
+
             }
 
 
@@ -149,25 +152,28 @@ class MainScreen constructor(
                         scaffoldState.drawerState.open()
 
                     when (it) {
-                        com.irancell.nwg.wfm.presentation.nav.Screen.Main.Menu.About -> {
+                        Menu.About -> {
                             navigator.push(aboutScreen)
 
                         }
 
-                        com.irancell.nwg.wfm.presentation.nav.Screen.Main.Menu.Logout -> {
+                        Menu.Logout -> {
                             viewModel.events.value = MainEvent.Logout
                         }
 
-                        com.irancell.nwg.wfm.presentation.nav.Screen.Main.Menu.MyTickets -> {
+                        Menu.MyTickets -> {
 //                        navigator.push(settingsScreen)
 
                         }
 
-                        com.irancell.nwg.wfm.presentation.nav.Screen.Main.Menu.Settings -> {
+                        Menu.Settings -> {
                             navigator.push(settingsScreen)
 
                         }
 
+                        Menu.GpsTrackingReport -> {
+                            navigator.push(gpsTrackingReportScreen)
+                        }
                     }
                     scaffoldState.drawerState.close()
 
@@ -264,6 +270,8 @@ class MainScreen constructor(
                         }
 
                     }
+
+
                 }
             }, bottomSheetContent = {
 
@@ -386,6 +394,8 @@ class MainScreen constructor(
                     MainEvent.Accept -> {
                         navigator.push(ticketInfoScreen)
                     }
+
+
                 }
 
             }, content = {

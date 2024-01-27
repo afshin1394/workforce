@@ -26,7 +26,10 @@ sqlDelight = "2.0.1"
 kotlinx-datetime = "0.5.0"
 koin = "3.5.3"
 koin-compose = "1.1.0"
-
+arrow = "1.2.1"
+ktor = "2.3.7"
+google-map = "4.3.1"
+kotlin1920-RC2 = "1.9.20-RC2"
 
 [libraries]
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
@@ -44,6 +47,7 @@ compose-ui-tooling = { module = "androidx.compose.ui:ui-tooling", version.ref = 
 compose-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview", version.ref = "compose" }
 compose-foundation = { module = "androidx.compose.foundation:foundation", version.ref = "compose" }
 compose-material = { module = "androidx.compose.material:material", version.ref = "compose" }
+
 moko-classpath =  {group = "dev.icerock.moko", name = "resources-generator", version.ref = "moko-version"}
 moko-resource = {group = "dev.icerock.moko", name = "resources", version.ref = "moko-version"}
 moko-resource-compose = {group = "dev.icerock.moko", name = "resources-compose", version.ref = "moko-version"}
@@ -70,18 +74,25 @@ sqlDelight-driver-js = { module = "app.cash.sqldelight:web-worker-driver", versi
 kotlin-x-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinx-datetime" }
 
 
+kotlin_arrow_stack = { module = "io.arrow-kt:arrow-stack", version.ref = "arrow" }
+kotlin_arrow_core = { module = "io.arrow-kt:arrow-core", version.ref = "arrow" }
+
+
 
 koin-android = { module = "io.insert-koin:koin-android", version.ref = "koin" }
 koin-core = { module = "io.insert-koin:koin-core", version.ref = "koin" }
 koin-compose = { module = "io.insert-koin:koin-compose", version.ref = "koin-compose"}
 
 
-
-
-
-
-
 napier = { module = "io.github.aakira:napier", version.ref = "napier" }
+
+ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
+ktor-client-okhttp = { module = "io.ktor:ktor-client-okhttp", version.ref = "ktor" }
+ktor-client-darwin = { module = "io.ktor:ktor-client-darwin", version.ref = "ktor" }
+ktor-client-logging = { module = "io.ktor:ktor-client-logging", version.ref = "ktor" }
+ktor-client-content-negotiation = {module = "io.ktor:ktor-client-content-negotiation", version.ref= "ktor"}
+kotlin-serialization = {module = "io.ktor:ktor-serialization-kotlinx-json", version.ref="ktor"}
+
 
 
 [plugins]
@@ -91,7 +102,9 @@ androidLibrary = { id = "com.android.library", version.ref = "agp" }
 jetbrainsCompose = { id = "org.jetbrains.compose", version.ref = "compose-plugin" }
 kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 sqlDelight = { id = "app.cash.sqldelight", version.ref = "sqlDelight" }
+kotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin1920-RC2" }
 
 
 [bundles]
 moko-resources = ["moko-resource", "moko-resource-compose"]
+ktor = ["ktor-client-core", "ktor-client-content-negotiation"]
