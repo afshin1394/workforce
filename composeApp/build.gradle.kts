@@ -101,7 +101,7 @@ kotlin {
 
 
 //osmdroid
-                 implementation ("org.osmdroid:osmdroid-android:6.1.6")
+                implementation("org.osmdroid:osmdroid-android:6.1.6")
 
             }
         }

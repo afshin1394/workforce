@@ -1,7 +1,5 @@
 package presentation.nav
 import cafe.adriel.voyager.core.registry.screenModule
-import cafe.adriel.voyager.navigator.Navigator
-import cafe.adriel.voyager.transitions.SlideTransition
 import com.irancell.nwg.wfm.presentation.nav.Screen
 import presentation.screens.auth.compose.LoginScreen
 import com.irancell.nwg.wfm.presentation.screens.auth.VerifyScreen
@@ -40,7 +38,7 @@ import presentation.screens.main.compose.SettingsScreen
 //import presentation.screens.main.compose.SettingsScreen
 //import presentation.screens.auth.compose.LoginScreen
 //import com.irancell.nwg.wfm.presentation.screens.auth.VerifyScreen
-//import com.irancell.nwg.wfm.presentation.screens.main.MainScreen
+//import presentation.screens.main.compose.MainScreen
 //import presentation.screens.splash.compose.SplashScreen
 //
 //import com.irancell.nwg.wfm.presentation.screens.main.compose.AccountScreen

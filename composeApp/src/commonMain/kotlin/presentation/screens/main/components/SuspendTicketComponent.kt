@@ -28,7 +28,7 @@ import presentation.theme.textPrimary
 
 
 @Composable
-fun SuspendTicketContentComponent(suspendReason: String = "" ,ticketName: String = "Huawei",onSelectReason : () -> Unit = {},onCompleted : (isComplete : Boolean) -> Unit = {} ) {
+fun SuspendTicketContentComponent(suspendReason: String = "" ,ticketName: String = "Huawei",onSelectReason : () -> Unit = {},onCompleted : (isComplete : Boolean) -> Unit = {},onCameraClick : () -> Unit = {} ) {
 
     Column(
         modifier = Modifier
@@ -59,7 +59,9 @@ fun SuspendTicketContentComponent(suspendReason: String = "" ,ticketName: String
         Spacer(modifier = Modifier.padding(vertical = spacing1X))
         Text(text = "Photo for ticket suspension*", style = body_large, color = textPrimary)
         Spacer(modifier = Modifier.padding(vertical = spacing1X))
-        TakeImageComponent()
+        TakeImageComponent(){
+            onCameraClick()
+        }
     }
 
 

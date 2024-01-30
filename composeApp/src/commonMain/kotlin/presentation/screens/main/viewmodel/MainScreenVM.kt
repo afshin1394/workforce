@@ -10,13 +10,16 @@ import com.irancell.nwg.wfm.presentation.model.SelectableItem
 import com.irancell.nwg.wfm.presentation.model.StateFilter
 import com.irancell.nwg.wfm.presentation.model.Task
 import presentation.screens.main.events.MainEvent
-import dev.icerock.moko.mvvm.viewmodel.ViewModel
+import dev.icerock.moko.permissions.Permission
+import dev.icerock.moko.permissions.PermissionsController
 import domain.usecase.usecase.GetAvailabilityUseCase
 import domain.usecase.usecase.StoreAvailabilityUseCase
+import irancell.nwg.wfm.Camera
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+
 import utils.AsyncStatus
 import utils.BaseViewModel
 import utils.ViewStates
@@ -27,6 +30,10 @@ class MainScreenVM(
 ) : BaseViewModel() {
     private val _availability = MutableStateFlow(false)
     val availability = _availability.asStateFlow()
+
+    private val _openCamera = MutableStateFlow(false)
+    val openCamera = _openCamera.asStateFlow()
+
     init {
         viewModelScope.launch {
             getAvailabilityUseCase(
@@ -40,6 +47,7 @@ class MainScreenVM(
                     }
 
                     AsyncStatus.LOADING -> {
+
                     }
 
                     AsyncStatus.SUCCESS -> {
@@ -147,8 +155,9 @@ class MainScreenVM(
 
     var tasks = ArrayList(initialTasks)
 
-
     var events = mutableStateOf<MainEvent>(MainEvent.Default)
+
+
 
     var enableSuspendSubmit = mutableStateOf(false)
     var enableCancelSubmit = mutableStateOf(false)
@@ -295,6 +304,7 @@ class MainScreenVM(
 
 
     fun removeAllFilters() {
+
         filterSectionItems.forEach {
             it.filterStates.forEach { stateFilter ->
                 run {
@@ -305,6 +315,22 @@ class MainScreenVM(
         }
         tasks.clear()
         tasks.addAll(initialTasks)
+    }
+
+    fun openCamera(permissionsController: PermissionsController) {
+        viewModelScope.launch {
+            val cameraPermission = Permission.CAMERA
+            val isGranted = permissionsController.isPermissionGranted(cameraPermission)
+            if (isGranted){
+                _openCamera.update { true }
+            }else{
+                permissionsController.providePermission(cameraPermission)
+            }
+        }
+    }
+
+    fun updateCameraStatus(openCamera : Boolean) {
+        _openCamera.update { openCamera }
     }
 
 }

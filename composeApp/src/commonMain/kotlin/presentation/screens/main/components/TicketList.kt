@@ -76,7 +76,7 @@ fun TicketListScreen(
                 ticketCard(modifier = Modifier.wrapContentHeight(),
                     task = item,
                     onActionClick = {
-                        onEvent(MainEvent.Accept)
+                        onEvent(MainEvent.AcceptTicket)
                     },
                     onMoreOptionsClick = {
                         onEvent(MainEvent.MoreOptions)

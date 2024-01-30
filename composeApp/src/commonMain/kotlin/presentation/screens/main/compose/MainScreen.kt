@@ -18,8 +18,11 @@ import presentation.screens.main.events.MainEvent
 import presentation.screens.main.viewmodel.MainScreenVM
 import com.irancell.nwg.wfm.presentation.theme.*
 import com.irancell.nwg.wfm.ui.compose.TicketListScreen
+import dev.icerock.moko.permissions.compose.PermissionsControllerFactory
+import dev.icerock.moko.permissions.compose.rememberPermissionsControllerFactory
 import io.github.aakira.napier.LogLevel
 import io.github.aakira.napier.Napier
+import irancell.nwg.wfm.Camera
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import presentation.components.CustomTopAppBar
@@ -35,7 +38,7 @@ import presentation.theme.textInverse
 import presentation.theme.textInverseDisabled
 import presentation.theme.textPrimary
 
-class MainScreen constructor(
+class MainScreen (
     private val title: String,
 
     ) : Screen {
@@ -48,6 +51,7 @@ class MainScreen constructor(
         Napier.log(LogLevel.ASSERT,"MainScreenVM", message = viewModel.toString())
 //        val viewModel = remember { MainScreenVM() }
         val availability by viewModel.availability.collectAsState()
+        val openCamera by viewModel.openCamera.collectAsState()
 
         val ticketInfoScreen =
             rememberScreen(com.irancell.nwg.wfm.presentation.nav.Screen.TicketProcess.TicketInfo)
@@ -111,10 +115,10 @@ class MainScreen constructor(
                     ""
                 }
 
-                MainEvent.Accept -> {
+
+                MainEvent.AcceptTicket -> {
                     ""
                 }
-
             }
 
 
@@ -264,13 +268,12 @@ class MainScreen constructor(
 
                     }
 
-                    MainEvent.Accept -> {
+                    MainEvent.AcceptTicket -> {
                         scope.launch {
                             scaffoldState.bottomSheetState.collapse()
                         }
 
                     }
-
 
                 }
             }, bottomSheetContent = {
@@ -329,8 +332,9 @@ class MainScreen constructor(
                             scaffoldState.bottomSheetState.expand()
                         }
                     }
-
                     MainEvent.SuspendTicket -> {
+                        val factory: PermissionsControllerFactory = rememberPermissionsControllerFactory()
+
                         SuspendTicketContentComponent(
                             viewModel.suspendReason.value,
                             onSelectReason = {
@@ -338,7 +342,11 @@ class MainScreen constructor(
                             },
                             onCompleted = {
                                 viewModel.enableSuspendSubmit.value = it
-                            })
+                            },
+                            onCameraClick = {
+                                viewModel.openCamera(factory.createPermissionsController())
+                            }
+                            )
                         scope.launch {
                             scaffoldState.bottomSheetState.expand()
                         }
@@ -391,18 +399,23 @@ class MainScreen constructor(
 
                     }
 
-                    MainEvent.Accept -> {
+                    MainEvent.AcceptTicket -> {
                         navigator.push(ticketInfoScreen)
                     }
-
 
                 }
 
             }, content = {
-                TicketListScreen(searchText = "", onEvent = {
-                    Napier.i("TicketListScreen")
-                    viewModel.events.value = it
-                }, tasks = viewModel.tasks)
+                if (openCamera){
+                    Camera.ImagePicker()
+                    viewModel.updateCameraStatus(false)
+                }
+                if (availability) {
+                    TicketListScreen(searchText = "", onEvent = {
+                        Napier.i("TicketListScreen")
+                        viewModel.events.value = it
+                    }, tasks = viewModel.tasks)
+                }
 
             }, onCloseBottomSheet = {
                 viewModel.events.value = MainEvent.Default

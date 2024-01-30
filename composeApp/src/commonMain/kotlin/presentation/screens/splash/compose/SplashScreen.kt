@@ -53,7 +53,6 @@ import presentation.theme.h4
 
 class SplashScreen() : Screen , KoinComponent{
 
-
     @Composable
     override fun Content() {
         val dataSyncRepository : GeneralLocationRepositoryImpl by inject()

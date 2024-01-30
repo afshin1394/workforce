@@ -39,6 +39,7 @@ fun useCaseModule() = module {
     single { StoreLocationDataUseCase(get()) }
 }
 
+
 fun httpModule() = module {
     single {
         HttpClient {
