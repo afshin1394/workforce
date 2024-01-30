@@ -26,8 +26,6 @@ class SplashScreenVM(
         MutableStateFlow<PermissionEvent>(PermissionEvent.RequestPermission)
     val permissionState = _permissionState.asStateFlow()
 
-    private val _numberOfRequests = MutableStateFlow(0)
-    val numberOfRequests = _numberOfRequests.asStateFlow()
 
 
     val permissions = listOf<Permission>(
@@ -58,11 +56,7 @@ class SplashScreenVM(
                     _permissionState.update { PermissionEvent.IsGranted }
 
                 } catch (deniedAlways: DeniedAlwaysException) {
-                    Napier.log(
-                        LogLevel.ASSERT,
-                        "checkPermissions",
-                        message = "DeniedAlwaysException" + _numberOfRequests.value
-                    )
+
                     _permissionState.update { PermissionEvent.DeniedAlwaysException }
                     return@launch
 
