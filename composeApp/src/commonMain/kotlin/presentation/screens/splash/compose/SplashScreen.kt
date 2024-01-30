@@ -36,51 +36,53 @@ import dev.icerock.moko.permissions.compose.rememberPermissionsControllerFactory
 import dev.icerock.moko.resources.compose.painterResource
 import io.github.aakira.napier.LogLevel
 import io.github.aakira.napier.Napier
+import irancell.nwg.wfm.LifecycleEvent
 import irancell.nwg.wfm.MR
+import irancell.nwg.wfm.OnLifecycleEvent
 import irancell.nwg.wfm.openAppSettings
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlinx.datetime.Clock
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toLocalDateTime
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import presentation.screens.splash.events.PermissionEvent
 import presentation.screens.splash.viewmodel.SplashScreenVM
-import presentation.theme.body_large
 import presentation.theme.body_small
-import presentation.theme.h4
 
-class SplashScreen() : Screen , KoinComponent{
+class SplashScreen() : Screen, KoinComponent {
+
 
     @Composable
     override fun Content() {
-        val dataSyncRepository : GeneralLocationRepositoryImpl by inject()
+        val dataSyncRepository: GeneralLocationRepositoryImpl by inject()
 
 
-        Napier.e("dataSyncRepository" +dataSyncRepository)
+        Napier.e("dataSyncRepository" + dataSyncRepository)
         val scope = rememberCoroutineScope()
         val navigator = LocalNavigator.currentOrThrow
         val loginScreen = rememberScreen(com.irancell.nwg.wfm.presentation.nav.Screen.Auth.Login)
         val snackbarHostState = remember { SnackbarHostState() }
         val factory: PermissionsControllerFactory = rememberPermissionsControllerFactory()
         val viewModel = remember { SplashScreenVM(factory.createPermissionsController()) }
-
-        val permissionState by viewModel.permissionState.collectAsState()
-        LifecycleEffect(onStarted = {
-            Napier.log(LogLevel.ASSERT, "lifecycleRegistry: ", message = "doOnResume")
-
-            viewModel.checkPermissions {
-                scope.launch {
-                    delay(2000)
-                    navigator.push(loginScreen)
-                }
-            }
-        })
         BindEffect(viewModel.permissionsController)
 
+        val permissionState by viewModel.permissionState.collectAsState()
 
 
+        OnLifecycleEvent { owner, event ->
+
+            when (event) {
+                LifecycleEvent.ON_RESUME -> {
+                    Napier.log(LogLevel.ASSERT, "onResume>>", message = "as on resume")
+                    viewModel.checkPermissions {
+                        scope.launch {
+                            delay(2000)
+                            navigator.push(loginScreen)
+                        }
+
+                    }
+                }
+            }
+        }
 
 
 
@@ -120,22 +122,18 @@ class SplashScreen() : Screen , KoinComponent{
                         style = body_small
                     )
                 }
-                if (permissionState == PermissionEvent.ShowRational) {
+                if (permissionState == PermissionEvent.DeniedException) {
                     scope.launch {
                         val userAction = snackbarHostState.showSnackbar(
                             message = "Please authorize needed permissions",
                             actionLabel = "Approve",
-                            duration = SnackbarDuration.Indefinite,
+                            duration = SnackbarDuration.Short,
                             withDismissAction = true
                         )
                         when (userAction) {
                             SnackbarResult.ActionPerformed -> {
-                                viewModel.checkPermissions {
-                                    scope.launch {
-                                        delay(2000)
-                                        navigator.push(loginScreen)
-                                    }
-                                }
+
+                                openAppSettings()
                             }
 
                             SnackbarResult.Dismissed -> {
@@ -146,12 +144,12 @@ class SplashScreen() : Screen , KoinComponent{
 
                 }
 
-                if (permissionState == PermissionEvent.OpenAppSettings) {
+                if (permissionState == PermissionEvent.DeniedAlwaysException) {
                     scope.launch {
                         val userAction = snackbarHostState.showSnackbar(
                             message = "Please authorize needed permissions",
                             actionLabel = "Approve",
-                            duration = SnackbarDuration.Indefinite,
+                            duration = SnackbarDuration.Short,
                             withDismissAction = true
                         )
                         when (userAction) {

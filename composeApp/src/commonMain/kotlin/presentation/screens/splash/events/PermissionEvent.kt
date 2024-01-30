@@ -5,7 +5,7 @@ sealed interface PermissionEvent {
 
     data object RequestPermission : PermissionEvent
 
-    data object ShowRational : PermissionEvent
+    data object DeniedException : PermissionEvent
 
-    data object OpenAppSettings : PermissionEvent
+    data object DeniedAlwaysException : PermissionEvent
 }

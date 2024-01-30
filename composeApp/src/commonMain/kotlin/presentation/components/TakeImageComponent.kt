@@ -21,7 +21,6 @@ import presentation.theme.surfaceDefault
 fun TakeImageComponent(modifier: Modifier = Modifier,onCameraClick : () -> Unit = {}){
     Card(modifier = modifier
         .clickable {
-
             onCameraClick()
         }
         .background(

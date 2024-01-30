@@ -20,9 +20,10 @@ import presentation.screens.splash.events.PermissionEvent
 
 class SplashScreenVM(
     val permissionsController: PermissionsController
-) : ViewModel()  {
+) : ViewModel() {
 
-    private val _permissionState  = MutableStateFlow<PermissionEvent>(PermissionEvent.RequestPermission)
+    private val _permissionState =
+        MutableStateFlow<PermissionEvent>(PermissionEvent.RequestPermission)
     val permissionState = _permissionState.asStateFlow()
 
     private val _numberOfRequests = MutableStateFlow(0)
@@ -31,52 +32,54 @@ class SplashScreenVM(
 
     val permissions = listOf<Permission>(
         Permission.CAMERA,
-        Permission.COARSE_LOCATION,
         Permission.LOCATION,
     )
 
-     fun checkPermissions(process : () -> Unit) {
-                 viewModelScope.launch {
-                     val hasAllPermissions = permissions.all() { permissionsController.isPermissionGranted(it) }
-                     if(hasAllPermissions) {
-                         _permissionState.update { PermissionEvent.IsGranted }
-                         Napier.log(LogLevel.ASSERT, "checkPermissions", message = "hasAllPermissions")
-                         process()
-                     }
-                     else if (_numberOfRequests.value < 2){
-                         try {
-                             Napier.log(LogLevel.ASSERT, "checkPermissions", message = "providePermission")
-                             permissions.map{
-                                 permissionsController.providePermission(it)
-                             }
-                             // Permission has been granted successfully.
-                         } catch(deniedAlways: DeniedAlwaysException) {
-                             Napier.log(LogLevel.ASSERT, "checkPermissions", message = "DeniedAlwaysException"+_numberOfRequests.value )
-
-                             _permissionState.update{ PermissionEvent.OpenAppSettings }
+    fun checkPermissions(process: () -> Unit) {
+        viewModelScope.launch {
 
 
-                             // Permission is always denied.
-                         } catch(denied: DeniedException) {
-                             Napier.log(LogLevel.ASSERT, "checkPermissions", message = "DeniedException")
+            val hasAllPermissions =
+                permissions.all() { permissionsController.isPermissionGranted(it) }
+            if (hasAllPermissions) {
+                _permissionState.update { PermissionEvent.IsGranted }
+                Napier.log(LogLevel.ASSERT, "checkPermissions", message = "hasAllPermissions")
+                process()
+            } else {
+                try {
+                    Napier.log(
+                        LogLevel.ASSERT,
+                        "checkPermissions",
+                        message = "providePermission"
+                    )
+                    permissions.map {
+                        permissionsController.providePermission(it)
+                    }
+                    _permissionState.update { PermissionEvent.IsGranted }
 
-                             _permissionState.update{ PermissionEvent.ShowRational }
+                } catch (deniedAlways: DeniedAlwaysException) {
+                    Napier.log(
+                        LogLevel.ASSERT,
+                        "checkPermissions",
+                        message = "DeniedAlwaysException" + _numberOfRequests.value
+                    )
+                    _permissionState.update { PermissionEvent.DeniedAlwaysException }
+                    return@launch
 
-                             // Permission was denied.
-                         }
+                } catch (denied: DeniedException) {
+                    Napier.log(LogLevel.ASSERT, "checkPermissions", message = "DeniedException")
+                    _permissionState.update { PermissionEvent.DeniedException }
 
-                         Napier.log(LogLevel.ASSERT, "checkPermissions", message = "request")
-                         _numberOfRequests.update { it+1 }
+                }
+                Napier.log(LogLevel.ASSERT, "checkPermissions", message = "request")
 
-                     }else{
-                         Napier.log(LogLevel.ASSERT, "checkPermissions", message = "openAppSettings")
 
-                         _permissionState.update{ PermissionEvent.OpenAppSettings }
-                     }
+            }
 
-                 }
+
+        }
+
     }
-
 
 
 }
