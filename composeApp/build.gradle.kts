@@ -50,30 +50,22 @@ kotlin {
                 implementation(compose.ui)
                 @OptIn(ExperimentalComposeLibrary::class)
                 implementation(compose.components.resources)
-
                 implementation(libs.napier)
-
                 implementation(libs.voyager.navigator)
                 implementation(libs.voyager.bottomSheet.navigator)
                 implementation(libs.voyager.transitions)
-
                 implementation(libs.moko.mvvm)
                 implementation(libs.moko.permission)
                 implementation(libs.moko.permission.compose)
-
                 implementation(libs.essenty.lifecycle)
-
                 implementation(libs.kotlin.x.datetime)
-
-
                 implementation(libs.koin.core)
                 implementation(libs.koin.compose)
-
                 implementation(libs.kotlin.arrow.core)
-
                 implementation(libs.ktor.client.core)
                 implementation(libs.ktor.client.content.negotiation)
                 implementation(libs.kotlin.serialization)
+                implementation(libs.composeImageLoader)
 
 
             }
@@ -94,6 +86,7 @@ kotlin {
                 implementation(libs.koin.android)
                 implementation(libs.ktor.client.okhttp)
                 implementation(libs.ktor.client.logging)
+
 //mapbox
 //implementation("com.mapbox.maps:android:11.1.0")
 //// If you're using compose also add the compose extension

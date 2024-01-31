@@ -63,6 +63,7 @@ class SplashScreenVM(
                 } catch (denied: DeniedException) {
                     Napier.log(LogLevel.ASSERT, "checkPermissions", message = "DeniedException")
                     _permissionState.update { PermissionEvent.DeniedException }
+                    return@launch
 
                 }
                 Napier.log(LogLevel.ASSERT, "checkPermissions", message = "request")
@@ -72,6 +73,11 @@ class SplashScreenVM(
 
 
         }
+
+    }
+
+    fun changeStateDenied(){
+        _permissionState.update { PermissionEvent.CheckPermission }
 
     }
 

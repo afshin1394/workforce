@@ -134,6 +134,8 @@ class SplashScreen() : Screen, KoinComponent {
                             SnackbarResult.ActionPerformed -> {
 
                                 openAppSettings()
+                                delay(2000)
+                                viewModel.changeStateDenied()
                             }
 
                             SnackbarResult.Dismissed -> {
@@ -155,6 +157,8 @@ class SplashScreen() : Screen, KoinComponent {
                         when (userAction) {
                             SnackbarResult.ActionPerformed -> {
                                 openAppSettings()
+                                delay(2000)
+                                viewModel.changeStateDenied()
                             }
 
                             SnackbarResult.Dismissed -> {
@@ -166,6 +170,15 @@ class SplashScreen() : Screen, KoinComponent {
                     scope.launch {
                         delay(2000)
                         navigator.push(loginScreen)
+                    }
+                }
+
+                if (permissionState == PermissionEvent.CheckPermission) {
+                    viewModel.checkPermissions {
+                        scope.launch {
+                            delay(2000)
+                            navigator.push(loginScreen)
+                        }
                     }
                 }
             }

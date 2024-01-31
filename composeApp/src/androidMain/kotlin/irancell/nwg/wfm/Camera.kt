@@ -2,7 +2,11 @@ package irancell.nwg.wfm
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.database.Cursor
 import android.net.Uri
+import android.os.Build
+import android.provider.MediaStore
+import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
@@ -12,19 +16,25 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.FileProvider
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import java.io.BufferedInputStream
+import java.io.BufferedOutputStream
 import java.io.File
+import java.io.FileInputStream
+import java.io.FileOutputStream
+import java.io.IOException
 import java.util.Objects
+import java.util.Random
 import java.util.UUID
 
 actual class Camera {
+
     actual companion object {
         @SuppressLint("CoroutineCreationDuringComposition")
         @Composable
-       actual  fun ImagePicker() {
+        actual fun ImagePicker() {
             val context = LocalContext.current
             var currentPhotoUri by remember { mutableStateOf(value = Uri.EMPTY) }
-            //var tempPhotoUri by remember { mutableStateOf(value = Uri.EMPTY) }
-            val file = context.createImageFile(context)
+            val file = context.createImageFile()
             val uri = FileProvider.getUriForFile(
                 Objects.requireNonNull(context),
                 context.packageName + ".provider", file
@@ -33,33 +43,29 @@ actual class Camera {
             val cameraLauncher = rememberLauncherForActivityResult(
                 contract = ActivityResultContracts.TakePicture(),
                 onResult = { success ->
-                    if (success) currentPhotoUri = uri
+                    if (success) {
+                        currentPhotoUri = uri
+                    }
                 }
             )
-            LaunchedEffect(Unit){
-               cameraLauncher.launch(uri)
+            LaunchedEffect(Unit) {
+                cameraLauncher.launch(uri)
+                Log.i("uriiiii", "ImagePicker: $uri")
             }
 
         }
 
 
-        fun Context.createImageFile(context : Context): File {
-            // Create an image file name
+        private fun Context.createImageFile(): File {
             val uuid = UUID.randomUUID().toString()
-            val imageFileName = "JPEG_" + uuid + "_"
-            var folder : File? = null
-            val path = context.filesDir.path + "/WFMImages/" + imageFileName
-            folder = createFolder(path)
+            val pathToDirectory = InternalStorage.createFolderFromPath( this,"/wfmImages/suspend/1234")
+            val imageFileName = "${uuid}.jpg"
 
-            return folder
+            return File(pathToDirectory, imageFileName)
         }
 
-        fun createFolder(parent : String, s : String = "") : File{
-            val folder = File(parent , s)
-            if (!folder.exists())
-                folder.mkdir()
 
-            return folder
-        }
+
+
     }
 }
