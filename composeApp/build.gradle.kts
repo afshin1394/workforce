@@ -6,6 +6,13 @@ plugins {
     alias(libs.plugins.jetbrainsCompose)
     id("dev.icerock.mobile.multiplatform-resources")
     alias(libs.plugins.sqlDelight)
+    id ("io.sentry.android.gradle") version "4.2.0"
+
+}
+
+sentry {
+    // List the build types that should be ignored (e.g. "release").
+    ignoredBuildTypes.set(setOf("debug"))
 
 }
 
@@ -65,7 +72,7 @@ kotlin {
                 implementation(libs.ktor.client.core)
                 implementation(libs.ktor.client.content.negotiation)
                 implementation(libs.kotlin.serialization)
-                implementation(libs.composeImageLoader)
+//                implementation(libs.composeImageLoader)
 
 
             }

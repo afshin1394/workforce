@@ -11,6 +11,7 @@ import io.ktor.client.plugins.HttpRequestTimeoutException
 import io.ktor.client.plugins.RedirectResponseException
 import io.ktor.client.plugins.ServerResponseException
 import io.ktor.utils.io.errors.IOException
+import irancell.nwg.wfm.SentryLog
 import kotlinx.coroutines.flow.flow
 import utils.AsyncResult
 abstract class BaseUseCase<out Type, in Params> {
@@ -24,6 +25,7 @@ abstract class BaseUseCase<out Type, in Params> {
             exception.message?.let {
                 Napier.log(LogLevel.INFO,"BaseUseCase", message =  it)
                 emit(AsyncResult.Error(it,handleError(exception)))
+                SentryLog(exception.stackTraceToString())
             } ?: run {
                 emit(AsyncResult.Error("no message",handleError(exception)))
             }

@@ -28,6 +28,7 @@ koin = "3.5.3"
 koin-compose = "1.1.0"
 arrow = "1.2.1"
 ktor = "2.3.7"
+sentry-android = "7.2.0"
 google-map = "4.3.1"
 kotlin1920-RC2 = "1.9.20-RC2"
 composeImageLoader = "1.7.1"
@@ -92,6 +93,7 @@ ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
 ktor-client-okhttp = { module = "io.ktor:ktor-client-okhttp", version.ref = "ktor" }
 ktor-client-darwin = { module = "io.ktor:ktor-client-darwin", version.ref = "ktor" }
 ktor-client-logging = { module = "io.ktor:ktor-client-logging", version.ref = "ktor" }
+sentry-android = { module = "io.sentry:sentry-android", version.ref = "sentry-android" }
 ktor-client-content-negotiation = {module = "io.ktor:ktor-client-content-negotiation", version.ref= "ktor"}
 kotlin-serialization = {module = "io.ktor:ktor-serialization-kotlinx-json", version.ref="ktor"}
 
