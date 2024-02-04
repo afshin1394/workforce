@@ -21,8 +21,11 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import com.irancell.nwg.wfm.presentation.screens.auth.components.*
 import com.irancell.nwg.wfm.presentation.theme.*
 import irancell.nwg.wfm.MR
+import org.koin.compose.koinInject
 import presentation.screens.auth.components.AuthAlertText
 import presentation.screens.auth.components.AuthAlertTextItem
+import presentation.screens.auth.viewmodel.LoginScreenVM
+import presentation.screens.main.viewmodel.MainScreenVM
 import presentation.theme.backgroundBackground3
 
 import presentation.theme.body_large
@@ -35,6 +38,7 @@ class LoginScreen : Screen {
     @Composable
     override fun Content() {
         val navigator = LocalNavigator.currentOrThrow
+        val viewModel : LoginScreenVM = koinInject()
 
         val verifyScreen =
             rememberScreen(com.irancell.nwg.wfm.presentation.nav.Screen.Auth.Verify(phoneNumber = "0912087866563"))
@@ -154,6 +158,9 @@ class LoginScreen : Screen {
 
                         if (!noEmail && !noPassword && !notEnoughChar)
                             navigator.push(verifyScreen)
+
+//                        viewModel.login(email,password){
+//                            }
 //                    navHostController.navigate(Screen.Auth.Verify.route+"/$email")
                     }
                 }

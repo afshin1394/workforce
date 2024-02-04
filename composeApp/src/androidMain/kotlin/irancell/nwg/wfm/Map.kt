@@ -5,11 +5,11 @@ import android.os.Bundle
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 import irancell.nwg.wfm.Android.App
-import irancell.nwg.wfm.db.GeneralLocation
+import irancell.nwg.wfm.db.GeneralLocationEntity
 
 
 @Composable
-actual fun mapView(generalLocations : List<GeneralLocation>){
+actual fun mapView(generalLocations : List<GeneralLocationEntity>){
    val context = LocalContext.current
 
 

@@ -1,0 +1,33 @@
+
+CREATE TABLE GeneralLocationEntity(
+ latitude TEXT NOT NULL,
+ longitude TEXT NOT NULL,
+ datetime TEXT NOT NULL,
+ isSent INTEGER
+);
+
+insert:
+INSERT INTO GeneralLocationEntity (longitude,latitude,datetime,isSent)
+VALUES (?, ?,?,?);
+
+
+
+update:
+UPDATE GeneralLocationEntity
+SET isSent = 1;
+
+
+
+removeSentLocations:
+DELETE FROM GeneralLocationEntity WHERE isSent = 1;
+
+
+selectAllNotSentLocation:
+SELECT * FROM GeneralLocationEntity WHERE isSent = 0 ORDER BY datetime ASC ;
+
+
+selectAll:
+SELECT * FROM GeneralLocationEntity ORDER BY datetime ASC ;
+
+deleteAllSent:
+DELETE FROM GeneralLocationEntity WHERE isSent = 1;

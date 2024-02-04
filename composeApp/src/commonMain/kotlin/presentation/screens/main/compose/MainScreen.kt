@@ -1,4 +1,4 @@
-package com.irancell.nwg.wfm.presentation.screens.main
+package presentation.screens.main.compose
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.*
@@ -13,6 +13,7 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import com.irancell.nwg.wfm.presentation.nav.Screen.Main.*
 import com.irancell.nwg.wfm.presentation.components.*
 import com.irancell.nwg.wfm.presentation.model.BottomSheetDoubleActionModel
+import com.irancell.nwg.wfm.presentation.model.Task
 import com.irancell.nwg.wfm.presentation.screens.main.components.*
 import presentation.screens.main.events.MainEvent
 import presentation.screens.main.viewmodel.MainScreenVM
@@ -30,7 +31,6 @@ import presentation.components.DrawerBody
 import presentation.components.DrawerHeader
 import presentation.screens.main.components.AvailabilityStatus
 import presentation.screens.main.components.MoreOptions
-import presentation.screens.main.compose.BaseScreen
 import presentation.theme.body_large
 import presentation.theme.surfaceBrandDefault
 import presentation.theme.surfaceDefault
@@ -407,13 +407,18 @@ class MainScreen (
 
             }, content = {
                 if (openCamera){
-                    Camera.ImagePicker()
-                    viewModel.updateCameraStatus(false)
+                    viewModel.selectedTask.value?.let {
+                        Camera.ImagePicker("/wfmImages/suspend/${it}"){
+
+                        }
+                        viewModel.updateCameraStatus(false)
+                    }
                 }
                 if (availability) {
-                    TicketListScreen(searchText = "", onEvent = {
+                    TicketListScreen(searchText = "", onEvent = { mainEvent: MainEvent, task: Task? ->
                         Napier.i("TicketListScreen")
-                        viewModel.events.value = it
+                        viewModel.events.value = mainEvent
+                        viewModel.selectedTask.value = task
                     }, tasks = viewModel.tasks)
                 }
 

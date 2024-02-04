@@ -3,6 +3,7 @@ package com.irancell.nwg.wfm.presentation.model
 import kotlin.reflect.KProperty
 
  class Task(
+    val taskId : Long = 1234,
     val title: String = "Huawei External Alarm, T5712, Bater ... Huawei External Alarm, T5712, Bater ...",
     val step: String ="HSE pre-check",
     val faultLevel: String ="Level: 1",

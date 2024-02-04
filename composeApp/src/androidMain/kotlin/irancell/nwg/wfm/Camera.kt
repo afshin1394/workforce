@@ -31,20 +31,15 @@ actual class Camera {
     actual companion object {
         @SuppressLint("CoroutineCreationDuringComposition")
         @Composable
-        actual fun ImagePicker() {
+        actual fun ImagePicker(savePath : String,onSuccess : (uri : Any) -> Unit) {
             val context = LocalContext.current
-            var currentPhotoUri by remember { mutableStateOf(value = Uri.EMPTY) }
-            val file = context.createImageFile()
-            val uri = FileProvider.getUriForFile(
-                Objects.requireNonNull(context),
-                context.packageName + ".provider", file
-            )
-
+            val file = context.createImageFile(savePath)
+            val uri  = InternalStorage.getUriForFile(context,file)
             val cameraLauncher = rememberLauncherForActivityResult(
                 contract = ActivityResultContracts.TakePicture(),
                 onResult = { success ->
                     if (success) {
-                        currentPhotoUri = uri
+                        onSuccess(uri)
                     }
                 }
             )
@@ -56,9 +51,9 @@ actual class Camera {
         }
 
 
-        private fun Context.createImageFile(): File {
+        private fun Context.createImageFile(path : String): File {
             val uuid = UUID.randomUUID().toString()
-            val pathToDirectory = InternalStorage.createFolderFromPath( this,"/wfmImages/suspend/1234")
+            val pathToDirectory = InternalStorage.createFolderFromPath( this,path)
             val imageFileName = "${uuid}.jpg"
 
             return File(pathToDirectory, imageFileName)

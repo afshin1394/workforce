@@ -3,7 +3,7 @@ import cafe.adriel.voyager.core.registry.screenModule
 import com.irancell.nwg.wfm.presentation.nav.Screen
 import presentation.screens.auth.compose.LoginScreen
 import com.irancell.nwg.wfm.presentation.screens.auth.VerifyScreen
-import com.irancell.nwg.wfm.presentation.screens.main.MainScreen
+import presentation.screens.main.compose.MainScreen
 import com.irancell.nwg.wfm.presentation.screens.main.compose.AccountScreen
 import com.irancell.nwg.wfm.presentation.screens.main.compose.NotificationScreen
 import presentation.screens.splash.compose.SplashScreen

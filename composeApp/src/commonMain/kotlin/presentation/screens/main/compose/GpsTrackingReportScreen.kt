@@ -43,7 +43,7 @@ import dev.icerock.moko.resources.ImageResource
 import io.github.aakira.napier.LogLevel
 import io.github.aakira.napier.Napier
 import irancell.nwg.wfm.MR
-import irancell.nwg.wfm.db.GeneralLocation
+import irancell.nwg.wfm.db.GeneralLocationEntity
 import irancell.nwg.wfm.mapView
 import kotlinx.coroutines.launch
 import presentation.model.ItemComponentModel
@@ -58,7 +58,7 @@ class GpsTrackingReportScreen(
     private val title: String
 ) : Screen {
     companion object {
-        lateinit var gneralLocs: List<GeneralLocation>
+        lateinit var gneralLocs: List<GeneralLocationEntity>
     }
     @ExperimentalMaterial3Api
     @Composable

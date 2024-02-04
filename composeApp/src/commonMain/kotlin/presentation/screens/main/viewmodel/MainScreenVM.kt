@@ -1,5 +1,6 @@
 package presentation.screens.main.viewmodel
 
+import androidx.compose.runtime.MutableState
 import irancell.nwg.wfm.GpsTrackingService
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -12,21 +13,23 @@ import com.irancell.nwg.wfm.presentation.model.Task
 import presentation.screens.main.events.MainEvent
 import dev.icerock.moko.permissions.Permission
 import dev.icerock.moko.permissions.PermissionsController
-import domain.usecase.usecase.GetAvailabilityUseCase
-import domain.usecase.usecase.StoreAvailabilityUseCase
-import irancell.nwg.wfm.Camera
+import domain.usecase.usecase.availability.ChangeServerAvailabilityUseCase
+import domain.usecase.usecase.availability.GetAvailabilityUseCase
+import domain.usecase.usecase.availability.StoreAvailabilityUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import utils.AsyncResult
 
 import utils.AsyncStatus
 import utils.BaseViewModel
 import utils.ViewStates
 
 class MainScreenVM(
-   private val storeAvailabilityUseCase: StoreAvailabilityUseCase,
-   private val getAvailabilityUseCase: GetAvailabilityUseCase,
+    private val storeAvailabilityUseCase: StoreAvailabilityUseCase,
+    private val getAvailabilityUseCase: GetAvailabilityUseCase,
+    private val changeServerAvailabilityUseCase: ChangeServerAvailabilityUseCase,
 ) : BaseViewModel() {
     private val _availability = MutableStateFlow(false)
     val availability = _availability.asStateFlow()
@@ -63,42 +66,64 @@ class MainScreenVM(
 
 
     fun changeAvailability() {
+
         viewModelScope.launch {
-            _availability.update { !it }
 
-            storeAvailabilityUseCase(
-                _availability.value
-            ).collect{
-                when (it.status) {
-                    AsyncStatus.ERROR -> {
-                        state.update { ViewStates.Loading }
-                        it.message?.let{ string ->
-                            error.update { string }
-                        }
-                    }
 
-                    AsyncStatus.LOADING -> {
-                    }
+            changeServerAvailabilityUseCase(!_availability.value).collect{
+               when(it){
+                   is AsyncResult.Error -> {
+                       it.message?.let{ string ->
+                           error.update { string }
+                       }
+                   }
+                   is AsyncResult.Loading -> {
 
-                    AsyncStatus.SUCCESS -> {
-                        state.update { ViewStates.Success }
-                    }
-                }
+                   }
+                   is AsyncResult.Success -> {
+
+                       storeAvailabilityUseCase(
+                           _availability.value
+                       ).collect{
+                           when (it.status) {
+                               AsyncStatus.ERROR -> {
+                                   it.message?.let{ string ->
+                                       error.update { string }
+                                   }
+                               }
+
+                               AsyncStatus.LOADING -> {
+
+                               }
+
+                               AsyncStatus.SUCCESS -> {
+                                   state.update { ViewStates.Success }
+                                   _availability.update { !it }
+                                   if (_availability.value) {
+                                       GpsTrackingService.startLocationTracker()
+                                   } else {
+                                       GpsTrackingService.stopLocationTracker()
+                                   }
+
+                               }
+                           }
+                       }
+                   }
+               }
             }
-            if (_availability.value) {
-                GpsTrackingService.startLocationTracker()
-            } else {
-                GpsTrackingService.stopLocationTracker()
 
-            }
+
+
         }
 
 
     }
 
     private val initialTasks = arrayListOf(
-        Task(),
+        Task(     1235,
+    ),
         Task(
+            1236,
             "Huawei External Alarm, T5713, Bater ... Huawei External Alarm, T5713, Bater ...",
             "HSE pre-check",
             "Level 3",
@@ -107,6 +132,8 @@ class MainScreenVM(
             "0h 43m",
         ),
         Task(
+            1237,
+
             "Huawei External Alarm, T5722, Bater ... Huawei External Alarm, T5722, Bater ...",
             "HSE pre-check",
             "Level 3",
@@ -115,6 +142,8 @@ class MainScreenVM(
             "2h 43m"
         ),
         Task(
+            1238,
+
             "Huawei External Alarm, T5742, Bater ... Huawei External Alarm, T5742, Bater ...",
             "HSE pre-check",
             "Level 2",
@@ -122,6 +151,8 @@ class MainScreenVM(
             "Tehran, Zafar, Zarin stre...",
             "4h 43m"
         ), Task(
+            1239,
+
             "Huawei External Alarm, T5744, Bater ... Huawei External Alarm, T5744, Bater ...",
             "Departed",
             "Level 2",
@@ -129,6 +160,8 @@ class MainScreenVM(
             "Tehran, Takhti, Zarin stre...",
             "1h 43m"
         ), Task(
+            1339,
+
             "Huawei External Alarm, T5754, Bater ... Huawei External Alarm, T5754, Bater ...",
             "Departed",
             "Level 1",
@@ -136,6 +169,8 @@ class MainScreenVM(
             "Tehran, Takhti, Zarin stre...",
             "1h 43m"
         ), Task(
+            1439,
+
             "Huawei External Alarm, T5754, Bater ... Huawei External Alarm, T5754, Bater ...",
             "Departed",
             "Level 1",
@@ -143,6 +178,8 @@ class MainScreenVM(
             "Tehran, Mirdamad, Zarin stre...",
             "4h 43m"
         ), Task(
+            1429,
+
             "Huawei External Alarm, T3754, Bater ... Huawei External Alarm, T3754, Bater ...",
             "Departed",
             "Level 1",
@@ -154,6 +191,7 @@ class MainScreenVM(
 
 
     var tasks = ArrayList(initialTasks)
+    var selectedTask : MutableState<Task?> = mutableStateOf(null)
 
     var events = mutableStateOf<MainEvent>(MainEvent.Default)
 

@@ -32,6 +32,7 @@ sentry-android = "7.2.0"
 google-map = "4.3.1"
 kotlin1920-RC2 = "1.9.20-RC2"
 composeImageLoader = "1.7.1"
+kotlinx-serialization = "1.6.2"
 
 
 [libraries]
@@ -99,6 +100,7 @@ kotlin-serialization = {module = "io.ktor:ktor-serialization-kotlinx-json", vers
 
 composeImageLoader = { module = "io.github.qdsfdhvh:image-loader", version.ref = "composeImageLoader" }
 
+kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinx-serialization" }
 
 [plugins]
 moko-multiplatform = {id="dev.icerock.mobile.multiplatform-resources", version.ref = "moko-version"}
@@ -108,6 +110,7 @@ jetbrainsCompose = { id = "org.jetbrains.compose", version.ref = "compose-plugin
 kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 sqlDelight = { id = "app.cash.sqldelight", version.ref = "sqlDelight" }
 kotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin1920-RC2" }
+kotlinx-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 
 
 [bundles]

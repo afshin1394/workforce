@@ -21,14 +21,14 @@ import com.irancell.nwg.wfm.presentation.theme.spacing15X
 
 import dev.icerock.moko.resources.compose.painterResource
 import irancell.nwg.wfm.MR
-import irancell.nwg.wfm.db.GeneralLocation
+import irancell.nwg.wfm.db.GeneralLocationEntity
 import presentation.theme.body_small
 import presentation.theme.body_small_strong
 import presentation.theme.errorIcon
 import presentation.theme.surfaceDefault
 
 @Composable
-fun LocationItem(modifier : Modifier = Modifier,generalLocation: GeneralLocation) {
+fun LocationItem(modifier : Modifier = Modifier,generalLocation: GeneralLocationEntity) {
     Column(modifier = modifier
         .background(surfaceDefault)
         ) {

@@ -6,7 +6,7 @@ expect class Camera{
 
      companion object {
           @Composable
-          fun ImagePicker()
+          fun ImagePicker(savePath : String,onSuccess : (uri : Any) -> Unit)
      }
 
 }

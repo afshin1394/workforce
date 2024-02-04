@@ -1,4 +1,4 @@
-package domain.usecase.usecase
+package domain.usecase.usecase.availability
 
 import domain.usecase.BaseUseCase
 import irancell.nwg.wfm.getSharedPref

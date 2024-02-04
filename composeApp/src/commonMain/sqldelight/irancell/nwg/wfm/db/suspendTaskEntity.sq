@@ -1,0 +1,51 @@
+CREATE TABLE SuspendTaskEntity (
+taskId INTEGER NOT NULL,
+reason TEXT NOT NULL,
+description TEXT NOT NULL,
+attachmentsUri TEXT NOT NULL,
+isSent INTEGER NOT NULL,
+datetime  TEXT  NOT NULL ,
+latitude TEXT NOT NULL,
+longitude TEXT NOT NULL
+);
+
+
+insert:
+INSERT INTO SuspendTaskEntity (taskId,reason,description,attachmentsUri,isSent,datetime,latitude,longitude)
+VALUES (?, ?,?,?,?,?,?,?);
+
+
+
+updateUnsend:
+UPDATE SuspendTaskEntity
+SET isSent = 1;
+
+updateAttachements:
+UPDATE  SuspendTaskEntity
+SET attachmentsUri = :attachements
+WHERE taskId = :taskId;
+
+updateSuspendDetails:
+UPDATE  SuspendTaskEntity
+SET datetime = :dateTime , latitude = :latitude , longitude= :longitude
+WHERE taskId = :taskId;
+
+
+deleteAllSent:
+DELETE FROM SuspendTaskEntity WHERE isSent = 1;
+
+removeSentItems:
+DELETE FROM SuspendTaskEntity WHERE isSent = 1;
+
+
+
+
+selectAllNotSent:
+SELECT * FROM SuspendTaskEntity WHERE isSent = 0 ORDER BY datetime ASC;
+
+selectAll:
+SELECT * FROM SuspendTaskEntity ORDER BY datetime ASC ;
+
+selectByTaskId:
+SELECT * FROM SuspendTaskEntity WHERE taskId = :taskId;
+

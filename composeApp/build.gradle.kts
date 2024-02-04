@@ -4,6 +4,8 @@ plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsCompose)
+    alias(libs.plugins.kotlinx.serialization)
+
     id("dev.icerock.mobile.multiplatform-resources")
     alias(libs.plugins.sqlDelight)
     id ("io.sentry.android.gradle") version "4.2.0"
@@ -73,6 +75,7 @@ kotlin {
                 implementation(libs.ktor.client.content.negotiation)
                 implementation(libs.kotlin.serialization)
 //                implementation(libs.composeImageLoader)
+                implementation("io.ktor:ktor-client-content-negotiation:2.3.7")
 
 
             }
@@ -93,6 +96,7 @@ kotlin {
                 implementation(libs.koin.android)
                 implementation(libs.ktor.client.okhttp)
                 implementation(libs.ktor.client.logging)
+
 
 //mapbox
 //implementation("com.mapbox.maps:android:11.1.0")

@@ -15,11 +15,11 @@ import android.os.SystemClock
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import domain.usecase.usecase.SendLocationToServerUseCase
-import domain.usecase.usecase.StoreLocationDataUseCase
+import domain.usecase.usecase.location.SendLocationToServerUseCase
+import domain.usecase.usecase.location.StoreLocationDataUseCase
 import io.github.aakira.napier.LogLevel
 import io.github.aakira.napier.Napier
-import irancell.nwg.wfm.db.GeneralLocation
+import irancell.nwg.wfm.db.GeneralLocationEntity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
@@ -89,8 +89,9 @@ actual class GpsTrackingService : Service() , KoinComponent {
             createNotification(applicationContext, "Gps Tracking On", "retrieving gps data")
         val intent = Intent(this, GpsTrackingService::class.java)
         startForeground(Notification_ID, notification);
+        GlobalScope.launch {
+
         Location.start() {
-            GlobalScope.launch {
                 Log.i("locationServicess", "onCreate:  latitude:" + it.latitude)
                 lat = it.latitude.toDouble()
                 lon = it.longitude.toDouble()
@@ -116,7 +117,7 @@ actual class GpsTrackingService : Service() , KoinComponent {
             Napier.log(LogLevel.ASSERT, tag = "serviice", message = "Launch")
 
             storeLocationDataUseCase(
-                GeneralLocation(
+                GeneralLocationEntity(
                     lat.toString(),
                     lon.toString(),
                     getCurrentDate(),
@@ -149,7 +150,7 @@ actual class GpsTrackingService : Service() , KoinComponent {
                 message = sendLocationToServerUseCase.toString()
             )
             sendLocationToServerUseCase(
-                GeneralLocation(
+                GeneralLocationEntity(
                     lat.toString(),
                     lon.toString(),
                     getCurrentDate(),

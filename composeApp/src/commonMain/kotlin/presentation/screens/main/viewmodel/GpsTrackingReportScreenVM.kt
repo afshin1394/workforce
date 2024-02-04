@@ -1,8 +1,8 @@
 package presentation.screens.main.viewmodel
 
 import androidx.compose.runtime.mutableStateListOf
-import domain.usecase.usecase.GetGeneralLocationListUseCase
-import irancell.nwg.wfm.db.GeneralLocation
+import domain.usecase.usecase.location.GetGeneralLocationListUseCase
+import irancell.nwg.wfm.db.GeneralLocationEntity
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import utils.AsyncStatus
@@ -13,7 +13,7 @@ import utils.ViewStates
 class GpsTrackingReportScreenVM(
    private val  generalLocationListUseCase: GetGeneralLocationListUseCase
 ) : BaseViewModel()  {
-     val generalLocationList = mutableStateListOf<GeneralLocation>()
+     val generalLocationList = mutableStateListOf<GeneralLocationEntity>()
 
 
     init {

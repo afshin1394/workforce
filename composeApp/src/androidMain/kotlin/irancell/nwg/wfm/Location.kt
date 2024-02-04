@@ -5,7 +5,6 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.content.pm.PackageManager
-import android.icu.util.TimeZone
 import android.location.Location
 import android.location.LocationListener
 import android.location.LocationManager
@@ -19,11 +18,8 @@ import com.google.android.gms.tasks.OnTokenCanceledListener
 import io.github.aakira.napier.LogLevel
 import io.github.aakira.napier.Napier
 import irancell.nwg.wfm.Android.App
-import irancell.nwg.wfm.db.GeneralLocation
-import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
+import irancell.nwg.wfm.db.GeneralLocationEntity
 import kotlinx.datetime.Clock
-import kotlinx.datetime.toLocalDateTime
 
 @SuppressLint("MissingPermission")
 actual class Location actual constructor() {
@@ -44,7 +40,7 @@ actual class Location actual constructor() {
         var _fusedLocationClient: FusedLocationProviderClient? = null
         val fusedLocationClient get() = _fusedLocationClient!!
 
-        actual fun start(update: (GeneralLocation) -> Unit) {
+        actual fun start(update: (GeneralLocationEntity) -> Unit) {
 
             _locationListener = object : LocationListener {
                 override fun onLocationChanged(location: Location) {
@@ -55,7 +51,7 @@ actual class Location actual constructor() {
                             it.longitude = it.longitude.toString().substring(0, 12).toDouble()
 
                         update(
-                            GeneralLocation(
+                            GeneralLocationEntity(
                                 it.latitude.toString(),
                                 it.longitude.toString(),
                                 DateTime.getFormattedDate(Clock.System.now().toString()),
@@ -96,7 +92,7 @@ actual class Location actual constructor() {
                                 it.longitude = it.longitude.toString().substring(0, 12).toDouble()
 
                             update(
-                                GeneralLocation(
+                                GeneralLocationEntity(
                                     it.latitude.toString(),
                                     it.longitude.toString(),
                                     DateTime.getFormattedDate(Clock.System.now().toString()),
@@ -174,7 +170,7 @@ actual class Location actual constructor() {
                                         it.longitude.toString().substring(0, 12).toDouble()
 
                                 update(
-                                    GeneralLocation(
+                                    GeneralLocationEntity(
                                         it.latitude.toString(),
                                         it.longitude.toString(),
                                         DateTime.getFormattedDate(Clock.System.now().toString()),
@@ -235,7 +231,7 @@ actual class Location actual constructor() {
                                         it.longitude.toString().substring(0, 12).toDouble()
 
                                 update(
-                                    GeneralLocation(
+                                    GeneralLocationEntity(
                                         it.latitude.toString(),
                                         it.longitude.toString(),
                                         DateTime.getFormattedDate(Clock.System.now().toString()),

@@ -24,7 +24,7 @@ import com.irancell.nwg.wfm.presentation.theme.spacing2X
 fun TicketListScreen(
     tasks: ArrayList<Task>,
     searchText: String = "",
-    onEvent: (mainEvents: MainEvent) -> Unit = {}
+    onEvent: (mainEvents: MainEvent,selectedTask : Task?) -> Unit = { _: MainEvent, _: Task? -> }
 ) {
 
 
@@ -49,7 +49,7 @@ fun TicketListScreen(
             updatedText = {
                 searchTextState = it
             }, onFilterClick = {
-                onEvent(MainEvent.ActionFilter)
+                onEvent(MainEvent.ActionFilter,null)
             })
         FilterRow(
             Modifier
@@ -76,10 +76,10 @@ fun TicketListScreen(
                 ticketCard(modifier = Modifier.wrapContentHeight(),
                     task = item,
                     onActionClick = {
-                        onEvent(MainEvent.AcceptTicket)
+                        onEvent(MainEvent.AcceptTicket,item)
                     },
                     onMoreOptionsClick = {
-                        onEvent(MainEvent.MoreOptions)
+                        onEvent(MainEvent.MoreOptions,item)
                     }
 
                 )
