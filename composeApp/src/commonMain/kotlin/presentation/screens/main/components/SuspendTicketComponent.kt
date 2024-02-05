@@ -17,6 +17,8 @@ import com.irancell.nwg.wfm.presentation.components.CustomButtonData
 import com.irancell.nwg.wfm.presentation.components.CustomEditTextComponent
 import presentation.components.TakeImageComponent
 import com.irancell.nwg.wfm.presentation.theme.*
+import dev.icerock.moko.resources.compose.stringResource
+import irancell.nwg.wfm.MR
 
 import presentation.theme.body_large
 import presentation.theme.surfaceBrandDefault
@@ -39,7 +41,7 @@ fun SuspendTicketContentComponent(suspendReason: String = "" ,ticketName: String
             )
     ) {
         Text(
-            text = "Why are you canceling the ticket $ticketName?",
+            text = "${stringResource(MR.strings.why_canceled_ticket)}$ticketName?",
             style = body_large,
             color = textPrimary
         )
@@ -57,7 +59,7 @@ fun SuspendTicketContentComponent(suspendReason: String = "" ,ticketName: String
            }
         })
         Spacer(modifier = Modifier.padding(vertical = spacing1X))
-        Text(text = "Photo for ticket suspension*", style = body_large, color = textPrimary)
+        Text(text = stringResource(MR.strings.photo_for_ticket_suspend), style = body_large, color = textPrimary)
         Spacer(modifier = Modifier.padding(vertical = spacing1X))
         TakeImageComponent(){
             onCameraClick()
@@ -83,7 +85,7 @@ fun SuspendTicketBottomBarComponent(isEnabled : Boolean = false,onClick : () -> 
         if (isEnabled){
             CustomButton(
                 customButtonData = CustomButtonData(
-                    "Submit", textColor = textInverse,
+                    stringResource(MR.strings.submit), textColor = textInverse,
                     surfaceBrandDefault
                 ), modifier = Modifier.clickable {
                     onClick()
@@ -92,7 +94,7 @@ fun SuspendTicketBottomBarComponent(isEnabled : Boolean = false,onClick : () -> 
         }else{
             CustomButton(
                 customButtonData = CustomButtonData(
-                    "Submit", textColor = textInverseDisabled,
+                    stringResource(MR.strings.submit), textColor = textInverseDisabled,
                     surfaceBrandDisabled
                 )
             )

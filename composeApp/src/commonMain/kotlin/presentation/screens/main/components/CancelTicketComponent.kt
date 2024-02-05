@@ -16,6 +16,8 @@ import com.irancell.nwg.wfm.presentation.components.CustomButton
 import com.irancell.nwg.wfm.presentation.components.CustomButtonData
 import com.irancell.nwg.wfm.presentation.components.CustomEditTextComponent
 import com.irancell.nwg.wfm.presentation.theme.*
+import dev.icerock.moko.resources.compose.stringResource
+import irancell.nwg.wfm.MR
 
 import presentation.theme.body_large
 import presentation.theme.surfaceBrandDefault
@@ -36,8 +38,9 @@ fun CancelTicketComponent(suspendReasonState: String = "", ticketName : String =
                 rememberScrollState()
             )
     ) {
+
         Text(
-            text = "Why are you canceling the ticket $ticketName?",
+            text = "${stringResource(MR.strings.why_canceled_ticket)}$ticketName?",
             style = body_large,
             color = textPrimary
         )
@@ -74,7 +77,7 @@ fun CancelTicketBottomBarComponent(isEnabled : Boolean = false,onClick : () -> U
         if (isEnabled){
             CustomButton(
                 customButtonData = CustomButtonData(
-                    "Submit", textColor = textInverse,
+                    stringResource(MR.strings.submit), textColor = textInverse,
                     surfaceBrandDefault
                 ), modifier = Modifier.clickable {
                     onClick()
@@ -83,7 +86,7 @@ fun CancelTicketBottomBarComponent(isEnabled : Boolean = false,onClick : () -> U
         }else{
             CustomButton(
                 customButtonData = CustomButtonData(
-                    "Submit", textColor = textInverseDisabled,
+                    stringResource(MR.strings.submit), textColor = textInverseDisabled,
                     surfaceBrandDisabled
                 )
             )

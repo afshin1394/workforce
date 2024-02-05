@@ -37,6 +37,7 @@ import presentation.theme.surfaceDefault
 import presentation.theme.textInverse
 import presentation.theme.textPrimary
 import dev.icerock.moko.resources.compose.painterResource
+import dev.icerock.moko.resources.compose.stringResource
 import irancell.nwg.wfm.MR
 import kotlinx.coroutines.launch
 import presentation.theme.body_large_strong
@@ -52,7 +53,7 @@ class TicketInfoScreen  (
         val scaffoldState = rememberBottomSheetScaffoldState()
         val navigator = LocalNavigator.currentOrThrow
         BaseScreen(title = title,scaffoldState = scaffoldState, hasDrawer = false, bottomSheetHasHeader = false, topBar = {
-            MenuItemsTopBar("Ticket Info") {
+            MenuItemsTopBar(stringResource(MR.strings.ticket_info)) {
                 navigator.pop()
 //            navHostController.navigate(Screen.Main.route) {
 //                popUpTo(Screen.Main.route) {
@@ -63,8 +64,8 @@ class TicketInfoScreen  (
         }, bottomSheetTitle = "", bottomSheetContent = {
             bottomDoubleActionSheet(
                 BottomSheetDoubleActionModel(
-                    "More options",
-                    surfaceDefault, textPrimary, "Resume", surfaceBrandDefault,
+                    stringResource(MR.strings.more_options),
+                    surfaceDefault, textPrimary, stringResource(MR.strings.resume), surfaceBrandDefault,
                     textInverse
                 )
             )
@@ -75,13 +76,13 @@ class TicketInfoScreen  (
 
         }, content = {
             Column(Modifier.verticalScroll(rememberScrollState())) {
-                TicketInfoItem("General Information",false, content = {
+                TicketInfoItem(stringResource(MR.strings.general_information),false, content = {
                     Box(modifier = Modifier.height(200.dp))
                 })
-                TicketInfoItem("Resource Information",false, content = {
+                TicketInfoItem(stringResource(MR.strings.resource_information),false, content = {
                     Box(modifier = Modifier.height(200.dp))
                 })
-                TicketInfoItem("Fault Information",false, content = {
+                TicketInfoItem(stringResource(MR.strings.fault_information),false, content = {
                     Box(modifier = Modifier.height(2000.dp))
                 })
             }

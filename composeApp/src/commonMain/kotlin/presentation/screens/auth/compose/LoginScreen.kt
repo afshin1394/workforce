@@ -20,6 +20,7 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 
 import com.irancell.nwg.wfm.presentation.screens.auth.components.*
 import com.irancell.nwg.wfm.presentation.theme.*
+import dev.icerock.moko.resources.compose.stringResource
 import irancell.nwg.wfm.MR
 import org.koin.compose.koinInject
 import presentation.screens.auth.components.AuthAlertText
@@ -92,10 +93,10 @@ class LoginScreen : Screen {
                         .weight(4f)
                         .padding(spacing2X)
                 ) {
-                    Text(text = "Login with your MTN account", style = body_large)
+                    Text(text = stringResource(MR.strings.login_mtn_account), style = body_large)
                     Spacer(modifier = Modifier.height(spacing3X))
                     AuthTextField(authTextFieldItem = AuthTextFieldItem(
-                        "Company email", imageResource = MR.images.mail1, "company email",
+                        stringResource(MR.strings.company_email), imageResource = MR.images.mail1, stringResource(MR.strings.company_email),
                         hasPassword = false,
                         passwordVisibility = true
                     ), updateText = {
@@ -106,8 +107,8 @@ class LoginScreen : Screen {
                         Spacer(modifier = Modifier.height(spacing1X))
                         AuthAlertText(
                             alertTextItem = AuthAlertTextItem(
-                                true, text = "Email is required",
-                                textColor = error_5, contentDescriptor = "Email is required"
+                                true, text = stringResource(MR.strings.email_required),
+                                textColor = error_5, contentDescriptor = stringResource(MR.strings.email_required)
                             )
                         ) {
                             //onClick
@@ -116,7 +117,7 @@ class LoginScreen : Screen {
                     Spacer(modifier = Modifier.height(spacing3X))
 
                     AuthTextField(authTextFieldItem = AuthTextFieldItem(
-                        "Password", imageResource = MR.images.password, "password",
+                        stringResource(MR.strings.password), imageResource = MR.images.password, stringResource(MR.strings.password),
                         hasPassword = true,
                         passwordVisibility = false
                     ), updateText = {
@@ -127,8 +128,8 @@ class LoginScreen : Screen {
 
                         AuthAlertText(
                             alertTextItem = AuthAlertTextItem(
-                                true, text = "Password is required",
-                                textColor = error_5, contentDescriptor = "Email is required"
+                                true, text = stringResource(MR.strings.password_required),
+                                textColor = error_5, contentDescriptor = stringResource(MR.strings.password_required)
                             )
                         ) {
                             //onClick
@@ -141,16 +142,16 @@ class LoginScreen : Screen {
                             alertTextItem = AuthAlertTextItem(
 
                                 true,
-                                text = "Password should be at least 8 characters",
+                                text = stringResource(MR.strings.password_should_least_8_characters),
                                 textColor = error_5,
-                                contentDescriptor = "Password should be at least 8 characters"
+                                contentDescriptor = stringResource(MR.strings.password_should_least_8_characters)
                             )
                         ) {
                             //onClick
                         }
                     }
                     Spacer(modifier = Modifier.height(spacing5X))
-                    AuthButton(authButtonItem = AuthButtonItem("Sign In")) {
+                    AuthButton(authButtonItem = AuthButtonItem(stringResource(MR.strings.sign_in))) {
                         //onClick
                         noEmail = email.isEmpty()
                         noPassword = password.isEmpty()
@@ -158,9 +159,6 @@ class LoginScreen : Screen {
 
                         if (!noEmail && !noPassword && !notEnoughChar)
                             navigator.push(verifyScreen)
-
-//                        viewModel.login(email,password){
-//                            }
 //                    navHostController.navigate(Screen.Auth.Verify.route+"/$email")
                     }
                 }

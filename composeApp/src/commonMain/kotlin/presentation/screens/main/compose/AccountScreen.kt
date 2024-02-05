@@ -18,6 +18,7 @@ import presentation.screens.main.compose.BaseScreen
 import com.irancell.nwg.wfm.presentation.screens.main.components.ProfileInfoComponent
 import com.irancell.nwg.wfm.presentation.theme.*
 import dev.icerock.moko.resources.compose.painterResource
+import dev.icerock.moko.resources.compose.stringResource
 import irancell.nwg.wfm.MR
 
 import presentation.theme.body_large
@@ -31,7 +32,7 @@ class AccountScreen (private val title : String) : Screen{
          val scaffoldState: BottomSheetScaffoldState = rememberBottomSheetScaffoldState()
          val navigator = LocalNavigator.currentOrThrow
 
-         BaseScreen(scaffoldState = scaffoldState, title = "Account Info", topBar = {
+         BaseScreen(scaffoldState = scaffoldState, title = stringResource(MR.strings.account_info), topBar = {
              MenuItemsTopBar(title) {
                  navigator.pop()
 //            navHostController.navigate(Screen.Main.route) {
@@ -58,22 +59,22 @@ class AccountScreen (private val title : String) : Screen{
                      Spacer(modifier = Modifier.padding(vertical = spacing2X))
 
                      Column(Modifier.padding(horizontal =  spacing2X),verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.Start) {
-                         Text(text = "Name", style = body_large)
+                         Text(text = stringResource(MR.strings.name), style = body_large)
                          Spacer(modifier = Modifier.padding(vertical = spacing05X))
                          ProfileInfoComponent("Ali Sohrabi",MR.images.user_account, backgroundColor = surfaceInputReadOnly)
                          Spacer(modifier = Modifier.padding(vertical = spacing1X))
 
-                         Text(text = "Expertise", style = body_large)
+                         Text(text = stringResource(MR.strings.expertise), style = body_large)
                          Spacer(modifier = Modifier.padding(vertical = spacing05X))
                          ProfileInfoComponent("Electrical engineer",MR.images.expertise, backgroundColor = surfaceInputReadOnly)
                          Spacer(modifier = Modifier.padding(vertical = spacing1X))
 
-                         Text(text = "Phone number", style = body_large)
+                         Text(text = stringResource(MR.strings.phone_number), style = body_large)
                          Spacer(modifier = Modifier.padding(vertical = spacing05X))
                          ProfileInfoComponent("09352003242",MR.images.phone, backgroundColor = surfaceInputReadOnly)
                          Spacer(modifier = Modifier.padding(vertical = spacing1X))
 
-                         Text(text = "Email", style = body_large)
+                         Text(text = stringResource(MR.strings.email), style = body_large)
                          Spacer(modifier = Modifier.padding(vertical = spacing05X))
                          ProfileInfoComponent("ali.soh@mtnirancell.ir",MR.images.mail1, backgroundColor = surfaceInputReadOnly)
                          Spacer(modifier = Modifier.padding(vertical = spacing1X))

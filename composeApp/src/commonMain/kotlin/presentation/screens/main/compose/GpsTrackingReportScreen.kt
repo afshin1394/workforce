@@ -40,6 +40,7 @@ import androidx.compose.runtime.setValue
 import com.irancell.nwg.wfm.presentation.components.ItemComponent
 import com.irancell.nwg.wfm.presentation.theme.spacing2X
 import dev.icerock.moko.resources.ImageResource
+import dev.icerock.moko.resources.compose.stringResource
 import io.github.aakira.napier.LogLevel
 import io.github.aakira.napier.Napier
 import irancell.nwg.wfm.MR
@@ -91,7 +92,7 @@ class GpsTrackingReportScreen(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 ItemComponent(itemComponentModel = ItemComponentModel(
-                    text = "Map",
+                    text = stringResource(MR.strings.map),
                     hasTag = false,
                     hasImage = true,
                     imageResource = MR.images.map,
@@ -112,7 +113,7 @@ class GpsTrackingReportScreen(
                     ViewStates.Error -> {
                         scope.launch {
                             snackbarHostState.showSnackbar(
-                                message = "Error getting gps tracker logs!",
+                                message = "${MR.strings.error_gps_tracker}!",
                                 duration = SnackbarDuration.Short,
                             )
                         }
@@ -123,10 +124,10 @@ class GpsTrackingReportScreen(
                     }
 
                     ViewStates.Success -> {
+                       val message = stringResource(MR.strings.success)
                         scope.launch {
                             snackbarHostState.showSnackbar(
-
-                                message = "success!",
+                                message =  message,
                                 duration = SnackbarDuration.Short,
                             )
                         }

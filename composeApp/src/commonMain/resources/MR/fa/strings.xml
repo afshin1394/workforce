@@ -1,5 +1,65 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <resources>
-    <string name="hello_world">Hallo Welt</string>
-    <string name="hello_x">Hallo %s</string>
+    <string name="password">پسوورد</string>
+    <string name="submit">تایید</string>
+    <string name="why_canceled_ticket">آیا می خواهید کنسل کنید تیکت</string>
+    <string name="suspend_ticket">متوقف کردن تیکت</string>
+    <string name="cancel_ticket">کنسل کردن تیکت</string>
+    <string name="photo_for_ticket_suspend">عکس بابت تیکت های متوقف شده</string>
+    <string name="save_photo_gallery">افزودن عکس در گالری</string>
+    <string name="about_application">درباره اپلیکیشن</string>
+    <string name="current_version">ورژن فعلی شما</string>
+    <string name="latest_version">آخرین ورژن</string>
+    <string name="description_for_update">شما در حال استفاده از ورژن قدیمی اپلیکیشن هستید لطفا برنامه خود را به اخرین ورژن آبدیت نمایید.</string>
+    <string name="update">آبدیت</string>
+    <string name="account_info">اطلاعات حساب کاربری</string>
+    <string name="name">نام</string>
+    <string name="expertise">تخصص</string>
+    <string name="phone_number">شماره موبایل</string>
+    <string name="email">ایمیل</string>
+    <string name="map">نقشه</string>
+    <string name="error_gps_tracker">خطا در دریافت گزارش های gps</string>
+    <string name="success">موفق</string>
+    <string name="filters">فیلترها</string>
+    <string name="logout">خروج</string>
+    <string name="availability_status">وضعیت دسترسی</string>
+    <string name="more_options">گزینه های بیشتر</string>
+    <string name="suspend_reason">دلیل متوقف کردن</string>
+    <string name="cancel_reason">دلیل کنسل کردن</string>
+    <string name="cancel">لغو کردن</string>
+    <string name="are_you_logout">آیا میخواهید از برنامه خارج شوید؟</string>
+    <string name="clear_all">پاک کردن همه</string>
+    <string name="settings">تنظیمات </string>
+    <string name="language">زبان </string>
+    <string name="help_support">پشتیبانی </string>
+    <string name="darkMode">تم تیره </string>
+    <string name="work_force_management">مدیریت نیروی کار </string>
+    <string name="please_authorize_permissions">لطفا مجوزهای لازم را تایید نمایید </string>
+    <string name="approve">تایید </string>
+    <string name="my_tickets">تسک های من</string>
+    <string name="gps_tracker">گزارش لوکیشن</string>
+    <string name="about">درباره ما</string>
+    <string name="login_mtn_account">ورود با حساب ایرانسلی</string>
+    <string name="company_email">ایمیل شرکتی</string>
+    <string name="email_required">لطفا ایمیل خودرا وارد نمایید</string>
+    <string name="password_required">لطفا رمزعبور خود را وارد نمایید</string>
+    <string name="password_should_least_8_characters">رمز عبور باید شامل 8کارکتر باشد</string>
+    <string name="sign_in">ورود</string>
+    <string name="enter_verification_code">لطفا کد ارسال شده را وارد نمایید</string>
+    <string name="waiting_time_receive">ارسال مجدد تا</string>
+    <string name="resend_code">ارسال مجدد</string>
+    <string name="verify">تایید</string>
+    <string name="english">انگلیسی</string>
+    <string name="farsi">فارسی</string>
+    <string name="ticket_list">لیست تسک ها</string>
+    <string name="tap_update_availability">جهت به روز رسانی وضعیت در دسترس بودن روی دکمه زیر کلیک کنید.</string>
+    <string name="available">در دسترس بودن</string>
+    <string name="unAvailable">عدم دسترسی</string>
+    <string name="ticket_info">اطلاعات تسک</string>
+    <string name="resume">ادامه</string>
+    <string name="general_information">اطلاعات کلی</string>
+    <string name="resource_information">اطلاعات منبع</string>
+    <string name="fault_information">اطلاعات خطا</string>
+
+
 </resources>

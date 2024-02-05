@@ -27,13 +27,13 @@ import presentation.theme.textPrimary
 fun OptionsItemComponent(modifier: Modifier = Modifier,selectableItem: SelectableItem = SelectableItem(1,"Unbelievable",false)
                          ,onOptionClick : (selectableItem: SelectableItem) -> Unit = {}){
 
-    val selectableItemState by remember {
-        mutableStateOf(selectableItem)
+    val selectableItemState by remember { mutableStateOf(selectableItem)
     }
 
 
     val cardColor = if (selectableItemState.isSelectedState.value) surfaceSelected else surfaceDefault
     Card(modifier = modifier
+        .padding(top = spacing05X, bottom = spacing05X)
         .background(
             color = cardColor,
             shape = RoundedCornerShape(spacing15X)

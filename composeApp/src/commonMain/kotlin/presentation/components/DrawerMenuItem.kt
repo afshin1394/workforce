@@ -13,8 +13,10 @@ import com.irancell.nwg.wfm.presentation.theme.spacing2X
 import dev.icerock.moko.resources.ImageResource
 import dev.icerock.moko.resources.compose.painterResource
 import irancell.nwg.wfm.MR
+import irancell.nwg.wfm.getSharedPref
 
 import presentation.theme.body_large
+import utils.Language
 
 
 @Composable
@@ -50,7 +52,8 @@ fun DrawerMenuItem(
         )
         Spacer(modifier = Modifier.width(spacing2X))
         Image(
-            painter = painterResource(MR.images.chevron_right),
+            painter = if (getSharedPref().getString(Language)=="en") painterResource(MR.images.chevron_right)else
+                painterResource(MR.images.chevron_left),
             contentDescription = "chevron_right",
             modifier = Modifier
                 .size(24.dp)

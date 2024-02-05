@@ -19,10 +19,21 @@ import com.irancell.nwg.wfm.presentation.model.SelectableItem
 import com.irancell.nwg.wfm.presentation.screens.main.components.SwitchItem
 import presentation.screens.main.events.SettingEvent
 import com.irancell.nwg.wfm.presentation.screens.main.viewmodel.SettingScreenVM
+import dev.icerock.moko.resources.compose.stringResource
+import irancell.nwg.wfm.IntentHandler
+import irancell.nwg.wfm.MR
+import irancell.nwg.wfm.getSharedPref
+import irancell.nwg.wfm.provideAppContext
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import presentation.theme.subtleDefault
 import presentation.theme.surfaceDefault
 import presentation.theme.textBrand
 import kotlinx.coroutines.launch
+import utils.Language
+import utils.SelectLanguage
+import utils.isRunningGPS
+
 @OptIn(ExperimentalMaterialApi::class)
 class SettingsScreen (
   private val  title: String
@@ -44,13 +55,14 @@ class SettingsScreen (
                 }
 
                 SettingEvent.ChangeLanguage -> {
-                    "Language"
+                    stringResource(MR.strings.language)
                 }
+
 
             }
 
-        BaseScreen(title = "Settings", topBar = {
-            MenuItemsTopBar("Settings") {
+        BaseScreen(title = stringResource(MR.strings.settings), topBar = {
+            MenuItemsTopBar(stringResource(MR.strings.settings)) {
                 navigator.pop()
             }
 
@@ -60,11 +72,42 @@ class SettingsScreen (
             bottomSheetContent = {
                 when (events) {
                     SettingEvent.ChangeLanguage -> {
-                        ChangeLanguageBottomSheetComponent(viewModel.mutableChangeLanguageOptions) { index, selectableItem ->
-                            {
+                        ChangeLanguageBottomSheetComponent(
+                            list =
 
-                            }
-                        }
+                            viewModel.mutableChangeLanguageOptions,
+                            onItemSelected = { index, selectableItem ->
+                                apply {
+
+
+                                    scope.launch(Dispatchers.Main) {
+
+                                        when (index) {
+                                            0 -> {
+                                                println("langg>>>${"en"}")
+                                                getSharedPref().put(Language, "en")
+
+                                            }
+                                            1 -> {
+                                                println("langg>>>${"fa"}")
+                                                getSharedPref().put(Language, "fa")
+
+                                            }
+                                        }
+
+                                        getSharedPref().put(SelectLanguage, true)
+                                        getSharedPref().put(isRunningGPS, false)
+
+                                        delay(1000)
+                                        IntentHandler(provideAppContext())
+
+                                    }
+
+
+
+
+                                }
+                            })
                         scope.launch {
                             scaffoldState.bottomSheetState.expand()
                         }
@@ -75,6 +118,8 @@ class SettingsScreen (
                             scaffoldState.bottomSheetState.collapse()
                         }
                     }
+
+
                 }
             }, onCloseBottomSheet = {
                 viewModel.events.value = SettingEvent.Default
@@ -92,23 +137,25 @@ class SettingsScreen (
 
             }, content = {
                 Column {
+                    val tagSelectLanguage=if ( getSharedPref().getString(Language)=="fa") "Farsi"
+                    else "English"
                     ItemComponent(itemComponentModel = ItemComponentModel(
-                        text = "Language",
+                        text = stringResource(MR.strings.language),
                         hasTag = true,
                         color = surfaceDefault,
-                        textTag = "English",
+                        textTag = tagSelectLanguage,
                         textTagColor = textBrand,
                         tagColor = subtleDefault
                     ), modifier = Modifier.clickable {
                         viewModel.events.value = SettingEvent.ChangeLanguage
                     })
                     ItemComponent(itemComponentModel = ItemComponentModel(
-                        text = "Help and Support", hasTag = false,
+                        text = stringResource(MR.strings.help_support), hasTag = false,
                         color = surfaceDefault
                     ), modifier = Modifier.clickable {
 
                     })
-                    SwitchItem(text = "Dark mode", false) {
+                    SwitchItem(text = stringResource(MR.strings.darkMode), false) {
 
                     }
                 }
@@ -119,9 +166,6 @@ class SettingsScreen (
     }
 
 }
-
-
-
 
 
 @Composable

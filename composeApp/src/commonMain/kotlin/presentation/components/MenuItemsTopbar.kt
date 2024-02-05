@@ -16,7 +16,9 @@ import com.irancell.nwg.wfm.presentation.theme.spacing075X
 import presentation.theme.surfaceDefault
 import dev.icerock.moko.resources.compose.painterResource
 import irancell.nwg.wfm.MR
+import irancell.nwg.wfm.getSharedPref
 import presentation.theme.h4
+import utils.Language
 
 
 @Composable
@@ -25,7 +27,8 @@ fun MenuItemsTopBar (title : String = "About",onBackClick : () -> Unit = {}){
      surfaceDefault
  ).padding(horizontal =
      spacing075X)) {
-     Image(painter = painterResource(MR.images.arrow_left), contentDescription = "", modifier = Modifier.weight(.1f).clickable {
+     Image(painter =   if (getSharedPref().getString(Language)=="en")painterResource(MR.images.arrow_left) else
+         painterResource(MR.images.arrow_right), contentDescription = "", modifier = Modifier.weight(.1f).clickable {
          onBackClick()
      })
      Text(text = title, style = h4, modifier = Modifier.padding(vertical = 15.dp).weight(.8f), textAlign = TextAlign.Center)

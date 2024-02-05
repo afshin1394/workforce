@@ -13,7 +13,7 @@ class SettingScreenVM : ViewModel() {
 
 
     val mutableChangeLanguageOptions =  mutableStateListOf(
-        SelectableItem(1, "English", true),
-        SelectableItem(2, "Farsi (فارسی)", false),
+        SelectableItem(1, "English", false),
+        SelectableItem(2, "Farsi", false),
     )
 }

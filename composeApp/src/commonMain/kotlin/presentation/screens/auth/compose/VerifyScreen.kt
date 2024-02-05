@@ -20,6 +20,7 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import com.irancell.nwg.wfm.presentation.screens.auth.components.*
 import com.irancell.nwg.wfm.presentation.theme.*
 import dev.icerock.moko.resources.compose.painterResource
+import dev.icerock.moko.resources.compose.stringResource
 import irancell.nwg.wfm.MR
 import presentation.screens.auth.components.AuthAlertText
 import presentation.screens.auth.components.AuthAlertTextItem
@@ -52,13 +53,13 @@ class VerifyScreen(private val phoneNumber : String = "") : Screen {
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-        Image(
-            painter = painterResource( MR.images.ic_sdm),
-            contentDescription = "ic_wfm",
-            modifier = Modifier
-                .weight(2f)
-                .wrapContentSize()
-        )
+            Image(
+                painter = painterResource( MR.images.ic_sdm),
+                contentDescription = "ic_wfm",
+                modifier = Modifier
+                    .weight(2f)
+                    .wrapContentSize()
+            )
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -67,6 +68,7 @@ class VerifyScreen(private val phoneNumber : String = "") : Screen {
             ) {
                 Text(text =
                 buildAnnotatedString {
+                    val messageEnterCode= stringResource(MR.strings.enter_verification_code)
 
                     withStyle(style = ParagraphStyle()) {
                         withStyle(
@@ -75,7 +77,7 @@ class VerifyScreen(private val phoneNumber : String = "") : Screen {
                                 fontSize = 16.sp
                             ),
                         ) {
-                            append("Enter the verification code that is sent to your phone number ")
+                            append(messageEnterCode)
                         }
 
                         withStyle(
@@ -84,7 +86,7 @@ class VerifyScreen(private val phoneNumber : String = "") : Screen {
                                 fontSize = 16.sp
                             )
                         ) {
-                            append(phoneNumberState)
+                          //  append(phoneNumberState)
                         }
                     }
 
@@ -98,12 +100,12 @@ class VerifyScreen(private val phoneNumber : String = "") : Screen {
 
                 Spacer(modifier = Modifier.height(spacing3X))
                 if (!isTimeout)
-                    Text(text = "Waiting time to receive$time")
+                    Text(text = "${stringResource(MR.strings.waiting_time_receive)} $time")
                 else
                     AuthAlertText(
                         alertTextItem = AuthAlertTextItem(
                             false,
-                            text = "Resend Code",
+                            text = stringResource(MR.strings.resend_code),
                             textColor = textBrand
                         )
                     ) {
@@ -115,7 +117,7 @@ class VerifyScreen(private val phoneNumber : String = "") : Screen {
 
 
                 Spacer(modifier = Modifier.height(spacing5X))
-                AuthButton(authButtonItem = AuthButtonItem("Verify")) {
+                AuthButton(authButtonItem = AuthButtonItem(stringResource(MR.strings.verify))) {
                     //onClick
                     if (otpCode.length == 6) {
                         navigator.popUntil { it == SplashScreen() }

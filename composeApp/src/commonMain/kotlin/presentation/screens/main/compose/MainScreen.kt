@@ -21,9 +21,11 @@ import com.irancell.nwg.wfm.presentation.theme.*
 import com.irancell.nwg.wfm.ui.compose.TicketListScreen
 import dev.icerock.moko.permissions.compose.PermissionsControllerFactory
 import dev.icerock.moko.permissions.compose.rememberPermissionsControllerFactory
+import dev.icerock.moko.resources.compose.stringResource
 import io.github.aakira.napier.LogLevel
 import io.github.aakira.napier.Napier
 import irancell.nwg.wfm.Camera
+import irancell.nwg.wfm.MR
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import presentation.components.CustomTopAppBar
@@ -79,36 +81,37 @@ class MainScreen (
         val bottomSheetTitle: String =
             when (events) {
                 MainEvent.ActionFilter -> {
-                    "Filters"
+                   stringResource(MR.strings.filters)
                 }
 
                 MainEvent.Logout -> {
-                    "logout"
+                    stringResource(MR.strings.logout)
                 }
 
                 MainEvent.AvailabilityStatus -> {
-                    "AvailabilityStatus"
+                    stringResource(MR.strings.availability_status)
                 }
 
                 MainEvent.CancelTicket -> {
-                    "Cancel ticket"
+                    stringResource(MR.strings.cancel_ticket)
                 }
 
                 MainEvent.MoreOptions -> {
+                    stringResource(MR.strings.more_options)
 
-                    "More options"
                 }
 
                 MainEvent.SuspendTicket -> {
-                    "Suspend ticket"
+                    stringResource(MR.strings.suspend_ticket)
                 }
 
                 MainEvent.SuspendReason -> {
-                    "Suspend reason"
+                    stringResource(MR.strings.suspend_reason)
+
                 }
 
                 MainEvent.CancelReason -> {
-                    "Cancel Reason"
+                    stringResource(MR.strings.cancel_reason)
                 }
 
                 MainEvent.Default -> {
@@ -123,7 +126,7 @@ class MainScreen (
 
 
         BaseScreen(scaffoldState = scaffoldState, hasDrawer = true, topBar = {
-            CustomTopAppBar(availability,title, onNavigationItemClick = {
+            CustomTopAppBar(availability, stringResource(MR.strings.ticket_list), onNavigationItemClick = {
                 scope.launch {
                     if (scaffoldState.drawerState.isOpen)
                         scaffoldState.drawerState.close()
@@ -188,10 +191,10 @@ class MainScreen (
                 when (events) {
                     MainEvent.ActionFilter -> {
                         bottomSheetDoubleActionBottomBar(BottomSheetDoubleActionModel(
-                            "Clear all",
+                            stringResource(MR.strings.clear_all),
                             Color.Transparent,
                             textInverseDisabled,
-                            "Filter",
+                            stringResource(MR.strings.filters),
                             surfaceBrandDefault,
                             textInverse
                         ), onFirstButtonClick = {
@@ -224,8 +227,8 @@ class MainScreen (
                     MainEvent.Logout -> {
                         bottomSheetDoubleActionBottomBar(
                             BottomSheetDoubleActionModel(
-                                "Cancel",
-                                surfaceDefault, textPrimary, "Logout", surfaceBrandDefault,
+                                stringResource(MR.strings.cancel) ,
+                                surfaceDefault, textPrimary, stringResource(MR.strings.logout), surfaceBrandDefault,
                                 textInverse
                             )
                         )
@@ -296,7 +299,7 @@ class MainScreen (
 
                     MainEvent.Logout -> {
                         Text(
-                            text = "Are you sure you want to logout?",
+                            text = stringResource(MR.strings.are_you_logout),
                             style = body_large,
                             modifier = Modifier.padding(start = spacing2X)
                         )

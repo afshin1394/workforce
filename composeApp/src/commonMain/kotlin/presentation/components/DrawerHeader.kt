@@ -15,10 +15,12 @@ import com.irancell.nwg.wfm.presentation.nav.Screen
 import com.irancell.nwg.wfm.presentation.theme.*
 import dev.icerock.moko.resources.compose.painterResource
 import irancell.nwg.wfm.MR
+import irancell.nwg.wfm.getSharedPref
 
 import presentation.theme.body_large
 import presentation.theme.mediumDivider
 import presentation.theme.surfaceDefault
+import utils.Language
 
 
 @Composable
@@ -63,8 +65,9 @@ fun DrawerHeader(onItemClick : (navRoute : String) -> Unit = {}) {
                     )
                 }
                 Image(
-                    painter = painterResource(MR.images.chevron_right),
-                    contentDescription = "avatar",
+                    painter = if (getSharedPref().getString(Language)=="en") painterResource(MR.images.chevron_right)else
+                        painterResource(MR.images.chevron_left),
+                    contentDescription = "chevron",
                     modifier = Modifier
                         .wrapContentSize()
                 )

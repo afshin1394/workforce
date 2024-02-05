@@ -20,6 +20,7 @@ import presentation.theme.surfaceDefault
 import presentation.theme.textPlaceHolder
 import dev.icerock.moko.resources.ImageResource
 import dev.icerock.moko.resources.compose.painterResource
+import dev.icerock.moko.resources.compose.stringResource
 import irancell.nwg.wfm.MR
 import presentation.theme.body_large
 
@@ -28,7 +29,7 @@ import presentation.theme.body_large
 fun showAuthTextField() {
     AuthTextField(
         modifier = Modifier,
-        AuthTextFieldItem("Password", imageResource = null,"password", hasPassword = false, false)
+        AuthTextFieldItem(stringResource(MR.strings.password), imageResource = null, stringResource(MR.strings.password), hasPassword = false, false)
     ) {}
 }
 

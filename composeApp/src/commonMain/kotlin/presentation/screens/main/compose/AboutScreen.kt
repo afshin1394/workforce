@@ -21,6 +21,7 @@ import com.irancell.nwg.wfm.presentation.components.*
 import presentation.screens.main.compose.BaseScreen
 import com.irancell.nwg.wfm.presentation.theme.*
 import dev.icerock.moko.resources.compose.painterResource
+import dev.icerock.moko.resources.compose.stringResource
 import irancell.nwg.wfm.MR
 import presentation.screens.main.viewmodel.AboutScreenVM
 
@@ -41,8 +42,8 @@ class AboutScreen(
         val scaffoldState: BottomSheetScaffoldState = rememberBottomSheetScaffoldState()
         val viewModel = remember { AboutScreenVM() }
 
-        BaseScreen(title = "About Application", scaffoldState = scaffoldState, topBar = {
-            MenuItemsTopBar("About application") {
+        BaseScreen(title = stringResource(MR.strings.about_application), scaffoldState = scaffoldState, topBar = {
+            MenuItemsTopBar(stringResource(MR.strings.about_application)) {
                 navigator.pop()
             }
         }, content = {
@@ -69,7 +70,7 @@ class AboutScreen(
                         horizontalArrangement = Arrangement.Center
                     ) {
                         Text(
-                            "Your current version:",
+                            "${stringResource(MR.strings.current_version)}:",
                             style = body_large,
                             modifier = Modifier.weight(.8f),
                         )
@@ -92,7 +93,7 @@ class AboutScreen(
                         horizontalArrangement = Arrangement.Center
                     ) {
                         Text(
-                            "Latest version:",
+                            "${ stringResource(MR.strings.latest_version)}:",
                             style = body_large,
                             modifier = Modifier.weight(.8f),
 
@@ -113,13 +114,13 @@ class AboutScreen(
                     Spacer(modifier = Modifier.padding(spacing25X))
 
                     Text(
-                        text = "You are using an old version of the app. Please update and enjoy the latest version. ",
+                        text = stringResource(MR.strings.description_for_update),
                         style = body_large
                     )
                     Spacer(modifier = Modifier.padding(spacing25X))
                     CustomButton(
                         customButtonData = CustomButtonData(
-                            title = "Update",
+                            title = stringResource(MR.strings.update),
                             textColor = textInverse,
                             backgroundColor = surfaceBrandDefault
                         )
