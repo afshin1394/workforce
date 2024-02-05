@@ -50,7 +50,6 @@ class MainScreenVM(
             ).collect {
                 when (it.status) {
                     AsyncStatus.ERROR -> {
-                        state.update { ViewStates.Loading }
                         val errorMessage = it.message!!
                         error.update { errorMessage }
                     }
@@ -62,9 +61,11 @@ class MainScreenVM(
                     AsyncStatus.SUCCESS -> {
                         state.update { ViewStates.Success }
                         it.data?.let { available ->
-                                _availability.update { available }
+                            _availability.update { available }
                         }
                     }
+
+
                 }
             }
         }
@@ -79,49 +80,54 @@ class MainScreenVM(
         viewModelScope.launch(Dispatchers.IO) {
 
 
-            changeServerAvailabilityUseCase(!_availability.value).collect{
-               when(it){
-                   is AsyncResult.Error -> {
-                       it.message?.let{ string ->
-                           error.update { string }
-                       }
-                   }
-                   is AsyncResult.Loading -> {
+            changeServerAvailabilityUseCase(!_availability.value).collect {
+                when (it) {
+                    is AsyncResult.Error -> {
+                        it.message?.let { string ->
+                            error.update { string }
+                        }
+                    }
 
-                   }
-                   is AsyncResult.Success -> {
-                       Napier.log(LogLevel.ASSERT,"datasuccess", message = "changeAvailability: "+it.data)
+                    is AsyncResult.Loading -> {
 
-                       storeAvailabilityUseCase(
-                           _availability.value
-                       ).collect{
-                           when (it.status) {
-                               AsyncStatus.ERROR -> {
-                                   it.message?.let{ string ->
-                                       error.update { string }
-                                   }
-                               }
+                    }
 
-                               AsyncStatus.LOADING -> {
+                    is AsyncResult.Success -> {
+                        Napier.log(
+                            LogLevel.ASSERT,
+                            "datasuccess",
+                            message = "changeAvailability: " + it.data
+                        )
+                        _availability.update { !it }
+                        storeAvailabilityUseCase(
+                            _availability.value
+                        ).collect {
+                            when (it.status) {
+                                AsyncStatus.ERROR -> {
+                                    it.message?.let { string ->
+                                        error.update { string }
+                                    }
+                                }
 
-                               }
+                                AsyncStatus.LOADING -> {
 
-                               AsyncStatus.SUCCESS -> {
-                                   state.update { ViewStates.Success }
-                                   _availability.update { !it }
-                                   if (!_availability.value) {
-                                       GpsTrackingService.startLocationTracker()
-                                   } else {
-                                       GpsTrackingService.stopLocationTracker()
-                                   }
+                                }
 
-                               }
-                           }
-                       }
-                   }
-               }
+                                AsyncStatus.SUCCESS -> {
+                                    state.update { ViewStates.Success }
+                                    Napier.log(LogLevel.ASSERT,"storeAvailabilityUseCase", message = _availability.value.toString())
+                                    if (_availability.value) {
+                                        GpsTrackingService.startLocationTracker()
+                                    } else {
+                                        GpsTrackingService.stopLocationTracker()
+                                    }
+
+                                }
+                            }
+                        }
+                    }
+                }
             }
-
 
 
         }
@@ -130,8 +136,9 @@ class MainScreenVM(
     }
 
     private val initialTasks = arrayListOf(
-        Task(     1235,
-    ),
+        Task(
+            1235,
+        ),
         Task(
             1236,
             "Huawei External Alarm, T5713, Bater ... Huawei External Alarm, T5713, Bater ...",
@@ -201,10 +208,9 @@ class MainScreenVM(
 
 
     var tasks = ArrayList(initialTasks)
-    var selectedTask : MutableState<Task?> = mutableStateOf(null)
+    var selectedTask: MutableState<Task?> = mutableStateOf(null)
 
     var events = mutableStateOf<MainEvent>(MainEvent.Default)
-
 
 
     var enableSuspendSubmit = mutableStateOf(false)
@@ -369,19 +375,19 @@ class MainScreenVM(
         viewModelScope.launch {
             val cameraPermission = Permission.CAMERA
             val isGranted = permissionsController.isPermissionGranted(cameraPermission)
-            if (isGranted){
+            if (isGranted) {
                 _openCamera.update { true }
-            }else{
+            } else {
                 permissionsController.providePermission(cameraPermission)
             }
         }
     }
 
-    fun updateCameraStatus(openCamera : Boolean) {
+    fun updateCameraStatus(openCamera: Boolean) {
         _openCamera.update { openCamera }
     }
 
-    fun getTasks(){
+    fun getTasks() {
         viewModelScope.launch(Dispatchers.IO) {
             getAllWorksUseCase(Unit).collect {
                 when (it.status) {
