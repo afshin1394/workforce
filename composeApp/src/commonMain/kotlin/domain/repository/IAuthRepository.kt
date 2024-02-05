@@ -1,7 +1,6 @@
 package domain.repository
 
-import data.network.LoginRequestNetwork
-import data.network.response.LoginResponseNetwork
+import data.network.request.LoginRequestNetwork
 
 interface IAuthRepository {
 

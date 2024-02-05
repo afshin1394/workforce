@@ -1,17 +1,12 @@
 package data
 
-import data.network.SendLocationRequest
+import data.network.request.SendLocationRequest
 import domain.repository.IGeneralLocationRepository
-import io.github.aakira.napier.LogLevel
-import io.github.aakira.napier.Napier
 import io.ktor.client.HttpClient
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import irancell.nwg.wfm.db.GeneralLocationEntity
 import irancell.nwg.wfm.db.WFMDatabase
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 
 class GeneralLocationRepositoryImpl(
     private val wfmDatabase: WFMDatabase,

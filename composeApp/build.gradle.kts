@@ -72,10 +72,10 @@ kotlin {
                 implementation(libs.koin.compose)
                 implementation(libs.kotlin.arrow.core)
                 implementation(libs.ktor.client.core)
+                implementation(libs.ktor.client.logging)
                 implementation(libs.ktor.client.content.negotiation)
                 implementation(libs.kotlin.serialization)
 //                implementation(libs.composeImageLoader)
-                implementation("io.ktor:ktor-client-content-negotiation:2.3.7")
 
 
             }

@@ -1,24 +1,32 @@
 package data
 
-import data.network.ChangeAvailabilityRequest
-import data.network.SendLocationRequest
+import data.network.request.ChangeAvailabilityRequest
 import domain.repository.IAvailabilityRepository
+import io.github.aakira.napier.LogLevel
+import io.github.aakira.napier.Napier
 import io.ktor.client.HttpClient
+import io.ktor.client.call.body
+import io.ktor.client.request.headers
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
-import io.ktor.http.ContentType
-import io.ktor.http.contentType
-import irancell.nwg.wfm.getSharedPref
-import utils.Availability
+import io.ktor.client.statement.bodyAsText
+import io.ktor.util.reflect.TypeInfo
 
 class AvailabilityRepositoryImpl(
     private val httpClient: HttpClient
 ) : IAvailabilityRepository {
-    override suspend fun changeAvailability(changeAvailabilityRequest: ChangeAvailabilityRequest) {
-        httpClient.post("workforce_management/ready-to-work/") {
+    override suspend fun changeAvailability(changeAvailabilityRequest: ChangeAvailabilityRequest): String {
+        val response = httpClient.post("workforce_management/user/ready-to-work/") {
             setBody(
-              body =  changeAvailabilityRequest,
+                body = changeAvailabilityRequest,
             )
-        }
+        }.bodyAsText()
+        Napier.log(
+            LogLevel.ASSERT,
+            tag = "changeAvailability",
+            message = response
+        )
+        return response
+
     }
 }

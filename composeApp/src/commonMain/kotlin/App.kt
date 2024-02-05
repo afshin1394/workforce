@@ -32,7 +32,8 @@ import presentation.screens.splash.compose.SplashScreen
 fun App() {
 
     startKoin {
-        modules(  httpModule(),repositoryModule(), useCaseModule(), viewModelModule())
+        modules(  httpModule(),
+            repositoryModule(), useCaseModule(), viewModelModule())
     }
     Navigator(SplashScreen()){
         SlideTransition(it)

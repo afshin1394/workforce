@@ -1,7 +1,6 @@
 package domain.usecase.usecase.auth
 
 import data.AuthRepositoryImpl
-import data.network.LoginRequestNetwork
 import domain.mappers.toLoginRequestNetwork
 import domain.models.LoginRequestDomain
 import domain.usecase.BaseUseCase

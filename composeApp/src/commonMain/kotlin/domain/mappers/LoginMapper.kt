@@ -1,6 +1,6 @@
 package domain.mappers
 
-import data.network.LoginRequestNetwork
+import data.network.request.LoginRequestNetwork
 import domain.models.LoginRequestDomain
 
 fun LoginRequestNetwork.toLoginRequestDomain() : LoginRequestDomain {

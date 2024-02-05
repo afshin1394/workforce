@@ -16,6 +16,11 @@ import dev.icerock.moko.permissions.PermissionsController
 import domain.usecase.usecase.availability.ChangeServerAvailabilityUseCase
 import domain.usecase.usecase.availability.GetAvailabilityUseCase
 import domain.usecase.usecase.availability.StoreAvailabilityUseCase
+import domain.usecase.usecase.work.GetAllWorksUseCase
+import io.github.aakira.napier.LogLevel
+import io.github.aakira.napier.Napier
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -30,6 +35,7 @@ class MainScreenVM(
     private val storeAvailabilityUseCase: StoreAvailabilityUseCase,
     private val getAvailabilityUseCase: GetAvailabilityUseCase,
     private val changeServerAvailabilityUseCase: ChangeServerAvailabilityUseCase,
+    private val getAllWorksUseCase: GetAllWorksUseCase
 ) : BaseViewModel() {
     private val _availability = MutableStateFlow(false)
     val availability = _availability.asStateFlow()
@@ -38,7 +44,7 @@ class MainScreenVM(
     val openCamera = _openCamera.asStateFlow()
 
     init {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             getAvailabilityUseCase(
                 Unit
             ).collect {
@@ -62,12 +68,15 @@ class MainScreenVM(
                 }
             }
         }
+
+        getTasks()
+
     }
 
 
     fun changeAvailability() {
 
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
 
 
             changeServerAvailabilityUseCase(!_availability.value).collect{
@@ -81,6 +90,7 @@ class MainScreenVM(
 
                    }
                    is AsyncResult.Success -> {
+                       Napier.log(LogLevel.ASSERT,"datasuccess", message = "changeAvailability: "+it.data)
 
                        storeAvailabilityUseCase(
                            _availability.value
@@ -99,7 +109,7 @@ class MainScreenVM(
                                AsyncStatus.SUCCESS -> {
                                    state.update { ViewStates.Success }
                                    _availability.update { !it }
-                                   if (_availability.value) {
+                                   if (!_availability.value) {
                                        GpsTrackingService.startLocationTracker()
                                    } else {
                                        GpsTrackingService.stopLocationTracker()
@@ -369,6 +379,40 @@ class MainScreenVM(
 
     fun updateCameraStatus(openCamera : Boolean) {
         _openCamera.update { openCamera }
+    }
+
+    fun getTasks(){
+        viewModelScope.launch(Dispatchers.IO) {
+            getAllWorksUseCase(Unit).collect {
+                when (it.status) {
+                    AsyncStatus.ERROR -> {
+                        Napier.log(
+                            LogLevel.ASSERT,
+                            "getAllWorksUseCase",
+                            message = "ERROR: " + it.message
+                        )
+
+                    }
+
+                    AsyncStatus.LOADING -> {
+                        Napier.log(LogLevel.ASSERT, "getAllWorksUseCase", message = "LOADING: ")
+
+                    }
+
+                    AsyncStatus.SUCCESS -> {
+                        Napier.log(
+                            LogLevel.ASSERT,
+                            "getAllWorksUseCase",
+                            message = "SUCCESS: " + it.data
+                        )
+
+
+                    }
+
+                }
+            }
+        }
+
     }
 
 }
