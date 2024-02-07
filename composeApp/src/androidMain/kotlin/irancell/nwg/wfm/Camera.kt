@@ -34,6 +34,8 @@ actual class Camera {
         actual fun ImagePicker(savePath : String,onSuccess : (uri : Any) -> Unit) {
             val context = LocalContext.current
             val file = context.createImageFile(savePath)
+            Log.i("uriiiii", "ImagePicker: ${file.path}")
+
             val uri  = InternalStorage.getUriForFile(context,file)
             val cameraLauncher = rememberLauncherForActivityResult(
                 contract = ActivityResultContracts.TakePicture(),

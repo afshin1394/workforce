@@ -28,6 +28,7 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
+import org.koin.core.context.stopKoin
 import utils.AsyncStatus
 import utils.getCurrentDate
 import java.util.concurrent.TimeUnit
@@ -56,6 +57,8 @@ actual class GpsTrackingService : Service() , KoinComponent {
 
             if (isRunning)
                 (provideAppContext() as Context).stopService(gpsTrackingIntent)
+
+            stopKoin()
         }
 
 

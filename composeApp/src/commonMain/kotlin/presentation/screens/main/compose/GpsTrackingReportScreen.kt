@@ -61,6 +61,7 @@ class GpsTrackingReportScreen(
     companion object {
         lateinit var gneralLocs: List<GeneralLocationEntity>
     }
+
     @ExperimentalMaterial3Api
     @Composable
     override fun Content() {
@@ -104,8 +105,12 @@ class GpsTrackingReportScreen(
                     showMap = true
 
                 })
-                Napier.log(LogLevel.ASSERT,tag = "checkcki", message =  "current $showMap  last $lastshowmap")
-                if (showMap){
+                Napier.log(
+                    LogLevel.ASSERT,
+                    tag = "checkcki",
+                    message = "current $showMap  last $lastshowmap"
+                )
+                if (showMap) {
                     mapView(generalLocations)
                     showMap = false
                 }
@@ -124,10 +129,10 @@ class GpsTrackingReportScreen(
                     }
 
                     ViewStates.Success -> {
-                       val message = stringResource(MR.strings.success)
+                        val message = stringResource(MR.strings.success)
                         scope.launch {
                             snackbarHostState.showSnackbar(
-                                message =  message,
+                                message = message,
                                 duration = SnackbarDuration.Short,
                             )
                         }
@@ -147,6 +152,10 @@ class GpsTrackingReportScreen(
                                 )
                             }
                         }
+                    }
+
+                    ViewStates.Default -> {
+
                     }
                 }
             }

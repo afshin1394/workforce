@@ -22,7 +22,6 @@ abstract class BaseUseCase<out Type, in Params> {
         try {
             val result = run(params)
             Napier.log(LogLevel.INFO, "BaseUseCase", message = "done")
-
             emit(AsyncResult.Success(result, ResultStatus.SUCCESS))
         } catch (exception: Exception) {
             exception.message?.let {

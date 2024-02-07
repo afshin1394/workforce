@@ -5,12 +5,11 @@ import domain.repository.IAvailabilityRepository
 import io.github.aakira.napier.LogLevel
 import io.github.aakira.napier.Napier
 import io.ktor.client.HttpClient
-import io.ktor.client.call.body
-import io.ktor.client.request.headers
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.client.statement.bodyAsText
-import io.ktor.util.reflect.TypeInfo
+import kotlinx.serialization.json.Json
+import data.network.response.ObjectID
 
 class AvailabilityRepositoryImpl(
     private val httpClient: HttpClient
@@ -21,12 +20,11 @@ class AvailabilityRepositoryImpl(
                 body = changeAvailabilityRequest,
             )
         }.bodyAsText()
-        Napier.log(
-            LogLevel.ASSERT,
-            tag = "changeAvailability",
-            message = response
-        )
-        return response
+
+        val objectIdJson  = response.substringAfter("=").substringBefore(" ")
+        val objectID = Json.decodeFromString<ObjectID>(objectIdJson).detail
+        Napier.log(LogLevel.ASSERT,"objectId", message = objectID)
+        return objectID
 
     }
 }

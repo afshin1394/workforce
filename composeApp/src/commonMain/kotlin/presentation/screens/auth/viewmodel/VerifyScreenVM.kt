@@ -1,29 +1,32 @@
 package presentation.screens.auth.viewmodel
 
-import domain.models.LoginRequestDomain
-import domain.usecase.usecase.auth.LoginUseCase
+
+import androidx.compose.runtime.mutableStateOf
+import dev.icerock.moko.resources.StringResource
+import dev.icerock.moko.resources.compose.stringResource
+import domain.usecase.usecase.auth.VerifyUseCase
 import io.github.aakira.napier.LogLevel
 import io.github.aakira.napier.Napier
+import irancell.nwg.wfm.MR
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import utils.AsyncStatus
 import utils.BaseViewModel
 import utils.ViewStates
 
-class LoginScreenVM(
-    private val loginUseCase: LoginUseCase
+class VerifyScreenVM(
+   private val verifyUseCase: VerifyUseCase
 ) : BaseViewModel() {
 
-    fun login(userName : String , password : String,onProcess : () -> Unit){
+    fun verify(otpCode : String,onProcess : () -> Unit){
 
 
         viewModelScope.launch {
 
-            loginUseCase(LoginRequestDomain(userName, password)).collect{
+            verifyUseCase(otpCode).collect{
                 when(it.status){
                     AsyncStatus.ERROR -> {
                         state.update { ViewStates.Error }
-
                         Napier.log(LogLevel.ASSERT, tag = "serviice", message = "ERROR")
 
                     }
@@ -34,7 +37,7 @@ class LoginScreenVM(
 
                     }
                     AsyncStatus.SUCCESS -> {
-                        state.update { ViewStates.Loading }
+                        state.update { ViewStates.Success }
 
                         Napier.log(LogLevel.ASSERT, tag = "serviice", message = "SUCCESS${it.data}")
                         onProcess()

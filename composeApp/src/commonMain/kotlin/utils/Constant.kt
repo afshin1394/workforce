@@ -2,6 +2,8 @@ package utils
 
 const val Availability = "Availability"
 const val AvailabilityObjectId = "AvailabilityObjectId"
+const val SessionId = "SessionId"
+const val PhoneNumber = "PhoneNumber"
 const val Token = "Token"
 const val Language = "Language"
 const val SelectLanguage = "SelectLanguage"

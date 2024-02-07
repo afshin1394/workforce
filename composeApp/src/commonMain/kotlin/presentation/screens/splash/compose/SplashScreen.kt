@@ -31,6 +31,7 @@ import dev.icerock.moko.permissions.compose.PermissionsControllerFactory
 import dev.icerock.moko.permissions.compose.rememberPermissionsControllerFactory
 import dev.icerock.moko.resources.compose.painterResource
 import dev.icerock.moko.resources.compose.stringResource
+import io.github.aakira.napier.LogLevel
 
 import io.github.aakira.napier.Napier
 import irancell.nwg.wfm.LifecycleEvent
@@ -46,6 +47,7 @@ import presentation.screens.splash.events.PermissionEvent
 import presentation.screens.splash.viewmodel.SplashScreenVM
 import presentation.theme.body_small
 import utils.SelectLanguage
+import utils.Token
 
 class SplashScreen() : Screen, KoinComponent {
 
@@ -74,8 +76,11 @@ class SplashScreen() : Screen, KoinComponent {
                 LifecycleEvent.ON_RESUME -> {
                     viewModel.checkPermissions {
                         scope.launch {
-                            delay(2000)
-                            navigator.push(loginScreen)
+                            delay(1000)
+                            if (getSharedPref().getString(Token).toString().length > 6)
+                                navigator.push(mainScreen)
+                            else
+                                navigator.push(loginScreen)
                         }
 
                     }
@@ -123,6 +128,7 @@ class SplashScreen() : Screen, KoinComponent {
                 }
 
                 if ( getSharedPref().getBool(SelectLanguage, false)){
+
                     navigator.push(mainScreen)
                     getSharedPref().put(SelectLanguage, false)
 
@@ -172,8 +178,12 @@ class SplashScreen() : Screen, KoinComponent {
                         }
                     }
                     if (permissionState == PermissionEvent.IsGranted) {
+
                         scope.launch {
-                            delay(2000)
+                            delay(1000)
+                            if (getSharedPref().getString(Token).toString().length > 6)
+                                navigator.push(mainScreen)
+                            else
                             navigator.push(loginScreen)
                         }
                     }

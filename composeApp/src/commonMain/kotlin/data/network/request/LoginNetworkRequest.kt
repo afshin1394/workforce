@@ -3,4 +3,4 @@ package data.network.request
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class LoginRequestNetwork(val username : String, val password : String)
+data class LoginNetworkRequest(val username : String, val password : String)

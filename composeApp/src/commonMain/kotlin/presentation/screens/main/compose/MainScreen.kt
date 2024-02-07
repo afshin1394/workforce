@@ -26,6 +26,7 @@ import io.github.aakira.napier.LogLevel
 import io.github.aakira.napier.Napier
 import irancell.nwg.wfm.Camera
 import irancell.nwg.wfm.MR
+import irancell.nwg.wfm.getSharedPref
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import presentation.components.CustomTopAppBar
@@ -39,8 +40,9 @@ import presentation.theme.surfaceDefault
 import presentation.theme.textInverse
 import presentation.theme.textInverseDisabled
 import presentation.theme.textPrimary
+import utils.Token
 
-class MainScreen (
+class MainScreen(
     private val title: String,
 
     ) : Screen {
@@ -49,8 +51,8 @@ class MainScreen (
     override fun Content() {
 
         val navigator = LocalNavigator.currentOrThrow
-        val viewModel : MainScreenVM = koinInject()
-        Napier.log(LogLevel.ASSERT,"MainScreenVM", message = viewModel.toString())
+        val viewModel: MainScreenVM = koinInject()
+        Napier.log(LogLevel.ASSERT, "MainScreenVM", message = viewModel.toString())
 //        val viewModel = remember { MainScreenVM() }
         val availability by viewModel.availability.collectAsState()
         val openCamera by viewModel.openCamera.collectAsState()
@@ -65,6 +67,7 @@ class MainScreen (
             rememberScreen(Menu.Settings)
         val aboutScreen = rememberScreen(Menu.About)
         val gpsTrackingReportScreen = rememberScreen(Menu.GpsTrackingReport)
+        val loginScreen = rememberScreen(com.irancell.nwg.wfm.presentation.nav.Screen.Auth.Login)
 
         val scope = rememberCoroutineScope()
         val scaffoldState = rememberBottomSheetScaffoldState();
@@ -81,7 +84,7 @@ class MainScreen (
         val bottomSheetTitle: String =
             when (events) {
                 MainEvent.ActionFilter -> {
-                   stringResource(MR.strings.filters)
+                    stringResource(MR.strings.filters)
                 }
 
                 MainEvent.Logout -> {
@@ -126,18 +129,23 @@ class MainScreen (
 
 
         BaseScreen(scaffoldState = scaffoldState, hasDrawer = true, topBar = {
-            CustomTopAppBar(availability, stringResource(MR.strings.ticket_list), onNavigationItemClick = {
-                scope.launch {
-                    if (scaffoldState.drawerState.isOpen)
-                        scaffoldState.drawerState.close()
-                    else
-                        scaffoldState.drawerState.open()
-                }
-            }, onAvailabilityClick = {
-                viewModel.events.value = MainEvent.AvailabilityStatus
-            }, onNotificationClick = {
-                navigator.push(notificationScreen)
-            })
+            CustomTopAppBar(
+                availability,
+                stringResource(MR.strings.ticket_list),
+                onNavigationItemClick = {
+                    scope.launch {
+                        if (scaffoldState.drawerState.isOpen)
+                            scaffoldState.drawerState.close()
+                        else
+                            scaffoldState.drawerState.open()
+                    }
+                },
+                onAvailabilityClick = {
+                    viewModel.events.value = MainEvent.AvailabilityStatus
+                },
+                onNotificationClick = {
+                    navigator.push(notificationScreen)
+                })
         }, drawerContent = {
             DrawerHeader() {
                 scope.launch {
@@ -227,11 +235,22 @@ class MainScreen (
                     MainEvent.Logout -> {
                         bottomSheetDoubleActionBottomBar(
                             BottomSheetDoubleActionModel(
-                                stringResource(MR.strings.cancel) ,
-                                surfaceDefault, textPrimary, stringResource(MR.strings.logout), surfaceBrandDefault,
+                                stringResource(MR.strings.cancel),
+                                surfaceDefault,
+                                textPrimary,
+                                stringResource(MR.strings.logout),
+                                surfaceBrandDefault,
                                 textInverse
                             )
-                        )
+                        , onFirstButtonClick = {
+
+
+                            }, onSecondButtonClick = {
+                                getSharedPref().put(Token,"")
+                                navigator.popAll()
+                                navigator.push(loginScreen)
+
+                            })
                         scope.launch {
                             scaffoldState.bottomSheetState.expand()
                         }
@@ -309,7 +328,7 @@ class MainScreen (
                     }
 
                     MainEvent.AvailabilityStatus -> {
-                        AvailabilityStatus(availability){
+                        AvailabilityStatus(availability) {
                             viewModel.changeAvailability()
                         }
                         scope.launch {
@@ -335,8 +354,10 @@ class MainScreen (
                             scaffoldState.bottomSheetState.expand()
                         }
                     }
+
                     MainEvent.SuspendTicket -> {
-                        val factory: PermissionsControllerFactory = rememberPermissionsControllerFactory()
+                        val factory: PermissionsControllerFactory =
+                            rememberPermissionsControllerFactory()
 
                         SuspendTicketContentComponent(
                             viewModel.suspendReason.value,
@@ -349,7 +370,7 @@ class MainScreen (
                             onCameraClick = {
                                 viewModel.openCamera(factory.createPermissionsController())
                             }
-                            )
+                        )
                         scope.launch {
                             scaffoldState.bottomSheetState.expand()
                         }
@@ -409,9 +430,9 @@ class MainScreen (
                 }
 
             }, content = {
-                if (openCamera){
+                if (openCamera) {
                     viewModel.selectedTask.value?.let {
-                        Camera.ImagePicker("/wfmImages/suspend/${it}"){
+                        Camera.ImagePicker("/wfmImages/suspend/${it}") {
 
                         }
                         viewModel.updateCameraStatus(false)

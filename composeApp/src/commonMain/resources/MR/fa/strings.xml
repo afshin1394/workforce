@@ -60,6 +60,8 @@
     <string name="general_information">اطلاعات کلی</string>
     <string name="resource_information">اطلاعات منبع</string>
     <string name="fault_information">اطلاعات خطا</string>
+    <string name="login_error">شما با اطلاعات وارد شده نمی توانید وارد شوید!</string>
+    <string name="verify_error">کد داده شده اشتباه است!</string>
 
 
 </resources>

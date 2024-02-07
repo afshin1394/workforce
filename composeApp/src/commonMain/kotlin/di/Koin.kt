@@ -8,6 +8,7 @@ import data.GeneralLocationRepositoryImpl
 import data.SuspendTaskRepositoryImpl
 import data.WorkRepositoryImpl
 import domain.usecase.usecase.auth.LoginUseCase
+import domain.usecase.usecase.auth.VerifyUseCase
 import domain.usecase.usecase.availability.ChangeServerAvailabilityUseCase
 import domain.usecase.usecase.availability.GetAvailabilityObjectIdUseCase
 import domain.usecase.usecase.availability.GetAvailabilityUseCase
@@ -42,6 +43,7 @@ import kotlinx.serialization.json.Json
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
 import presentation.screens.auth.viewmodel.LoginScreenVM
+import presentation.screens.auth.viewmodel.VerifyScreenVM
 import presentation.screens.main.viewmodel.AboutScreenVM
 import presentation.screens.main.viewmodel.GpsTrackingReportScreenVM
 import utils.Token
@@ -50,11 +52,11 @@ import utils.Token
 fun repositoryModule() = module {
     //Repositories
     single { WFMDatabase(DatabaseDriverFactory.createDriver()) }
-    single { GeneralLocationRepositoryImpl(get(), get()) }
-    single { AvailabilityRepositoryImpl(get()) }
-    single { SuspendTaskRepositoryImpl(get(), get()) }
-    single { AuthRepositoryImpl(get()) }
-    single { WorkRepositoryImpl(get()) }
+    single { GeneralLocationRepositoryImpl(get(), get(named("tokenized"))) }
+    single { AvailabilityRepositoryImpl(get(named("tokenized"))) }
+    single { SuspendTaskRepositoryImpl(get(), get(named("tokenized"))) }
+    single { AuthRepositoryImpl(get(named("noToken"))) }
+    single { WorkRepositoryImpl(get(named("tokenized"))) }
 }
 
 fun useCaseModule() = module {
@@ -68,10 +70,12 @@ fun useCaseModule() = module {
     single { GetAvailabilityObjectIdUseCase() }
     single { LoginUseCase(get()) }
     single { GetAllWorksUseCase(get()) }
+    single { LoginUseCase(get()) }
+    single { VerifyUseCase(get()) }
 }
 
 fun httpModule() = module {
-    single() {
+    single(named("tokenized")) {
         HttpClient {
 
             install(ContentNegotiation) {
@@ -84,15 +88,49 @@ fun httpModule() = module {
                 )
             }
 
-
             defaultRequest {
                 url("https://uat.ios.mtnirancell.ir/api/")
                 contentType(ContentType.Application.Json)
                 headers {
                     append(
                         "Authorization",
-                        "Token eyjt8aZoIgiedTSKYUNLrXd0apPrzQjB5LPqhYV_uv2ZRnkO-2JRU8rIu-BPdr4u0X5YAot8kJ0yqiBQYuzM1w"
+                        "Token ${getSharedPref().getString(Token)}"
                     )
+                    append("Content-Type", "application/json")
+                    append("accept", "application/json")
+                }
+            }
+
+            install(HttpTimeout) {
+                requestTimeoutMillis = 10000
+                connectTimeoutMillis = 5000
+                socketTimeoutMillis = 5000
+            }
+            addDefaultResponseValidation()
+            install(Logging) {
+                logger = Logger.DEFAULT
+                level = LogLevel.ALL
+            }
+        }
+    }
+    single(named("noToken")) {
+        HttpClient {
+
+            install(ContentNegotiation) {
+                json(
+                    Json {
+                        ignoreUnknownKeys = true
+                        prettyPrint = true
+                        isLenient = true
+                    }
+                )
+            }
+
+            defaultRequest {
+                url("https://uat.ios.mtnirancell.ir/api/")
+                contentType(ContentType.Application.Json)
+                headers {
+
                     append("Content-Type", "application/json")
                     append("accept", "application/json")
                 }
@@ -142,8 +180,9 @@ fun httpModule() = module {
 //}
 fun viewModelModule() = module {
     viewModelDefinition { AboutScreenVM() }
-    viewModelDefinition { MainScreenVM(get(), get(), get(), get()) }
+    viewModelDefinition { MainScreenVM(get(), get(),get(),get()) }
     viewModelDefinition { SettingScreenVM() }
     viewModelDefinition { GpsTrackingReportScreenVM(get()) }
     viewModelDefinition { LoginScreenVM(get()) }
+    viewModelDefinition { VerifyScreenVM(get()) }
 }

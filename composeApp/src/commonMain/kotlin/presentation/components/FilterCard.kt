@@ -29,35 +29,28 @@ import presentation.theme.textBrand
 import presentation.theme.textSecondary
 
 
+
 @Composable
-fun FilterCard(
-    modifier: Modifier = Modifier,
-    stateFilter: StateFilter,
-    isActive: Boolean = false,
-    onClick: (stateFilter: StateFilter) -> Unit = {}
-) {
+fun FilterCard(item:StateFilter,isSelected:Boolean,onItemSelected:()->Unit){
 
-
-    var isActiveState by remember {
-        mutableStateOf(stateFilter.isActive)
-    }
-
-    Card(modifier = modifier
+    Card(modifier = Modifier
+                    .fillMaxWidth()
+                   .padding(spacing1X)
         .clickable {
-            isActiveState = !isActiveState
-            onClick(stateFilter)
+
+            onItemSelected()
         }
 
         .background(
-            color = if (isActiveState) surfaceSelected else surfaceDefault,
+            color = if (isSelected) surfaceSelected else surfaceDefault,
             shape = RoundedCornerShape(radius2XLarge)
         ),
 
-        border = if (isActiveState) BorderStroke(1.dp, strokeBrand) else null) {
+        border = if (isSelected) BorderStroke(1.dp, strokeBrand) else null) {
         Text(
 
-            text = stateFilter.title,
-            color = if (isActiveState) textBrand else textSecondary,
+            text = item.title,
+            color = if (isSelected) textBrand else textSecondary,
             style = body_large,
 
             modifier = Modifier
@@ -75,34 +68,25 @@ fun FilterRow(
         StateFilter(1, "Pending", false),
         StateFilter(2, "Doing", false),
         StateFilter(3, "Done", false),
-        StateFilter(3, "Suspended", false),
-        StateFilter(3, "Completed", false)
+        StateFilter(4, "Suspended", false),
+        StateFilter(5, "Completed", false),
+        StateFilter(6, "All", false)
 
 
     ), updateFilter: (stateFilter: StateFilter) -> Unit = {}
 ) {
-    val itemsState by remember {
-         mutableStateOf(items)
-    }
 
 
+
+    var select by remember { mutableStateOf(-1) }
     LazyRow(modifier = modifier) {
-        items(itemsState) { item ->
-            FilterCard(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(spacing1X), isActive = item.isActive,
-                stateFilter = item
-            ) { stateFilter ->
-                    itemsState.map() {  if (it.id != stateFilter.id) it.isActive = false }
+        items(items) { item ->
 
+            FilterCard(item=item,isSelected = select==item.id, onItemSelected = {
+                select=item.id
+                updateFilter(item)
+            })
 
-
-//                  itemsState.map{
-//                      if (it.id !=stateFilter.id)
-//                          it.isActive = false
-//                  }
-            }
 
         }
     }

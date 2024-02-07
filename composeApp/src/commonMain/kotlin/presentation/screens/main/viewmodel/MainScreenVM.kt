@@ -25,6 +25,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.serialization.json.Json
+import data.network.response.ObjectID
 import utils.AsyncResult
 
 import utils.AsyncStatus
@@ -93,14 +95,10 @@ class MainScreenVM(
                     }
 
                     is AsyncResult.Success -> {
-                        Napier.log(
-                            LogLevel.ASSERT,
-                            "datasuccess",
-                            message = "changeAvailability: " + it.data
-                        )
+
                         _availability.update { !it }
                         storeAvailabilityUseCase(
-                            _availability.value
+                            Pair(_availability.value,it.data.toString())
                         ).collect {
                             when (it.status) {
                                 AsyncStatus.ERROR -> {
@@ -147,6 +145,7 @@ class MainScreenVM(
             "CR",
             "Tehran, Amanieh, Zarin stre...",
             "0h 43m",
+            "Done"
         ),
         Task(
             1237,
@@ -156,7 +155,8 @@ class MainScreenVM(
             "Level 3",
             "TT",
             "Tehran, Nelson mandela, Zarin stre...",
-            "2h 43m"
+            "2h 43m",
+            "Pending"
         ),
         Task(
             1238,
@@ -166,7 +166,8 @@ class MainScreenVM(
             "Level 2",
             "TT",
             "Tehran, Zafar, Zarin stre...",
-            "4h 43m"
+            "4h 43m",
+            "Done"
         ), Task(
             1239,
 
@@ -175,7 +176,8 @@ class MainScreenVM(
             "Level 2",
             "CR",
             "Tehran, Takhti, Zarin stre...",
-            "1h 43m"
+            "1h 43m",
+            "Suspended"
         ), Task(
             1339,
 
@@ -184,7 +186,9 @@ class MainScreenVM(
             "Level 1",
             "PT",
             "Tehran, Takhti, Zarin stre...",
-            "1h 43m"
+            "1h 43m",
+            "Completed"
+
         ), Task(
             1439,
 
@@ -193,7 +197,8 @@ class MainScreenVM(
             "Level 1",
             "TT",
             "Tehran, Mirdamad, Zarin stre...",
-            "4h 43m"
+            "4h 43m",
+            "Doing"
         ), Task(
             1429,
 
@@ -202,7 +207,9 @@ class MainScreenVM(
             "Level 1",
             "CR",
             "Tehran, Ghoba, Zarin stre...",
-            "2h 44m"
+            "2h 44m",
+            "Pending"
+
         )
     )
 

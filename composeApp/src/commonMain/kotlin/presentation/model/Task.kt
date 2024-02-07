@@ -10,7 +10,9 @@ import kotlin.reflect.KProperty
     val type: String ="TT",
     val address: String = "Tehran, Amanieh, Zarin stre...",
     val remainingTime: String ="0h 47m",
-    ) {
+    val state: String="Done"
+
+ ) {
 
 
 

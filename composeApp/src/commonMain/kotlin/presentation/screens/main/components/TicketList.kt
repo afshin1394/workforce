@@ -33,6 +33,9 @@ fun TicketListScreen(
     var searchTextState by remember {
         mutableStateOf(searchText)
     }
+    var selectState by remember {
+        mutableStateOf("")
+    }
 
 
     Column(
@@ -57,6 +60,12 @@ fun TicketListScreen(
                 .padding(horizontal = spacing2X)
         ) {
 
+            selectState = if (it.title=="All"){
+                ""
+            }else{
+                it.title
+            }
+
         }
         LazyColumn(
             verticalArrangement = Arrangement.Center,
@@ -65,14 +74,19 @@ fun TicketListScreen(
                 .background(color = backgroundBackground3)
                 .padding(horizontal = spacing2X)
         ) {
+           val filteredList =  tasks.filter {
 
-            itemsIndexed(items = tasks.filter {
-                it.title.lowercase().contains(searchTextState.lowercase()) ||
+
+                        it.title.lowercase().contains(searchTextState.lowercase()) ||
                         it.faultLevel.lowercase().contains(searchTextState.lowercase()) ||
                         it.step.lowercase().contains(searchTextState.lowercase()) ||
                         it.address.lowercase().contains(searchTextState.lowercase()) ||
-                        it.type.lowercase().contains(searchTextState.lowercase())
-            }) { index: Int, item: Task ->
+                        it.type.lowercase().contains(searchTextState.lowercase()
+                        )
+            }.filter {  it.state.lowercase().contains(selectState.lowercase()) }
+
+
+            itemsIndexed(items = filteredList) { index: Int, item: Task ->
                 ticketCard(modifier = Modifier.wrapContentHeight(),
                     task = item,
                     onActionClick = {

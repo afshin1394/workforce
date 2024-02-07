@@ -60,6 +60,8 @@
     <string name="general_information">General Information</string>
     <string name="resource_information">Resource Information</string>
     <string name="fault_information">Resource Information</string>
+    <string name="login_error">You cannot login with the following credentials!</string>
+    <string name="verify_error">کد داده شده اشتباه است!</string>
 
 
 
