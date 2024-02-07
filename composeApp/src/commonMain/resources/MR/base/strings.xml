@@ -63,6 +63,16 @@
     <string name="login_error">You cannot login with the following credentials!</string>
     <string name="verify_error">کد داده شده اشتباه است!</string>
 
+    <string name="pending">Pending</string>
+    <string name="doing">Doing</string>
+    <string name="done">Done</string>
+    <string name="suspended">Suspended</string>
+    <string name="completed">Completed</string>
+    <string name="all">All</string>
+    <string name="unread">Unread</string>
+    <string name="read">Read</string>
+    <string name="notification">Notification</string>
+
 
 
 </resources>

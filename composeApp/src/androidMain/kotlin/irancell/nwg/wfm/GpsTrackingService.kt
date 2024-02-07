@@ -58,7 +58,6 @@ actual class GpsTrackingService : Service() , KoinComponent {
             if (isRunning)
                 (provideAppContext() as Context).stopService(gpsTrackingIntent)
 
-            stopKoin()
         }
 
 

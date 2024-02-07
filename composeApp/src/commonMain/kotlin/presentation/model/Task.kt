@@ -9,11 +9,10 @@ import kotlin.reflect.KProperty
     val faultLevel: String ="Level: 1",
     val type: String ="TT",
     val address: String = "Tehran, Amanieh, Zarin stre...",
-    val remainingTime: String ="0h 47m",
-    val state: String="Done"
-
- ) {
-
+    val remainingTime: String = "0h 47m",
+    val state: String="Done",
+    val idState: Int=1,
+) {
 
 
     fun hasremaining(){

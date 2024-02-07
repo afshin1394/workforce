@@ -12,12 +12,14 @@ import androidx.compose.ui.unit.dp
 
 import com.irancell.nwg.wfm.presentation.model.NotificationModel
 import com.irancell.nwg.wfm.presentation.theme.*
+import presentation.theme.backgroundBackground3
 
 import presentation.theme.body_large
 import presentation.theme.body_small
 import presentation.theme.body_small_strong
 import presentation.theme.errorIcon
 import presentation.theme.surfaceDefault
+import presentation.theme.surfaceHovered
 
 
 @Composable
@@ -31,7 +33,7 @@ fun NotificationItem(modifier: Modifier = Modifier,notificationItemModel: Notifi
            androidx.compose.material3.Card(modifier = Modifier
                .width(3.dp)
                .height(18.dp),
-               colors = CardDefaults.cardColors(errorIcon),
+               colors = CardDefaults.cardColors(if (notificationItemModel.statusId==2)  errorIcon else backgroundBackground3),
                shape = RoundedCornerShape(spacing05X),
                content = {
 

@@ -98,7 +98,7 @@ class MainScreenVM(
 
                         _availability.update { !it }
                         storeAvailabilityUseCase(
-                            Pair(_availability.value,it.data.toString())
+                            Pair(_availability.value, it.data.toString())
                         ).collect {
                             when (it.status) {
                                 AsyncStatus.ERROR -> {
@@ -113,7 +113,11 @@ class MainScreenVM(
 
                                 AsyncStatus.SUCCESS -> {
                                     state.update { ViewStates.Success }
-                                    Napier.log(LogLevel.ASSERT,"storeAvailabilityUseCase", message = _availability.value.toString())
+                                    Napier.log(
+                                        LogLevel.ASSERT,
+                                        "storeAvailabilityUseCase",
+                                        message = _availability.value.toString()
+                                    )
                                     if (_availability.value) {
                                         GpsTrackingService.startLocationTracker()
                                     } else {
@@ -145,7 +149,8 @@ class MainScreenVM(
             "CR",
             "Tehran, Amanieh, Zarin stre...",
             "0h 43m",
-            "Done"
+            "Done",
+            3
         ),
         Task(
             1237,
@@ -156,7 +161,8 @@ class MainScreenVM(
             "TT",
             "Tehran, Nelson mandela, Zarin stre...",
             "2h 43m",
-            "Pending"
+            "Pending",
+            1
         ),
         Task(
             1238,
@@ -167,7 +173,8 @@ class MainScreenVM(
             "TT",
             "Tehran, Zafar, Zarin stre...",
             "4h 43m",
-            "Done"
+            "Done",
+            3
         ), Task(
             1239,
 
@@ -177,7 +184,8 @@ class MainScreenVM(
             "CR",
             "Tehran, Takhti, Zarin stre...",
             "1h 43m",
-            "Suspended"
+            "Suspended",
+            4
         ), Task(
             1339,
 
@@ -187,7 +195,8 @@ class MainScreenVM(
             "PT",
             "Tehran, Takhti, Zarin stre...",
             "1h 43m",
-            "Completed"
+            "Completed",
+            5
 
         ), Task(
             1439,
@@ -198,7 +207,9 @@ class MainScreenVM(
             "TT",
             "Tehran, Mirdamad, Zarin stre...",
             "4h 43m",
-            "Doing"
+            "Doing",
+            2
+
         ), Task(
             1429,
 
@@ -208,7 +219,9 @@ class MainScreenVM(
             "CR",
             "Tehran, Ghoba, Zarin stre...",
             "2h 44m",
-            "Pending"
+            "Pending",
+            1
+
 
         )
     )
@@ -354,7 +367,6 @@ class MainScreenVM(
                     tasksList.clear()
                     tasksList.addAll(ix)
                     filteredList.addAll(ix)
-
                 }
             }
 

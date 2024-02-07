@@ -20,6 +20,9 @@ import androidx.compose.ui.unit.dp
 import com.irancell.nwg.wfm.presentation.model.StateFilter
 
 import com.irancell.nwg.wfm.presentation.theme.*
+import dev.icerock.moko.resources.compose.stringResource
+
+import irancell.nwg.wfm.MR
 
 import presentation.theme.body_large
 import presentation.theme.strokeBrand
@@ -64,13 +67,14 @@ fun FilterCard(item:StateFilter,isSelected:Boolean,onItemSelected:()->Unit){
 @Composable
 fun FilterRow(
     modifier: Modifier = Modifier,
+    itemIdSelected:Int,
     items: List<StateFilter> = arrayListOf(
-        StateFilter(1, "Pending", false),
-        StateFilter(2, "Doing", false),
-        StateFilter(3, "Done", false),
-        StateFilter(4, "Suspended", false),
-        StateFilter(5, "Completed", false),
-        StateFilter(6, "All", false)
+        StateFilter(1, stringResource(MR.strings.pending) , false),
+        StateFilter(2, stringResource(MR.strings.doing), false),
+        StateFilter(3, stringResource(MR.strings.done), false),
+        StateFilter(4, stringResource(MR.strings.suspended), false),
+        StateFilter(5, stringResource(MR.strings.completed), false),
+        StateFilter(6, stringResource(MR.strings.all), false)
 
 
     ), updateFilter: (stateFilter: StateFilter) -> Unit = {}
@@ -78,7 +82,7 @@ fun FilterRow(
 
 
 
-    var select by remember { mutableStateOf(-1) }
+    var select by remember { mutableStateOf(itemIdSelected) }
     LazyRow(modifier = modifier) {
         items(items) { item ->
 

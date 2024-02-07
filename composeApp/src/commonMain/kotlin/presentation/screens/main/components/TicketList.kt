@@ -57,13 +57,14 @@ fun TicketListScreen(
         FilterRow(
             Modifier
                 .fillMaxWidth()
-                .padding(horizontal = spacing2X)
+                .padding(horizontal = spacing2X),
+            itemIdSelected = 6
         ) {
 
-            selectState = if (it.title=="All"){
-                ""
+            selectState = if (it.id.toString()=="6"){
+               ""
             }else{
-                it.title
+                it.id.toString()
             }
 
         }
@@ -83,7 +84,7 @@ fun TicketListScreen(
                         it.address.lowercase().contains(searchTextState.lowercase()) ||
                         it.type.lowercase().contains(searchTextState.lowercase()
                         )
-            }.filter {  it.state.lowercase().contains(selectState.lowercase()) }
+            }.filter {  it.idState.toString().lowercase().contains(selectState.toString().lowercase()) }
 
 
             itemsIndexed(items = filteredList) { index: Int, item: Task ->

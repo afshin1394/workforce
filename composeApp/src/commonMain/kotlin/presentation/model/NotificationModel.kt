@@ -8,7 +8,9 @@ data class NotificationModel(
     val body : String = "has assigned a ticket to you",
     val date : String = "11/25/2025",
     val time : String = "12:34:28",
-    val isNew : Boolean = true
+    val isNew : Boolean = true,
+    val status : String = "Read",
+    val statusId : Int = 1,
 )
 
 sealed class Notification(val type: Int){
