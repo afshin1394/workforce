@@ -71,6 +71,7 @@
     <string name="unread">خوانده نشده</string>
     <string name="read">خوانده شده</string>
     <string name="notification">پیام</string>
+    <string name="search">جستجو</string>
 
 
 </resources>
