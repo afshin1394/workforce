@@ -1,5 +1,3 @@
-
-
 package presentation.screens.main.components.formViewer
 
 import androidx.compose.foundation.background
@@ -10,7 +8,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -49,16 +46,18 @@ import com.irancell.nwg.wfm.presentation.theme.spacing15X
 import dev.icerock.moko.resources.compose.painterResource
 import dev.icerock.moko.resources.compose.stringResource
 import irancell.nwg.wfm.MR
+import presentation.theme.strokeDefaultDark
 import presentation.theme.strokeDefaultLight
 import presentation.theme.surfaceBrandDefault
+import presentation.theme.textSecondary
 
 @Composable
 fun DropDownSingleChoice(
-    titleDropDown:String,
+    titleDropDown: String,
     itemList: List<String>,
     selectItem: String,
     searchText: String,
-    onItemSelected: (selectItem:String) -> Unit,
+    onItemSelected: (selectItem: String) -> Unit,
     onSearchButtonClicked: (query: String) -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
@@ -77,33 +76,45 @@ fun DropDownSingleChoice(
                 .border(
                     width = 1.dp,
                     color = strokeDefaultLight,
-                    shape = RoundedCornerShape(8.dp)
+                    shape = RoundedCornerShape(15.dp)
                 )
                 .onGloballyPositioned { coordinates ->
                     textFieldSize = coordinates.size.toSize()
                 },
             readOnly = true,
+            shape = RoundedCornerShape(8.dp),
+            textStyle = TextStyle(color = textSecondary),
             colors = TextFieldDefaults.colors(
                 focusedIndicatorColor = Color.Transparent,
                 disabledIndicatorColor = Color.Transparent,
                 unfocusedIndicatorColor = Color.Transparent,
                 focusedContainerColor = Color.White,
                 unfocusedContainerColor = Color.White,
-                disabledContainerColor = Color.White),
+                disabledContainerColor = Color.White
+            ),
 
             trailingIcon = {
                 Row(
                     modifier = Modifier,
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Icon(  painter = painterResource(MR.images.close), "deleteAllSelected", Modifier.width(28.dp).height(28.dp).padding(end = 8.dp).clickable {selectedText="" })
-                    Icon(icon, "contentDescription", Modifier.padding(end = 8.dp).clickable { expanded = !expanded })
+                    Icon(
+                        painter = painterResource(MR.images.close),
+                        "deleteAllSelected",
+                        Modifier.width(28.dp).height(28.dp).padding(end = 8.dp)
+                            .clickable { selectedText = "" },
+                        tint = textSecondary)
+                    Icon(
+                        icon,
+                        "contentDescription",
+                        Modifier.padding(end = 8.dp).clickable { expanded = !expanded },
+                        tint = textSecondary)
 
                 }
             })
         Spacer(modifier = Modifier.padding(top = spacing05X))
 
-        MaterialTheme(shapes = MaterialTheme.shapes.copy(extraSmall  = RoundedCornerShape(10.dp))) {
+        MaterialTheme(shapes = MaterialTheme.shapes.copy(extraSmall = RoundedCornerShape(10.dp))) {
             DropdownMenu(
                 expanded = expanded,
                 onDismissRequest = { expanded = false },
@@ -128,7 +139,7 @@ fun DropDownSingleChoice(
                     TextField(
                         value = searchedText,
                         onValueChange = {
-                            searchedText=it
+                            searchedText = it
                             onSearchButtonClicked(it)
                         },
                         modifier = Modifier
@@ -143,7 +154,7 @@ fun DropDownSingleChoice(
                                 shape = RoundedCornerShape(8.dp)
                             ),
                         textStyle = TextStyle(
-                            color = Color.Black,
+                            color = textSecondary,
                             fontSize = 14.sp
                         ),
                         singleLine = true,
@@ -152,7 +163,8 @@ fun DropDownSingleChoice(
                                 painter = painterResource(MR.images.search),
                                 contentDescription = "", Modifier.clickable {
                                     onSearchButtonClicked(selectedText)
-                                }
+                                },
+                                tint = textSecondary
                             )
                         },
                         placeholder = {
@@ -162,12 +174,9 @@ fun DropDownSingleChoice(
                                     lineHeight = 16.sp,
 
                                     fontWeight = FontWeight(400),
-                                    color = Color(0xFF93A5BE),
+                                    color = strokeDefaultDark,
                                     textAlign = TextAlign.Right,
                                 ), modifier = Modifier
-                                    .clickable {
-
-                                    }
                                     .padding(top = 0.dp, bottom = 0.dp)
                                     .height(45.dp)
                                     .padding(top = 0.dp, bottom = 0.dp)
@@ -192,8 +201,8 @@ fun DropDownSingleChoice(
                 itemList.forEach { label ->
                     val isSelected = selectedText == label
 
-                    DropdownMenuItemCustom(onClick = {}, text = {},
-                        modifier = Modifier.defaultMinSize(minHeight = ((-200).dp)),
+                    DropdownMenuItemCustom(
+                        modifier = Modifier,
                         interactionSource = remember { MutableInteractionSource() }
                             .also {
                                 Row(
@@ -214,7 +223,10 @@ fun DropDownSingleChoice(
                                         }
                                     )
 
-                                    Text(text = label)
+                                    Text(
+                                        text = label,
+                                        style = TextStyle(color = textSecondary)
+                                    )
                                 }
 
                             }

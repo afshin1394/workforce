@@ -1,6 +1,5 @@
 package presentation.screens.main.components.formViewer
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -9,7 +8,6 @@ import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.sizeIn
-import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MenuDefaults
 import androidx.compose.material3.MenuItemColors
@@ -25,8 +23,7 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun DropdownMenuItemCustom(
-    text: @Composable () -> Unit,
-    onClick: () -> Unit,
+
     modifier: Modifier = Modifier,
     leadingIcon: @Composable (() -> Unit)? = null,
     trailingIcon: @Composable (() -> Unit)? = null,
@@ -36,8 +33,7 @@ fun DropdownMenuItemCustom(
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
 ) {
     DropdownMenuItemContent(
-        text = text,
-        onClick = onClick,
+
         modifier = modifier,
         leadingIcon = leadingIcon,
         trailingIcon = trailingIcon,
@@ -50,8 +46,7 @@ fun DropdownMenuItemCustom(
 
 @Composable
 internal fun DropdownMenuItemContent(
-    text: @Composable () -> Unit,
-    onClick: () -> Unit,
+
     modifier: Modifier,
     leadingIcon: @Composable (() -> Unit)?,
     trailingIcon: @Composable (() -> Unit)?,
@@ -62,12 +57,7 @@ internal fun DropdownMenuItemContent(
 ) {
     Row(
         modifier = modifier
-            .clickable(
-                enabled = enabled,
-                onClick = onClick,
-                interactionSource = interactionSource,
-                indication = rememberRipple(true)
-            )
+
             .fillMaxWidth()
             // Preferred min and max width used during the intrinsic measurement.
             .sizeIn(
@@ -107,7 +97,7 @@ internal fun DropdownMenuItemContent(
                             }
                         )
                 ) {
-                    text()
+
                 }
             }
             if (trailingIcon != null) {
