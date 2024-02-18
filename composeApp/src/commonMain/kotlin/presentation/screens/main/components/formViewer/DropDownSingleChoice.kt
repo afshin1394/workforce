@@ -68,7 +68,7 @@ fun DropDownSingleChoice(
     else Icons.Filled.KeyboardArrowDown
 
 
-    Column(Modifier.padding(20.dp)) {
+    Column(Modifier.padding(16.dp)) {
         TextField(value = selectedText.ifEmpty { titleDropDown },
             onValueChange = { selectedText = it },
             modifier = Modifier

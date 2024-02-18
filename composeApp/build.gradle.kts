@@ -37,6 +37,7 @@ kotlin {
             isStatic = true
             export("dev.icerock.moko:resources:0.22.3")
             export("dev.icerock.moko:graphics:0.9.0")
+            export("com.mohamedrejeb.calf:calf-ui:0.3.1")
         }
     }
 
@@ -75,6 +76,7 @@ kotlin {
                 implementation(libs.ktor.client.logging)
                 implementation(libs.ktor.client.content.negotiation)
                 implementation(libs.kotlin.serialization)
+                api(libs.calf.ui)
 //                implementation(libs.composeImageLoader)
 
 

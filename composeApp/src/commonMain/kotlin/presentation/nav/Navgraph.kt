@@ -9,6 +9,7 @@ import com.irancell.nwg.wfm.presentation.screens.main.compose.NotificationScreen
 import presentation.screens.splash.compose.SplashScreen
 import com.irancell.nwg.wfm.presentation.screens.ticket_process.compose.TicketInfoScreen
 import com.irancell.nwg.wfm.ui.compose.AboutScreen
+import presentation.screens.main.compose.FormViewerScreen
 import presentation.screens.main.compose.GpsTrackingReportScreen
 import presentation.screens.main.compose.SettingsScreen
 
@@ -324,6 +325,9 @@ import presentation.screens.main.compose.SettingsScreen
             }
             register<Screen.Main.Menu.Settings> {
                 SettingsScreen( "Settings")
+            }
+            register<Screen.Main.Menu.FormViewer> {
+                FormViewerScreen( "FormViewer")
             }
             register<Screen.Main.Menu.GpsTrackingReport> {
                 GpsTrackingReportScreen( "GpsTrackingReport")

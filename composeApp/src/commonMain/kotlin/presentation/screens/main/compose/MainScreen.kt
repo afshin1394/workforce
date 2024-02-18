@@ -63,8 +63,8 @@ class MainScreen(
             rememberScreen(Notification)
         val accountScreen =
             rememberScreen(AccountInfo)
-        val settingsScreen =
-            rememberScreen(Menu.Settings)
+        val settingsScreen = rememberScreen(Menu.Settings)
+        val formViewerScreen = rememberScreen(Menu.FormViewer)
         val aboutScreen = rememberScreen(Menu.About)
         val gpsTrackingReportScreen = rememberScreen(Menu.GpsTrackingReport)
         val loginScreen = rememberScreen(com.irancell.nwg.wfm.presentation.nav.Screen.Auth.Login)
@@ -188,6 +188,9 @@ class MainScreen(
 
                         Menu.GpsTrackingReport -> {
                             navigator.push(gpsTrackingReportScreen)
+                        }
+                        Menu.FormViewer->{
+                            navigator.push(formViewerScreen)
                         }
                     }
                     scaffoldState.drawerState.close()

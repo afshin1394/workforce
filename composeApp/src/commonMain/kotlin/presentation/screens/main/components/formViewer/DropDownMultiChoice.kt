@@ -49,6 +49,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.material3.rememberModalBottomSheetState
 import com.irancell.nwg.wfm.presentation.theme.spacing15X
 import dev.icerock.moko.resources.compose.stringResource
 import presentation.theme.strokeDefaultDark
@@ -75,7 +76,7 @@ fun DropDownMultiChoice(
     else Icons.Filled.KeyboardArrowDown
 
 
-    Column(Modifier.padding(20.dp)) {
+    Column(Modifier.padding(16.dp)) {
 
 
         Row(
@@ -96,7 +97,7 @@ fun DropDownMultiChoice(
 
                 Row(
                     modifier = Modifier
-                        .width(250.dp)
+                        .weight(1f)
                         .height(56.dp)
                         .background(color = White, shape = RoundedCornerShape(15.dp))
                         .wrapContentHeight(), verticalAlignment = Alignment.CenterVertically
@@ -137,7 +138,7 @@ fun DropDownMultiChoice(
                     onValueChange = { },
                     readOnly = true,
                     modifier = Modifier
-                        .width(250.dp),
+                        .weight(1f),
                     colors = TextFieldDefaults.colors(
                         focusedIndicatorColor = Color.Transparent,
                         disabledIndicatorColor = Color.Transparent,
@@ -160,7 +161,7 @@ fun DropDownMultiChoice(
                 painter = painterResource(MR.images.close),
                 tint = textSecondary,
                 contentDescription = "deleteAllSelected",
-                modifier = Modifier.width(28.dp).height(28.dp).padding(end = 8.dp).clickable {
+                modifier = Modifier.width(26.dp).height(26.dp).padding(end = 4.dp).clickable {
 
                     selectedItems.clear()
 
@@ -170,7 +171,7 @@ fun DropDownMultiChoice(
             Icon(
                 icon,
                 contentDescription = "contentDescription",
-                modifier = Modifier.width(32.dp).height(32.dp).padding(end = 8.dp)
+                modifier = Modifier.width(34.dp).height(34.dp).padding(end = 10.dp)
                     .clickable { expanded = !expanded },
                 tint = textSecondary,
             )
@@ -291,7 +292,7 @@ fun DropDownMultiChoice(
                                     if (isSelected) {
                                         selectedItems.remove(label)
                                     } else {
-                                        expanded = false
+                                        //expanded = false
                                         selectedItems.add(label)
                                         onItemSelected(selectedItems)
                                     }

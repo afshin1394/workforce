@@ -36,6 +36,7 @@ sealed class Screen(val mainRoute: String) : ScreenProvider{
             data object Settings : Menu("settings")
             data object About : Menu("about")
             data object Logout : Menu("logout")
+            data object FormViewer : Menu("Form Viewer")
             data object MyTickets : Menu("My Tickets")
             data object GpsTrackingReport : Menu("GpsTrackingReport")
         }
