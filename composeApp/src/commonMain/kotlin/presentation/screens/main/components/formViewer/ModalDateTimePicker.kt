@@ -43,10 +43,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.unit.toSize
 import com.mohamedrejeb.calf.ui.datepicker.AdaptiveDatePicker
 import com.mohamedrejeb.calf.ui.datepicker.rememberAdaptiveDatePickerState
 import dev.icerock.moko.resources.compose.painterResource
@@ -63,7 +65,7 @@ import utils.getLocalDateTimeFromLong
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ModalDatePicker(title:String,titleDatePiker:String, onDateSelected: (selectItem: String) -> Unit) {
+fun ModalDateTimePicker (title:String,titleDatePiker:String, onDateSelected: (selectItem: String) -> Unit) {
 
     val scope = rememberCoroutineScope()
     var isBottomSheetVisible by rememberSaveable { mutableStateOf(false) }
@@ -111,11 +113,12 @@ fun ModalDatePicker(title:String,titleDatePiker:String, onDateSelected: (selectI
                                 sheetState.expand()
                             }
                         },
-                    tint = textSecondary)
+                    tint = textSecondary
+                )
 
             })
 
-        BottomSheet(
+        BottomSheet2(
             isBottomSheetVisible = isBottomSheetVisible,
             sheetState = sheetState,
             onDateSelected = {
@@ -138,7 +141,7 @@ fun ModalDatePicker(title:String,titleDatePiker:String, onDateSelected: (selectI
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun BottomSheet(
+fun BottomSheet2(
     isBottomSheetVisible: Boolean,
     sheetState: SheetState,
     titleDatePiker:String,
@@ -179,7 +182,7 @@ fun BottomSheet(
 
             dragHandle = null,
             scrimColor = Color.Black.copy(alpha = .5f),
-           windowInsets = WindowInsets(0, 0, 0, 0)
+            windowInsets = WindowInsets(0, 0, 0, 0)
         ) {
 
             Column(
@@ -238,6 +241,58 @@ fun BottomSheet(
 
                         )
 
+                    Row(Modifier.height(IntrinsicSize.Min)) {
+
+
+                        TextField(value = "",
+                            onValueChange = {  },
+                            modifier = Modifier
+                                .fillMaxWidth().padding(bottom = 18.dp)
+                                .weight(2f)
+                                .border(
+                                    width = 1.dp,
+                                    color = strokeDefaultLight,
+                                    shape = RoundedCornerShape(15.dp)
+                                )
+                             ,
+                            readOnly = true,
+                            shape = RoundedCornerShape(8.dp),
+                            textStyle = TextStyle(color = textSecondary),
+                            colors = TextFieldDefaults.colors(
+                                focusedIndicatorColor = Color.Transparent,
+                                disabledIndicatorColor = Color.Transparent,
+                                unfocusedIndicatorColor = Color.Transparent,
+                                focusedContainerColor = Color.White,
+                                unfocusedContainerColor = Color.White,
+                                disabledContainerColor = Color.White
+                            ),
+
+                            leadingIcon = {
+
+                                    Icon(
+                                        painter = painterResource(MR.images.clock),
+                                        "deleteAllSelected",
+                                        Modifier.width(28.dp).height(28.dp).padding(end = 8.dp)
+                                            .clickable { },
+                                        tint = textSecondary)
+
+                            })
+
+
+                        Text(
+                            text = "Now",
+                            style = TextStyle(color = Color.Blue),
+                            modifier = Modifier.weight(1f).padding(top=18.dp),
+                            textAlign = TextAlign.Center
+                        )
+
+
+
+
+                    }
+
+
+
 
 
                     Row(Modifier.height(IntrinsicSize.Min).padding(bottom = 16.dp)) {
@@ -246,7 +301,7 @@ fun BottomSheet(
                             onClick = {
                                 onDismiss()
                                 isCancelclick=true
-                                      },
+                            },
                             modifier = Modifier
                                 .fillMaxHeight()
                                 .padding(end = 12.dp)

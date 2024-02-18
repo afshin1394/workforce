@@ -8,6 +8,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -53,6 +54,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.SheetState
+import androidx.compose.material3.TimePickerDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -79,21 +81,31 @@ import com.irancell.nwg.wfm.presentation.components.MenuItemsTopBar
 import com.irancell.nwg.wfm.presentation.theme.radius
 import com.mohamedrejeb.calf.ui.datepicker.AdaptiveDatePicker
 import com.mohamedrejeb.calf.ui.datepicker.rememberAdaptiveDatePickerState
+import com.mohamedrejeb.calf.ui.sheet.AdaptiveBottomSheet
+import com.mohamedrejeb.calf.ui.sheet.rememberAdaptiveSheetState
+import com.mohamedrejeb.calf.ui.timepicker.AdaptiveTimePicker
+import com.mohamedrejeb.calf.ui.timepicker.rememberAdaptiveTimePickerState
 import dev.icerock.moko.resources.compose.painterResource
 import io.github.aakira.napier.Napier
 import irancell.nwg.wfm.DatePickerFormat.format
 import irancell.nwg.wfm.MR
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
+import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.LocalTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import presentation.screens.main.components.formViewer.DropDownMultiChoice
 import presentation.screens.main.components.formViewer.DropDownSingleChoice
 import presentation.screens.main.components.formViewer.ModalDatePicker
+import presentation.screens.main.components.formViewer.ModalDateTimePicker
+import presentation.screens.main.components.formViewer.ModalTimePicker
 
 import presentation.theme.h4
 import presentation.theme.strokeDefaultLight
+import presentation.theme.subtleDefault
 import presentation.theme.surfaceBrandDefault
+import presentation.theme.textInverse
 import presentation.theme.textSecondary
 
 import utils.getLocalDateTimeFromLong
@@ -101,39 +113,20 @@ import utils.getLocalDateTimeFromLong
 
 @OptIn(ExperimentalMaterialApi::class)
 class FormViewerScreen(private val title: String) : Screen {
-    @OptIn(ExperimentalMaterial3Api::class)
+
     @Composable
     override fun Content() {
         val scaffoldState: BottomSheetScaffoldState = rememberBottomSheetScaffoldState()
 
-        val sheetState = rememberBottomSheetScaffoldState(
-            bottomSheetState = BottomSheetState(BottomSheetValue.Collapsed)
-        )
         val navigator = LocalNavigator.currentOrThrow
-
-
-        var bottomSheetIsOpen by rememberSaveable { mutableStateOf(false) }
-
-
         val scope = rememberCoroutineScope()
-        val datePickerState = rememberAdaptiveDatePickerState()
-        var data by remember { mutableStateOf("") }
-
-
-        LaunchedEffect(datePickerState.selectedDateMillis) {
-            datePickerState.selectedDateMillis?.let {
-                val currentDate =
-                    Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
-                data = getLocalDateTimeFromLong(it).format("yyyy-mm-dd")
-
-            }
-
-        }
-
 
         val items = listOf("Item 1", "Item 2", "Item 3", "Item 4")
         var selectedItem by remember { mutableStateOf("") }
-        datePickerState.selectedDateMillis
+
+
+
+
 
 
 
@@ -161,7 +154,7 @@ class FormViewerScreen(private val title: String) : Screen {
 
                 Column(
                     modifier = Modifier.fillMaxHeight().verticalScroll(rememberScrollState()),
-                   // verticalArrangement = Arrangement.Center,
+                    // verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
 
@@ -193,7 +186,16 @@ class FormViewerScreen(private val title: String) : Screen {
                         })
 
 
-                    ModalDatePicker("selected date", "Date-time-picker", onDateSelected = {
+                    ModalDatePicker("selected date", "Date-time picker", onDateSelected = {
+
+                    })
+
+
+                    ModalTimePicker("selected date", "Time picker", onTimeSelected = {
+
+                    })
+
+                    ModalDateTimePicker("selected date", "Date-time picker", onDateSelected = {
 
                     })
 
@@ -204,7 +206,9 @@ class FormViewerScreen(private val title: String) : Screen {
 
         )
 
+
     }
+
 }
 
 

@@ -61,7 +61,7 @@
     <string name="resource_information">اطلاعات منبع</string>
     <string name="fault_information">اطلاعات خطا</string>
     <string name="login_error">شما با اطلاعات وارد شده نمی توانید وارد شوید!</string>
-    <string name="verify_error">کد داده شده اشتباه است!</string>
+    <string name="verify_error">کد وارد شده اشتباه است!</string>
     <string name="pending">درانتظار</string>
     <string name="doing">در حال انجام</string>
     <string name="done">انجام شده</string>
@@ -72,6 +72,7 @@
     <string name="read">خوانده شده</string>
     <string name="notification">پیام</string>
     <string name="search">جستجو</string>
+    <string name="accept">تایید</string>
 
 
 </resources>

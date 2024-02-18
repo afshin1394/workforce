@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -30,6 +31,7 @@ import androidx.compose.material3.SheetState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.TimePickerDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -47,23 +49,30 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.irancell.nwg.wfm.presentation.theme.spacing05X
+import com.irancell.nwg.wfm.presentation.theme.spacing15X
 import com.mohamedrejeb.calf.ui.datepicker.AdaptiveDatePicker
 import com.mohamedrejeb.calf.ui.datepicker.rememberAdaptiveDatePickerState
+import com.mohamedrejeb.calf.ui.sheet.rememberAdaptiveSheetState
+import com.mohamedrejeb.calf.ui.timepicker.AdaptiveTimePicker
+import com.mohamedrejeb.calf.ui.timepicker.rememberAdaptiveTimePickerState
 import dev.icerock.moko.resources.compose.painterResource
-import dev.icerock.moko.resources.compose.stringResource
 import irancell.nwg.wfm.DatePickerFormat.format
 import irancell.nwg.wfm.MR
 import kotlinx.coroutines.launch
+import kotlinx.datetime.Clock
+import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.LocalTime
 import presentation.theme.h4
 import presentation.theme.strokeDefaultLight
+import presentation.theme.subtleDefault
 import presentation.theme.surfaceBrandDefault
 import presentation.theme.textSecondary
 import utils.getLocalDateTimeFromLong
 
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ModalDatePicker(title:String,titleDatePiker:String, onDateSelected: (selectItem: String) -> Unit) {
+fun ModalTimePicker(title:String,titleDatePiker:String, onTimeSelected: (selectItem: String) -> Unit) {
 
     val scope = rememberCoroutineScope()
     var isBottomSheetVisible by rememberSaveable { mutableStateOf(false) }
@@ -102,7 +111,7 @@ fun ModalDatePicker(title:String,titleDatePiker:String, onDateSelected: (selectI
             trailingIcon = {
 
                 Icon(
-                    painter = painterResource(MR.images.calendar),
+                    painter = painterResource(MR.images.clock),
                     "deleteAllSelected",
                     Modifier.width(28.dp).height(28.dp).padding(end = 8.dp)
                         .clickable {
@@ -111,16 +120,17 @@ fun ModalDatePicker(title:String,titleDatePiker:String, onDateSelected: (selectI
                                 sheetState.expand()
                             }
                         },
-                    tint = textSecondary)
+                    tint = textSecondary
+                )
 
             })
 
-        BottomSheet(
+        BottomSheetTime(
             isBottomSheetVisible = isBottomSheetVisible,
             sheetState = sheetState,
-            onDateSelected = {
+            onTimeSelected = {
                 title = it
-                onDateSelected(it)
+                onTimeSelected(it)
 
             },
             titleDatePiker = titleDatePiker,
@@ -138,35 +148,35 @@ fun ModalDatePicker(title:String,titleDatePiker:String, onDateSelected: (selectI
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun BottomSheet(
+fun BottomSheetTime(
     isBottomSheetVisible: Boolean,
     sheetState: SheetState,
     titleDatePiker:String,
-    onDateSelected: (selectItem: String) -> Unit,
+    onTimeSelected: (selectItem: String) -> Unit,
     onDismiss: () -> Unit
 ) {
 
 
-    var isCancelclick by rememberSaveable { mutableStateOf(false) }
+
 
     val datePickerState = rememberAdaptiveDatePickerState()
-    var data by remember { mutableStateOf("") }
 
-    LaunchedEffect(datePickerState.selectedDateMillis) {
-        datePickerState.selectedDateMillis?.let {
+    var startTime by remember { mutableStateOf("") }
 
-
-            if (isCancelclick){
-
-                isCancelclick=false
-            }else{
-                data = getLocalDateTimeFromLong(it).format("yyyy-mm-dd")
-                onDateSelected(data)
-            }
-
-        }
-
+    val startTimePickerState = rememberAdaptiveTimePickerState()
+    val time = getTimeProgress(
+        datePickerState.selectedDateMillis,
+        startTimePickerState.hour,
+        startTimePickerState.minute
+    )
+    LaunchedEffect(
+        time
+    ) {
+        startTime = time
+        onTimeSelected(time)
     }
+
+
 
     if (isBottomSheetVisible) {
 
@@ -179,7 +189,7 @@ fun BottomSheet(
 
             dragHandle = null,
             scrimColor = Color.Black.copy(alpha = .5f),
-           windowInsets = WindowInsets(0, 0, 0, 0)
+             windowInsets = WindowInsets(0, 0, 0, 0)
         ) {
 
             Column(
@@ -188,7 +198,7 @@ fun BottomSheet(
                     .clip(shape = RoundedCornerShape(topEnd = 4.dp, topStart = 4.dp))
                     .background(color = MaterialTheme.colorScheme.background)
                     .fillMaxWidth()
-                    .padding(20.dp)
+                    .padding(24.dp)
             ) {
 
                 Column(
@@ -210,8 +220,6 @@ fun BottomSheet(
                             modifier = Modifier
                                 .clickable {
                                     onDismiss()
-                                    isCancelclick=true
-
                                 }
                         )
 
@@ -223,73 +231,26 @@ fun BottomSheet(
                         )
 
                     }
-
-                    AdaptiveDatePicker(
-                        state = datePickerState,
-                        colors = DatePickerDefaults.colors(
-                            weekdayContentColor = textSecondary,
-                            containerColor = Color.White,
-                            dayContentColor = textSecondary,
-                            selectedDayContainerColor = surfaceBrandDefault,
-                            selectedYearContainerColor = surfaceBrandDefault
-
-                        ),
-
+                    Spacer(modifier = Modifier.padding(top = spacing15X))
+                    AdaptiveTimePicker(
+                        state = startTimePickerState,
+                        colors = TimePickerDefaults.colors(
+                            clockDialColor= subtleDefault,
+                            containerColor=Color.White,
+                            periodSelectorSelectedContainerColor= subtleDefault,
+                            timeSelectorSelectedContainerColor= subtleDefault,
+                            timeSelectorUnselectedContainerColor=strokeDefaultLight,
+                            timeSelectorSelectedContentColor= textSecondary,
+                            selectorColor=surfaceBrandDefault
 
                         )
 
 
+                    )
 
-                    Row(Modifier.height(IntrinsicSize.Min).padding(bottom = 16.dp)) {
 
-                        OutlinedButton(
-                            onClick = {
-                                onDismiss()
-                                isCancelclick=true
-                                      },
-                            modifier = Modifier
-                                .fillMaxHeight()
-                                .padding(end = 12.dp)
-                                .height(48.dp)
-                                .weight(1f),
-                            border = BorderStroke(1.dp, strokeDefaultLight),
-                            shape = RoundedCornerShape(20),
-                            colors = ButtonDefaults.buttonColors(
-                                contentColor = Color.Black,
-                                containerColor = Color.White
-                            )
-                        ) {
 
-                            Text(
-                                stringResource(MR.strings.cancel),
-                                color = textSecondary,
-                                style = MaterialTheme.typography.bodyMedium,
-                                fontSize = 14.sp
-                            )
 
-                        }
-
-                        Button(
-                            onClick = {
-                                onDismiss()
-
-                            },
-                            shape = RoundedCornerShape(20),
-                            colors = ButtonDefaults.buttonColors(containerColor = surfaceBrandDefault),
-                            modifier = Modifier
-                                .fillMaxHeight()
-                                .padding(start = 12.dp)
-                                .height(48.dp)
-                                .weight(1f)
-                        ) {
-                            Text(
-                                text = "Accept",
-                                color = Color.White,
-                                style = MaterialTheme.typography.bodyMedium,
-                                fontSize = 14.sp
-                            )
-                        }
-                    }
 
                 }
 
@@ -298,6 +259,21 @@ fun BottomSheet(
         }
 
 
+
     }
 
+
+
+
 }
+
+fun getTimeProgress(date: Long?, hour: Int, minute: Int): String {
+    val localDate = getLocalDateTimeFromLong(date ?: Clock.System.now().toEpochMilliseconds())
+    val localTime = LocalTime(hour, minute)
+    val localObj = LocalDateTime(localDate.date, localTime)
+    return localObj.format("hh:mm a")
+
+}
+
+
+
