@@ -43,20 +43,17 @@ class VerifyScreen(private val phoneNumber : String = "") : Screen {
         val navigator = LocalNavigator.currentOrThrow
         val viewModel: VerifyScreenVM = koinInject()
         val state by viewModel.state.collectAsState()
+        val remainTime by viewModel.remainTime.collectAsState()
+        val finishTimer by viewModel.finishTimer.collectAsState()
 
         val mainScreen =
             rememberScreen(com.irancell.nwg.wfm.presentation.nav.Screen.Main.Menu.MyTickets)
 
-        var isTimeout by remember {
-            mutableStateOf(false)
-        }
         val scope = rememberCoroutineScope()
         val phoneNumberState by remember {
             mutableStateOf(phoneNumber)
         }
-        val time by remember {
-            mutableStateOf("")
-        }
+
         var otpCode by remember {
             mutableStateOf("")
         }
@@ -87,7 +84,7 @@ class VerifyScreen(private val phoneNumber : String = "") : Screen {
                     val success =  stringResource(MR.strings.success)
                     val error = stringResource(MR.strings.verify_error)
                     when (state) {
-                        ViewStates.Error -> {
+                       is ViewStates.Error -> {
                             scope.launch {
                                 snackbarHostState.showSnackbar(
                                     message = "$error",
@@ -147,8 +144,8 @@ class VerifyScreen(private val phoneNumber : String = "") : Screen {
                     })
 
                     Spacer(modifier = Modifier.height(spacing3X))
-                    if (!isTimeout)
-                        Text(text = "${stringResource(MR.strings.waiting_time_receive)} $time")
+                    if (!finishTimer)
+                        Text(text = "${stringResource(MR.strings.waiting_time_receive)} : $remainTime")
                     else
                         AuthAlertText(
                             alertTextItem = AuthAlertTextItem(
@@ -158,7 +155,9 @@ class VerifyScreen(private val phoneNumber : String = "") : Screen {
                             )
                         ) {
                             //onClick
-                            isTimeout = false
+                            viewModel.resendCode(onError = {
+                                navigator.pop()
+                            })
                         }
 
 

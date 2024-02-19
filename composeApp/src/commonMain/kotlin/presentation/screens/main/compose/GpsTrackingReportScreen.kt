@@ -4,7 +4,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.Divider
@@ -24,22 +23,17 @@ import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import com.irancell.nwg.wfm.presentation.components.FilterRow
 import com.irancell.nwg.wfm.presentation.components.MenuItemsTopBar
-import com.irancell.nwg.wfm.presentation.model.StateFilter
 import com.irancell.nwg.wfm.presentation.theme.spacing15X
 
 import org.koin.compose.koinInject
 import presentation.screens.main.components.LocationItem
 import presentation.screens.main.viewmodel.GpsTrackingReportScreenVM
-import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import com.irancell.nwg.wfm.presentation.components.ItemComponent
-import com.irancell.nwg.wfm.presentation.theme.spacing2X
-import dev.icerock.moko.resources.ImageResource
 import dev.icerock.moko.resources.compose.stringResource
 import io.github.aakira.napier.LogLevel
 import io.github.aakira.napier.Napier
@@ -48,7 +42,6 @@ import irancell.nwg.wfm.db.GeneralLocationEntity
 import irancell.nwg.wfm.mapView
 import kotlinx.coroutines.launch
 import presentation.model.ItemComponentModel
-import presentation.screens.main.events.SettingEvent
 import presentation.theme.mediumDivider
 import presentation.theme.subtleDefault
 import presentation.theme.surfaceDefault
@@ -115,7 +108,7 @@ class GpsTrackingReportScreen(
                     showMap = false
                 }
                 when (state) {
-                    ViewStates.Error -> {
+                   is ViewStates.Error -> {
                         scope.launch {
                             snackbarHostState.showSnackbar(
                                 message = "${MR.strings.error_gps_tracker}!",

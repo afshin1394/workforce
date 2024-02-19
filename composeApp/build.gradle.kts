@@ -75,6 +75,7 @@ kotlin {
                 implementation(libs.ktor.client.logging)
                 implementation(libs.ktor.client.content.negotiation)
                 implementation(libs.kotlin.serialization)
+                implementation(libs.connectivity.status)
 //                implementation(libs.composeImageLoader)
 
 

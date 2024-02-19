@@ -1,5 +1,6 @@
 package domain.repository
 
+import data.network.request.live_location.LiveLocationRequest
 import irancell.nwg.wfm.db.GeneralLocationEntity
 
 interface IGeneralLocationRepository {
@@ -9,5 +10,5 @@ interface IGeneralLocationRepository {
    suspend fun updateUnSend()
    suspend fun deleteSent()
 
-   suspend fun sendLocationToServer(generalLocation: GeneralLocationEntity)
+   suspend fun sendLocationToServer(liveLocationRequest: List<LiveLocationRequest>)
 }

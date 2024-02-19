@@ -26,13 +26,14 @@ import com.irancell.nwg.wfm.presentation.components.FilterRow
 import com.irancell.nwg.wfm.presentation.components.MenuItemsTopBar
 import com.irancell.nwg.wfm.presentation.model.Notification
 import com.irancell.nwg.wfm.presentation.model.NotificationModel
-import com.irancell.nwg.wfm.presentation.model.StateFilter
+import presentation.model.StateFilter
 import presentation.screens.main.components.NotificationItem
 import presentation.theme.mediumDivider
 import com.irancell.nwg.wfm.presentation.theme.spacing15X
 import com.irancell.nwg.wfm.presentation.theme.spacing2X
 import dev.icerock.moko.resources.compose.stringResource
 import irancell.nwg.wfm.MR
+import utils.NotificationState
 
 @OptIn(ExperimentalMaterialApi::class)
 class NotificationScreen (
@@ -58,7 +59,7 @@ class NotificationScreen (
                 "Suspended ticket",
                 body = "has suspended ticket",
                 status = "Read",
-                statusId = 3
+                statusId = NotificationState.Read.id
             ),
             NotificationModel(
                 ticketId = 3,
@@ -66,7 +67,7 @@ class NotificationScreen (
                 "Canceled ticket",
                 body = "has canceled the ticket",
                 status = "Unread",
-                statusId = 2
+                statusId = NotificationState.Read.id
             ),
             NotificationModel(
                 ticketId = 4,
@@ -74,20 +75,20 @@ class NotificationScreen (
                 "New update",
                 body = "A new version of the app is released",
                 status = "Read",
-                statusId = 3
+                statusId = NotificationState.Read.id
             ),
             NotificationModel(ticketId = 5,
                     ticketType = Notification.NewUpdate.type,
                 "New update",
                 body = "A new version of the app is released",
                 status = "Read",
-                statusId = 3),
+                statusId = NotificationState.Read.id),
             NotificationModel(ticketId = 6,
                 ticketType = Notification.NewUpdate.type,
                 "New update",
                 body = "A new version of the app is released",
                 status = "Unread",
-                statusId = 2),
+                statusId = NotificationState.UnRead.id),
             NotificationModel(ticketId = 7,
                 ticketType = Notification.NewUpdate.type,
                 "New update",
@@ -99,31 +100,31 @@ class NotificationScreen (
                 "New update",
                 body = "A new version of the app is released",
                 status = "Read",
-                statusId = 3),
+                statusId = NotificationState.UnRead.id),
             NotificationModel(ticketId = 9,
                 ticketType = Notification.NewUpdate.type,
                 "New update",
                 body = "A new version of the app is released",
                 status = "Unread",
-                statusId = 2),
+                statusId = NotificationState.UnRead.id),
             NotificationModel(ticketId = 10,
                 ticketType = Notification.NewUpdate.type,
                 "New update",
                 body = "A new version of the app is released",
                 status = "Read",
-                statusId = 3),
+                statusId = NotificationState.UnRead.id),
             NotificationModel(ticketId = 11,
                 ticketType = Notification.NewUpdate.type,
                 "New update",
                 body = "A new version of the app is released",
                 status = "Read",
-                statusId = 3),
+                statusId = NotificationState.UnRead.id),
             NotificationModel(ticketId = 12,
                 ticketType = Notification.NewUpdate.type,
                 "New update",
                 body = "A new version of the app is released",
                 status = "Read",
-                statusId = 3),
+                statusId = NotificationState.Read.id),
 
 
             )
@@ -149,17 +150,17 @@ class NotificationScreen (
 
                 FilterRow(
                     items = arrayListOf(
-                        StateFilter(1, stringResource(MR.strings.all), false),
-                        StateFilter(2, stringResource(MR.strings.unread), false),
-                        StateFilter(3, stringResource(MR.strings.read), false)
+                        StateFilter(NotificationState.All.id, stringResource(MR.strings.all), false),
+                        StateFilter(NotificationState.UnRead.id, stringResource(MR.strings.unread), false),
+                        StateFilter(NotificationState.Read.id, stringResource(MR.strings.read), false)
 
                     ), modifier =
                     Modifier
                         .fillMaxWidth()
                         .padding(horizontal = spacing2X)
-                    , itemIdSelected = 1
+                    , itemTitleSelected = stringResource(MR.strings.all)
                 ) {
-                    if (it.id.toString()=="1"){
+                    if (it.id == NotificationState.All.id){
                         selectState=""
                     }else{
                         selectState=it.id.toString()

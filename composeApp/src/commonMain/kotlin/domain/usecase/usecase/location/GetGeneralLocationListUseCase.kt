@@ -6,9 +6,9 @@ import domain.usecase.BaseUseCase
 import irancell.nwg.wfm.db.GeneralLocationEntity
 
 class GetGeneralLocationListUseCase(
-   private val generalLocationRepository: GeneralLocationRepositoryImpl
+   private val iGeneralLocationRepository: IGeneralLocationRepository
 ): BaseUseCase<List<GeneralLocationEntity>, Unit>() {
     override suspend fun run(params: Unit): List<GeneralLocationEntity> {
-        return generalLocationRepository.selectUnSend()
+        return iGeneralLocationRepository.selectUnSend()
     }
 }

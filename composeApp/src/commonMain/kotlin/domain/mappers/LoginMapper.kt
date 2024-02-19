@@ -1,7 +1,7 @@
 package domain.mappers
 
-import data.network.request.LoginNetworkRequest
-import data.network.response.LoginNetworkResponse
+import data.network.request.auth.LoginNetworkRequest
+import data.network.response.auth.LoginNetworkResponse
 import domain.models.LoginRequestDomain
 import domain.models.LoginResponseDomain
 
@@ -16,7 +16,7 @@ fun LoginRequestDomain.toLoginNetworkRequest() : LoginNetworkRequest {
     )
 }
 
-fun LoginResponseDomain.toLoginNetworkResponse() : LoginNetworkResponse{
+fun LoginResponseDomain.toLoginNetworkResponse() : LoginNetworkResponse {
     return LoginNetworkResponse(
         session_id, phone_number
     )

@@ -31,6 +31,7 @@ import dev.icerock.moko.permissions.compose.PermissionsControllerFactory
 import dev.icerock.moko.permissions.compose.rememberPermissionsControllerFactory
 import dev.icerock.moko.resources.compose.painterResource
 import dev.icerock.moko.resources.compose.stringResource
+import domain.repository.IGeneralLocationRepository
 import io.github.aakira.napier.LogLevel
 
 import io.github.aakira.napier.Napier
@@ -54,7 +55,7 @@ class SplashScreen() : Screen, KoinComponent {
 
     @Composable
     override fun Content() {
-        val dataSyncRepository: GeneralLocationRepositoryImpl by inject()
+        val dataSyncRepository: IGeneralLocationRepository by inject()
 
 
         Napier.e("dataSyncRepository" + dataSyncRepository)

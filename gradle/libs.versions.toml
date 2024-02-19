@@ -33,6 +33,9 @@ google-map = "4.3.1"
 kotlin1920-RC2 = "1.9.20-RC2"
 composeImageLoader = "1.7.1"
 kotlinx-serialization = "1.6.2"
+connectivity_status= "1.2.0"
+orbital = "0.3.4"
+
 
 
 [libraries]
@@ -102,6 +105,9 @@ composeImageLoader = { module = "io.github.qdsfdhvh:image-loader", version.ref =
 
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinx-serialization" }
 
+connectivity_status = { module = "com.github.ln-12:multiplatform-connectivity-status", version.ref = "connectivity_status" }
+orbital_animation = { module = "com.github.skydoves:orbital", version.ref = "orbital" }
+
 [plugins]
 moko-multiplatform = {id="dev.icerock.mobile.multiplatform-resources", version.ref = "moko-version"}
 androidApplication = { id = "com.android.application", version.ref = "agp" }
@@ -111,6 +117,7 @@ kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref =
 sqlDelight = { id = "app.cash.sqldelight", version.ref = "sqlDelight" }
 kotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin1920-RC2" }
 kotlinx-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+
 
 
 [bundles]

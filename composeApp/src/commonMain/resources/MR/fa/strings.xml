@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <resources>
+    <string name= "none"> </string>
     <string name="password">پسوورد</string>
     <string name="submit">تایید</string>
     <string name="why_canceled_ticket">آیا می خواهید کنسل کنید تیکت</string>
@@ -62,15 +63,22 @@
     <string name="fault_information">اطلاعات خطا</string>
     <string name="login_error">شما با اطلاعات وارد شده نمی توانید وارد شوید!</string>
     <string name="verify_error">کد داده شده اشتباه است!</string>
-    <string name="pending">درانتظار</string>
-    <string name="doing">در حال انجام</string>
-    <string name="done">انجام شده</string>
-    <string name="suspended">متوقف شده</string>
+
+    <string name="draft">پیش نویس</string>
+    <string name="running">در حال اجرا</string>
     <string name="completed">تکمیل شده</string>
+    <string name="cancelled">کنسل شده</string>
+    <string name="fpa_roll_back">برگشت خورده</string>
+    <string name="suspended">معلق</string>
+    <string name="parked">پارک شده</string>
     <string name="all">همه</string>
     <string name="unread">خوانده نشده</string>
     <string name="read">خوانده شده</string>
     <string name="notification">پیام</string>
 
+    <string name="client_error">اطلاعات کاربری شما معتبر نیست, لطفا مجددا وارد شوید.</string>
+    <string name="server_error">سرور در دسترس نیست لطفا بعدا مجدد تلاش کنید.</string>
+    <string name="timeout_error">لطفا اینترنت خود را چک کنید ارتباط برقرار نشد.</string>
+    <string name="general_error">خطایی رخ داده است لطفا با پشتیبانی ارتباط حاصل فرمایید</string>
 
 </resources>

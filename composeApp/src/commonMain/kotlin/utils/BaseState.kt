@@ -23,7 +23,7 @@ sealed class AsyncResult <out T> (val status: AsyncStatus, val data: T?, val mes
         status = AsyncStatus.ERROR,
         data = null,
         message = exception,
-        resultStatus = null
+        resultStatus = _resultStatus
     )
 
     data class Loading<out R>(val _data: R?, val isLoading: Boolean): AsyncResult<R>(

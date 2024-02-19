@@ -1,4 +1,4 @@
-package com.irancell.nwg.wfm.presentation.screens.ticket_process.compose
+package presentation.screens.ticket_process.compose
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -22,14 +23,16 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import cafe.adriel.voyager.core.registry.rememberScreen
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 
 import com.irancell.nwg.wfm.presentation.components.MenuItemsTopBar
-import com.irancell.nwg.wfm.presentation.model.BottomSheetDoubleActionModel
+import presentation.screens.ticket_process.viewModel.TicketProcessVM
+import presentation.model.BottomSheetDoubleActionModel
 import presentation.screens.main.compose.BaseScreen
-import com.irancell.nwg.wfm.presentation.screens.ticket_process.components.bottomDoubleActionSheet
+import presentation.screens.ticket_process.components.bottomDoubleActionSheet
 import com.irancell.nwg.wfm.presentation.theme.spacing15X
 import com.irancell.nwg.wfm.presentation.theme.spacing2X
 import presentation.theme.surfaceBrandDefault
@@ -40,11 +43,12 @@ import dev.icerock.moko.resources.compose.painterResource
 import dev.icerock.moko.resources.compose.stringResource
 import irancell.nwg.wfm.MR
 import kotlinx.coroutines.launch
+import org.koin.compose.koinInject
 import presentation.theme.body_large_strong
 
-class TicketInfoScreen  (
+class TicketInfoScreen(
     private val title: String
-) : Screen{
+) : Screen {
     @OptIn(ExperimentalMaterialApi::class)
     @Composable
     override fun Content() {
@@ -52,49 +56,70 @@ class TicketInfoScreen  (
         val scope = rememberCoroutineScope()
         val scaffoldState = rememberBottomSheetScaffoldState()
         val navigator = LocalNavigator.currentOrThrow
-        BaseScreen(title = title,scaffoldState = scaffoldState, hasDrawer = false, bottomSheetHasHeader = false, topBar = {
-            MenuItemsTopBar(stringResource(MR.strings.ticket_info)) {
-                navigator.pop()
-//            navHostController.navigate(Screen.Main.route) {
-//                popUpTo(Screen.Main.route) {
-//
-//                }
-//            }
-            }
-        }, bottomSheetTitle = "", bottomSheetContent = {
-            bottomDoubleActionSheet(
-                BottomSheetDoubleActionModel(
-                    stringResource(MR.strings.more_options),
-                    surfaceDefault, textPrimary, stringResource(MR.strings.resume), surfaceBrandDefault,
-                    textInverse
-                )
-            )
+        val ticketProcessScreen =
+            rememberScreen(com.irancell.nwg.wfm.presentation.nav.Screen.TicketProcess.TicketProcessScreen)
 
-            scope.launch {
-                scaffoldState.bottomSheetState.expand()
-            }
 
-        }, content = {
-            Column(Modifier.verticalScroll(rememberScrollState())) {
-                TicketInfoItem(stringResource(MR.strings.general_information),false, content = {
-                    Box(modifier = Modifier.height(200.dp))
-                })
-                TicketInfoItem(stringResource(MR.strings.resource_information),false, content = {
-                    Box(modifier = Modifier.height(200.dp))
-                })
-                TicketInfoItem(stringResource(MR.strings.fault_information),false, content = {
-                    Box(modifier = Modifier.height(2000.dp))
-                })
-            }
-        })
+        val viewModel: TicketProcessVM = koinInject()
+
+            BaseScreen(
+            viewModel =viewModel,
+            title = title,
+            scaffoldState = scaffoldState,
+            hasDrawer = false,
+            bottomSheetHasHeader = false,
+            topBar = {
+                MenuItemsTopBar(stringResource(MR.strings.ticket_info)) {
+                    navigator.pop()
+                }
+            },
+            bottomSheetTitle = "",
+            bottomSheetContent = {
+                bottomDoubleActionSheet(
+                    BottomSheetDoubleActionModel(
+                        stringResource(MR.strings.more_options),
+                        surfaceDefault,
+                        textPrimary,
+                        stringResource(MR.strings.resume),
+                        surfaceBrandDefault,
+                        textInverse
+                    ), onFirstButtonClick = {
+
+                    }, onSecondButtonClick = {
+                        navigator.push(ticketProcessScreen)
+                    })
+
+                scope.launch {
+                    scaffoldState.bottomSheetState.expand()
+                }
+
+            },
+            content = {
+                Column(Modifier.fillMaxHeight().verticalScroll(rememberScrollState())) {
+                    TicketInfoItem(
+                        stringResource(MR.strings.general_information),
+                        false,
+                        content = {
+                            Box(modifier = Modifier.height(200.dp))
+                        })
+                    TicketInfoItem(
+                        stringResource(MR.strings.resource_information),
+                        false,
+                        content = {
+                            Box(modifier = Modifier.height(200.dp))
+                        })
+                    TicketInfoItem(stringResource(MR.strings.fault_information), false, content = {
+                        Box(modifier = Modifier.height(2000.dp))
+                    })
+                }
+            })
     }
 
 }
 
 
-
 @Composable
-private fun TicketInfoItem(text : String,expanded : Boolean,content :@Composable () -> Unit){
+private fun TicketInfoItem(text: String, expanded: Boolean, content: @Composable () -> Unit) {
     var expandedState by remember {
         mutableStateOf(expanded)
     }
@@ -102,12 +127,13 @@ private fun TicketInfoItem(text : String,expanded : Boolean,content :@Composable
     Column {
 
 
-        Row(modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = spacing15X, horizontal = spacing2X)
-            .clickable {
-                expandedState = !expandedState
-            },
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = spacing15X, horizontal = spacing2X)
+                .clickable {
+                    expandedState = !expandedState
+                },
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Text(text = text, style = body_large_strong, modifier = Modifier)
@@ -117,7 +143,7 @@ private fun TicketInfoItem(text : String,expanded : Boolean,content :@Composable
                     painter = painterResource(MR.images.chevron_up),
                     contentDescription = ""
                 )
-            }else{
+            } else {
                 Image(
                     painter = painterResource(MR.images.chevron_down),
                     contentDescription = ""
@@ -128,7 +154,7 @@ private fun TicketInfoItem(text : String,expanded : Boolean,content :@Composable
         AnimatedVisibility(
             visible = expandedState,
         ) {
-         content()
+            content()
         }
     }
 

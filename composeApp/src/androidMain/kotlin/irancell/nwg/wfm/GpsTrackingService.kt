@@ -15,6 +15,7 @@ import android.os.SystemClock
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import domain.models.LiveLocationDomain
 import domain.usecase.usecase.location.SendLocationToServerUseCase
 import domain.usecase.usecase.location.StoreLocationDataUseCase
 import io.github.aakira.napier.LogLevel
@@ -152,12 +153,12 @@ actual class GpsTrackingService : Service() , KoinComponent {
                 message = sendLocationToServerUseCase.toString()
             )
             sendLocationToServerUseCase(
-                GeneralLocationEntity(
-                    lat.toString(),
-                    lon.toString(),
+                listOf(LiveLocationDomain(
+                    lat,
+                    lon,
                     getCurrentDate(),
                     0
-                )
+                ))
             ).collect{
                 when(it.status){
                     AsyncStatus.ERROR -> {
@@ -174,7 +175,7 @@ actual class GpsTrackingService : Service() , KoinComponent {
                         Napier.log(
                             LogLevel.ASSERT,
                             tag = "serviice",
-                            message = "success"
+                            message = "success sendLocationToServerUseCase"
                         )
                     }
                 }

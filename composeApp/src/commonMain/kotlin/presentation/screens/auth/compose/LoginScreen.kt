@@ -4,11 +4,7 @@ package presentation.screens.auth.compose
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.material.Divider
 import androidx.compose.material.Text
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
@@ -18,7 +14,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.registry.rememberScreen
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
@@ -30,18 +25,18 @@ import dev.icerock.moko.resources.compose.stringResource
 import io.github.aakira.napier.LogLevel
 import io.github.aakira.napier.Napier
 import irancell.nwg.wfm.MR
-import kotlinx.coroutines.flow.update
+import irancell.nwg.wfm.MR.strings.email
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import presentation.screens.auth.components.AuthAlertText
 import presentation.screens.auth.components.AuthAlertTextItem
+import presentation.screens.auth.components.AuthTextField
+import presentation.screens.auth.components.AuthTextFieldItem
 import presentation.screens.auth.viewmodel.LoginScreenVM
-import presentation.screens.main.components.LocationItem
 import presentation.theme.backgroundBackground3
 
 import presentation.theme.body_large
 import presentation.theme.error_5
-import presentation.theme.mediumDivider
 import utils.ViewStates
 
 class LoginScreen : Screen {
@@ -53,6 +48,10 @@ class LoginScreen : Screen {
         val navigator = LocalNavigator.currentOrThrow
         val viewModel : LoginScreenVM = koinInject()
         val state by viewModel.state.collectAsState()
+        val email by viewModel.email.collectAsState()
+        val password by viewModel.password.collectAsState()
+
+
 
         val verifyScreen =
             rememberScreen(com.irancell.nwg.wfm.presentation.nav.Screen.Auth.Verify(phoneNumber = "0912087866563"))
@@ -67,13 +66,7 @@ class LoginScreen : Screen {
             mutableStateOf(false)
         }
 
-        var email by remember {
-            mutableStateOf("")
-        }
 
-        var password by remember {
-            mutableStateOf("")
-        }
         val scope = rememberCoroutineScope()
         val snackbarHostState = remember { SnackbarHostState() }
 
@@ -90,7 +83,7 @@ class LoginScreen : Screen {
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 when (state) {
-                    ViewStates.Error -> {
+                    is ViewStates.Error -> {
 
                         scope.launch {
                             snackbarHostState.showSnackbar(
@@ -133,12 +126,13 @@ class LoginScreen : Screen {
                 ) {
                     Text(text = stringResource(MR.strings.login_mtn_account), style = body_large)
                     Spacer(modifier = Modifier.height(spacing3X))
-                    AuthTextField(authTextFieldItem = AuthTextFieldItem(
+
+                    AuthTextField(defaultText = email,authTextFieldItem = AuthTextFieldItem(
                         stringResource(MR.strings.company_email), imageResource = MR.images.mail1, stringResource(MR.strings.company_email),
                         hasPassword = false,
                         passwordVisibility = true
                     ), updateText = {
-                        email = it.text
+                        viewModel.updateEmail(it.text)
                     })
 
                     if (noEmail) {
@@ -154,12 +148,12 @@ class LoginScreen : Screen {
                     }
                     Spacer(modifier = Modifier.height(spacing3X))
 
-                    AuthTextField(authTextFieldItem = AuthTextFieldItem(
+                    AuthTextField(defaultText = password,authTextFieldItem = AuthTextFieldItem(
                         stringResource(MR.strings.password), imageResource = MR.images.password, stringResource(MR.strings.password),
                         hasPassword = true,
                         passwordVisibility = false
                     ), updateText = {
-                        password = it.text
+                        viewModel.updatePassword(it.text)
                     })
                     if (noPassword) {
                         Spacer(modifier = Modifier.height(spacing1X))

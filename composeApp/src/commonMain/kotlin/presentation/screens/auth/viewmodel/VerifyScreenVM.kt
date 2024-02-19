@@ -1,13 +1,19 @@
 package presentation.screens.auth.viewmodel
 
 
+import androidx.compose.runtime.asIntState
 import androidx.compose.runtime.mutableStateOf
 import dev.icerock.moko.resources.StringResource
 import dev.icerock.moko.resources.compose.stringResource
+import domain.usecase.usecase.auth.ResendUseCase
 import domain.usecase.usecase.auth.VerifyUseCase
 import io.github.aakira.napier.LogLevel
 import io.github.aakira.napier.Napier
+import irancell.nwg.wfm.CountdownTimer
 import irancell.nwg.wfm.MR
+import irancell.nwg.wfm.TimerListener
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import utils.AsyncStatus
@@ -15,8 +21,28 @@ import utils.BaseViewModel
 import utils.ViewStates
 
 class VerifyScreenVM(
-   private val verifyUseCase: VerifyUseCase
+   private val verifyUseCase: VerifyUseCase,
+   private val resendUseCase: ResendUseCase
 ) : BaseViewModel() {
+    private val _remainTime = MutableStateFlow(30)
+    var remainTime = _remainTime.asStateFlow()
+
+    private val _finishTimer = MutableStateFlow(false)
+    var finishTimer =_finishTimer.asStateFlow()
+
+    private val countdownTimer = CountdownTimer(_remainTime.value, object : TimerListener {
+        override fun onTick(secondsLeft: Int) {
+            _remainTime.update { secondsLeft }
+            // Update UI with the remaining seconds
+        }
+
+        override fun onFinish() {
+            _finishTimer.update { true }
+        }
+    })
+    init {
+      countdownTimer.start()
+    }
 
     fun verify(otpCode : String,onProcess : () -> Unit){
 
@@ -26,25 +52,50 @@ class VerifyScreenVM(
             verifyUseCase(otpCode).collect{
                 when(it.status){
                     AsyncStatus.ERROR -> {
-                        state.update { ViewStates.Error }
                         Napier.log(LogLevel.ASSERT, tag = "serviice", message = "ERROR")
 
                     }
                     AsyncStatus.LOADING -> {
-                        state.update { ViewStates.Loading }
+                        updateState(ViewStates.Loading)
 
                         Napier.log(LogLevel.ASSERT, tag = "serviice", message = "LOADING")
 
                     }
                     AsyncStatus.SUCCESS -> {
-                        state.update { ViewStates.Success }
-
+                        updateState(ViewStates.Success)
+                        countdownTimer.stop()
                         Napier.log(LogLevel.ASSERT, tag = "serviice", message = "SUCCESS${it.data}")
                         onProcess()
                     }
                 }
             }
 
+        }
+    }
+
+    fun resendCode(onError: () -> Unit) {
+
+        viewModelScope.launch {
+            resendUseCase(Unit).collect {
+                when(it.status){
+                    AsyncStatus.ERROR -> {
+                        Napier.log(LogLevel.ASSERT, tag = "serviice", message = "ERROR")
+                        onError()
+
+                    }
+                    AsyncStatus.LOADING -> {
+
+                        Napier.log(LogLevel.ASSERT, tag = "serviice", message = "LOADING")
+
+                    }
+                    AsyncStatus.SUCCESS -> {
+                        _finishTimer.update { false }
+                        _remainTime.update { 30 }
+                        countdownTimer.start()
+                        Napier.log(LogLevel.ASSERT, tag = "serviice", message = "SUCCESS${it.data}")
+                    }
+                }
+            }
         }
     }
 

@@ -51,11 +51,7 @@ sealed class Screen(val mainRoute: String) : ScreenProvider{
 
     sealed class  TicketProcess(val route: String) : Screen("ticket_process"){
         data object TicketInfo : TicketProcess("ticket_info")
-        data object HSECheck1 : TicketProcess("hse_check_1")
-        data object Routing : TicketProcess("routing")
-        data object HSECheck2 : TicketProcess("hse_check_2")
-        data object JobReport : TicketProcess("job_report")
-        data object WaitingForApproval : TicketProcess("waiting_for_approval")
+        data object TicketProcessScreen : TicketProcess("ticket_process")
     }
 }
 

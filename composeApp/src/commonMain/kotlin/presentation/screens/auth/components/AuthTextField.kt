@@ -1,4 +1,4 @@
-package com.irancell.nwg.wfm.presentation.screens.auth.components
+package presentation.screens.auth.components
 
 
 import androidx.compose.foundation.Image
@@ -20,27 +20,24 @@ import presentation.theme.surfaceDefault
 import presentation.theme.textPlaceHolder
 import dev.icerock.moko.resources.ImageResource
 import dev.icerock.moko.resources.compose.painterResource
-import dev.icerock.moko.resources.compose.stringResource
+import io.github.aakira.napier.LogLevel
+import io.github.aakira.napier.Napier
 import irancell.nwg.wfm.MR
 import presentation.theme.body_large
 
 
-@Composable
-fun showAuthTextField() {
-    AuthTextField(
-        modifier = Modifier,
-        AuthTextFieldItem(stringResource(MR.strings.password), imageResource = null, stringResource(MR.strings.password), hasPassword = false, false)
-    ) {}
-}
+
 
 
 @Composable
 fun AuthTextField(
     modifier: Modifier = Modifier,
     authTextFieldItem: AuthTextFieldItem,
+    defaultText : String,
     updateText: (text: TextFieldValue) -> Unit
+
 ) {
-    var value by remember { mutableStateOf(TextFieldValue("")) }
+    var value by remember { mutableStateOf(TextFieldValue(defaultText)) }
 
     var visualTransformation by remember {
         mutableStateOf(if (authTextFieldItem.passwordVisibility) VisualTransformation.None else PasswordVisualTransformation())
@@ -88,6 +85,7 @@ fun AuthTextField(
                             .background(surfaceDefault)
                             .fillMaxWidth()
                     ) {
+                        Napier.log(LogLevel.ASSERT,"AuthTextField", message = value.text)
 
                         if (value.text.isEmpty()) {
                             Text(

@@ -17,7 +17,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 
 import androidx.compose.ui.unit.dp
-import com.irancell.nwg.wfm.presentation.model.StateFilter
+import presentation.model.StateFilter
 
 import com.irancell.nwg.wfm.presentation.theme.*
 import dev.icerock.moko.resources.compose.stringResource
@@ -30,11 +30,11 @@ import presentation.theme.surfaceDefault
 import presentation.theme.surfaceSelected
 import presentation.theme.textBrand
 import presentation.theme.textSecondary
-
+import utils.TaskState
 
 
 @Composable
-fun FilterCard(item:StateFilter,isSelected:Boolean,onItemSelected:()->Unit){
+fun FilterCard(item: StateFilter, isSelected:Boolean, onItemSelected:()->Unit){
 
     Card(modifier = Modifier
                     .fillMaxWidth()
@@ -51,7 +51,6 @@ fun FilterCard(item:StateFilter,isSelected:Boolean,onItemSelected:()->Unit){
 
         border = if (isSelected) BorderStroke(1.dp, strokeBrand) else null) {
         Text(
-
             text = item.title,
             color = if (isSelected) textBrand else textSecondary,
             style = body_large,
@@ -67,14 +66,14 @@ fun FilterCard(item:StateFilter,isSelected:Boolean,onItemSelected:()->Unit){
 @Composable
 fun FilterRow(
     modifier: Modifier = Modifier,
-    itemIdSelected:Int,
+    itemTitleSelected:String,
     items: List<StateFilter> = arrayListOf(
-        StateFilter(1, stringResource(MR.strings.pending) , false),
-        StateFilter(2, stringResource(MR.strings.doing), false),
-        StateFilter(3, stringResource(MR.strings.done), false),
-        StateFilter(4, stringResource(MR.strings.suspended), false),
-        StateFilter(5, stringResource(MR.strings.completed), false),
-        StateFilter(6, stringResource(MR.strings.all), false)
+        StateFilter(TaskState.Draft.id, stringResource(MR.strings.draft) , false),
+        StateFilter(TaskState.Running.id, stringResource(MR.strings.running), false),
+        StateFilter(TaskState.Cancelled.id, stringResource(MR.strings.cancel), false),
+        StateFilter(TaskState.Suspended.id, stringResource(MR.strings.suspended), false),
+        StateFilter(TaskState.Completed.id, stringResource(MR.strings.completed), false),
+        StateFilter(TaskState.All.id, stringResource(MR.strings.all), false)
 
 
     ), updateFilter: (stateFilter: StateFilter) -> Unit = {}
@@ -82,12 +81,12 @@ fun FilterRow(
 
 
 
-    var select by remember { mutableStateOf(itemIdSelected) }
+    var select by remember { mutableStateOf(itemTitleSelected) }
     LazyRow(modifier = modifier) {
         items(items) { item ->
 
-            FilterCard(item=item,isSelected = select==item.id, onItemSelected = {
-                select=item.id
+            FilterCard(item=item,isSelected = select==item.title, onItemSelected = {
+                select=item.title
                 updateFilter(item)
             })
 

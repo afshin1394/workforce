@@ -1,6 +1,6 @@
 package data
 
-import data.network.request.SendLocationRequest
+import data.network.request.live_location.LiveLocationRequest
 import domain.repository.IGeneralLocationRepository
 import io.ktor.client.HttpClient
 import io.ktor.client.request.post
@@ -38,15 +38,12 @@ class GeneralLocationRepositoryImpl(
         wfmDatabase.generalLocationEntityQueries.deleteAllSent()
     }
 
-    override suspend fun sendLocationToServer(generalLocation: GeneralLocationEntity) {
+    override suspend fun sendLocationToServer(liveLocationRequest: List<LiveLocationRequest>) {
 
 
-        httpClient.post("workforce_management/") {
+        httpClient.post("workforce_management/user/live-location/") {
             setBody(
-                SendLocationRequest(
-                    generalLocation.latitude.toDouble(),
-                    generalLocation.longitude.toDouble()
-                )
+               liveLocationRequest
             )
         }
     }

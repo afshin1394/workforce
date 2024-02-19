@@ -10,7 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 
-import com.irancell.nwg.wfm.presentation.model.StateFilter
+import presentation.model.StateFilter
 import com.irancell.nwg.wfm.presentation.theme.*
 import presentation.theme.body_large
 import presentation.theme.strokeDefaultDark
@@ -18,7 +18,7 @@ import presentation.theme.surfaceBrandDefault
 
 
 @Composable
-fun CustomCheckbox(stateFilter: StateFilter = StateFilter(1,"Level 1",false),updateStateFilter : (stateFilter : StateFilter)-> Unit={})
+fun CustomCheckbox(stateFilter: StateFilter = StateFilter(1,"Level 1",false), updateStateFilter : (stateFilter : StateFilter)-> Unit={})
 {
     Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(start = spacing05X)) {
         Checkbox(

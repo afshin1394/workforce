@@ -5,10 +5,10 @@ import domain.usecase.BaseUseCase
 import irancell.nwg.wfm.Location
 data class SuspendTaskFootStomp(val taskId : Int ,val date : String, val latitude : String,val longitude : String)
 class UpdateSuspendTaskDetails(
-    private val suspendTaskRepository : ISuspendTaskRepository
+    private val iSuspendTaskRepository: ISuspendTaskRepository
 ) : BaseUseCase<Unit,SuspendTaskFootStomp>() {
     override suspend fun run(params: SuspendTaskFootStomp) {
-            suspendTaskRepository.updateSuspendDetails(
+        iSuspendTaskRepository.updateSuspendDetails(
                 taskId = params.taskId,
                 dateTime = params.date,
                 latitude =  params.latitude,

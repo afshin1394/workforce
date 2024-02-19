@@ -1,4 +1,4 @@
-package com.irancell.nwg.wfm.presentation.model
+package presentation.model
 
 import kotlin.reflect.KProperty
 
@@ -11,18 +11,7 @@ import kotlin.reflect.KProperty
     val address: String = "Tehran, Amanieh, Zarin stre...",
     val remainingTime: String = "0h 47m",
     val state: String="Done",
-    val idState: Int=1,
-) {
-
-
-    fun hasremaining(){
-
-    }
-     operator fun getValue(nothing: Nothing?, property: KProperty<*>): Task {
-       return this
-     }
-
-
- }
+    val idState: Int  = 1,
+)
 
 

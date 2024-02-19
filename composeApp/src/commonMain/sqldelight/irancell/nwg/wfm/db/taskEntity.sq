@@ -1,0 +1,31 @@
+CREATE  TABLE TaskEntity (
+wi_id INTEGER NOT NULL,
+ticket_instance_id INTEGER NOT NULL,
+ticket_title TEXT NOT NULL,
+ticket_instance_number TEXT NOT NULL,
+ticket_instance_state TEXT NOT NULL,
+ticket_instance_title  TEXT  NOT NULL,
+type  TEXT  NOT NULL,
+description  TEXT  NOT NULL,
+category  TEXT  NOT NULL,
+subCategory  TEXT  NOT NULL,
+attachment  TEXT  NOT NULL
+);
+
+
+insert:
+INSERT INTO TaskEntity (wi_id,ticket_instance_id,ticket_title,ticket_instance_number,ticket_instance_state,ticket_instance_title,type,description,category,subCategory,attachment)
+VALUES (?, ?,?,?,?,?,?,?,?,?,?);
+
+
+deleteAll:
+DELETE FROM TaskEntity;
+
+
+selectAll:
+SELECT * FROM TaskEntity;
+
+updateStatus:
+UPDATE  TaskEntity
+SET type = :type
+WHERE wi_id = :wi_id;

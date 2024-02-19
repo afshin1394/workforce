@@ -6,17 +6,18 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 
 import com.irancell.nwg.wfm.presentation.components.FilterSectionItem
-import com.irancell.nwg.wfm.presentation.model.FilterType
+import presentation.model.FilterType
 import com.irancell.nwg.wfm.presentation.model.SelectableItem
-import com.irancell.nwg.wfm.presentation.model.StateFilter
-import com.irancell.nwg.wfm.presentation.model.Task
+import presentation.model.StateFilter
 import presentation.screens.main.events.MainEvent
 import dev.icerock.moko.permissions.Permission
 import dev.icerock.moko.permissions.PermissionsController
+import domain.models.TaskDomain
+import domain.usecase.ResultStatus
 import domain.usecase.usecase.availability.ChangeServerAvailabilityUseCase
 import domain.usecase.usecase.availability.GetAvailabilityUseCase
 import domain.usecase.usecase.availability.StoreAvailabilityUseCase
-import domain.usecase.usecase.work.GetAllWorksUseCase
+import domain.usecase.usecase.ticket.UpdateTasksUseCase
 import io.github.aakira.napier.LogLevel
 import io.github.aakira.napier.Napier
 import kotlinx.coroutines.Dispatchers
@@ -25,8 +26,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.serialization.json.Json
-import data.network.response.ObjectID
 import utils.AsyncResult
 
 import utils.AsyncStatus
@@ -37,31 +36,45 @@ class MainScreenVM(
     private val storeAvailabilityUseCase: StoreAvailabilityUseCase,
     private val getAvailabilityUseCase: GetAvailabilityUseCase,
     private val changeServerAvailabilityUseCase: ChangeServerAvailabilityUseCase,
-    private val getAllWorksUseCase: GetAllWorksUseCase
+    private val updateTasksUseCase: UpdateTasksUseCase
 ) : BaseViewModel() {
     private val _availability = MutableStateFlow(false)
     val availability = _availability.asStateFlow()
 
     private val _openCamera = MutableStateFlow(false)
     val openCamera = _openCamera.asStateFlow()
+    val tasks  = mutableStateListOf<TaskDomain>()
+
+
+
 
     init {
+
+        getCurrentAvailability()
+        getTasks()
+
+    }
+
+    private fun getCurrentAvailability() {
         viewModelScope.launch(Dispatchers.IO) {
             getAvailabilityUseCase(
                 Unit
             ).collect {
                 when (it.status) {
                     AsyncStatus.ERROR -> {
-                        val errorMessage = it.message!!
-                        error.update { errorMessage }
+
+
+                        Napier.log(LogLevel.ASSERT,"resrrrr", message = it.resultStatus.toString())
                     }
 
                     AsyncStatus.LOADING -> {
+                        updateState(ViewStates.Loading)
+
 
                     }
 
                     AsyncStatus.SUCCESS -> {
-                        state.update { ViewStates.Success }
+                        updateState(ViewStates.Success)
                         it.data?.let { available ->
                             _availability.update { available }
                         }
@@ -71,9 +84,6 @@ class MainScreenVM(
                 }
             }
         }
-
-        getTasks()
-
     }
 
 
@@ -85,16 +95,18 @@ class MainScreenVM(
             changeServerAvailabilityUseCase(!_availability.value).collect {
                 when (it) {
                     is AsyncResult.Error -> {
-                        it.message?.let { string ->
-                            error.update { string }
-                        }
+                        handleError(it.resultStatus)
+                        Napier.log(LogLevel.ASSERT,"resrrrr", message = it.resultStatus.toString())
+
                     }
 
                     is AsyncResult.Loading -> {
+                        updateState(ViewStates.Loading)
 
                     }
 
                     is AsyncResult.Success -> {
+                        Napier.log(LogLevel.ASSERT,"resrrrr", message = it.resultStatus.toString())
 
                         _availability.update { !it }
                         storeAvailabilityUseCase(
@@ -102,9 +114,8 @@ class MainScreenVM(
                         ).collect {
                             when (it.status) {
                                 AsyncStatus.ERROR -> {
-                                    it.message?.let { string ->
-                                        error.update { string }
-                                    }
+                                    handleError(it.resultStatus)
+
                                 }
 
                                 AsyncStatus.LOADING -> {
@@ -112,7 +123,7 @@ class MainScreenVM(
                                 }
 
                                 AsyncStatus.SUCCESS -> {
-                                    state.update { ViewStates.Success }
+                                    updateState(ViewStates.Success)
                                     Napier.log(
                                         LogLevel.ASSERT,
                                         "storeAvailabilityUseCase",
@@ -137,98 +148,98 @@ class MainScreenVM(
 
     }
 
-    private val initialTasks = arrayListOf(
-        Task(
-            1235,
-        ),
-        Task(
-            1236,
-            "Huawei External Alarm, T5713, Bater ... Huawei External Alarm, T5713, Bater ...",
-            "HSE pre-check",
-            "Level 3",
-            "CR",
-            "Tehran, Amanieh, Zarin stre...",
-            "0h 43m",
-            "Done",
-            3
-        ),
-        Task(
-            1237,
 
-            "Huawei External Alarm, T5722, Bater ... Huawei External Alarm, T5722, Bater ...",
-            "HSE pre-check",
-            "Level 3",
-            "TT",
-            "Tehran, Nelson mandela, Zarin stre...",
-            "2h 43m",
-            "Pending",
-            1
-        ),
-        Task(
-            1238,
+//    private val initialTasks = arrayListOf(
+//        TaskDomain(
+//            1235,
+//        ),
+//        TaskDomain(
+//            1236,
+//            "Huawei External Alarm, T5713, Bater ... Huawei External Alarm, T5713, Bater ...",
+//            "HSE pre-check",
+//            "Level 3",
+//            "CR",
+//            "Tehran, Amanieh, Zarin stre...",
+//            "0h 43m",
+//            "Done",
+//            3
+//        ),
+//        TaskDomain(
+//            1237,
+//
+//            "Huawei External Alarm, T5722, Bater ... Huawei External Alarm, T5722, Bater ...",
+//            "HSE pre-check",
+//            "Level 3",
+//            "TT",
+//            "Tehran, Nelson mandela, Zarin stre...",
+//            "2h 43m",
+//            "Pending",
+//            1
+//        ),
+//        TaskDomain(
+//            1238,
+//
+//            "Huawei External Alarm, T5742, Bater ... Huawei External Alarm, T5742, Bater ...",
+//            "HSE pre-check",
+//            "Level 2",
+//            "TT",
+//            "Tehran, Zafar, Zarin stre...",
+//            "4h 43m",
+//            "Done",
+//            3
+//        ), TaskDomain(
+//            1239,
+//
+//            "Huawei External Alarm, T5744, Bater ... Huawei External Alarm, T5744, Bater ...",
+//            "Departed",
+//            "Level 2",
+//            "CR",
+//            "Tehran, Takhti, Zarin stre...",
+//            "1h 43m",
+//            "Suspended",
+//            4
+//        ), TaskDomain(
+//            1339,
+//
+//            "Huawei External Alarm, T5754, Bater ... Huawei External Alarm, T5754, Bater ...",
+//            "Departed",
+//            "Level 1",
+//            "PT",
+//            "Tehran, Takhti, Zarin stre...",
+//            "1h 43m",
+//            "Completed",
+//            5
+//
+//        ), TaskDomain(
+//            1439,
+//
+//            "Huawei External Alarm, T5754, Bater ... Huawei External Alarm, T5754, Bater ...",
+//            "Departed",
+//            "Level 1",
+//            "TT",
+//            "Tehran, Mirdamad, Zarin stre...",
+//            "4h 43m",
+//            "Doing",
+//            2
+//
+//        ), TaskDomain(
+//            1429,
+//
+//            "Huawei External Alarm, T3754, Bater ... Huawei External Alarm, T3754, Bater ...",
+//            "Departed",
+//            "Level 1",
+//            "CR",
+//            "Tehran, Ghoba, Zarin stre...",
+//            "2h 44m",
+//            "Pending",
+//            1
+//
+//
+//        )
+//    )
 
-            "Huawei External Alarm, T5742, Bater ... Huawei External Alarm, T5742, Bater ...",
-            "HSE pre-check",
-            "Level 2",
-            "TT",
-            "Tehran, Zafar, Zarin stre...",
-            "4h 43m",
-            "Done",
-            3
-        ), Task(
-            1239,
 
-            "Huawei External Alarm, T5744, Bater ... Huawei External Alarm, T5744, Bater ...",
-            "Departed",
-            "Level 2",
-            "CR",
-            "Tehran, Takhti, Zarin stre...",
-            "1h 43m",
-            "Suspended",
-            4
-        ), Task(
-            1339,
-
-            "Huawei External Alarm, T5754, Bater ... Huawei External Alarm, T5754, Bater ...",
-            "Departed",
-            "Level 1",
-            "PT",
-            "Tehran, Takhti, Zarin stre...",
-            "1h 43m",
-            "Completed",
-            5
-
-        ), Task(
-            1439,
-
-            "Huawei External Alarm, T5754, Bater ... Huawei External Alarm, T5754, Bater ...",
-            "Departed",
-            "Level 1",
-            "TT",
-            "Tehran, Mirdamad, Zarin stre...",
-            "4h 43m",
-            "Doing",
-            2
-
-        ), Task(
-            1429,
-
-            "Huawei External Alarm, T3754, Bater ... Huawei External Alarm, T3754, Bater ...",
-            "Departed",
-            "Level 1",
-            "CR",
-            "Tehran, Ghoba, Zarin stre...",
-            "2h 44m",
-            "Pending",
-            1
-
-
-        )
-    )
-
-
-    var tasks = ArrayList(initialTasks)
-    var selectedTask: MutableState<Task?> = mutableStateOf(null)
+    var selectedTask: MutableState<TaskDomain?> = mutableStateOf(null)
 
     var events = mutableStateOf<MainEvent>(MainEvent.Default)
 
@@ -321,7 +332,7 @@ class MainScreenVM(
     fun getActiveFilterItems() {
         val filterMaps: ArrayList<FilterModel> = arrayListOf()
 
-        val filteredList = arrayListOf<Task>()
+        val filteredList = arrayListOf<TaskDomain>()
 
         filterSectionItems.forEach {
             it.filterStates.forEach {
@@ -331,18 +342,18 @@ class MainScreenVM(
 
 
         }
-        val tasksList: ArrayList<Task> = arrayListOf()
-        tasksList.addAll(initialTasks)
+        val tasksList: ArrayList<TaskDomain> = arrayListOf()
+        tasksList.addAll(tasks)
         for (key in filterMaps) {
             when (key.type) {
                 FilterType.CURRENT_STEP -> {
-
-                    val ix = tasksList.filter {
-                        it.step.trim() == key.filter.title.trim()
-                    }
-                    tasksList.clear()
-                    tasksList.addAll(ix)
-                    filteredList.addAll(ix)
+//
+//                    val ix = tasksList.filter {
+//                        it.step.trim() == key.filter.title.trim()
+//                    }
+//                    tasksList.clear()
+//                    tasksList.addAll(ix)
+//                    filteredList.addAll(ix)
 
                 }
 
@@ -351,10 +362,10 @@ class MainScreenVM(
                 }
 
                 FilterType.SEVERITY_LEVEL -> {
-                    val ix = tasksList.filter { it.faultLevel.trim() == key.filter.title.trim() }
-                    tasksList.clear()
-                    tasksList.addAll(ix)
-                    filteredList.addAll(ix)
+//                    val ix = tasksList.filter { it.faultLevel.trim() == key.filter.title.trim() }
+//                    tasksList.clear()
+//                    tasksList.addAll(ix)
+//                    filteredList.addAll(ix)
 
                 }
 
@@ -363,7 +374,7 @@ class MainScreenVM(
                 }
 
                 FilterType.TICKET_TYPE -> {
-                    val ix = tasksList.filter { it.type.trim() == key.filter.title.trim() }
+                    val ix = tasksList.filter { it.status.trim() == key.filter.title.trim() }
                     tasksList.clear()
                     tasksList.addAll(ix)
                     filteredList.addAll(ix)
@@ -387,7 +398,7 @@ class MainScreenVM(
             }
         }
         tasks.clear()
-        tasks.addAll(initialTasks)
+        tasks.addAll(tasks)
     }
 
     fun openCamera(permissionsController: PermissionsController) {
@@ -408,9 +419,12 @@ class MainScreenVM(
 
     fun getTasks() {
         viewModelScope.launch(Dispatchers.IO) {
-            getAllWorksUseCase(Unit).collect {
+            updateTasksUseCase(Unit).collect {
                 when (it.status) {
                     AsyncStatus.ERROR -> {
+                        handleError(it.resultStatus)
+
+
                         Napier.log(
                             LogLevel.ASSERT,
                             "getAllWorksUseCase",
@@ -421,16 +435,25 @@ class MainScreenVM(
 
                     AsyncStatus.LOADING -> {
                         Napier.log(LogLevel.ASSERT, "getAllWorksUseCase", message = "LOADING: ")
+                        updateState(ViewStates.Loading)
 
                     }
 
                     AsyncStatus.SUCCESS -> {
+                        updateState(ViewStates.Success)
+
                         Napier.log(
                             LogLevel.ASSERT,
                             "getAllWorksUseCase",
                             message = "SUCCESS: " + it.data
                         )
+                        it.data?.let { it1 -> tasks.addAll(it1) }
 
+                        Napier.log(
+                            LogLevel.ASSERT,
+                            "getAllWorksUseCase",
+                            message = "initialTasks: $tasks"
+                        )
 
                     }
 

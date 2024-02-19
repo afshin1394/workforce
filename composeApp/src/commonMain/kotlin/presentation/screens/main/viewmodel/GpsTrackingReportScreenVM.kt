@@ -28,15 +28,15 @@ class GpsTrackingReportScreenVM(
             ).collect {
                 when(it.status){
                     AsyncStatus.ERROR -> {
-                        state.update { ViewStates.Loading }
-                        val errorMessage = it.message!!
-                        error.update { errorMessage }
+                        updateState(ViewStates.Loading)
                     }
                     AsyncStatus.LOADING -> {
+                        updateState(ViewStates.Loading)
+
                     }
                     AsyncStatus.SUCCESS -> {
                         it.data?.let { locations -> generalLocationList.addAll(locations) }
-                        state.update{  ViewStates.Success  }
+                        updateState(ViewStates.Success)
                     }
                 }
             }

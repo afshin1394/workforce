@@ -1,4 +1,4 @@
-package com.irancell.nwg.wfm.ui.compose
+package presentation.screens.main.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -11,7 +11,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 
-import com.irancell.nwg.wfm.presentation.model.Task
+
 import com.irancell.nwg.wfm.presentation.components.CustomSearchBar
 import com.irancell.nwg.wfm.presentation.components.FilterRow
 import presentation.components.ticketCard
@@ -19,12 +19,19 @@ import presentation.screens.main.events.MainEvent
 import presentation.theme.backgroundBackground3
 import com.irancell.nwg.wfm.presentation.theme.spacing15X
 import com.irancell.nwg.wfm.presentation.theme.spacing2X
+import dev.icerock.moko.resources.compose.stringResource
+import domain.models.TaskDomain
+import io.github.aakira.napier.LogLevel
+import io.github.aakira.napier.Napier
+import irancell.nwg.wfm.MR
+import utils.TaskState
 
 @Composable
 fun TicketListScreen(
-    tasks: ArrayList<Task>,
+    tasks: ArrayList<TaskDomain>,
     searchText: String = "",
-    onEvent: (mainEvents: MainEvent,selectedTask : Task?) -> Unit = { _: MainEvent, _: Task? -> }
+    onEvent: (mainEvents: MainEvent,selectedTask : TaskDomain?) -> Unit = { _: MainEvent, _: TaskDomain? -> },
+    onAccept : (item : TaskDomain) -> Unit,
 ) {
 
 
@@ -58,10 +65,10 @@ fun TicketListScreen(
             Modifier
                 .fillMaxWidth()
                 .padding(horizontal = spacing2X),
-            itemIdSelected = 6
+            itemTitleSelected = stringResource(MR.strings.all)
         ) {
 
-            selectState = if (it.id.toString()=="6"){
+            selectState = if (it.id == TaskState.All.id){
                ""
             }else{
                 it.id.toString()
@@ -79,19 +86,23 @@ fun TicketListScreen(
 
 
                         it.title.lowercase().contains(searchTextState.lowercase()) ||
-                        it.faultLevel.lowercase().contains(searchTextState.lowercase()) ||
-                        it.step.lowercase().contains(searchTextState.lowercase()) ||
-                        it.address.lowercase().contains(searchTextState.lowercase()) ||
-                        it.type.lowercase().contains(searchTextState.lowercase()
+                        it.workId.toString().contains(searchTextState.lowercase()) ||
+                        it.status.lowercase().contains(searchTextState.lowercase()) ||
+                        it.instanceId.toString().contains(searchTextState.lowercase()) ||
+                        it.instanceNumber.lowercase().contains(searchTextState.lowercase()) ||
+                        it.instanceTitle.lowercase().contains(searchTextState.lowercase()
                         )
-            }.filter {  it.idState.toString().lowercase().contains(selectState.toString().lowercase()) }
+            }.filter {  it.instanceStateId.toString().contains(selectState.lowercase()) }
+            Napier.log(LogLevel.ASSERT,"selectState" , message =  selectState)
 
-
-            itemsIndexed(items = filteredList) { index: Int, item: Task ->
+            itemsIndexed(items = filteredList) { index: Int, item: TaskDomain ->
                 ticketCard(modifier = Modifier.wrapContentHeight(),
                     task = item,
                     onActionClick = {
+                        Napier.log(LogLevel.ASSERT,"onActionClick", message = "onActionClick")
+                        onAccept(item)
                         onEvent(MainEvent.AcceptTicket,item)
+
                     },
                     onMoreOptionsClick = {
                         onEvent(MainEvent.MoreOptions,item)

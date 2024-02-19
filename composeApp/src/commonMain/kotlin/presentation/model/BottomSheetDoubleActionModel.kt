@@ -1,4 +1,4 @@
-package com.irancell.nwg.wfm.presentation.model
+package presentation.model
 
 import androidx.compose.ui.graphics.Color
 

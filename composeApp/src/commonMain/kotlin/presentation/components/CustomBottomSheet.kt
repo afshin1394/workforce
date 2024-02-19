@@ -12,7 +12,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 
-import com.irancell.nwg.wfm.presentation.model.BottomSheetDoubleActionModel
+import presentation.model.BottomSheetDoubleActionModel
 import com.irancell.nwg.wfm.presentation.theme.*
 import dev.icerock.moko.resources.compose.painterResource
 import io.github.aakira.napier.Napier

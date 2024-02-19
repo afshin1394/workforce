@@ -6,8 +6,9 @@ import com.irancell.nwg.wfm.presentation.model.SelectableItem
 
 import presentation.screens.main.events.SettingEvent
 import dev.icerock.moko.mvvm.viewmodel.ViewModel
+import utils.BaseViewModel
 
-class SettingScreenVM : ViewModel() {
+class SettingScreenVM : BaseViewModel() {
 
     var events = mutableStateOf<SettingEvent>(SettingEvent.Default)
 

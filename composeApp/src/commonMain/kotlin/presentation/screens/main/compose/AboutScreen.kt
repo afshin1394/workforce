@@ -1,4 +1,4 @@
-package com.irancell.nwg.wfm.ui.compose
+package presentation.screens.main.compose
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
@@ -18,11 +18,11 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 
 import com.irancell.nwg.wfm.presentation.components.*
-import presentation.screens.main.compose.BaseScreen
 import com.irancell.nwg.wfm.presentation.theme.*
 import dev.icerock.moko.resources.compose.painterResource
 import dev.icerock.moko.resources.compose.stringResource
 import irancell.nwg.wfm.MR
+import org.koin.compose.koinInject
 import presentation.screens.main.viewmodel.AboutScreenVM
 
 import presentation.theme.body_large
@@ -40,96 +40,101 @@ class AboutScreen(
         val navigator = LocalNavigator.currentOrThrow
 
         val scaffoldState: BottomSheetScaffoldState = rememberBottomSheetScaffoldState()
-        val viewModel = remember { AboutScreenVM() }
+        val viewModel: AboutScreenVM = koinInject()
 
-        BaseScreen(title = stringResource(MR.strings.about_application), scaffoldState = scaffoldState, topBar = {
-            MenuItemsTopBar(stringResource(MR.strings.about_application)) {
-                navigator.pop()
-            }
-        }, content = {
-            Column(
-                modifier = Modifier.verticalScroll(rememberScrollState()),
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-
-
-                Spacer(modifier = Modifier.padding(30.dp))
-                Image(painter = painterResource(MR.images.ic_sdm), contentDescription = "wfm")
-                Spacer(modifier = Modifier.padding(spacing25X))
-
+        BaseScreen(
+            viewModel = viewModel,
+            title = stringResource(MR.strings.about_application),
+            scaffoldState = scaffoldState,
+            topBar = {
+                MenuItemsTopBar(stringResource(MR.strings.about_application)) {
+                    navigator.pop()
+                }
+            },
+            content = {
                 Column(
-                    modifier = Modifier.padding(horizontal = spacing3X),
+                    modifier = Modifier.verticalScroll(rememberScrollState()),
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
 
 
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Center
-                    ) {
-                        Text(
-                            "${stringResource(MR.strings.current_version)}:",
-                            style = body_large,
-                            modifier = Modifier.weight(.8f),
-                        )
-                        ChipsView(
-                            chipsItem = ChipsItem(
-                                hasBorder = false,
-                                text = viewModel.currentVersion.value,
-                                chipsColor = subtleDefault,
-                                borderWidth = 0.dp,
-                                chipsRadius = radius2XLarge,
-                                textColor = textPrimary,
-                                textStyle = body_large
-                            ), modifier = Modifier.weight(.2f)
-                        )
-                    }
-                    Spacer(modifier = Modifier.padding(spacing15X))
+                    Spacer(modifier = Modifier.padding(30.dp))
+                    Image(painter = painterResource(MR.images.ic_sdm), contentDescription = "wfm")
+                    Spacer(modifier = Modifier.padding(spacing25X))
 
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Center
+                    Column(
+                        modifier = Modifier.padding(horizontal = spacing3X),
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        Text(
-                            "${ stringResource(MR.strings.latest_version)}:",
-                            style = body_large,
-                            modifier = Modifier.weight(.8f),
 
+
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Center
+                        ) {
+                            Text(
+                                "${stringResource(MR.strings.current_version)}:",
+                                style = body_large,
+                                modifier = Modifier.weight(.8f),
                             )
-                        ChipsView(
-                            chipsItem = ChipsItem(
-                                hasBorder = false,
-                                text = viewModel.updateVersion.value,
-                                chipsColor = subtleDefault,
-                                borderWidth = 0.dp,
-                                chipsRadius = radius2XLarge,
-                                textColor = textPrimary,
-                                textStyle = body_large
-                            ), modifier = Modifier.weight(.2f)
+                            ChipsView(
+                                chipsItem = ChipsItem(
+                                    hasBorder = false,
+                                    text = viewModel.currentVersion.value,
+                                    chipsColor = subtleDefault,
+                                    borderWidth = 0.dp,
+                                    chipsRadius = radius2XLarge,
+                                    textColor = textPrimary,
+                                    textStyle = body_large
+                                ), modifier = Modifier.weight(.2f)
+                            )
+                        }
+                        Spacer(modifier = Modifier.padding(spacing15X))
+
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Center
+                        ) {
+                            Text(
+                                "${stringResource(MR.strings.latest_version)}:",
+                                style = body_large,
+                                modifier = Modifier.weight(.8f),
+
+                                )
+                            ChipsView(
+                                chipsItem = ChipsItem(
+                                    hasBorder = false,
+                                    text = viewModel.updateVersion.value,
+                                    chipsColor = subtleDefault,
+                                    borderWidth = 0.dp,
+                                    chipsRadius = radius2XLarge,
+                                    textColor = textPrimary,
+                                    textStyle = body_large
+                                ), modifier = Modifier.weight(.2f)
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.padding(spacing25X))
+
+                        Text(
+                            text = stringResource(MR.strings.description_for_update),
+                            style = body_large
+                        )
+                        Spacer(modifier = Modifier.padding(spacing25X))
+                        CustomButton(
+                            customButtonData = CustomButtonData(
+                                title = stringResource(MR.strings.update),
+                                textColor = textInverse,
+                                backgroundColor = surfaceBrandDefault
+                            )
                         )
                     }
+                    Spacer(modifier = Modifier.padding(vertical = 30.dp))
 
-                    Spacer(modifier = Modifier.padding(spacing25X))
-
-                    Text(
-                        text = stringResource(MR.strings.description_for_update),
-                        style = body_large
-                    )
-                    Spacer(modifier = Modifier.padding(spacing25X))
-                    CustomButton(
-                        customButtonData = CustomButtonData(
-                            title = stringResource(MR.strings.update),
-                            textColor = textInverse,
-                            backgroundColor = surfaceBrandDefault
-                        )
-                    )
                 }
-                Spacer(modifier = Modifier.padding(vertical = 30.dp))
-
             }
-        }
         ) {
 
 

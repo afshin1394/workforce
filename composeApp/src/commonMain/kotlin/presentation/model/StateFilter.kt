@@ -1,4 +1,4 @@
-package com.irancell.nwg.wfm.presentation.model
+package presentation.model
 
 import androidx.compose.runtime.*
 
@@ -9,7 +9,7 @@ sealed class FilterType(type : String){
     object CURRENT_STEP : FilterType(type = "CURRENT_STEP")
     object TICKET_TYPE : FilterType(type = "TICKET_TYPE")
 }
-data class StateFilter(val id : Int,val title : String = "Pending", var isActive : Boolean,var type : FilterType = FilterType.DEFAULT
+data class StateFilter(val id : Int,val title : String = "Completed", var isActive : Boolean,var type : FilterType = FilterType.DEFAULT
 ){
     var isActiveState by mutableStateOf(isActive)
     override fun toString(): String {

@@ -4,13 +4,14 @@ import com.irancell.nwg.wfm.presentation.nav.Screen
 import presentation.screens.auth.compose.LoginScreen
 import com.irancell.nwg.wfm.presentation.screens.auth.VerifyScreen
 import presentation.screens.main.compose.MainScreen
-import com.irancell.nwg.wfm.presentation.screens.main.compose.AccountScreen
+import presentation.screens.main.compose.AccountScreen
 import com.irancell.nwg.wfm.presentation.screens.main.compose.NotificationScreen
 import presentation.screens.splash.compose.SplashScreen
-import com.irancell.nwg.wfm.presentation.screens.ticket_process.compose.TicketInfoScreen
-import com.irancell.nwg.wfm.ui.compose.AboutScreen
+import presentation.screens.ticket_process.compose.TicketInfoScreen
+import presentation.screens.main.compose.AboutScreen
 import presentation.screens.main.compose.GpsTrackingReportScreen
 import presentation.screens.main.compose.SettingsScreen
+import presentation.screens.ticket_process.compose.TicketProcessScreen
 
 //@file:OptIn(ExperimentalMaterialApi::class)
 //package com.irancell.nwg.wfm.presentation.nav
@@ -34,20 +35,20 @@ import presentation.screens.main.compose.SettingsScreen
 //import androidx.navigation.compose.composable
 //import androidx.navigation.compose.navigation
 //import androidx.navigation.compose.rememberNavController
-//import com.irancell.nwg.wfm.ui.compose.AboutScreen
+//import presentation.screens.main.compose.AboutScreen
 //import presentation.screens.main.compose.SettingsScreen
 //import presentation.screens.auth.compose.LoginScreen
 //import com.irancell.nwg.wfm.presentation.screens.auth.VerifyScreen
 //import presentation.screens.main.compose.MainScreen
 //import presentation.screens.splash.compose.SplashScreen
 //
-//import com.irancell.nwg.wfm.presentation.screens.main.compose.AccountScreen
+//import presentation.screens.main.compose.AccountScreen
 //import com.irancell.nwg.wfm.presentation.screens.main.compose.NotificationScreen
 //import com.irancell.nwg.wfm.presentation.screens.main.viewmodel.presentation.screens.main.viewmodel.AboutScreenVM
 //import presentation.screens.main.viewmodel.MainScreenVM
 //import com.irancell.nwg.wfm.presentation.screens.main.viewmodel.SettingScreenVM
-//import com.irancell.nwg.wfm.presentation.screens.ticket_process.compose.TicketInfoScreen
-//import com.irancell.nwg.wfm.presentation.screens.ticket_process.viewModel.TicketProcessVM
+//import presentation.screens.ticket_process.compose.TicketInfoScreen
+//import presentation.screens.ticket_process.viewModel.TicketProcessVM
 //
 //@OptIn(ExperimentalMaterialApi::class)
 //@Composable
@@ -334,7 +335,9 @@ import presentation.screens.main.compose.SettingsScreen
             register<Screen.TicketProcess.TicketInfo> {
                 TicketInfoScreen( "TicketInfo")
             }
-
+            register<Screen.TicketProcess.TicketProcessScreen> {
+                TicketProcessScreen( "TicketProcessScreen")
+            }
         }
 
 

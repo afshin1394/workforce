@@ -31,30 +31,12 @@ fun SuspendTaskDomain.toSuspendTaskEntity() : SuspendTaskEntity{
 
 fun List<SuspendTaskDomain>.toSuspendTaskEntityList() : List<SuspendTaskEntity>{
     return map {
-        SuspendTaskEntity(
-            taskId = it.taskId,
-            reason = it.reason,
-            description =  it.description,
-            attachmentsUri = it.attachmentsUri,
-            isSent = it.isSent,
-            datetime = it.datetime,
-            latitude = it.latitude,
-            longitude = it.longitude
-        )
-    }.toList()
+       it.toSuspendTaskEntity()
+    }
 }
 
 fun List<SuspendTaskEntity>.toSuspendTaskDomainList() : List<SuspendTaskDomain>{
     return map {
-        SuspendTaskDomain(
-            taskId = it.taskId,
-            reason = it.reason,
-            description =  it.description,
-            attachmentsUri = it.attachmentsUri,
-            isSent = it.isSent,
-            datetime = it.datetime,
-            latitude = it.latitude,
-            longitude = it.longitude
-        )
-    }.toList()
+        it.toSuspendTaskDomain()
+    }
 }

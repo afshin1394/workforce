@@ -6,9 +6,9 @@ import domain.repository.ISuspendTaskRepository
 import domain.usecase.BaseUseCase
 
 class StoreSuspendTask(
-    private val suspendTicketRepository: ISuspendTaskRepository
+    private val iSuspendTaskRepository: ISuspendTaskRepository
 ) : BaseUseCase<Unit, SuspendTaskDomain>() {
     override suspend fun run(params: SuspendTaskDomain) {
-        suspendTicketRepository.insert(params.toSuspendTaskEntity())
+        iSuspendTaskRepository.insert(params.toSuspendTaskEntity())
     }
 }

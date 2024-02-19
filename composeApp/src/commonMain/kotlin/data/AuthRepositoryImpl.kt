@@ -1,9 +1,10 @@
 package data
 
-import data.network.request.LoginNetworkRequest
-import data.network.request.VerifyNetworkRequest
-import data.network.response.LoginNetworkResponse
-import data.network.response.VerifyNetworkResponse
+import data.network.request.auth.LoginNetworkRequest
+import data.network.request.auth.ResendNetworkRequest
+import data.network.request.auth.VerifyNetworkRequest
+import data.network.response.auth.LoginNetworkResponse
+import data.network.response.auth.VerifyNetworkResponse
 import domain.repository.IAuthRepository
 import io.github.aakira.napier.LogLevel
 import io.github.aakira.napier.Napier
@@ -15,7 +16,7 @@ import io.ktor.client.request.setBody
 class AuthRepositoryImpl(
     private val httpClient: HttpClient
 ) : IAuthRepository {
-    override suspend fun login(loginNetworkRequest: LoginNetworkRequest) : LoginNetworkResponse    {
+    override suspend fun login(loginNetworkRequest: LoginNetworkRequest) : LoginNetworkResponse {
       val response = httpClient.post("auth/token/2fa/login"){
             setBody(loginNetworkRequest)
         }.body<LoginNetworkResponse>()
@@ -23,11 +24,18 @@ class AuthRepositoryImpl(
       return response
     }
 
-    override suspend fun verify(verifyNetworkRequest: VerifyNetworkRequest ) : VerifyNetworkResponse  {
+    override suspend fun verify(verifyNetworkRequest: VerifyNetworkRequest) : VerifyNetworkResponse {
       val response = httpClient.post("auth/token/2fa/verify"){
             setBody(verifyNetworkRequest)
         }.body<VerifyNetworkResponse>()
         Napier.log(LogLevel.ASSERT,"login" ,  message = "response${response.auth_token}")
         return response
+    }
+
+    override suspend fun resend(resendNetworkRequest: ResendNetworkRequest) {
+        httpClient.post("auth/token/2fa/resend/"){
+            setBody(resendNetworkRequest)
+        }
+        Napier.log(LogLevel.ASSERT,"resend" ,  message = "sessionId ${resendNetworkRequest.session_id}")
     }
 }

@@ -1,9 +1,7 @@
 package domain.mappers
 
-import data.network.request.VerifyNetworkRequest
-import data.network.response.LoginNetworkResponse
-import data.network.response.VerifyNetworkResponse
-import domain.models.LoginResponseDomain
+import data.network.request.auth.VerifyNetworkRequest
+import data.network.response.auth.VerifyNetworkResponse
 import domain.models.VerifyRequestDomain
 import domain.models.VerifyResponseDomain
 
@@ -19,7 +17,7 @@ fun VerifyResponseDomain.toVerifyNetworkResponse() : VerifyNetworkResponse {
     )
 }
 
-fun VerifyRequestDomain.toVerifyNetworkRequest() : VerifyNetworkRequest{
+fun VerifyRequestDomain.toVerifyNetworkRequest() : VerifyNetworkRequest {
     return VerifyNetworkRequest(
          session_id, code
     )

@@ -30,6 +30,7 @@ import presentation.theme.subtleDefault
 import presentation.theme.surfaceDefault
 import presentation.theme.textBrand
 import kotlinx.coroutines.launch
+import org.koin.compose.koinInject
 import utils.Language
 import utils.SelectLanguage
 import utils.isRunningGPS
@@ -41,7 +42,7 @@ class SettingsScreen (
     @Composable
     override fun Content() {
         val scaffoldState: BottomSheetScaffoldState = rememberBottomSheetScaffoldState()
-        val viewModel = remember { SettingScreenVM() }
+        val viewModel : SettingScreenVM  = koinInject()
         val events by viewModel.events
         val navigator = LocalNavigator.currentOrThrow
 
@@ -61,7 +62,7 @@ class SettingsScreen (
 
             }
 
-        BaseScreen(title = stringResource(MR.strings.settings), topBar = {
+        BaseScreen(viewModel = viewModel,title = stringResource(MR.strings.settings), topBar = {
             MenuItemsTopBar(stringResource(MR.strings.settings)) {
                 navigator.pop()
             }

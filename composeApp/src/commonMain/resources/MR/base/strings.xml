@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <resources>
+    <string name= "none"> </string>
     <string name="password">Password</string>
     <string name="submit">Submit</string>
     <string name="why_canceled_ticket">Why are you canceling the ticket</string>
@@ -61,17 +62,28 @@
     <string name="resource_information">Resource Information</string>
     <string name="fault_information">Resource Information</string>
     <string name="login_error">You cannot login with the following credentials!</string>
-    <string name="verify_error">کد داده شده اشتباه است!</string>
+    <string name="verify_error">wrong verification code!</string>
 
-    <string name="pending">Pending</string>
-    <string name="doing">Doing</string>
-    <string name="done">Done</string>
-    <string name="suspended">Suspended</string>
+    <string name="draft">Draft</string>
+    <string name="running">Running</string>
     <string name="completed">Completed</string>
+    <string name="cancelled">Cancelled</string>
+    <string name="fpa_roll_back">FPA_RollBack</string>
+    <string name="suspended">Suspended</string>
+    <string name="parked">Parked</string>
+
+
+
     <string name="all">All</string>
     <string name="unread">Unread</string>
     <string name="read">Read</string>
     <string name="notification">Notification</string>
+
+
+    <string name="client_error">Credentials are not valid</string>
+    <string name="server_error">Server is not available right no, please try later</string>
+    <string name="timeout_error">Please check your network connection</string>
+    <string name="general_error">An error has been occurred please contact support</string>
 
 
 

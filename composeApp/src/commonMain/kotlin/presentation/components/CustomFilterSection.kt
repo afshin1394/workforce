@@ -5,16 +5,14 @@ import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.irancell.nwg.wfm.presentation.model.StateFilter
+import presentation.model.StateFilter
 import com.irancell.nwg.wfm.presentation.theme.*
-import com.irancell.nwg.wfm.presentation.theme.color.backgroundBackground1
 import dev.icerock.moko.resources.compose.painterResource
 import irancell.nwg.wfm.MR
 import presentation.theme.body_large_strong
