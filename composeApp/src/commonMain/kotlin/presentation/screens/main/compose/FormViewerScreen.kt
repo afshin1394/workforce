@@ -86,6 +86,7 @@ import com.mohamedrejeb.calf.ui.sheet.rememberAdaptiveSheetState
 import com.mohamedrejeb.calf.ui.timepicker.AdaptiveTimePicker
 import com.mohamedrejeb.calf.ui.timepicker.rememberAdaptiveTimePickerState
 import dev.icerock.moko.resources.compose.painterResource
+import dev.icerock.moko.resources.compose.stringResource
 import io.github.aakira.napier.Napier
 import irancell.nwg.wfm.DatePickerFormat.format
 import irancell.nwg.wfm.MR
@@ -186,18 +187,18 @@ class FormViewerScreen(private val title: String) : Screen {
                         })
 
 
-                    ModalDatePicker("selected date", "Date-time picker", onDateSelected = {
+                    ModalDatePicker(stringResource(MR.strings.selected_date), stringResource(MR.strings.date_picker), onDateSelected = {
 
                     })
 
 
-                    ModalTimePicker("selected date", "Time picker", onTimeSelected = {
+                    ModalTimePicker(stringResource(MR.strings.selected_time), stringResource(MR.strings.time_picker), onTimeSelected = {
 
                     })
 
-                    ModalDateTimePicker("selected date", "Date-time picker", onDateSelected = {
+                    ModalDateTimePicker(stringResource(MR.strings.selected_date_time), stringResource(MR.strings.date_time_picker), onDateSelected = {
 
-                    })
+                    }, onTimeSelected = {})
 
 
                 }

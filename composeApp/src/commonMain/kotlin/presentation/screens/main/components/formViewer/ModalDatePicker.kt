@@ -283,7 +283,7 @@ fun BottomSheet(
                                 .weight(1f)
                         ) {
                             Text(
-                                text = "Accept",
+                                text = stringResource(MR.strings.aaccept),
                                 color = Color.White,
                                 style = MaterialTheme.typography.bodyMedium,
                                 fontSize = 14.sp
