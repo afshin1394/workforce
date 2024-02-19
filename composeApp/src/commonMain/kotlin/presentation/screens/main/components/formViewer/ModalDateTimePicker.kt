@@ -419,14 +419,23 @@ fun BottomSheetTimeDate(
     var startTime by remember { mutableStateOf("") }
 
     val startTimePickerState = rememberAdaptiveTimePickerState()
+
+    var initialSelection  by remember { mutableStateOf("") }
     val time = getTimeProgress(
         datePickerState.selectedDateMillis, startTimePickerState.hour, startTimePickerState.minute
     )
     LaunchedEffect(
         time
     ) {
-        startTime = time
-        onTimeSelected(time)
+
+        if (initialSelection!=""){
+            startTime = time
+            onTimeSelected(time)
+
+        }else{
+            initialSelection =time
+        }
+
     }
 
 

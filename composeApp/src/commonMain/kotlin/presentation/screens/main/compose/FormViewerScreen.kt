@@ -96,11 +96,13 @@ import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.LocalTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
+import presentation.screens.main.components.formViewer.CheckList
 import presentation.screens.main.components.formViewer.DropDownMultiChoice
 import presentation.screens.main.components.formViewer.DropDownSingleChoice
 import presentation.screens.main.components.formViewer.ModalDatePicker
 import presentation.screens.main.components.formViewer.ModalDateTimePicker
 import presentation.screens.main.components.formViewer.ModalTimePicker
+import presentation.screens.main.components.formViewer.Radio
 
 import presentation.theme.h4
 import presentation.theme.strokeDefaultLight
@@ -122,7 +124,20 @@ class FormViewerScreen(private val title: String) : Screen {
         val navigator = LocalNavigator.currentOrThrow
         val scope = rememberCoroutineScope()
 
-        val items = listOf("Item 1", "Item 2", "Item 3", "Item 4")
+        val items = listOf(
+            "Item 1",
+            "Item 2",
+            "Item 3",
+            "Item 4",
+            "Item 5",
+            "Item 6",
+            "Item 7",
+            "Item 8",
+            "Item 9",
+            "Item 10",
+            "Item 11",
+            "Item 12"
+        )
         var selectedItem by remember { mutableStateOf("") }
 
 
@@ -155,7 +170,7 @@ class FormViewerScreen(private val title: String) : Screen {
 
                 Column(
                     modifier = Modifier.fillMaxHeight().verticalScroll(rememberScrollState()),
-                    // verticalArrangement = Arrangement.Center,
+                    verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
 
@@ -187,18 +202,42 @@ class FormViewerScreen(private val title: String) : Screen {
                         })
 
 
-                    ModalDatePicker(stringResource(MR.strings.selected_date), stringResource(MR.strings.date_picker), onDateSelected = {
+                    ModalDatePicker(
+                        stringResource(MR.strings.selected_date),
+                        stringResource(MR.strings.date_picker),
+                        onDateSelected = {
+
+                        })
+
+
+                    ModalTimePicker(
+                        stringResource(MR.strings.selected_time),
+                        stringResource(MR.strings.time_picker),
+                        onTimeSelected = {
+
+                        })
+
+                    ModalDateTimePicker(
+                        stringResource(MR.strings.selected_date_time),
+                        stringResource(MR.strings.date_time_picker),
+                        onDateSelected = {
+
+                        },
+                        onTimeSelected = {})
+
+
+                    Radio(itemList = items, selectItem = "", onItemSelected = {
+
+                        println("multiChoooice>>>>${it}")
 
                     })
 
+                    CheckList(  itemList = items,
+                        onItemSelected = {
 
-                    ModalTimePicker(stringResource(MR.strings.selected_time), stringResource(MR.strings.time_picker), onTimeSelected = {
+                            println("multiChoooice>>>>${it.size}")
 
-                    })
-
-                    ModalDateTimePicker(stringResource(MR.strings.selected_date_time), stringResource(MR.strings.date_time_picker), onDateSelected = {
-
-                    }, onTimeSelected = {})
+                        })
 
 
                 }
