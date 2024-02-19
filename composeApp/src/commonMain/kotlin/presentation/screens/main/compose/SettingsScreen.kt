@@ -2,6 +2,9 @@ package presentation.screens.main.compose
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.BottomSheetScaffoldState
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.rememberBottomSheetScaffoldState
@@ -85,12 +88,10 @@ class SettingsScreen (
 
                                         when (index) {
                                             0 -> {
-                                                println("langg>>>${"en"}")
                                                 getSharedPref().put(Language, "en")
 
                                             }
                                             1 -> {
-                                                println("langg>>>${"fa"}")
                                                 getSharedPref().put(Language, "fa")
 
                                             }
@@ -137,7 +138,7 @@ class SettingsScreen (
                 }
 
             }, content = {
-                Column {
+                Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
                     val tagSelectLanguage=if ( getSharedPref().getString(Language)=="fa") "Farsi"
                     else "English"
                     ItemComponent(itemComponentModel = ItemComponentModel(

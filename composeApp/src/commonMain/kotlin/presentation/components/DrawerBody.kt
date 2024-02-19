@@ -45,6 +45,12 @@ fun DrawerBody( onItemClick: (navRoute : Screen.Main.Menu) -> Unit={}) {
             onItemClick(Screen.Main.Menu.Logout)
 
         }
+        DrawerMenuItem(modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = spacing2X),MR.images.form, "form") {
+            onItemClick(Screen.Main.Menu.FormViewer)
+
+        }
     }
 
 }

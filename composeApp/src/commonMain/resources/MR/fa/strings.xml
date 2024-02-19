@@ -75,7 +75,14 @@
     <string name="unread">خوانده نشده</string>
     <string name="read">خوانده شده</string>
     <string name="notification">پیام</string>
-
+    <string name="search">جستجو</string>
+    <string name="aaccept">تایید</string>
+    <string name="selected_date">تاریخ را انتخاب کنید</string>
+    <string name="selected_time">زمان را انتخاب کنید</string>
+    <string name="selected_date_time">زمان و تاریخ را انتخاب کنید</string>
+    <string name="date_picker">انتخاب تاریخ</string>
+    <string name="time_picker">انتخاب زمان</string>
+    <string name="date_time_picker">انتخاب تاریخ-زمان</string>
     <string name="client_error">اطلاعات کاربری شما معتبر نیست, لطفا مجددا وارد شوید.</string>
     <string name="server_error">سرور در دسترس نیست لطفا بعدا مجدد تلاش کنید.</string>
     <string name="timeout_error">لطفا اینترنت خود را چک کنید ارتباط برقرار نشد.</string>

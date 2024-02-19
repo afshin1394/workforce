@@ -12,21 +12,20 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.irancell.nwg.wfm.presentation.nav.Screen.Main.*
 import com.irancell.nwg.wfm.presentation.components.*
-import presentation.model.BottomSheetDoubleActionModel
+import com.irancell.nwg.wfm.presentation.model.BottomSheetDoubleActionModel
+import com.irancell.nwg.wfm.presentation.model.Task
 import com.irancell.nwg.wfm.presentation.screens.main.components.*
 import presentation.screens.main.events.MainEvent
 import presentation.screens.main.viewmodel.MainScreenVM
 import com.irancell.nwg.wfm.presentation.theme.*
-import presentation.screens.main.components.TicketListScreen
+import com.irancell.nwg.wfm.ui.compose.TicketListScreen
 import dev.icerock.moko.permissions.compose.PermissionsControllerFactory
 import dev.icerock.moko.permissions.compose.rememberPermissionsControllerFactory
 import dev.icerock.moko.resources.compose.stringResource
-import domain.models.TaskDomain
 import io.github.aakira.napier.LogLevel
 import io.github.aakira.napier.Napier
 import irancell.nwg.wfm.Camera
 import irancell.nwg.wfm.MR
-import irancell.nwg.wfm.checkConnectivity
 import irancell.nwg.wfm.getSharedPref
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
@@ -54,9 +53,9 @@ class MainScreen(
         val navigator = LocalNavigator.currentOrThrow
         val viewModel: MainScreenVM = koinInject()
         Napier.log(LogLevel.ASSERT, "MainScreenVM", message = viewModel.toString())
+//        val viewModel = remember { MainScreenVM() }
         val availability by viewModel.availability.collectAsState()
         val openCamera by viewModel.openCamera.collectAsState()
-        val state by viewModel.state.collectAsState()
 
         val ticketInfoScreen =
             rememberScreen(com.irancell.nwg.wfm.presentation.nav.Screen.TicketProcess.TicketInfo)
@@ -64,8 +63,8 @@ class MainScreen(
             rememberScreen(Notification)
         val accountScreen =
             rememberScreen(AccountInfo)
-        val settingsScreen =
-            rememberScreen(Menu.Settings)
+        val settingsScreen = rememberScreen(Menu.Settings)
+        val formViewerScreen = rememberScreen(Menu.FormViewer)
         val aboutScreen = rememberScreen(Menu.About)
         val gpsTrackingReportScreen = rememberScreen(Menu.GpsTrackingReport)
         val loginScreen = rememberScreen(com.irancell.nwg.wfm.presentation.nav.Screen.Auth.Login)
@@ -129,109 +128,101 @@ class MainScreen(
             }
 
 
-        BaseScreen(
-            viewModel = viewModel,
-            scaffoldState = scaffoldState,
-            hasDrawer = true,
-            topBar = {
-                CustomTopAppBar(
-                    availability,
-                    stringResource(MR.strings.ticket_list),
-                    onNavigationItemClick = {
-                        scope.launch {
-                            if (scaffoldState.drawerState.isOpen)
-                                scaffoldState.drawerState.close()
-                            else
-                                scaffoldState.drawerState.open()
-                        }
-                    },
-                    onAvailabilityClick = {
-                        viewModel.events.value = MainEvent.AvailabilityStatus
-                    },
-                    onNotificationClick = {
-                        navigator.push(notificationScreen)
-                    })
-            },
-            drawerContent = {
-                DrawerHeader() {
+        BaseScreen(scaffoldState = scaffoldState, hasDrawer = true, topBar = {
+            CustomTopAppBar(
+                availability,
+                stringResource(MR.strings.ticket_list),
+                onNavigationItemClick = {
                     scope.launch {
                         if (scaffoldState.drawerState.isOpen)
                             scaffoldState.drawerState.close()
                         else
                             scaffoldState.drawerState.open()
                     }
-
-                    navigator.push(accountScreen)
-
+                },
+                onAvailabilityClick = {
+                    viewModel.events.value = MainEvent.AvailabilityStatus
+                },
+                onNotificationClick = {
+                    navigator.push(notificationScreen)
+                })
+        }, drawerContent = {
+            DrawerHeader() {
+                scope.launch {
+                    if (scaffoldState.drawerState.isOpen)
+                        scaffoldState.drawerState.close()
+                    else
+                        scaffoldState.drawerState.open()
                 }
-                DrawerBody(onItemClick = {
 
-                    scope.launch {
-                        if (scaffoldState.drawerState.isOpen)
-                            scaffoldState.drawerState.close()
-                        else
-                            scaffoldState.drawerState.open()
+                navigator.push(accountScreen)
 
-                        when (it) {
-                            Menu.About -> {
+            }
+            DrawerBody(onItemClick = {
 
-                                navigator.push(aboutScreen)
+                scope.launch {
+                    if (scaffoldState.drawerState.isOpen)
+                        scaffoldState.drawerState.close()
+                    else
+                        scaffoldState.drawerState.open()
 
-                            }
+                    when (it) {
+                        Menu.About -> {
+                            navigator.push(aboutScreen)
 
-                            Menu.Logout -> {
-                                viewModel.events.value = MainEvent.Logout
-                            }
+                        }
 
-                            Menu.MyTickets -> {
+                        Menu.Logout -> {
+                            viewModel.events.value = MainEvent.Logout
+                        }
+
+                        Menu.MyTickets -> {
 //                        navigator.push(settingsScreen)
 
-                            }
-
-                            Menu.Settings -> {
-                                navigator.push(settingsScreen)
-
-                            }
-
-                            Menu.GpsTrackingReport -> {
-                                navigator.push(gpsTrackingReportScreen)
-                            }
                         }
-                        scaffoldState.drawerState.close()
 
+                        Menu.Settings -> {
+                            navigator.push(settingsScreen)
+
+                        }
+
+                        Menu.GpsTrackingReport -> {
+                            navigator.push(gpsTrackingReportScreen)
+                        }
+                        Menu.FormViewer->{
+                            navigator.push(formViewerScreen)
+                        }
                     }
-                })
-            },
-            title = title,
-            bottomSheetTitle = bottomSheetTitle,
+                    scaffoldState.drawerState.close()
+
+                }
+            })
+        }, title = title, bottomSheetTitle = bottomSheetTitle,
             bottomBarBottomSheetContent = {
                 when (events) {
                     MainEvent.ActionFilter -> {
-                        Napier.log(LogLevel.ASSERT,tag="ActionFilter", message = "ActionFilter")
+                        bottomSheetDoubleActionBottomBar(BottomSheetDoubleActionModel(
+                            stringResource(MR.strings.clear_all),
+                            Color.Transparent,
+                            textInverseDisabled,
+                            stringResource(MR.strings.filters),
+                            surfaceBrandDefault,
+                            textInverse
+                        ), onFirstButtonClick = {
+                            scope.launch {
+                                viewModel.removeAllFilters()
+                                scaffoldState.bottomSheetState.collapse()
+                                viewModel.events.value = MainEvent.Default
+                            }
 
-                        bottomSheetDoubleActionBottomBar(
-                            BottomSheetDoubleActionModel(
-                                stringResource(MR.strings.clear_all),
-                                Color.Transparent,
-                                textInverseDisabled,
-                                stringResource(MR.strings.filters),
-                                surfaceBrandDefault,
-                                textInverse
-                            ), onFirstButtonClick = {
-                                scope.launch {
-                                    viewModel.removeAllFilters()
-                                    scaffoldState.bottomSheetState.collapse()
-                                    viewModel.events.value = MainEvent.Default
-                                }
+                        }, onSecondButtonClick = {
+                            scope.launch {
+                                viewModel.getActiveFilterItems()
+                                scaffoldState.bottomSheetState.collapse()
+                                viewModel.events.value = MainEvent.Default
 
-                            }, onSecondButtonClick = {
-                                scope.launch {
-                                    viewModel.getActiveFilterItems()
-                                    scaffoldState.bottomSheetState.collapse()
-                                    viewModel.events.value = MainEvent.Default
-
-                                }
-                            })
+                            }
+                        })
                         scope.launch {
                             scaffoldState.bottomSheetState.expand()
                         }
@@ -253,11 +244,12 @@ class MainScreen(
                                 stringResource(MR.strings.logout),
                                 surfaceBrandDefault,
                                 textInverse
-                            ), onFirstButtonClick = {
+                            )
+                        , onFirstButtonClick = {
 
 
                             }, onSecondButtonClick = {
-                                getSharedPref().put(Token, "")
+                                getSharedPref().put(Token,"")
                                 navigator.popAll()
                                 navigator.push(loginScreen)
 
@@ -309,13 +301,11 @@ class MainScreen(
                     }
 
                 }
-            },
-            bottomSheetContent = {
+            }, bottomSheetContent = {
 
                 when (events) {
 
                     MainEvent.ActionFilter -> {
-
                         CustomFilterSectionPreview(viewModel.filterSectionItems)
                         scope.launch {
                             scaffoldState.bottomSheetState.expand()
@@ -358,8 +348,6 @@ class MainScreen(
                     }
 
                     MainEvent.MoreOptions -> {
-
-
                         MoreOptions(onCancelClick = {
                             viewModel.events.value = MainEvent.CancelTicket
                         }, onSuspendClick = {
@@ -439,20 +427,12 @@ class MainScreen(
                     }
 
                     MainEvent.AcceptTicket -> {
-//                        Napier.log(LogLevel.ASSERT,tag="Accepttt", message = "Accpettcket")
-//                        navigator.push(ticketInfoScreen)
+                        navigator.push(ticketInfoScreen)
                     }
 
                 }
 
-            },
-            snackbarHostState = remember { androidx.compose.material.SnackbarHostState() },
-            content = {
-                scope.launch {
-                    checkConnectivity {
-                        Napier.log(LogLevel.ASSERT,tag = "connected",message= it.toString())
-                    }
-                }
+            }, content = {
                 if (openCamera) {
                     viewModel.selectedTask.value?.let {
                         Camera.ImagePicker("/wfmImages/suspend/${it}") {
@@ -462,22 +442,14 @@ class MainScreen(
                     }
                 }
                 if (availability) {
-                    TicketListScreen(
-                        searchText = "",
-                        onEvent = { mainEvent: MainEvent, task: TaskDomain? ->
-                            Napier.i("TicketListScreen")
-                            viewModel.events.value = mainEvent
-                            viewModel.selectedTask.value = task
-                        },
-                        tasks = ArrayList(viewModel.tasks.toList())
-                            , onAccept = {
-                                navigator.push(ticketInfoScreen)
-                        }
-                    )
+                    TicketListScreen(searchText = "", onEvent = { mainEvent: MainEvent, task: Task? ->
+                        Napier.i("TicketListScreen")
+                        viewModel.events.value = mainEvent
+                        viewModel.selectedTask.value = task
+                    }, tasks = viewModel.tasks)
                 }
 
-            },
-            onCloseBottomSheet = {
+            }, onCloseBottomSheet = {
                 viewModel.events.value = MainEvent.Default
             })
     }

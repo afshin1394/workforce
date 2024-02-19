@@ -78,6 +78,14 @@
     <string name="unread">Unread</string>
     <string name="read">Read</string>
     <string name="notification">Notification</string>
+    <string name="search">Search</string>
+    <string name="aaccept">Accept</string>
+    <string name="selected_date">selected date</string>
+    <string name="selected_time">selected time</string>
+    <string name="selected_date_time">selected date time</string>
+    <string name="date_picker">Date picker</string>
+    <string name="time_picker">Time picker</string>
+    <string name="date_time_picker">Date-time picker</string>
 
 
     <string name="client_error">Credentials are not valid</string>

@@ -74,6 +74,9 @@ val Teal200 = Color(0xFF03DAC5)
  val gray_9 = Color(0xFF191919)
  val gray_10 = Color(0xFF191919)
 
+val blue_1=Color(0xFFF3F9FC)
+
+
 
 val surfacePressed = gray_3
 
@@ -117,7 +120,7 @@ val backgroundBackground3 = gray_3
 val surfaceSelected = brand_blue_2
 val surfaceHovered = gray_2
 
-val subtleDefault = Color(0xFFF3F9FC)
+val subtleDefault = blue_1
 val mediumDivider = gray_3
 
 
