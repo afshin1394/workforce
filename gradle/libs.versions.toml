@@ -40,6 +40,7 @@ orbital = "0.3.4"
 
 
 [libraries]
+
 calf-ui = { module = "com.mohamedrejeb.calf:calf-ui", version.ref = "calfUi" }
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
 kotlin-test-junit = { module = "org.jetbrains.kotlin:kotlin-test-junit", version.ref = "kotlin" }
