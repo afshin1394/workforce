@@ -10,6 +10,7 @@ import dev.icerock.moko.permissions.Permission
 import dev.icerock.moko.permissions.PermissionsController
 import io.github.aakira.napier.LogLevel
 import io.github.aakira.napier.Napier
+import irancell.nwg.wfm.canReadExternalStorage
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -27,13 +28,15 @@ class SplashScreenVM(
     val permissionState = _permissionState.asStateFlow()
 
 
-
-    val permissions = listOf<Permission>(
+    val permissions = arrayListOf<Permission>(
         Permission.CAMERA,
         Permission.LOCATION,
     )
 
     fun checkPermissions(process: () -> Unit) {
+
+
+
         viewModelScope.launch {
 
 

@@ -75,6 +75,7 @@ class SplashScreen() : Screen, KoinComponent {
 
             when (event) {
                 LifecycleEvent.ON_RESUME -> {
+
                     viewModel.checkPermissions {
                         scope.launch {
                             delay(1000)
@@ -147,6 +148,8 @@ class SplashScreen() : Screen, KoinComponent {
                             when (userAction) {
                                 SnackbarResult.ActionPerformed -> {
                                     openAppSettings()
+                                    delay(2000)
+                                    viewModel.changeStateDenied()
                                 }
                                 SnackbarResult.Dismissed -> {
                                 }
@@ -171,6 +174,8 @@ class SplashScreen() : Screen, KoinComponent {
                             when (userAction) {
                                 SnackbarResult.ActionPerformed -> {
                                     openAppSettings()
+                                    delay(2000)
+                                    viewModel.changeStateDenied()
                                 }
 
                                 SnackbarResult.Dismissed -> {

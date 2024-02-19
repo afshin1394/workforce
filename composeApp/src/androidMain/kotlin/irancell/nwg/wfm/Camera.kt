@@ -37,9 +37,12 @@ actual class Camera {
             Log.i("uriiiii", "ImagePicker: ${file.path}")
 
             val uri  = InternalStorage.getUriForFile(context,file)
+
             val cameraLauncher = rememberLauncherForActivityResult(
                 contract = ActivityResultContracts.TakePicture(),
                 onResult = { success ->
+                    Log.i("pathtt", "ImagePicker: ${file.path}")
+
                     if (success) {
                         onSuccess(uri)
                     }

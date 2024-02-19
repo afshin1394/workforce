@@ -9,6 +9,7 @@ import com.irancell.nwg.wfm.presentation.screens.main.compose.NotificationScreen
 import presentation.screens.splash.compose.SplashScreen
 import presentation.screens.ticket_process.compose.TicketInfoScreen
 import presentation.screens.main.compose.AboutScreen
+import presentation.screens.main.compose.FormViewerScreen
 import presentation.screens.main.compose.GpsTrackingReportScreen
 import presentation.screens.main.compose.SettingsScreen
 import presentation.screens.ticket_process.compose.TicketProcessScreen

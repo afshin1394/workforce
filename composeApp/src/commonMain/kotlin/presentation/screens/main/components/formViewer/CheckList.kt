@@ -1,8 +1,11 @@
 package presentation.screens.main.components.formViewer
 
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
@@ -13,41 +16,54 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import irancell.nwg.wfm.getSharedPref
 import presentation.theme.strokeDefaultLight
 import presentation.theme.surfaceBrandDefault
 import presentation.theme.textSecondary
+import utils.Language
 
 
 @Composable
-fun CheckList(itemList: List<String>, onItemSelected: (List<String>) -> Unit) {
+fun CheckList(title:String,  itemList: List<String>, onItemSelected: (List<String>) -> Unit) {
     val selectedItems = remember { mutableStateListOf<String>() }
 
-    LazyColumn(modifier = Modifier.heightIn(0.dp, 500.dp)) {
-        items(itemList.size) { index ->
-            val item = itemList[index]
+    Column(Modifier.padding(16.dp)) {
 
-            ItemCheckList(
+        Text(
+            text = title,
+            style = TextStyle(color = textSecondary, fontSize = 16.sp),
+            modifier = Modifier.fillMaxWidth().wrapContentHeight(),
+            textAlign =   if (getSharedPref().getString(Language)=="en") TextAlign.Left else TextAlign.Right
+        )
 
-                item=item,
-                onItemSelected={
+        LazyColumn(modifier = Modifier.heightIn(0.dp, 500.dp)) {
+            items(itemList.size) { index ->
+                val item = itemList[index]
 
-                    val isSelected = selectedItems.contains(it)
-                    if (isSelected) {
-                        selectedItems.remove(item)
-                    } else {
-                        selectedItems.add(item)
+                ItemCheckList(
+
+                    item = item,
+                    onItemSelected = {
+
+                        val isSelected = selectedItems.contains(it)
+                        if (isSelected) {
+                            selectedItems.remove(item)
+                        } else {
+                            selectedItems.add(item)
+                        }
+                        onItemSelected(selectedItems)
+
                     }
-                    onItemSelected(selectedItems)
 
-                }
+                )
 
-            )
-
+            }
         }
+
     }
-
-
 
 
 }

@@ -66,3 +66,8 @@ val h4 = TextStyle(
     fontWeight = FontWeight.SemiBold,
     fontSize = 20.sp
 )
+
+val h5 = TextStyle(
+    fontWeight = FontWeight.SemiBold,
+    fontSize = 16.sp
+)

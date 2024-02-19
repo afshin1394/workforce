@@ -48,6 +48,7 @@ import org.koin.dsl.module
 import presentation.screens.auth.viewmodel.LoginScreenVM
 import presentation.screens.auth.viewmodel.VerifyScreenVM
 import presentation.screens.main.viewmodel.AboutScreenVM
+import presentation.screens.main.viewmodel.FormViewVM
 import presentation.screens.main.viewmodel.GpsTrackingReportScreenVM
 import presentation.screens.ticket_process.viewModel.TicketInfoVM
 import utils.Token
@@ -166,4 +167,5 @@ fun viewModelModule() = module {
     viewModelDefinition { VerifyScreenVM(get(),get()) }
     viewModelDefinition { TicketInfoVM() }
     viewModelDefinition { TicketProcessVM() }
+    viewModelDefinition { FormViewVM() }
 }

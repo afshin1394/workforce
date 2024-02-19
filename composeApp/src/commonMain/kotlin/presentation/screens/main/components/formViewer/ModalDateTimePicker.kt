@@ -308,7 +308,7 @@ fun BottomSheetDate(
 
 
                         Text(
-                            text = "Now",
+                            text = stringResource(MR.strings.now),
                             style = TextStyle(color = Color.Blue),
                             modifier = Modifier.weight(1f).padding(top = 18.dp).clickable {
 
