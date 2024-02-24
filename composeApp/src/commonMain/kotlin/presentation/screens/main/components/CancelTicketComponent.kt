@@ -1,4 +1,4 @@
-package com.irancell.nwg.wfm.presentation.screens.main.components
+package presentation.screens.main.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -14,7 +14,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.irancell.nwg.wfm.presentation.components.CustomButton
 import com.irancell.nwg.wfm.presentation.components.CustomButtonData
-import com.irancell.nwg.wfm.presentation.components.CustomEditTextComponent
+import com.irancell.nwg.wfm.presentation.screens.main.components.DropDownComponent
+import presentation.components.CustomEditTextComponent
 import com.irancell.nwg.wfm.presentation.theme.*
 import dev.icerock.moko.resources.compose.stringResource
 import irancell.nwg.wfm.MR
@@ -50,7 +51,7 @@ fun CancelTicketComponent(suspendReasonState: String = "", ticketName : String =
 
         })
         Spacer(modifier = Modifier.padding(vertical = spacing1X))
-        CustomEditTextComponent(updateText = {
+        CustomEditTextComponent(defaultText = "",updateText = {
             if (it.text.isNotEmpty()) {
                 onCompleted(true)
             } else {

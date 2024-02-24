@@ -2,7 +2,6 @@ package presentation.screens.main.compose
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.BottomSheetScaffoldState
@@ -10,7 +9,6 @@ import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.rememberBottomSheetScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import cafe.adriel.voyager.core.screen.Screen
@@ -34,6 +32,7 @@ import presentation.theme.surfaceDefault
 import presentation.theme.textBrand
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
+import presentation.components.MenuItemsTopBar
 import utils.Language
 import utils.SelectLanguage
 import utils.isRunningGPS

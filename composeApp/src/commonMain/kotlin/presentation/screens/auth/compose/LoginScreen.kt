@@ -26,6 +26,8 @@ import io.github.aakira.napier.LogLevel
 import io.github.aakira.napier.Napier
 import irancell.nwg.wfm.MR
 import irancell.nwg.wfm.MR.strings.email
+import irancell.nwg.wfm.MR.strings.update
+import irancell.nwg.wfm.getSharedPref
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import presentation.screens.auth.components.AuthAlertText
@@ -37,24 +39,29 @@ import presentation.theme.backgroundBackground3
 
 import presentation.theme.body_large
 import presentation.theme.error_5
+import utils.PhoneNumber
 import utils.ViewStates
 
 class LoginScreen : Screen {
 
 
-
     @Composable
     override fun Content() {
         val navigator = LocalNavigator.currentOrThrow
-        val viewModel : LoginScreenVM = koinInject()
+        val viewModel: LoginScreenVM = koinInject()
         val state by viewModel.state.collectAsState()
         val email by viewModel.email.collectAsState()
         val password by viewModel.password.collectAsState()
 
 
-
         val verifyScreen =
-            rememberScreen(com.irancell.nwg.wfm.presentation.nav.Screen.Auth.Verify(phoneNumber = "0912087866563"))
+            rememberScreen(
+                com.irancell.nwg.wfm.presentation.nav.Screen.Auth.Verify(
+                    phoneNumber = getSharedPref().getString(
+                        PhoneNumber
+                    ) ?: ""
+                )
+            )
 
         var noPassword by remember {
             mutableStateOf(false)
@@ -73,7 +80,7 @@ class LoginScreen : Screen {
         Scaffold(snackbarHost = {
             SnackbarHost(hostState = snackbarHostState)
         }) {
-            val success =  stringResource(MR.strings.success)
+            val success = stringResource(MR.strings.success)
             val error = stringResource(MR.strings.login_error)
             Column(
                 modifier = Modifier
@@ -90,6 +97,7 @@ class LoginScreen : Screen {
                                 message = "${error}!",
                                 duration = SnackbarDuration.Short,
                             )
+                            viewModel.updateState(ViewStates.Default)
                         }
 
                     }
@@ -104,10 +112,15 @@ class LoginScreen : Screen {
                                 message = "${success}!",
                                 duration = SnackbarDuration.Short,
                             )
+                            viewModel.updateState(ViewStates.Default)
                         }
                     }
 
                     ViewStates.Default -> {
+
+                    }
+
+                    ViewStates.NoGps -> {
 
                     }
                 }
@@ -127,8 +140,10 @@ class LoginScreen : Screen {
                     Text(text = stringResource(MR.strings.login_mtn_account), style = body_large)
                     Spacer(modifier = Modifier.height(spacing3X))
 
-                    AuthTextField(defaultText = email,authTextFieldItem = AuthTextFieldItem(
-                        stringResource(MR.strings.company_email), imageResource = MR.images.mail1, stringResource(MR.strings.company_email),
+                    AuthTextField(defaultText = email, authTextFieldItem = AuthTextFieldItem(
+                        stringResource(MR.strings.company_email),
+                        imageResource = MR.images.mail1,
+                        stringResource(MR.strings.company_email),
                         hasPassword = false,
                         passwordVisibility = true
                     ), updateText = {
@@ -139,8 +154,10 @@ class LoginScreen : Screen {
                         Spacer(modifier = Modifier.height(spacing1X))
                         AuthAlertText(
                             alertTextItem = AuthAlertTextItem(
-                                true, text = stringResource(MR.strings.email_required),
-                                textColor = error_5, contentDescriptor = stringResource(MR.strings.email_required)
+                                true,
+                                text = stringResource(MR.strings.email_required),
+                                textColor = error_5,
+                                contentDescriptor = stringResource(MR.strings.email_required)
                             )
                         ) {
                             //onClick
@@ -148,8 +165,10 @@ class LoginScreen : Screen {
                     }
                     Spacer(modifier = Modifier.height(spacing3X))
 
-                    AuthTextField(defaultText = password,authTextFieldItem = AuthTextFieldItem(
-                        stringResource(MR.strings.password), imageResource = MR.images.password, stringResource(MR.strings.password),
+                    AuthTextField(defaultText = password, authTextFieldItem = AuthTextFieldItem(
+                        stringResource(MR.strings.password),
+                        imageResource = MR.images.password,
+                        stringResource(MR.strings.password),
                         hasPassword = true,
                         passwordVisibility = false
                     ), updateText = {
@@ -160,8 +179,10 @@ class LoginScreen : Screen {
 
                         AuthAlertText(
                             alertTextItem = AuthAlertTextItem(
-                                true, text = stringResource(MR.strings.password_required),
-                                textColor = error_5, contentDescriptor = stringResource(MR.strings.password_required)
+                                true,
+                                text = stringResource(MR.strings.password_required),
+                                textColor = error_5,
+                                contentDescriptor = stringResource(MR.strings.password_required)
                             )
                         ) {
                             //onClick
@@ -190,8 +211,12 @@ class LoginScreen : Screen {
                         notEnoughChar = password.length < 8 && password.isNotEmpty()
 
                         if (!noEmail && !noPassword && !notEnoughChar) {
-                            Napier.log(LogLevel.ASSERT,"email & password",message = "email ${email} password ${password}")
-                            viewModel.login(email,password){
+                            Napier.log(
+                                LogLevel.ASSERT,
+                                "email & password",
+                                message = "email ${email} password ${password}"
+                            )
+                            viewModel.login(email, password) {
                                 navigator.push(verifyScreen)
                             }
                         }

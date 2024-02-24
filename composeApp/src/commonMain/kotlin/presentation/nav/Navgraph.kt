@@ -2,7 +2,7 @@ package presentation.nav
 import cafe.adriel.voyager.core.registry.screenModule
 import com.irancell.nwg.wfm.presentation.nav.Screen
 import presentation.screens.auth.compose.LoginScreen
-import com.irancell.nwg.wfm.presentation.screens.auth.VerifyScreen
+import presentation.screens.auth.compose.VerifyScreen
 import presentation.screens.main.compose.MainScreen
 import presentation.screens.main.compose.AccountScreen
 import com.irancell.nwg.wfm.presentation.screens.main.compose.NotificationScreen
@@ -39,7 +39,7 @@ import presentation.screens.ticket_process.compose.TicketProcessScreen
 //import com.irancell.nwg.wfm.ui.compose.AboutScreen
 //import presentation.screens.main.compose.SettingsScreen
 //import presentation.screens.auth.compose.LoginScreen
-//import com.irancell.nwg.wfm.presentation.screens.auth.VerifyScreen
+//import presentation.screens.auth.compose.VerifyScreen
 //import presentation.screens.main.compose.MainScreen
 //import presentation.screens.splash.compose.SplashScreen
 //
@@ -337,7 +337,7 @@ import presentation.screens.ticket_process.compose.TicketProcessScreen
                 NotificationScreen( "Notification")
             }
             register<Screen.TicketProcess.TicketInfo> {
-                TicketInfoScreen( "TicketInfo")
+                TicketInfoScreen()
             }
             register<Screen.TicketProcess.TicketProcessScreen> {
                 TicketProcessScreen( "TicketProcessScreen")

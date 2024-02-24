@@ -12,16 +12,15 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import cafe.adriel.voyager.core.registry.rememberScreen
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import com.irancell.nwg.wfm.presentation.components.MenuItemsTopBar
+import presentation.components.MenuItemsTopBar
 import com.irancell.nwg.wfm.presentation.model.ProcessLevel
 import presentation.screens.ticket_process.viewModel.TicketProcessVM
 import presentation.screens.ticket_process.components.processBar
 import dev.icerock.moko.resources.compose.stringResource
-import io.github.aakira.napier.LogLevel
-import io.github.aakira.napier.Napier
 import irancell.nwg.wfm.MR
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
@@ -43,6 +42,7 @@ class TicketProcessScreen(private val title: String) : Screen {
 
         val currentLevelState = viewModel.currentLevel.collectAsState()
         val listOfSteps = viewModel.listSample.toMutableList()
+        val formViewerScreen = rememberScreen(com.irancell.nwg.wfm.presentation.nav.Screen.Main.Menu.FormViewer)
 
 
         BaseScreen(
@@ -53,7 +53,8 @@ class TicketProcessScreen(private val title: String) : Screen {
             bottomSheetHasHeader = false,
             topBar = {
                 MenuItemsTopBar(title) {
-                    navigator.pop()
+
+                    navigator.popUntil { it ==  TicketInfoScreen() }
 
                 }
             },
@@ -91,7 +92,9 @@ class TicketProcessScreen(private val title: String) : Screen {
 
                 Column() {
                     processBar(listOfSteps,currentLevelState.value)
-                    formView(listOfSteps[currentLevelState.value])
+                    formViewerScreen.Content()
+//                    navigator.push(formViewerScreen)
+//                    formView(listOfSteps[currentLevelState.value])
                 }
             })
 

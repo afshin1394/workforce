@@ -13,34 +13,40 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import com.irancell.nwg.wfm.presentation.nav.Screen.Main.*
 import com.irancell.nwg.wfm.presentation.components.*
 import presentation.model.BottomSheetDoubleActionModel
-import com.irancell.nwg.wfm.presentation.screens.main.components.*
 import presentation.screens.main.events.MainEvent
 import presentation.screens.main.viewmodel.MainScreenVM
 import com.irancell.nwg.wfm.presentation.theme.*
 import presentation.screens.main.components.TicketListScreen
-import dev.icerock.moko.permissions.compose.PermissionsControllerFactory
-import dev.icerock.moko.permissions.compose.rememberPermissionsControllerFactory
+
 import dev.icerock.moko.resources.compose.stringResource
 import domain.models.TaskDomain
 import io.github.aakira.napier.LogLevel
 import io.github.aakira.napier.Napier
 import irancell.nwg.wfm.Camera
+import irancell.nwg.wfm.InternalStorage
 import irancell.nwg.wfm.MR
 import irancell.nwg.wfm.checkConnectivity
 import irancell.nwg.wfm.getSharedPref
+import irancell.nwg.wfm.provideAppContext
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import presentation.components.CustomTopAppBar
 import presentation.components.DrawerBody
 import presentation.components.DrawerHeader
 import presentation.screens.main.components.AvailabilityStatus
+import presentation.screens.main.components.CancelTicketBottomBarComponent
+import presentation.screens.main.components.CancelTicketComponent
 import presentation.screens.main.components.MoreOptions
+import presentation.screens.main.components.SuspendTicketBottomBarComponent
+import presentation.screens.main.components.SuspendTicketContentComponent
 import presentation.theme.body_large
 import presentation.theme.surfaceBrandDefault
 import presentation.theme.surfaceDefault
 import presentation.theme.textInverse
 import presentation.theme.textInverseDisabled
 import presentation.theme.textPrimary
+import utils.Availability
+import utils.PhoneNumber
 import utils.Token
 
 class MainScreen(
@@ -57,6 +63,7 @@ class MainScreen(
         val availability by viewModel.availability.collectAsState()
         val openCamera by viewModel.openCamera.collectAsState()
         val state by viewModel.state.collectAsState()
+        val suspendTaskState by viewModel.suspendTaskDomain.collectAsState()
 
         val ticketInfoScreen =
             rememberScreen(com.irancell.nwg.wfm.presentation.nav.Screen.TicketProcess.TicketInfo)
@@ -83,6 +90,8 @@ class MainScreen(
         val cancelItems by lazy {
             viewModel.cancelItems
         }
+
+
 
         val bottomSheetTitle: String =
             when (events) {
@@ -264,6 +273,8 @@ class MainScreen(
 
 
                             }, onSecondButtonClick = {
+                                getSharedPref().put(Availability,false)
+                                getSharedPref().put(PhoneNumber,"")
                                 getSharedPref().put(Token, "")
                                 navigator.popAll()
                                 navigator.push(loginScreen)
@@ -294,6 +305,7 @@ class MainScreen(
 
 
                         SuspendTicketBottomBarComponent(viewModel.enableSuspendSubmit.value) {
+                            viewModel.saveSuspendTask()
                             viewModel.events.value = MainEvent.Default
                         }
 
@@ -378,21 +390,25 @@ class MainScreen(
                     }
 
                     MainEvent.SuspendTicket -> {
-                        val factory: PermissionsControllerFactory =
-                            rememberPermissionsControllerFactory()
-
+//                        val factory: PermissionsControllerFactory =
+//                            rememberPermissionsControllerFactory()
+                        viewModel.loadSuspendTask()
                         SuspendTicketContentComponent(
-                            viewModel.suspendReason.value,
+                            taskid = viewModel.selectedTask.value!!.instanceTitle,
+                            suspendTaskDomain = viewModel.suspendTaskDomain.value
+                            ,
                             onSelectReason = {
                                 viewModel.events.value = MainEvent.SuspendReason
                             },
-                            onCompleted = {
-                                viewModel.enableSuspendSubmit.value = it
+                            onCompleted = { isComplete, description ->
+                                viewModel.enableSuspendSubmit.value = isComplete
+                                viewModel.suspendDescription.value = description
                             },
                             onCameraClick = {
-                                viewModel.openCamera(factory.createPermissionsController())
+                                viewModel.openCamera()
                             }
                         )
+
                         scope.launch {
                             scaffoldState.bottomSheetState.expand()
                         }
@@ -462,8 +478,10 @@ class MainScreen(
                 }
                 if (openCamera) {
                     viewModel.selectedTask.value?.let {
-                        Camera.ImagePicker("/wfmImages/suspend/${it.workId}") {
+                        InternalStorage.createWorkItemImages(provideAppContext(),"Suspend",it.workId.toString())
 
+                        Camera.ImagePicker("/wfmImages/Suspend/${it.workId}") { it ->
+                            viewModel.suspendImageUri.value.plus(it.toString())
                         }
                         viewModel.updateCameraStatus(false)
                     }
@@ -478,6 +496,8 @@ class MainScreen(
                         },
                         tasks = ArrayList(viewModel.tasks.toList())
                         , onAccept = {
+                            viewModel.selectedTask.value = it
+
                             navigator.push(ticketInfoScreen)
                         }
                     )

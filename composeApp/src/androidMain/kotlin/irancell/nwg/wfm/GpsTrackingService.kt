@@ -12,9 +12,15 @@ import android.content.Intent
 import android.os.Build
 import android.os.IBinder
 import android.os.SystemClock
+import android.provider.Settings
 import android.util.Log
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import androidx.fragment.app.FragmentActivity
 import domain.models.LiveLocationDomain
 import domain.usecase.usecase.location.SendLocationToServerUseCase
 import domain.usecase.usecase.location.StoreLocationDataUseCase
@@ -26,6 +32,8 @@ import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -42,8 +50,10 @@ actual class GpsTrackingService : Service() , KoinComponent {
     private var lon: Double = 0.0
     val storeLocationDataUseCase : StoreLocationDataUseCase by inject()
     val sendLocationToServerUseCase : SendLocationToServerUseCase by inject()
+    val locationServiceEnabled = MutableStateFlow(false)
 
    actual companion object {
+
         lateinit var gpsTrackingIntent : Intent
 
         const val Notification_ID = 123
@@ -85,6 +95,7 @@ actual class GpsTrackingService : Service() , KoinComponent {
 
     @OptIn(DelicateCoroutinesApi::class)
     override fun onCreate() {
+
         Napier.log(LogLevel.ASSERT, tag = "serviice", message = "init")
         super.onCreate()
         isRunning = true
@@ -114,7 +125,7 @@ actual class GpsTrackingService : Service() , KoinComponent {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         Napier.log(LogLevel.ASSERT, tag = "serviice", message = "scope")
 
-        val scope = CoroutineScope(Dispatchers.IO)
+        val scope = CoroutineScope(Dispatchers.Main)
 
         scope.launch {
             Napier.log(LogLevel.ASSERT, tag = "serviice", message = "Launch")

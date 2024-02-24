@@ -23,7 +23,7 @@ import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import com.irancell.nwg.wfm.presentation.components.MenuItemsTopBar
+import presentation.components.MenuItemsTopBar
 import com.irancell.nwg.wfm.presentation.theme.spacing15X
 
 import org.koin.compose.koinInject
@@ -148,6 +148,10 @@ class GpsTrackingReportScreen(
                     }
 
                     ViewStates.Default -> {
+
+                    }
+
+                    ViewStates.NoGps -> {
 
                     }
                 }

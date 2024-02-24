@@ -107,7 +107,12 @@ fun DropDownSingleChoice(
                     Icon(
                         icon,
                         "contentDescription",
-                        Modifier.padding(end = 8.dp).clickable { expanded = !expanded },
+                        Modifier.padding(end = 8.dp).clickable {
+
+                            expanded = !expanded
+                            searchedText=""
+
+                                                               },
                         tint = textSecondary)
 
                 }
@@ -198,7 +203,12 @@ fun DropDownSingleChoice(
 
                 }
                 Spacer(modifier = Modifier.padding(top = spacing15X))
-                itemList.forEach { label ->
+
+                val filteredList=itemList.filter { lable->
+                    lable.lowercase().trim().contains(searchedText.lowercase())
+                }
+
+                filteredList.forEach { label ->
                     val isSelected = selectedText == label
 
                     DropdownMenuItemCustom(

@@ -83,7 +83,7 @@
     <string name="date_picker">انتخاب تاریخ</string>
     <string name="time_picker">انتخاب زمان</string>
     <string name="date_time_picker">انتخاب تاریخ-زمان</string>
-    <string name="client_error">اطلاعات کاربری شما معتبر نیست, لطفا مجددا وارد شوید.</string>
+    <string name="client_error">خطایی رخ داده است لطفا با پشتیبانی ارتباط حاصل فرمایید</string>
     <string name="server_error">سرور در دسترس نیست لطفا بعدا مجدد تلاش کنید.</string>
     <string name="timeout_error">لطفا اینترنت خود را چک کنید ارتباط برقرار نشد.</string>
     <string name="general_error">خطایی رخ داده است لطفا با پشتیبانی ارتباط حاصل فرمایید</string>
@@ -91,4 +91,7 @@
     <string name="choose_more">انتخاب چند مورد</string>
     <string name="form">فرم</string>
     <string name="now">زمان جاری</string>
+
+    <string name="otp_failed">خطا در دریافت کد تایید</string>
+
 </resources>

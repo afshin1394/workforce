@@ -5,8 +5,7 @@ sealed interface PermissionEvent {
 
     data object RequestPermission : PermissionEvent
 
-    data object DeniedException : PermissionEvent
+    data object DeniedPermission : PermissionEvent
     data object CheckPermission : PermissionEvent
 
-    data object DeniedAlwaysException : PermissionEvent
 }

@@ -36,6 +36,7 @@ composeImageLoader = "1.7.1"
 kotlinx-serialization = "1.6.2"
 connectivity_status= "1.2.0"
 orbital = "0.3.4"
+accompanist = "0.35.0-alpha"
 
 
 
@@ -110,6 +111,7 @@ kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serializa
 
 connectivity_status = { module = "com.github.ln-12:multiplatform-connectivity-status", version.ref = "connectivity_status" }
 orbital_animation = { module = "com.github.skydoves:orbital", version.ref = "orbital" }
+accompanist_permission = { module = "com.google.accompanist:accompanist-permissions", version.ref = "accompanist" }
 
 [plugins]
 moko-multiplatform = {id="dev.icerock.mobile.multiplatform-resources", version.ref = "moko-version"}

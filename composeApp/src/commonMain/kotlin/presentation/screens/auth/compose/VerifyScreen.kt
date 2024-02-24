@@ -1,4 +1,4 @@
-package com.irancell.nwg.wfm.presentation.screens.auth
+package presentation.screens.auth.compose
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -45,6 +45,7 @@ class VerifyScreen(private val phoneNumber : String = "") : Screen {
         val state by viewModel.state.collectAsState()
         val remainTime by viewModel.remainTime.collectAsState()
         val finishTimer by viewModel.finishTimer.collectAsState()
+        val smsCode by viewModel.otpCode.collectAsState()
 
         val mainScreen =
             rememberScreen(com.irancell.nwg.wfm.presentation.nav.Screen.Main.Menu.MyTickets)
@@ -54,9 +55,6 @@ class VerifyScreen(private val phoneNumber : String = "") : Screen {
             mutableStateOf(phoneNumber)
         }
 
-        var otpCode by remember {
-            mutableStateOf("")
-        }
         val snackbarHostState = remember { SnackbarHostState() }
         Scaffold(snackbarHost = {
             SnackbarHost(hostState = snackbarHostState)
@@ -90,6 +88,8 @@ class VerifyScreen(private val phoneNumber : String = "") : Screen {
                                     message = "$error",
                                     duration = SnackbarDuration.Short,
                                 )
+                                viewModel.updateState(ViewStates.Default)
+
                             }
                         }
 
@@ -103,17 +103,23 @@ class VerifyScreen(private val phoneNumber : String = "") : Screen {
                                     message = "${success}!",
                                     duration = SnackbarDuration.Short,
                                 )
+                                viewModel.updateState(ViewStates.Default)
+
                             }
                         }
 
                         ViewStates.Default -> {
 
                         }
+
+                        ViewStates.NoGps -> {
+
+                        }
                     }
 
                     Text(text =
                     buildAnnotatedString {
-                        val messageEnterCode = stringResource(MR.strings.enter_verification_code)
+                        val messageEnterCode = stringResource(MR.strings.enter_verification_code) + " " + phoneNumberState
 
                         withStyle(style = ParagraphStyle()) {
                             withStyle(
@@ -139,8 +145,7 @@ class VerifyScreen(private val phoneNumber : String = "") : Screen {
                     )
 
                     Spacer(modifier = Modifier.height(spacing3X))
-                    AuthVerificationCodeRow(otpText = otpCode, onOtpTextChange = { otp, boolean ->
-                        otpCode = otp
+                    AuthVerificationCodeRow(otpText = smsCode, onOtpTextChange = { otp, boolean ->
                     })
 
                     Spacer(modifier = Modifier.height(spacing3X))
@@ -166,8 +171,9 @@ class VerifyScreen(private val phoneNumber : String = "") : Screen {
                     Spacer(modifier = Modifier.height(spacing5X))
                     AuthButton(authButtonItem = AuthButtonItem(stringResource(MR.strings.verify))) {
                         //onClick
-                        if (otpCode.length == 6) {
-                            viewModel.verify(otpCode) {
+                        if (smsCode.length == 6) {
+                            viewModel.verify(smsCode) {
+                                viewModel.disableSMSListener()
                                 navigator.popUntil { it == SplashScreen() }
                                 navigator.push(mainScreen)
                             }

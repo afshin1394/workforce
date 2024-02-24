@@ -66,7 +66,7 @@ kotlin {
                 implementation(libs.voyager.transitions)
                 implementation(libs.moko.mvvm)
                 implementation(libs.moko.permission)
-                implementation(libs.moko.permission.compose)
+//                implementation(libs.moko.permission.compose)
                 implementation(libs.essenty.lifecycle)
                 implementation(libs.kotlin.x.datetime)
                 implementation(libs.koin.core)
@@ -99,6 +99,7 @@ kotlin {
                 implementation(libs.koin.android)
                 implementation(libs.ktor.client.okhttp)
                 implementation(libs.ktor.client.logging)
+                implementation(libs.accompanist.permission)
 
 
 //mapbox

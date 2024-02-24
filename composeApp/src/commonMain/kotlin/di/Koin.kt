@@ -23,6 +23,8 @@ import domain.usecase.usecase.location.GetGeneralLocationListUseCase
 import domain.usecase.usecase.location.SendLocationToServerUseCase
 import domain.usecase.usecase.availability.StoreAvailabilityUseCase
 import domain.usecase.usecase.location.StoreLocationDataUseCase
+import domain.usecase.usecase.suspendTask.GetSuspendTaskById
+import domain.usecase.usecase.suspendTask.StoreSuspendTask
 import domain.usecase.usecase.ticket.UpdateTasksUseCase
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.HttpTimeout
@@ -48,6 +50,7 @@ import org.koin.dsl.module
 import presentation.screens.auth.viewmodel.LoginScreenVM
 import presentation.screens.auth.viewmodel.VerifyScreenVM
 import presentation.screens.main.viewmodel.AboutScreenVM
+import presentation.screens.main.viewmodel.AccountScreenVM
 import presentation.screens.main.viewmodel.FormViewVM
 import presentation.screens.main.viewmodel.GpsTrackingReportScreenVM
 import presentation.screens.ticket_process.viewModel.TicketInfoVM
@@ -78,6 +81,8 @@ fun useCaseModule() = module {
     single { LoginUseCase(get()) }
     single { VerifyUseCase(get()) }
     single { ResendUseCase(get()) }
+    single { StoreSuspendTask(get()) }
+    single { GetSuspendTaskById(get()) }
 }
 
 fun httpModule() = module {
@@ -160,7 +165,7 @@ fun httpModule() = module {
 
 fun viewModelModule() = module {
     viewModelDefinition { AboutScreenVM() }
-    viewModelDefinition { MainScreenVM(get(), get(),get(),get()) }
+    viewModelDefinition { MainScreenVM(get(), get(),get(),get(),get(),get()) }
     viewModelDefinition { SettingScreenVM() }
     viewModelDefinition { GpsTrackingReportScreenVM(get()) }
     viewModelDefinition { LoginScreenVM(get()) }
@@ -168,4 +173,5 @@ fun viewModelModule() = module {
     viewModelDefinition { TicketInfoVM() }
     viewModelDefinition { TicketProcessVM() }
     viewModelDefinition { FormViewVM() }
+    viewModelDefinition { AccountScreenVM() }
 }

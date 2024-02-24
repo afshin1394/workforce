@@ -1,4 +1,4 @@
-package com.irancell.nwg.wfm.presentation.components
+package presentation.components
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -23,10 +23,11 @@ import presentation.theme.textPlaceHolder
 @Composable
 fun CustomEditTextComponent(
     modifier: Modifier = Modifier,
+    defaultText : String,
     editTextHint: String = "Describe the reason",
     updateText: (value: TextFieldValue) -> Unit = {}
 ) {
-    var value by remember { mutableStateOf(TextFieldValue("")) }
+    var value by remember { mutableStateOf(TextFieldValue(defaultText)) }
     Card(
         modifier = Modifier.background(
             color = surfaceDefault,

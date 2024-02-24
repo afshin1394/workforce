@@ -28,26 +28,23 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 
-import com.irancell.nwg.wfm.presentation.components.MenuItemsTopBar
+import presentation.components.MenuItemsTopBar
 import presentation.screens.ticket_process.viewModel.TicketProcessVM
-import presentation.model.BottomSheetDoubleActionModel
 import presentation.screens.main.compose.BaseScreen
-import presentation.screens.ticket_process.components.bottomDoubleActionSheet
 import com.irancell.nwg.wfm.presentation.theme.spacing15X
 import com.irancell.nwg.wfm.presentation.theme.spacing2X
 import presentation.theme.surfaceBrandDefault
-import presentation.theme.surfaceDefault
 import presentation.theme.textInverse
-import presentation.theme.textPrimary
 import dev.icerock.moko.resources.compose.painterResource
 import dev.icerock.moko.resources.compose.stringResource
 import irancell.nwg.wfm.MR
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
+import presentation.model.SingleButtonActionModel
+import presentation.screens.ticket_process.components.bottomSingleActionComponent
 import presentation.theme.body_large_strong
 
 class TicketInfoScreen(
-    private val title: String
 ) : Screen {
     @OptIn(ExperimentalMaterialApi::class)
     @Composable
@@ -64,7 +61,7 @@ class TicketInfoScreen(
 
             BaseScreen(
             viewModel =viewModel,
-            title = title,
+            title = "TicketInfo",
             scaffoldState = scaffoldState,
             hasDrawer = false,
             bottomSheetHasHeader = false,
@@ -75,17 +72,14 @@ class TicketInfoScreen(
             },
             bottomSheetTitle = "",
             bottomSheetContent = {
-                bottomDoubleActionSheet(
-                    BottomSheetDoubleActionModel(
-                        stringResource(MR.strings.more_options),
-                        surfaceDefault,
-                        textPrimary,
+
+
+                bottomSingleActionComponent(
+                    SingleButtonActionModel(
                         stringResource(MR.strings.resume),
                         surfaceBrandDefault,
                         textInverse
-                    ), onFirstButtonClick = {
-
-                    }, onSecondButtonClick = {
+                    ), onClick = {
                         navigator.push(ticketProcessScreen)
                     })
 

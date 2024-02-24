@@ -13,8 +13,7 @@ import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import com.irancell.nwg.wfm.presentation.components.MenuItemsTopBar
-import presentation.screens.main.compose.BaseScreen
+import presentation.components.MenuItemsTopBar
 import com.irancell.nwg.wfm.presentation.screens.main.components.ProfileInfoComponent
 import com.irancell.nwg.wfm.presentation.theme.*
 import dev.icerock.moko.resources.compose.painterResource

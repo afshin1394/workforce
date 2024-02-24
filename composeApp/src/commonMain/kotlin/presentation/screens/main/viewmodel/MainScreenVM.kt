@@ -1,5 +1,6 @@
 package presentation.screens.main.viewmodel
 
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import irancell.nwg.wfm.GpsTrackingService
 import androidx.compose.runtime.mutableStateListOf
@@ -12,14 +13,18 @@ import presentation.model.StateFilter
 import presentation.screens.main.events.MainEvent
 import dev.icerock.moko.permissions.Permission
 import dev.icerock.moko.permissions.PermissionsController
+import domain.models.SuspendTaskDomain
 import domain.models.TaskDomain
 import domain.usecase.ResultStatus
 import domain.usecase.usecase.availability.ChangeServerAvailabilityUseCase
 import domain.usecase.usecase.availability.GetAvailabilityUseCase
 import domain.usecase.usecase.availability.StoreAvailabilityUseCase
+import domain.usecase.usecase.suspendTask.GetSuspendTaskById
+import domain.usecase.usecase.suspendTask.StoreSuspendTask
 import domain.usecase.usecase.ticket.UpdateTasksUseCase
 import io.github.aakira.napier.LogLevel
 import io.github.aakira.napier.Napier
+import irancell.nwg.wfm.Location
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -31,12 +36,15 @@ import utils.AsyncResult
 import utils.AsyncStatus
 import utils.BaseViewModel
 import utils.ViewStates
+import utils.getCurrentDate
 
 class MainScreenVM(
     private val storeAvailabilityUseCase: StoreAvailabilityUseCase,
     private val getAvailabilityUseCase: GetAvailabilityUseCase,
     private val changeServerAvailabilityUseCase: ChangeServerAvailabilityUseCase,
-    private val updateTasksUseCase: UpdateTasksUseCase
+    private val updateTasksUseCase: UpdateTasksUseCase,
+    private val storeSuspendTask: StoreSuspendTask,
+    private val getSuspendTaskById: GetSuspendTaskById
 ) : BaseViewModel() {
     private val _availability = MutableStateFlow(false)
     val availability = _availability.asStateFlow()
@@ -62,25 +70,17 @@ class MainScreenVM(
             ).collect {
                 when (it.status) {
                     AsyncStatus.ERROR -> {
-
-
                         Napier.log(LogLevel.ASSERT,"resrrrr", message = it.resultStatus.toString())
                     }
-
                     AsyncStatus.LOADING -> {
                         updateState(ViewStates.Loading)
-
-
                     }
-
                     AsyncStatus.SUCCESS -> {
                         updateState(ViewStates.Success)
                         it.data?.let { available ->
                             _availability.update { available }
                         }
                     }
-
-
                 }
             }
         }
@@ -251,6 +251,12 @@ class MainScreenVM(
     var cancelReason = mutableStateOf("")
 
 
+    var suspendDescription = mutableStateOf("")
+    var cancelDescription = mutableStateOf("")
+
+    var suspendImageUri = mutableStateOf("")
+
+
     val suspendItems = mutableStateListOf(
         SelectableItem(1, "Equipment failure", false),
         SelectableItem(2, "Weather condition", false),
@@ -401,15 +407,16 @@ class MainScreenVM(
         tasks.addAll(tasks)
     }
 
-    fun openCamera(permissionsController: PermissionsController) {
+    fun openCamera() {
         viewModelScope.launch {
-            val cameraPermission = Permission.CAMERA
-            val isGranted = permissionsController.isPermissionGranted(cameraPermission)
-            if (isGranted) {
-                _openCamera.update { true }
-            } else {
-                permissionsController.providePermission(cameraPermission)
-            }
+            _openCamera.update { true }
+
+//            val cameraPermission = Permission.CAMERA
+//            val isGranted = permissionsController.isPermissionGranted(cameraPermission)
+//            if (isGranted) {
+//            } else {
+//                permissionsController.providePermission(cameraPermission)
+//            }
         }
     }
 
@@ -460,6 +467,86 @@ class MainScreenVM(
                 }
             }
         }
+
+    }
+    private val _suspendTaskDomain = MutableStateFlow<SuspendTaskDomain?>(null)
+    val suspendTaskDomain = _suspendTaskDomain.asStateFlow()
+
+    fun loadSuspendTask(){
+        viewModelScope.launch {
+            selectedTask.value?.let {
+                getSuspendTaskById(it.workId).collect{
+                    when (it.status) {
+                        AsyncStatus.ERROR -> {
+//                            handleError(it.resultStatus)
+                        }
+
+                        AsyncStatus.LOADING -> {
+                            Napier.log(LogLevel.ASSERT, "getAllWorksUseCase", message = "LOADING: ")
+                            updateState(ViewStates.Loading)
+
+                        }
+
+                        AsyncStatus.SUCCESS -> {
+
+                            updateState(ViewStates.Success)
+                            val suspendTaskDomain = it.data
+                            _suspendTaskDomain.update { suspendTaskDomain }
+
+                            }
+                        }
+
+                    }
+                }
+
+
+
+            }
+
+        }
+
+
+
+
+    fun saveSuspendTask() {
+
+                viewModelScope.launch {
+                    storeSuspendTask(
+                        SuspendTaskDomain(
+                            selectedTask.value?.workId ?: 0,
+                            suspendReason.value,
+                            suspendDescription.value,
+                            suspendImageUri.value,
+                            0,
+                            getCurrentDate(),
+                            "",
+                            ""
+                        )
+                    ).collect {
+                        when (it.status) {
+                            AsyncStatus.ERROR -> {
+                                handleError(it.resultStatus)
+                                Location.stop()
+
+                            }
+
+                            AsyncStatus.LOADING -> {
+                                Napier.log(LogLevel.ASSERT, "getAllWorksUseCase", message = "LOADING: ")
+                                updateState(ViewStates.Loading)
+
+                            }
+
+                            AsyncStatus.SUCCESS -> {
+                                updateState(ViewStates.Success)
+                                Location.stop()
+
+                            }
+
+                        }
+                    }
+//                }
+            }
+
 
     }
 

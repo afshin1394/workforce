@@ -2,28 +2,31 @@ package irancell.nwg.wfm
 
 import App
 import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.content.res.Configuration
+import android.location.LocationManager
+import android.os.Build
 import android.os.Bundle
-import android.util.Log
-import androidx.activity.ComponentActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.fragment.app.FragmentActivity
-import cafe.adriel.voyager.navigator.Navigator
-import data.GeneralLocationRepositoryImpl
-import dev.icerock.moko.resources.desc.StringDesc
-import org.koin.compose.KoinApplication
-import org.koin.core.KoinApplication
-import org.koin.core.context.startKoin
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.update
 import org.koin.core.context.stopKoin
-import presentation.screens.splash.compose.SplashScreen
 import utils.Language
-import utils.SelectLanguage
-import utils.isRunningGPS
-import java.util.Locale
 
 class MainActivity : FragmentActivity() {
+    companion object {
+        const val LOCATION_SETTING_REQUEST = 999
+    }
+    val locationServiceEnabled = MutableStateFlow(false)
+
     override fun attachBaseContext(newBase: Context?) {
         updateConfig(this)
         super.attachBaseContext(newBase)
@@ -40,10 +43,46 @@ class MainActivity : FragmentActivity() {
 
     }
 
+
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-          App()
+                App()
+
+//            val locationServiceState = locationServiceEnabled.collectAsState()
+//
+//            val receiver = ChangeGpsReceiver{
+//                locationServiceEnabled.update { false }
+//                stopKoin()
+//
+//            }
+//            registerReceiver(receiver,  IntentFilter(LocationManager.PROVIDERS_CHANGED_ACTION))
+
+
+
+
+//            if (locationServiceState.value){
+//                App()
+//            }else{
+//                val settingResultRequest = rememberLauncherForActivityResult(
+//                    contract = ActivityResultContracts.StartIntentSenderForResult()
+//                ) { activityResult ->
+//                    if (activityResult.resultCode == RESULT_OK)
+//                        locationServiceEnabled.update { true }
+//                    else {
+//                        locationServiceEnabled.update { false }
+//                    }
+//                }
+//                checkLocationSetting( this, onDisabled =  {
+//                    settingResultRequest.launch(it)
+//
+//                }, onEnabled =  {
+//                    locationServiceEnabled.update { true }
+//
+//                })
+//            }
+
         }
     }
 

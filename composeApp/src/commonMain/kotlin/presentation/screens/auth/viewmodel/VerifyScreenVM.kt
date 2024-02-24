@@ -11,6 +11,7 @@ import io.github.aakira.napier.LogLevel
 import io.github.aakira.napier.Napier
 import irancell.nwg.wfm.CountdownTimer
 import irancell.nwg.wfm.MR
+import irancell.nwg.wfm.SMSListener
 import irancell.nwg.wfm.TimerListener
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -24,11 +25,19 @@ class VerifyScreenVM(
    private val verifyUseCase: VerifyUseCase,
    private val resendUseCase: ResendUseCase
 ) : BaseViewModel() {
-    private val _remainTime = MutableStateFlow(30)
+    private val _remainTime = MutableStateFlow(10)
     var remainTime = _remainTime.asStateFlow()
 
     private val _finishTimer = MutableStateFlow(false)
     var finishTimer =_finishTimer.asStateFlow()
+
+
+    private val _otpCode = MutableStateFlow("")
+    var otpCode = _otpCode.asStateFlow()
+
+
+
+
 
     private val countdownTimer = CountdownTimer(_remainTime.value, object : TimerListener {
         override fun onTick(secondsLeft: Int) {
@@ -42,6 +51,15 @@ class VerifyScreenVM(
     })
     init {
       countdownTimer.start()
+      SMSListener.enableSMSListener({
+            _otpCode.update { it }
+      },{
+            updateState(ViewStates.Error(MR.strings.form))
+      })
+    }
+
+    fun disableSMSListener(){
+        SMSListener.disableSMSListener()
     }
 
     fun verify(otpCode : String,onProcess : () -> Unit){
@@ -52,6 +70,7 @@ class VerifyScreenVM(
             verifyUseCase(otpCode).collect{
                 when(it.status){
                     AsyncStatus.ERROR -> {
+                        handleError(it.resultStatus)
                         Napier.log(LogLevel.ASSERT, tag = "serviice", message = "ERROR")
 
                     }
@@ -79,6 +98,7 @@ class VerifyScreenVM(
             resendUseCase(Unit).collect {
                 when(it.status){
                     AsyncStatus.ERROR -> {
+                        handleError(it.resultStatus)
                         Napier.log(LogLevel.ASSERT, tag = "serviice", message = "ERROR")
                         onError()
 
@@ -90,7 +110,7 @@ class VerifyScreenVM(
                     }
                     AsyncStatus.SUCCESS -> {
                         _finishTimer.update { false }
-                        _remainTime.update { 30 }
+                        _remainTime.update { 10 }
                         countdownTimer.start()
                         Napier.log(LogLevel.ASSERT, tag = "serviice", message = "SUCCESS${it.data}")
                     }

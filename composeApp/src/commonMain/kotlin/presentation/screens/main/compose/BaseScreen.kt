@@ -26,30 +26,41 @@ import com.irancell.nwg.wfm.presentation.theme.spacing2X
 import dev.icerock.moko.resources.compose.stringResource
 import io.github.aakira.napier.LogLevel
 import io.github.aakira.napier.Napier
+import irancell.nwg.wfm.GPS
+import irancell.nwg.wfm.provideAppContext
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import utils.BaseViewModel
 import utils.ViewStates
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun< T : BaseViewModel> BaseScreen(
+fun <T : BaseViewModel> BaseScreen(
     viewModel: T,
-    scaffoldState : BottomSheetScaffoldState,
-    snackbarHostState: androidx.compose.material.SnackbarHostState =  remember { androidx.compose.material.SnackbarHostState() },
-    title: String  ,
-    hasDrawer : Boolean = false,
-    content: @Composable (snackBarHost : androidx.compose.material.SnackbarHostState) -> Unit ={},
-    topBar : @Composable () -> Unit ={},
-    drawerContent : @Composable () ->  Unit = {},
-    bottomSheetHasHeader : Boolean = true,
-    bottomSheetTitle  : String = ""  ,
-    bottomSheetContent : @Composable (bottomSheetState: BottomSheetState) -> Unit = {},
-    bottomBarBottomSheetContent : @Composable (bottomSheetState: BottomSheetState) -> Unit = {},
-    onCloseBottomSheet : () -> Unit = {},
+    scaffoldState: BottomSheetScaffoldState,
+    snackbarHostState: androidx.compose.material.SnackbarHostState = remember { androidx.compose.material.SnackbarHostState() },
+    title: String,
+    hasDrawer: Boolean = false,
+    content: @Composable (snackBarHost: androidx.compose.material.SnackbarHostState) -> Unit = {},
+    topBar: @Composable () -> Unit = {},
+    drawerContent: @Composable () -> Unit = {},
+    bottomSheetHasHeader: Boolean = true,
+    bottomSheetTitle: String = "",
+    bottomSheetContent: @Composable (bottomSheetState: BottomSheetState) -> Unit = {},
+    bottomBarBottomSheetContent: @Composable (bottomSheetState: BottomSheetState) -> Unit = {},
+    onCloseBottomSheet: () -> Unit = {},
 
-) {
+    ) {
+
     val scope = rememberCoroutineScope()
     val state by viewModel.state.collectAsState()
+    Napier.log(LogLevel.ASSERT,"BaseScreen", message = "enableGPS")
+    GPS.enableGps(provideAppContext(), disable =  {
+        viewModel.updateState(ViewStates.NoGps)
+    }, enabled =  {
+        viewModel.updateState(ViewStates.Default)
+    })
+
     Box(
         modifier = Modifier
             .background(color = backgroundBackground3)
@@ -65,91 +76,151 @@ fun< T : BaseViewModel> BaseScreen(
                 drawerContent = {
                     drawerContent()
                 },
-                snackbarHost  = { SnackbarHost(hostState = snackbarHostState) },
+                snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
                 sheetPeekHeight = 0.dp,
                 sheetGesturesEnabled = false,
                 sheetShape = RoundedCornerShape(topEnd = radius, topStart = radius),
                 sheetContent = {
-                    CustomBottomSheet(scaffoldState.bottomSheetState,hasHeader =  bottomSheetHasHeader,title = bottomSheetTitle, content = {
-                        bottomSheetContent(scaffoldState.bottomSheetState)
-                    }, onClose = {
-                        onCloseBottomSheet()
-                    }, bottomBar = {
-                        bottomBarBottomSheetContent(scaffoldState.bottomSheetState)
-                    })
+                    CustomBottomSheet(
+                        scaffoldState.bottomSheetState,
+                        hasHeader = bottomSheetHasHeader,
+                        title = bottomSheetTitle,
+                        content = {
+                            bottomSheetContent(scaffoldState.bottomSheetState)
+                        },
+                        onClose = {
+                            onCloseBottomSheet()
+                        },
+                        bottomBar = {
+                            bottomBarBottomSheetContent(scaffoldState.bottomSheetState)
+                        })
                 }
             ) {
-                Napier.log(LogLevel.ASSERT,"viewState",message = state.toString())
-                if (state is ViewStates.Error) {
-                    val errorMessage = (state as ViewStates.Error).message
-                    val mess = stringResource((state as ViewStates.Error).message)
-                    Napier.log(LogLevel.INFO, tag = "fkpekfpw", message = errorMessage.toString())
-                    scope.launch {
-                        snackbarHostState.showSnackbar(
-                            message = "${mess}!",
-                            duration = SnackbarDuration.Short,
-                        )
-                    }
-                    viewModel.updateState(ViewStates.Default)
-                }
+
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
                         .fillMaxHeight()
                 ) {
-                    if (state is ViewStates.Loading) {
-                        CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                    when(state){
+                    ViewStates.Default -> {
+                        content(snackbarHostState)
+
                     }
-                    content(snackbarHostState)
+                    is ViewStates.Error -> {
+                        val errorMessage =  stringResource((state as ViewStates.Error).message)
+
+                        Napier.log(LogLevel.INFO, tag = "fkpekfpw", message = errorMessage.toString())
+                        scope.launch {
+                            snackbarHostState.showSnackbar(
+                                message = "${errorMessage}!",
+                                duration = SnackbarDuration.Short,
+                            )
+                        }
+                        viewModel.updateState(ViewStates.Default)
+                    }
+                    ViewStates.Loading -> {
+                        CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+
+                    }
+                    ViewStates.NoGps -> {
+                        GPS.enableGps(provideAppContext(), disable =  {
+                            scope.launch {
+                                viewModel.updateState(ViewStates.Loading)
+                                delay(100)
+                                viewModel.updateState(ViewStates.NoGps)
+                            }
+                        }, enabled = {
+                            viewModel.updateState(ViewStates.Default)
+                        })
+
+
+                    }
+                    ViewStates.Success -> {
+                        content(snackbarHostState)
+                    }
+                }
                 }
             }
-        }
-    else{
-        BottomSheetScaffold(modifier = Modifier.background(color = backgroundBackground3),
-            scaffoldState = scaffoldState,
-            topBar = {
-                topBar()
-            },
-            sheetPeekHeight = 0.dp,
-            sheetGesturesEnabled = false,
-            sheetShape = RoundedCornerShape(topEnd = radius, topStart = radius),
-            sheetContent = {
-                CustomBottomSheet(scaffoldState.bottomSheetState, hasHeader =  bottomSheetHasHeader, title =  bottomSheetTitle, content = {
-                    bottomSheetContent(scaffoldState.bottomSheetState)
-                }, onClose = {
-                    onCloseBottomSheet()
-                }, bottomBar = {
-                    bottomBarBottomSheetContent(scaffoldState.bottomSheetState)
-                })
-            }
-        ) {
-            Napier.log(LogLevel.ASSERT,"viewState",message = state.toString())
-
-            if (state is ViewStates.Error) {
-                val errorMessage = (state as ViewStates.Error).message
-
-                Napier.log(LogLevel.INFO, tag = "fkpekfpw", message = errorMessage.toString())
-                scope.launch {
-                    snackbarHostState.showSnackbar(
-                        message = "${errorMessage}!",
-                        duration = SnackbarDuration.Short,
-                    )
+        } else {
+            BottomSheetScaffold(modifier = Modifier.background(color = backgroundBackground3),
+                scaffoldState = scaffoldState,
+                topBar = {
+                    topBar()
+                },
+                sheetPeekHeight = 0.dp,
+                sheetGesturesEnabled = false,
+                sheetShape = RoundedCornerShape(topEnd = radius, topStart = radius),
+                sheetContent = {
+                    CustomBottomSheet(
+                        scaffoldState.bottomSheetState,
+                        hasHeader = bottomSheetHasHeader,
+                        title = bottomSheetTitle,
+                        content = {
+                            bottomSheetContent(scaffoldState.bottomSheetState)
+                        },
+                        onClose = {
+                            onCloseBottomSheet()
+                        },
+                        bottomBar = {
+                            bottomBarBottomSheetContent(scaffoldState.bottomSheetState)
+                        })
                 }
-                viewModel.updateState(ViewStates.Default)
-            }
-
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .fillMaxHeight()
-
             ) {
-                if (state is ViewStates.Loading) {
-                    CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+
+
+
+
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .fillMaxHeight()
+
+                ) {
+                    when(state){
+                        ViewStates.Default -> {
+                            content(snackbarHostState)
+
+                        }
+                        is ViewStates.Error -> {
+                            val errorMessage = (state as ViewStates.Error).message
+
+                            Napier.log(LogLevel.INFO, tag = "fkpekfpw", message = errorMessage.toString())
+                            scope.launch {
+                                snackbarHostState.showSnackbar(
+                                    message = "${errorMessage}!",
+                                    duration = SnackbarDuration.Short,
+                                )
+                            }
+                            viewModel.updateState(ViewStates.Default)
+                        }
+                        ViewStates.Loading -> {
+                            CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+
+                        }
+                        ViewStates.NoGps -> {
+                            GPS.enableGps(provideAppContext(), disable =  {
+                                scope.launch {
+                                    viewModel.updateState(ViewStates.Loading)
+                                    delay(100)
+                                    viewModel.updateState(ViewStates.NoGps)
+                                }
+
+                            }, enabled = {
+                                    viewModel.updateState(ViewStates.Default)
+                            })
+
+                        }
+                        ViewStates.Success -> {
+                            content(snackbarHostState)
+                        }
+                    }
+
+
                 }
-                content(snackbarHostState)
             }
         }
+
     }
-    }
+
 }

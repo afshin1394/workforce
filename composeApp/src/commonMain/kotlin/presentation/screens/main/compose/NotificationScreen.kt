@@ -23,7 +23,7 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.irancell.nwg.wfm.presentation.components.FilterRow
-import com.irancell.nwg.wfm.presentation.components.MenuItemsTopBar
+import presentation.components.MenuItemsTopBar
 import com.irancell.nwg.wfm.presentation.model.Notification
 import com.irancell.nwg.wfm.presentation.model.NotificationModel
 import presentation.model.StateFilter

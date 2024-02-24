@@ -88,7 +88,7 @@
     <string name="date_time_picker">Date-time picker</string>
 
 
-    <string name="client_error">Credentials are not valid</string>
+    <string name="client_error">An error has been occurred please contact support</string>
     <string name="server_error">Server is not available right no, please try later</string>
     <string name="timeout_error">Please check your network connection</string>
     <string name="general_error">An error has been occurred please contact support</string>
@@ -97,5 +97,7 @@
     <string name="choose_more">Choose more</string>
     <string name="form">Form Viewer</string>
     <string name="now">Now</string>
+
+    <string name="otp_failed">Failed in getting verification code</string>
 
 </resources>

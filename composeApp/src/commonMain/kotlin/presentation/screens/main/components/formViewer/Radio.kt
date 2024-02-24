@@ -44,7 +44,6 @@ fun Radio( title:String, itemList: List<String>, selectItem: String, onItemSelec
             text = title,
             style = TextStyle(color = textSecondary, fontSize = 16.sp),
             modifier = Modifier.fillMaxWidth().wrapContentHeight(),
-            textAlign = if (getSharedPref().getString(Language)=="en") TextAlign.Left else TextAlign.Right
         )
 
         Spacer(modifier = Modifier.padding(top = spacing15X))

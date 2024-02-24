@@ -1,4 +1,4 @@
-package com.irancell.nwg.wfm.presentation.screens.main.components
+package presentation.screens.main.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -14,10 +14,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.irancell.nwg.wfm.presentation.components.CustomButton
 import com.irancell.nwg.wfm.presentation.components.CustomButtonData
-import com.irancell.nwg.wfm.presentation.components.CustomEditTextComponent
+import com.irancell.nwg.wfm.presentation.screens.main.components.DropDownComponent
+import presentation.components.CustomEditTextComponent
 import presentation.components.TakeImageComponent
 import com.irancell.nwg.wfm.presentation.theme.*
 import dev.icerock.moko.resources.compose.stringResource
+import domain.models.SuspendTaskDomain
 import irancell.nwg.wfm.MR
 
 import presentation.theme.body_large
@@ -30,7 +32,7 @@ import presentation.theme.textPrimary
 
 
 @Composable
-fun SuspendTicketContentComponent(suspendReason: String = "" ,ticketName: String = "Huawei",onSelectReason : () -> Unit = {},onCompleted : (isComplete : Boolean) -> Unit = {},onCameraClick : () -> Unit = {} ) {
+fun SuspendTicketContentComponent(suspendTaskDomain: SuspendTaskDomain?, taskid : String, onSelectReason : () -> Unit = {}, onCompleted : (isComplete : Boolean, text:String) -> Unit = { b: Boolean, s: String -> }, onCameraClick : () -> Unit = {} ) {
 
     Column(
         modifier = Modifier
@@ -40,22 +42,23 @@ fun SuspendTicketContentComponent(suspendReason: String = "" ,ticketName: String
                 rememberScrollState()
             )
     ) {
+        val taskTitle = suspendTaskDomain?.taskId ?: taskid
         Text(
-            text = "${stringResource(MR.strings.why_canceled_ticket)}$ticketName?",
+            text = "${stringResource(MR.strings.why_canceled_ticket)}${taskTitle}",
             style = body_large,
             color = textPrimary
         )
         Spacer(modifier = Modifier.padding(vertical = spacing1X))
-        DropDownComponent(suspendReasonText = suspendReason,modifier = Modifier.clickable {
+        DropDownComponent(suspendReasonText = suspendTaskDomain?.reason?:"",modifier = Modifier.clickable {
             onSelectReason()
 
         })
         Spacer(modifier = Modifier.padding(vertical = spacing1X))
-        CustomEditTextComponent(updateText = {
+        CustomEditTextComponent(defaultText = suspendTaskDomain?.description?:"",updateText = {
            if (it.text.isNotEmpty()){
-               onCompleted(true)
+               onCompleted(true,it.text)
            }else{
-               onCompleted(false)
+               onCompleted(false,it.text)
            }
         })
         Spacer(modifier = Modifier.padding(vertical = spacing1X))

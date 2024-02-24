@@ -33,7 +33,7 @@ actual class Camera {
         @Composable
         actual fun ImagePicker(savePath : String,onSuccess : (uri : Any) -> Unit) {
             val context = LocalContext.current
-            val file = context.createImageFile(savePath)
+            val file = createImageFile(context.filesDir.path + savePath )
             Log.i("uriiiii", "ImagePicker: ${file.path}")
 
             val uri  = InternalStorage.getUriForFile(context,file)
@@ -56,12 +56,11 @@ actual class Camera {
         }
 
 
-        private fun Context.createImageFile(path : String): File {
+        private fun createImageFile(path : String): File {
             val uuid = UUID.randomUUID().toString()
-            val pathToDirectory = InternalStorage.createFolderFromPath( this,path)
             val imageFileName = "${uuid}.jpg"
 
-            return File(pathToDirectory, imageFileName)
+            return File(path, imageFileName)
         }
 
 

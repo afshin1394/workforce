@@ -172,7 +172,10 @@ fun DropDownMultiChoice(
                 icon,
                 contentDescription = "contentDescription",
                 modifier = Modifier.width(34.dp).height(34.dp).padding(end = 10.dp)
-                    .clickable { expanded = !expanded },
+                    .clickable {
+                        expanded = !expanded
+                        searchedText = ""
+                    },
                 tint = textSecondary,
             )
 
@@ -267,7 +270,11 @@ fun DropDownMultiChoice(
             Spacer(modifier = Modifier.padding(top = spacing15X))
 
 
-            itemList.forEach { label ->
+
+            val filteredList = itemList.filter { lable->
+                lable.lowercase().trim().contains(searchedText.lowercase())
+            }
+            filteredList.forEach { label ->
 
                 val isSelected = selectedItems.contains(label)
                 DropdownMenuItemCustom(

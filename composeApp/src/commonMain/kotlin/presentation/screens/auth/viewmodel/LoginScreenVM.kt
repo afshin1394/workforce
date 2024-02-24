@@ -44,7 +44,7 @@ class LoginScreenVM(
             loginUseCase(LoginRequestDomain(userName, password)).collect {
                 when (it.status) {
                     AsyncStatus.ERROR -> {
-
+                        handleError(it.resultStatus)
 
                         Napier.log(LogLevel.ASSERT, tag = "serviice", message = "ERROR"+it.message)
 

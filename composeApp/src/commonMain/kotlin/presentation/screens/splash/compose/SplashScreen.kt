@@ -23,27 +23,20 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 
 
-
 import com.irancell.nwg.wfm.presentation.theme.spacing2X
-import data.GeneralLocationRepositoryImpl
-import dev.icerock.moko.permissions.compose.BindEffect
-import dev.icerock.moko.permissions.compose.PermissionsControllerFactory
-import dev.icerock.moko.permissions.compose.rememberPermissionsControllerFactory
+
 import dev.icerock.moko.resources.compose.painterResource
 import dev.icerock.moko.resources.compose.stringResource
-import domain.repository.IGeneralLocationRepository
-import io.github.aakira.napier.LogLevel
 
-import io.github.aakira.napier.Napier
 import irancell.nwg.wfm.LifecycleEvent
 import irancell.nwg.wfm.MR
 import irancell.nwg.wfm.OnLifecycleEvent
+import irancell.nwg.wfm.checkPermission
 import irancell.nwg.wfm.getSharedPref
 import irancell.nwg.wfm.openAppSettings
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
 import presentation.screens.splash.events.PermissionEvent
 import presentation.screens.splash.viewmodel.SplashScreenVM
 import presentation.theme.body_small
@@ -55,47 +48,39 @@ class SplashScreen() : Screen, KoinComponent {
 
     @Composable
     override fun Content() {
-        val dataSyncRepository: IGeneralLocationRepository by inject()
 
 
-        Napier.e("dataSyncRepository" + dataSyncRepository)
         val scope = rememberCoroutineScope()
         val navigator = LocalNavigator.currentOrThrow
         val loginScreen = rememberScreen(com.irancell.nwg.wfm.presentation.nav.Screen.Auth.Login)
-        val mainScreen = rememberScreen(com.irancell.nwg.wfm.presentation.nav.Screen.Main.Menu.MyTickets)
+        val mainScreen =
+            rememberScreen(com.irancell.nwg.wfm.presentation.nav.Screen.Main.Menu.MyTickets)
         val snackbarHostState = remember { SnackbarHostState() }
-        val factory: PermissionsControllerFactory = rememberPermissionsControllerFactory()
-        val viewModel = remember { SplashScreenVM(factory.createPermissionsController()) }
-        BindEffect(viewModel.permissionsController)
+        val viewModel = remember { SplashScreenVM() }
 
         val permissionState by viewModel.permissionState.collectAsState()
+        val lifecycleEvent by viewModel.lifeCycleEvent.collectAsState()
 
 
-        OnLifecycleEvent { owner, event ->
+        if (lifecycleEvent == LifecycleEvent.ON_RESUME) {
+            viewModel.updateLifeCycleEventState(LifecycleEvent.ON_ANY)
 
-            when (event) {
-                LifecycleEvent.ON_RESUME -> {
-
-                    viewModel.checkPermissions {
-                        scope.launch {
-                            delay(1000)
-                            if (getSharedPref().getString(Token).toString().length > 6)
-                                navigator.push(mainScreen)
-                            else
-                                navigator.push(loginScreen)
-                        }
-
-                    }
-                }
-            }
+            checkPermission({
+                viewModel.updatePermissionState(PermissionEvent.IsGranted)
+            }, {
+                viewModel.updatePermissionState(PermissionEvent.DeniedPermission)
+            })
         }
 
-
+        OnLifecycleEvent { owner, event ->
+            viewModel.updateLifeCycleEventState(event as LifecycleEvent)
+        }
 
         Surface(
             modifier = Modifier.fillMaxSize(),
             color = MaterialTheme.colorScheme.background
-        ) {
+        )
+        {
             Scaffold(
                 snackbarHost = {
                     SnackbarHost(hostState = snackbarHostState)
@@ -129,48 +114,23 @@ class SplashScreen() : Screen, KoinComponent {
                     )
                 }
 
-                if ( getSharedPref().getBool(SelectLanguage, false)){
+                if (getSharedPref().getBool(SelectLanguage, false)) {
 
                     navigator.push(mainScreen)
                     getSharedPref().put(SelectLanguage, false)
 
-                }else{
-                    if (permissionState == PermissionEvent.DeniedException) {
-                        val message=stringResource(MR.strings.please_authorize_permissions)
-                        val approve =stringResource(MR.strings.approve)
+                } else {
+                    if (permissionState == PermissionEvent.DeniedPermission) {
+                        val message = stringResource(MR.strings.please_authorize_permissions)
+                        val approve = stringResource(MR.strings.approve)
                         scope.launch {
                             val userAction = snackbarHostState.showSnackbar(
                                 message = message,
                                 actionLabel = approve,
-                                duration = SnackbarDuration.Short,
+                                duration = SnackbarDuration.Long,
                                 withDismissAction = true
                             )
-                            when (userAction) {
-                                SnackbarResult.ActionPerformed -> {
-                                    openAppSettings()
-                                    delay(2000)
-                                    viewModel.changeStateDenied()
-                                }
-                                SnackbarResult.Dismissed -> {
-                                }
-                            }
-                        }
-
-
-                    }
-
-                    if (permissionState == PermissionEvent.DeniedAlwaysException) {
-                        val message=stringResource(MR.strings.please_authorize_permissions)
-                        val approve =stringResource(MR.strings.approve)
-                        scope.launch {
-
-
-                            val userAction = snackbarHostState.showSnackbar(
-                                message = message,
-                                actionLabel = approve,
-                                duration = SnackbarDuration.Short,
-                                withDismissAction = true
-                            )
+                            viewModel.updatePermissionState(PermissionEvent.CheckPermission)
                             when (userAction) {
                                 SnackbarResult.ActionPerformed -> {
                                     openAppSettings()
@@ -179,10 +139,12 @@ class SplashScreen() : Screen, KoinComponent {
                                 }
 
                                 SnackbarResult.Dismissed -> {
+
                                 }
                             }
                         }
                     }
+
                     if (permissionState == PermissionEvent.IsGranted) {
 
                         scope.launch {
@@ -190,16 +152,12 @@ class SplashScreen() : Screen, KoinComponent {
                             if (getSharedPref().getString(Token).toString().length > 6)
                                 navigator.push(mainScreen)
                             else
-                            navigator.push(loginScreen)
+                                navigator.push(loginScreen)
                         }
                     }
-
                 }
-
             }
         }
-
-
     }
 }
 
