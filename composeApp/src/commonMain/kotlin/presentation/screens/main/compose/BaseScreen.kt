@@ -120,13 +120,13 @@ fun <T : BaseViewModel> BaseScreen(
                         viewModel.updateState(ViewStates.Default)
                     }
                     ViewStates.Loading -> {
-                        CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+//                        CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
 
                     }
                     ViewStates.NoGps -> {
                         GPS.enableGps(provideAppContext(), disable =  {
                             scope.launch {
-                                viewModel.updateState(ViewStates.Loading)
+                                viewModel.updateState(ViewStates.Default)
                                 delay(100)
                                 viewModel.updateState(ViewStates.NoGps)
                             }
@@ -195,13 +195,13 @@ fun <T : BaseViewModel> BaseScreen(
                             viewModel.updateState(ViewStates.Default)
                         }
                         ViewStates.Loading -> {
-                            CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+//                            CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
 
                         }
                         ViewStates.NoGps -> {
                             GPS.enableGps(provideAppContext(), disable =  {
                                 scope.launch {
-                                    viewModel.updateState(ViewStates.Loading)
+                                    viewModel.updateState(ViewStates.Default)
                                     delay(100)
                                     viewModel.updateState(ViewStates.NoGps)
                                 }

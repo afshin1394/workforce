@@ -271,8 +271,8 @@ fun DropDownMultiChoice(
 
 
 
-            val filteredList = itemList.filter { lable->
-                lable.lowercase().trim().contains(searchedText.lowercase())
+            val filteredList=itemList.filter { lable->
+                lable.trim().contains(searchedText)
             }
             filteredList.forEach { label ->
 

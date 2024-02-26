@@ -112,7 +112,7 @@ fun DropDownSingleChoice(
                             expanded = !expanded
                             searchedText=""
 
-                                                               },
+                        },
                         tint = textSecondary)
 
                 }
@@ -205,7 +205,7 @@ fun DropDownSingleChoice(
                 Spacer(modifier = Modifier.padding(top = spacing15X))
 
                 val filteredList=itemList.filter { lable->
-                    lable.lowercase().trim().contains(searchedText.lowercase())
+                    lable.trim().contains(searchedText)
                 }
 
                 filteredList.forEach { label ->

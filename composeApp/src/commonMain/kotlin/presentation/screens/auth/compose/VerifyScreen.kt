@@ -26,6 +26,8 @@ import com.irancell.nwg.wfm.presentation.screens.auth.components.*
 import com.irancell.nwg.wfm.presentation.theme.*
 import dev.icerock.moko.resources.compose.painterResource
 import dev.icerock.moko.resources.compose.stringResource
+import io.github.aakira.napier.LogLevel
+import io.github.aakira.napier.Napier
 import irancell.nwg.wfm.MR
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
@@ -146,6 +148,7 @@ class VerifyScreen(private val phoneNumber : String = "") : Screen {
 
                     Spacer(modifier = Modifier.height(spacing3X))
                     AuthVerificationCodeRow(otpText = smsCode, onOtpTextChange = { otp, boolean ->
+                        viewModel.updateOtp(otp)
                     })
 
                     Spacer(modifier = Modifier.height(spacing3X))
@@ -172,6 +175,7 @@ class VerifyScreen(private val phoneNumber : String = "") : Screen {
                     AuthButton(authButtonItem = AuthButtonItem(stringResource(MR.strings.verify))) {
                         //onClick
                         if (smsCode.length == 6) {
+                            Napier.log(LogLevel.ASSERT,"dadsd",message= smsCode)
                             viewModel.verify(smsCode) {
                                 viewModel.disableSMSListener()
                                 navigator.popUntil { it == SplashScreen() }
@@ -179,11 +183,7 @@ class VerifyScreen(private val phoneNumber : String = "") : Screen {
                             }
 
 
-//                    navHostController.navigate(Screen.Main.route){
-//                        popUpTo(Screen.Auth.route){
-//                            inclusive = true
-//                        }
-//                    }
+
                         }
                     }
                 }

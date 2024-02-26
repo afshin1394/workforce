@@ -23,6 +23,7 @@ import irancell.nwg.wfm.getSharedPref
 import presentation.theme.strokeDefaultLight
 import presentation.theme.surfaceBrandDefault
 import presentation.theme.textSecondary
+import utils.Language
 
 
 @Composable
@@ -35,7 +36,8 @@ fun CheckList(title:String,  itemList: List<String>, onItemSelected: (List<Strin
             text = title,
             style = TextStyle(color = textSecondary, fontSize = 16.sp),
             modifier = Modifier.fillMaxWidth().wrapContentHeight(),
-        )
+
+            )
 
         LazyColumn(modifier = Modifier.heightIn(0.dp, 500.dp)) {
             items(itemList.size) { index ->

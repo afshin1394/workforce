@@ -28,6 +28,7 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TimePickerDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -39,8 +40,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.irancell.nwg.wfm.presentation.theme.spacing15X
 import com.mohamedrejeb.calf.ui.datepicker.rememberAdaptiveDatePickerState
@@ -48,7 +51,12 @@ import com.mohamedrejeb.calf.ui.timepicker.AdaptiveTimePicker
 import com.mohamedrejeb.calf.ui.timepicker.rememberAdaptiveTimePickerState
 import dev.icerock.moko.resources.compose.painterResource
 import irancell.nwg.wfm.DatePickerFormat.format
+import irancell.nwg.wfm.IntentHandler
 import irancell.nwg.wfm.MR
+import irancell.nwg.wfm.getSharedPref
+import irancell.nwg.wfm.provideAppContext
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 import kotlinx.datetime.LocalDateTime
@@ -58,7 +66,10 @@ import presentation.theme.strokeDefaultLight
 import presentation.theme.subtleDefault
 import presentation.theme.surfaceBrandDefault
 import presentation.theme.textSecondary
+import utils.Language
+import utils.SelectLanguage
 import utils.getLocalDateTimeFromLong
+import utils.isRunningGPS
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -68,6 +79,9 @@ fun ModalTimePicker(title:String,titleDatePiker:String, onTimeSelected: (selectI
     var isBottomSheetVisible by rememberSaveable { mutableStateOf(false) }
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     var title by remember { mutableStateOf(title) }
+
+
+
 
     Column(Modifier.padding(16.dp)) {
         TextField(value = title,
@@ -105,6 +119,8 @@ fun ModalTimePicker(title:String,titleDatePiker:String, onTimeSelected: (selectI
                     "deleteAllSelected",
                     Modifier.width(28.dp).height(28.dp).padding(end = 8.dp)
                         .clickable {
+
+
                             scope.launch {
                                 isBottomSheetVisible = !isBottomSheetVisible
                                 sheetState.expand()
@@ -132,8 +148,11 @@ fun ModalTimePicker(title:String,titleDatePiker:String, onTimeSelected: (selectI
 
         )
     }
-
 }
+
+
+
+
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -151,7 +170,7 @@ fun BottomSheetTime(
 
     val datePickerState = rememberAdaptiveDatePickerState()
 
-     var initialSelection  by remember { mutableStateOf("") }
+    var initialSelection  by remember { mutableStateOf("") }
 
     var startTime by remember { mutableStateOf("") }
 
@@ -188,7 +207,7 @@ fun BottomSheetTime(
 
             dragHandle = null,
             scrimColor = Color.Black.copy(alpha = .5f),
-             windowInsets = WindowInsets(0, 0, 0, 0)
+            windowInsets = WindowInsets(0, 0, 0, 0)
         ) {
 
             Column(
@@ -231,21 +250,28 @@ fun BottomSheetTime(
 
                     }
                     Spacer(modifier = Modifier.padding(top = spacing15X))
-                    AdaptiveTimePicker(
-                        state = startTimePickerState,
-                        colors = TimePickerDefaults.colors(
-                            clockDialColor= subtleDefault,
-                            containerColor=Color.White,
-                            periodSelectorSelectedContainerColor= subtleDefault,
-                            timeSelectorSelectedContainerColor= subtleDefault,
-                            timeSelectorUnselectedContainerColor=strokeDefaultLight,
-                            timeSelectorSelectedContentColor= textSecondary,
-                            selectorColor=surfaceBrandDefault
+
+                    CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr ) {
+
+                        AdaptiveTimePicker(
+                            state = startTimePickerState,
+
+                            colors = TimePickerDefaults.colors(
+                                clockDialColor= subtleDefault,
+                                containerColor=Color.White,
+                                periodSelectorSelectedContainerColor= subtleDefault,
+                                timeSelectorSelectedContainerColor= subtleDefault,
+                                timeSelectorUnselectedContainerColor=strokeDefaultLight,
+                                timeSelectorSelectedContentColor= textSecondary,
+                                selectorColor=surfaceBrandDefault
+
+                            )
+
 
                         )
 
+                    }
 
-                    )
 
 
                 }

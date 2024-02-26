@@ -44,7 +44,8 @@ fun Radio( title:String, itemList: List<String>, selectItem: String, onItemSelec
             text = title,
             style = TextStyle(color = textSecondary, fontSize = 16.sp),
             modifier = Modifier.fillMaxWidth().wrapContentHeight(),
-        )
+
+            )
 
         Spacer(modifier = Modifier.padding(top = spacing15X))
         LazyColumn(modifier = Modifier.heightIn(0.dp, 500.dp)) {

@@ -36,7 +36,9 @@ class VerifyScreenVM(
     var otpCode = _otpCode.asStateFlow()
 
 
-
+    fun updateOtp(smsCode : String){
+        _otpCode.update { smsCode }
+    }
 
 
     private val countdownTimer = CountdownTimer(_remainTime.value, object : TimerListener {

@@ -12,15 +12,10 @@ import android.content.Intent
 import android.os.Build
 import android.os.IBinder
 import android.os.SystemClock
-import android.provider.Settings
 import android.util.Log
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import androidx.fragment.app.FragmentActivity
 import domain.models.LiveLocationDomain
 import domain.usecase.usecase.location.SendLocationToServerUseCase
 import domain.usecase.usecase.location.StoreLocationDataUseCase
@@ -31,15 +26,17 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.MainCoroutineDispatcher
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import org.koin.core.context.stopKoin
 import utils.AsyncStatus
+import utils.Language
+import utils.SelectLanguage
 import utils.getCurrentDate
+import utils.isRunningGPS
 import java.util.concurrent.TimeUnit
 
 actual class GpsTrackingService : Service() , KoinComponent {
@@ -50,15 +47,13 @@ actual class GpsTrackingService : Service() , KoinComponent {
     private var lon: Double = 0.0
     val storeLocationDataUseCase : StoreLocationDataUseCase by inject()
     val sendLocationToServerUseCase : SendLocationToServerUseCase by inject()
-    val locationServiceEnabled = MutableStateFlow(false)
 
    actual companion object {
-
         lateinit var gpsTrackingIntent : Intent
 
         const val Notification_ID = 123
         const val CHANNEL_ID = "GPS TRACKER"
-        var isRunning: Boolean = false
+       var isRunning: Boolean = getSharedPref().getBool(isRunningGPS, false)
         actual fun stopLocationTracker(){
             Napier.log(
                 LogLevel.ASSERT,
@@ -95,17 +90,16 @@ actual class GpsTrackingService : Service() , KoinComponent {
 
     @OptIn(DelicateCoroutinesApi::class)
     override fun onCreate() {
-
         Napier.log(LogLevel.ASSERT, tag = "serviice", message = "init")
         super.onCreate()
-        isRunning = true
+        getSharedPref().put(isRunningGPS, true)
         val notification =
             createNotification(applicationContext, "Gps Tracking On", "retrieving gps data")
         val intent = Intent(this, GpsTrackingService::class.java)
         startForeground(Notification_ID, notification);
-        GlobalScope.launch {
 
         Location.start() {
+            GlobalScope.launch {
                 Log.i("locationServicess", "onCreate:  latitude:" + it.latitude)
                 lat = it.latitude.toDouble()
                 lon = it.longitude.toDouble()
@@ -124,73 +118,77 @@ actual class GpsTrackingService : Service() , KoinComponent {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         Napier.log(LogLevel.ASSERT, tag = "serviice", message = "scope")
+        var scope = CoroutineScope(Dispatchers.IO)
 
-        val scope = CoroutineScope(Dispatchers.Main)
 
-        scope.launch {
-            Napier.log(LogLevel.ASSERT, tag = "serviice", message = "Launch")
 
-            storeLocationDataUseCase(
-                GeneralLocationEntity(
-                    lat.toString(),
-                    lon.toString(),
-                    getCurrentDate(),
-                    0
-                )
-            ).collect{
-                when(it.status){
-                    AsyncStatus.ERROR -> {
-                        val errorMessage = it.message!!
-                        Napier.log(
-                            LogLevel.ASSERT,
-                            tag = "serviice",
-                            message = it.message
-                        )
-                    }
-                    AsyncStatus.LOADING -> {
-                    }
-                    AsyncStatus.SUCCESS -> {
-                        Napier.log(
-                            LogLevel.ASSERT,
-                            tag = "serviice",
-                            message = "success"
-                        )
-                    }
-                }
-            }
-            Napier.log(
-                LogLevel.ASSERT,
-                tag = "serviice",
-                message = sendLocationToServerUseCase.toString()
-            )
-            sendLocationToServerUseCase(
-                listOf(LiveLocationDomain(
-                    lat,
-                    lon,
-                    getCurrentDate(),
-                    0
-                ))
-            ).collect{
-                when(it.status){
-                    AsyncStatus.ERROR -> {
-                        val errorMessage = it.message!!
-                        Napier.log(
-                            LogLevel.ASSERT,
-                            tag = "serviice",
-                            message = it.message
-                        )
-                    }
-                    AsyncStatus.LOADING -> {
-                    }
-                    AsyncStatus.SUCCESS -> {
-                        Napier.log(
-                            LogLevel.ASSERT,
-                            tag = "serviice",
-                            message = "success sendLocationToServerUseCase"
-                        )
-                    }
-                }
-            }
+
+
+      try {
+          scope.launch(Dispatchers.Main) {
+              Napier.log(LogLevel.ASSERT, tag = "serviice", message = "Launch")
+
+              storeLocationDataUseCase(
+                  GeneralLocationEntity(
+                      lat.toString(),
+                      lon.toString(),
+                      getCurrentDate(),
+                      0
+                  )
+              ).collect{
+                  when(it.status){
+                      AsyncStatus.ERROR -> {
+                          val errorMessage = it.message!!
+                          Napier.log(
+                              LogLevel.ASSERT,
+                              tag = "serviice",
+                              message = it.message
+                          )
+                      }
+                      AsyncStatus.LOADING -> {
+                      }
+                      AsyncStatus.SUCCESS -> {
+                          Napier.log(
+                              LogLevel.ASSERT,
+                              tag = "serviice",
+                              message = "success"
+                          )
+                      }
+                  }
+              }
+              Napier.log(
+                  LogLevel.ASSERT,
+                  tag = "serviice",
+                  message = sendLocationToServerUseCase.toString()
+              )
+              sendLocationToServerUseCase(
+                  listOf(LiveLocationDomain(
+                      lat,
+                      lon,
+                      getCurrentDate(),
+                      0
+                  ))
+              ).collect{
+                  when(it.status){
+                      AsyncStatus.ERROR -> {
+                          val errorMessage = it.message!!
+                          Napier.log(
+                              LogLevel.ASSERT,
+                              tag = "serviice",
+                              message = it.message
+                          )
+                      }
+                      AsyncStatus.LOADING -> {
+                      }
+                      AsyncStatus.SUCCESS -> {
+                          Napier.log(
+                              LogLevel.ASSERT,
+                              tag = "serviice",
+                              message = "success sendLocationToServerUseCase"
+                          )
+                      }
+                  }
+              }
 
 
 
@@ -204,9 +202,13 @@ actual class GpsTrackingService : Service() , KoinComponent {
 
 
 
-            startAlarm()
-            scope.cancel()
-        }
+              startAlarm()
+              scope.cancel()
+          }
+
+      }catch (e:Exception){
+
+      }
 
 
         return START_STICKY
@@ -217,7 +219,7 @@ actual class GpsTrackingService : Service() , KoinComponent {
         super.onDestroy()
         cancelAlarm()
         stopSelf()
-        isRunning = false
+        getSharedPref().put(isRunningGPS, false)
     }
 
     @SuppressLint("ScheduleExactAlarm")
