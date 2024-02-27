@@ -81,9 +81,7 @@ class LoginScreenVM(
 
                     AsyncStatus.SUCCESS -> {
                         updateState(ViewStates.Success)
-
                         Napier.log(LogLevel.ASSERT, tag = "serviice", message = "SUCCESS${it.data}")
-                        //onProcess()
                     }
                 }
             }
