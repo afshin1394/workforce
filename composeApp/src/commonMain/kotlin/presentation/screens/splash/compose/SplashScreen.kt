@@ -5,13 +5,10 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.BottomSheetScaffoldState
 import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.SnackbarDuration
+import androidx.compose.material.SnackbarResult
 import androidx.compose.material.rememberBottomSheetScaffoldState
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarDuration
-import androidx.compose.material3.SnackbarHost
-
-import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 
@@ -44,9 +41,9 @@ import presentation.screens.main.compose.BaseScreen
 import presentation.screens.splash.events.PermissionEvent
 import presentation.screens.splash.viewmodel.SplashScreenVM
 import presentation.theme.body_small
-import utils.SelectLanguage
+
 import utils.Token
-import androidx.compose.material3.SnackbarHostState
+
 
 class SplashScreen() : Screen, KoinComponent {
 
@@ -59,15 +56,13 @@ class SplashScreen() : Screen, KoinComponent {
         val scaffoldState: BottomSheetScaffoldState = rememberBottomSheetScaffoldState()
         val scope = rememberCoroutineScope()
         val navigator = LocalNavigator.currentOrThrow
-        val loginScreen = rememberScreen(com.irancell.nwg.wfm.presentation.nav.Screen.Auth.Login)
-        val mainScreen =
-            rememberScreen(com.irancell.nwg.wfm.presentation.nav.Screen.Main.Menu.MyTickets)
-        val snackbarHostState = remember { SnackbarHostState() }
+        val loginScreen = rememberScreen(presentation.nav.Screen.Auth.Login)
+        val mainScreen = rememberScreen(presentation.nav.Screen.Main.Menu.MyTickets)
+
         val viewModel = remember { SplashScreenVM() }
 
         val permissionState by viewModel.permissionState.collectAsState()
         val lifecycleEvent by viewModel.lifeCycleEvent.collectAsState()
-
 
         if (lifecycleEvent == LifecycleEvent.ON_RESUME) {
             viewModel.updateLifeCycleEventState(LifecycleEvent.ON_ANY)
@@ -86,87 +81,77 @@ class SplashScreen() : Screen, KoinComponent {
 
         BaseScreen(
             viewModel = viewModel,
-            snackbarHostState=remember { SnackbarHostState() },
             title = "",
             scaffoldState = scaffoldState,
-
             content = {
                 Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
-                    Scaffold(
-                        snackbarHost = {
-                            SnackbarHost(hostState = snackbarHostState)
-                        }) { contentPadding ->
-
-                        Box(
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                    ) {
+                        Image(
+                            painter = painterResource(MR.images.bg_splash_screen),
+                            contentScale = ContentScale.FillBounds,
+                            contentDescription = "",
+                            modifier = Modifier.fillMaxSize()
+                        )
+                        Image(
+                            painter = painterResource(MR.images.ic_sdm),
+                            contentScale = ContentScale.FillBounds,
+                            contentDescription = "",
                             modifier = Modifier
-                                .fillMaxSize()
-                                .padding(contentPadding),
-                        ) {
-                            Image(
-                                painter = painterResource(MR.images.bg_splash_screen),
-                                contentScale = ContentScale.FillBounds,
-                                contentDescription = "",
-                                modifier = Modifier.fillMaxSize()
-                            )
-                            Image(
-                                painter = painterResource(MR.images.ic_sdm),
-                                contentScale = ContentScale.FillBounds,
-                                contentDescription = "",
-                                modifier = Modifier
-                                    .wrapContentSize()
-                                    .align(Alignment.Center)
-                            )
-                            Text(
-                                modifier = Modifier
-                                    .align(Alignment.BottomCenter)
-                                    .padding(bottom = spacing2X),
-                                text = stringResource(MR.strings.work_force_management),
-                                style = body_small
-                            )
-                        }
+                                .wrapContentSize()
+                                .align(Alignment.Center)
+                        )
+                        Text(
+                            modifier = Modifier
+                                .align(Alignment.BottomCenter)
+                                .padding(bottom = spacing2X),
+                            text = stringResource(MR.strings.work_force_management),
+                            style = body_small
+                        )
+                    }
 
 
-                        if (permissionState == PermissionEvent.DeniedPermission) {
-                            val message = stringResource(MR.strings.please_authorize_permissions)
-                            val approve = stringResource(MR.strings.approve)
-                            scope.launch {
-                                val userAction = snackbarHostState.showSnackbar(
-                                    message = message,
-                                    actionLabel = approve,
-                                    duration = SnackbarDuration.Long,
-                                    withDismissAction = true
+                    if (permissionState == PermissionEvent.DeniedPermission) {
+                        val message = stringResource(MR.strings.please_authorize_permissions)
+                        val approve = stringResource(MR.strings.approve)
+                        scope.launch {
+
+                            val userAction =it.showSnackbar(
+                                message = message,
+                                actionLabel = approve,
+                                duration = SnackbarDuration.Long,
+
                                 )
-                                viewModel.updatePermissionState(PermissionEvent.CheckPermission)
-                                when (userAction) {
-                                    SnackbarResult.ActionPerformed -> {
-                                        openAppSettings()
-                                        delay(2000)
-                                        viewModel.changeStateDenied()
-                                    }
 
-                                    SnackbarResult.Dismissed -> {
-
-                                    }
+                            viewModel.updatePermissionState(PermissionEvent.CheckPermission)
+                            when (userAction) {
+                                SnackbarResult.ActionPerformed -> {
+                                    openAppSettings()
+                                    delay(2000)
+                                    viewModel.changeStateDenied()
                                 }
-                            }
-                        }
 
-                        if (permissionState == PermissionEvent.IsGranted) {
+                                SnackbarResult.Dismissed -> {
 
-                            scope.launch {
-                                delay(1000)
-                                if (getSharedPref().getString(Token).toString().length > 6)
-                                    navigator.push(mainScreen)
-                                else
-                                    navigator.push(loginScreen)
+                                }
                             }
                         }
                     }
 
+                    if (permissionState == PermissionEvent.IsGranted) {
+
+                        scope.launch {
+                            delay(1000)
+                            if (getSharedPref().getString(Token).toString().length > 6)
+                                navigator.push(mainScreen)
+                            else
+                                navigator.push(loginScreen)
+                        }
+                    }
+
                 }
-
-
-
 
             }
 

@@ -44,7 +44,7 @@ class MainScreenVM(
     private val changeServerAvailabilityUseCase: ChangeServerAvailabilityUseCase,
     private val updateTasksUseCase: UpdateTasksUseCase,
     private val storeSuspendTask: StoreSuspendTask,
-    private val getSuspendTaskById: GetSuspendTaskById
+    private val getSuspendTaskById: GetSuspendTaskById,
 ) : BaseViewModel() {
     private val _availability = MutableStateFlow(false)
     val availability = _availability.asStateFlow()
@@ -63,13 +63,15 @@ class MainScreenVM(
 
     }
 
+
     private fun getCurrentAvailability() {
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch(Dispatchers.Main) {
             getAvailabilityUseCase(
                 Unit
             ).collect {
                 when (it.status) {
                     AsyncStatus.ERROR -> {
+                        handleError(it.resultStatus)
                         Napier.log(LogLevel.ASSERT,"resrrrr", message = it.resultStatus.toString())
                     }
                     AsyncStatus.LOADING -> {
@@ -89,7 +91,7 @@ class MainScreenVM(
 
     fun changeAvailability() {
 
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch(Dispatchers.Main) {
 
 
             changeServerAvailabilityUseCase(!_availability.value).collect {

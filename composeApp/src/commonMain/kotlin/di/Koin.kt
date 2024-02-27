@@ -65,6 +65,7 @@ fun repositoryModule() = module {
     single<ISuspendTaskRepository> { SuspendTaskRepositoryImpl(get(), get(named("tokenized"))) }
     single<IAuthRepository> { AuthRepositoryImpl(get(named("noToken"))) }
     single<ITaskRepository> { TaskRepositoryImpl(get(named("tokenized")),get()) }
+
 }
 
 fun useCaseModule() = module {

@@ -14,7 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 
-import com.irancell.nwg.wfm.presentation.nav.Screen
+import presentation.nav.Screen
 import presentation.theme.backgroundBackground3
 import presentation.theme.textPrimary
 import dev.icerock.moko.resources.compose.painterResource

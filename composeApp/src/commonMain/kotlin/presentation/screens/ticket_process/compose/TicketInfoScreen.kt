@@ -54,7 +54,7 @@ class TicketInfoScreen(
         val scaffoldState = rememberBottomSheetScaffoldState()
         val navigator = LocalNavigator.currentOrThrow
         val ticketProcessScreen =
-            rememberScreen(com.irancell.nwg.wfm.presentation.nav.Screen.TicketProcess.TicketProcessScreen)
+            rememberScreen(presentation.nav.Screen.TicketProcess.TicketProcessScreen)
 
 
         val viewModel: TicketProcessVM = koinInject()

@@ -149,7 +149,6 @@ class FormViewerScreen(private val title: String) : Screen {
 
         BaseScreen(
             viewModel = viewModel,
-            snackbarHostState = remember { SnackbarHostState() },
 
             title = title,
             scaffoldState = scaffoldState,

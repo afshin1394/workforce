@@ -64,7 +64,7 @@ class VerifyScreenVM(
         SMSListener.disableSMSListener()
     }
 
-    fun verify(otpCode : String,onProcess : () -> Unit){
+    fun verify(otpCode : String){
 
 
         viewModelScope.launch {
@@ -86,7 +86,7 @@ class VerifyScreenVM(
                         updateState(ViewStates.Success)
                         countdownTimer.stop()
                         Napier.log(LogLevel.ASSERT, tag = "serviice", message = "SUCCESS${it.data}")
-                        onProcess()
+
                     }
                 }
             }

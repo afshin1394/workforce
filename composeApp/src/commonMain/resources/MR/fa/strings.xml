@@ -94,4 +94,7 @@
 
     <string name="otp_failed">خطا در دریافت کد تایید</string>
 
+    <string name="open_cr">بازکردن CR</string>
+    <string name="close_cr">بستن CR</string>
+
 </resources>

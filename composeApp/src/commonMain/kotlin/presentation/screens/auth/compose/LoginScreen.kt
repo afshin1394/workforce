@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Text
 import androidx.compose.material.rememberBottomSheetScaffoldState
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -51,11 +50,11 @@ class LoginScreen : Screen {
         val scope = rememberCoroutineScope()
         val email by viewModel.email.collectAsState()
         val password by viewModel.password.collectAsState()
-        val scaffoldState = rememberBottomSheetScaffoldState();
+        val scaffoldState = rememberBottomSheetScaffoldState()
         val authValidationState by viewModel.authValidationState.collectAsState()
         val verifyScreen =
             rememberScreen(
-                com.irancell.nwg.wfm.presentation.nav.Screen.Auth.Verify(
+                presentation.nav.Screen.Auth.Verify(
                     phoneNumber = getSharedPref().getString(
                         PhoneNumber
                     ) ?: ""
@@ -66,7 +65,6 @@ class LoginScreen : Screen {
             viewModel = viewModel,
             scaffoldState = scaffoldState,
             title = "",
-            snackbarHostState = remember { SnackbarHostState() },
             content = {
                 Column(
                     modifier = Modifier
@@ -181,10 +179,7 @@ class LoginScreen : Screen {
 
                         AuthButton(authButtonItem = AuthButtonItem(stringResource(MR.strings.sign_in))) {
 
-
                             //onClick
-
-
                             if (viewModel.performLogin(email, password)) {
                                 Napier.log(
                                     LogLevel.ASSERT,
@@ -197,11 +192,9 @@ class LoginScreen : Screen {
                     }
                 }
 
-
             }
 
         )
-
 
     }
 }

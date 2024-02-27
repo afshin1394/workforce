@@ -1,6 +1,5 @@
 package presentation.nav
 import cafe.adriel.voyager.core.registry.screenModule
-import com.irancell.nwg.wfm.presentation.nav.Screen
 import presentation.screens.auth.compose.LoginScreen
 import presentation.screens.auth.compose.VerifyScreen
 import presentation.screens.main.compose.MainScreen
@@ -309,6 +308,7 @@ import presentation.screens.ticket_process.compose.TicketProcessScreen
             register<Screen.Splash> {
                 SplashScreen()
             }
+
             register<Screen.Auth.Login> {
                 LoginScreen()
             }
