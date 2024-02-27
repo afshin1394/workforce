@@ -38,10 +38,10 @@ import utils.ViewStates
 fun <T : BaseViewModel> BaseScreen(
     viewModel: T,
     scaffoldState: BottomSheetScaffoldState,
-    snackbarHostState: androidx.compose.material.SnackbarHostState = remember { androidx.compose.material.SnackbarHostState() },
+    snackbarHostState: androidx.compose.material3.SnackbarHostState = remember { androidx.compose.material3.SnackbarHostState() },
     title: String,
     hasDrawer: Boolean = false,
-    content: @Composable (snackBarHost: androidx.compose.material.SnackbarHostState) -> Unit = {},
+    content: @Composable (snackBarHost: androidx.compose.material3.SnackbarHostState) -> Unit = {},
     topBar: @Composable () -> Unit = {},
     drawerContent: @Composable () -> Unit = {},
     bottomSheetHasHeader: Boolean = true,
@@ -76,7 +76,7 @@ fun <T : BaseViewModel> BaseScreen(
                 drawerContent = {
                     drawerContent()
                 },
-                snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
+                snackbarHost = { androidx.compose.material3.SnackbarHost(hostState = snackbarHostState) },
                 sheetPeekHeight = 0.dp,
                 sheetGesturesEnabled = false,
                 sheetShape = RoundedCornerShape(topEnd = radius, topStart = radius),
@@ -114,8 +114,10 @@ fun <T : BaseViewModel> BaseScreen(
                         scope.launch {
                             snackbarHostState.showSnackbar(
                                 message = "${errorMessage}!",
-                                duration = SnackbarDuration.Short,
+                                duration = androidx.compose.material3.SnackbarDuration.Short,
                             )
+
+
                         }
                         viewModel.updateState(ViewStates.Default)
                     }
@@ -189,7 +191,7 @@ fun <T : BaseViewModel> BaseScreen(
                             scope.launch {
                                 snackbarHostState.showSnackbar(
                                     message = "${errorMessage}!",
-                                    duration = SnackbarDuration.Short,
+                                    duration = androidx.compose.material3.SnackbarDuration.Short,
                                 )
                             }
                             viewModel.updateState(ViewStates.Default)

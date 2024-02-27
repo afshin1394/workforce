@@ -469,7 +469,7 @@ class MainScreen(
                 }
 
             },
-            snackbarHostState = remember { androidx.compose.material.SnackbarHostState() },
+            snackbarHostState = remember { androidx.compose.material3.SnackbarHostState() },
             content = {
                 scope.launch {
                     checkConnectivity {

@@ -34,6 +34,7 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TimePickerDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -45,8 +46,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.irancell.nwg.wfm.presentation.theme.spacing15X
@@ -488,20 +491,23 @@ fun BottomSheetTimeDate(
 
                     }
                     Spacer(modifier = Modifier.padding(top = spacing15X))
-                    AdaptiveTimePicker(
-                        state = startTimePickerState, colors = TimePickerDefaults.colors(
-                            clockDialColor = subtleDefault,
-                            containerColor = Color.White,
-                            periodSelectorSelectedContainerColor = subtleDefault,
-                            timeSelectorSelectedContainerColor = subtleDefault,
-                            timeSelectorUnselectedContainerColor = strokeDefaultLight,
-                            timeSelectorSelectedContentColor = textSecondary,
-                            selectorColor = surfaceBrandDefault
+
+                    CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr ) {
+                        AdaptiveTimePicker(
+                            state = startTimePickerState, colors = TimePickerDefaults.colors(
+                                clockDialColor = subtleDefault,
+                                containerColor = Color.White,
+                                periodSelectorSelectedContainerColor = subtleDefault,
+                                timeSelectorSelectedContainerColor = subtleDefault,
+                                timeSelectorUnselectedContainerColor = strokeDefaultLight,
+                                timeSelectorSelectedContentColor = textSecondary,
+                                selectorColor = surfaceBrandDefault
+
+                            )
+
 
                         )
-
-
-                    )
+                    }
 
 
                 }

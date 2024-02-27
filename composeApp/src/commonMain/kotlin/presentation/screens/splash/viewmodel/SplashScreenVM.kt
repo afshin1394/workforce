@@ -20,12 +20,13 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import presentation.screens.splash.events.PermissionEvent
+import utils.BaseViewModel
 import utils.ViewStates
 
 
 class SplashScreenVM(
 
-) : ViewModel() {
+) : BaseViewModel() {
 
     private val _permissionState =
         MutableStateFlow<PermissionEvent>(PermissionEvent.RequestPermission)

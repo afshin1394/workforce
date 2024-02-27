@@ -1,9 +1,12 @@
 package presentation.screens.auth.compose
 
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Scaffold
+import androidx.compose.material.rememberBottomSheetScaffoldState
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
@@ -12,6 +15,12 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.BlendMode
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.text.ParagraphStyle
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -34,12 +43,14 @@ import org.koin.compose.koinInject
 import presentation.screens.auth.components.AuthAlertText
 import presentation.screens.auth.components.AuthAlertTextItem
 import presentation.screens.auth.viewmodel.VerifyScreenVM
+import presentation.screens.main.compose.BaseScreen
 import presentation.screens.splash.compose.SplashScreen
 import presentation.theme.backgroundBackground3
 import presentation.theme.textBrand
 import utils.ViewStates
 
 class VerifyScreen(private val phoneNumber : String = "") : Screen {
+    @OptIn(ExperimentalMaterialApi::class)
     @Composable
     override fun Content() {
         val navigator = LocalNavigator.currentOrThrow
@@ -48,6 +59,7 @@ class VerifyScreen(private val phoneNumber : String = "") : Screen {
         val remainTime by viewModel.remainTime.collectAsState()
         val finishTimer by viewModel.finishTimer.collectAsState()
         val smsCode by viewModel.otpCode.collectAsState()
+        val scaffoldState = rememberBottomSheetScaffoldState();
 
         val mainScreen =
             rememberScreen(com.irancell.nwg.wfm.presentation.nav.Screen.Main.Menu.MyTickets)
@@ -58,6 +70,19 @@ class VerifyScreen(private val phoneNumber : String = "") : Screen {
         }
 
         val snackbarHostState = remember { SnackbarHostState() }
+
+
+
+        BaseScreen(
+            viewModel = viewModel,
+            scaffoldState = scaffoldState,
+            title = "",
+            snackbarHostState = remember { SnackbarHostState() },
+            content = {
+
+            }
+        )
+
         Scaffold(snackbarHost = {
             SnackbarHost(hostState = snackbarHostState)
         }) {
