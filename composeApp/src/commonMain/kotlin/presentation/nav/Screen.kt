@@ -1,7 +1,6 @@
-package com.irancell.nwg.wfm.presentation.nav
+package presentation.nav
 
 import cafe.adriel.voyager.core.registry.ScreenProvider
-import presentation.screens.main.events.MainEvent
 
 //sealed class Screen(val route: String) {
 //   data object Splash : Screen("splash")
@@ -31,6 +30,9 @@ import presentation.screens.main.events.MainEvent
 
 sealed class Screen(val mainRoute: String) : ScreenProvider{
     data object Splash : Screen("splash")
+
+    data object CRScreen : Screen("CR Management")
+
     sealed class Main(val route : String) : Screen("main") {
         sealed class Menu(val subRoute : String) : Main("Menu"){
             data object Settings : Menu("settings")
@@ -54,6 +56,7 @@ sealed class Screen(val mainRoute: String) : ScreenProvider{
         data object TicketInfo : TicketProcess("ticket_info")
         data object TicketProcessScreen : TicketProcess("ticket_process")
     }
+
 }
 
 

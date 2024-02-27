@@ -5,12 +5,12 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.wrapContentHeight
+
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -22,7 +22,6 @@ import androidx.compose.ui.unit.dp
 import com.irancell.nwg.wfm.presentation.components.*
 import presentation.theme.backgroundBackground3
 import com.irancell.nwg.wfm.presentation.theme.radius
-import com.irancell.nwg.wfm.presentation.theme.spacing2X
 import dev.icerock.moko.resources.compose.stringResource
 import io.github.aakira.napier.LogLevel
 import io.github.aakira.napier.Napier
@@ -32,16 +31,17 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import utils.BaseViewModel
 import utils.ViewStates
+import androidx.compose.material3.CircularProgressIndicator
+import com.mohamedrejeb.calf.ui.progress.AdaptiveCircularProgressIndicator
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun <T : BaseViewModel> BaseScreen(
     viewModel: T,
     scaffoldState: BottomSheetScaffoldState,
-    snackbarHostState: androidx.compose.material.SnackbarHostState = remember { androidx.compose.material.SnackbarHostState() },
     title: String,
     hasDrawer: Boolean = false,
-    content: @Composable (snackBarHost: androidx.compose.material.SnackbarHostState) -> Unit = {},
+    content: @Composable (snackBarHost: SnackbarHostState) -> Unit = {},
     topBar: @Composable () -> Unit = {},
     drawerContent: @Composable () -> Unit = {},
     bottomSheetHasHeader: Boolean = true,
@@ -55,6 +55,8 @@ fun <T : BaseViewModel> BaseScreen(
     val scope = rememberCoroutineScope()
     val state by viewModel.state.collectAsState()
     Napier.log(LogLevel.ASSERT,"BaseScreen", message = "enableGPS")
+    val snackbarHostState = remember { SnackbarHostState() }
+
     GPS.enableGps(provideAppContext(), disable =  {
         viewModel.updateState(ViewStates.NoGps)
     }, enabled =  {
@@ -76,7 +78,10 @@ fun <T : BaseViewModel> BaseScreen(
                 drawerContent = {
                     drawerContent()
                 },
-                snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
+                snackbarHost = {
+                    androidx.compose.material3.SnackbarHost(hostState = snackbarHostState)
+                }
+                ,
                 sheetPeekHeight = 0.dp,
                 sheetGesturesEnabled = false,
                 sheetShape = RoundedCornerShape(topEnd = radius, topStart = radius),
@@ -102,44 +107,44 @@ fun <T : BaseViewModel> BaseScreen(
                         .fillMaxWidth()
                         .fillMaxHeight()
                 ) {
+                    content(snackbarHostState)
+
                     when(state){
-                    ViewStates.Default -> {
-                        content(snackbarHostState)
+                        ViewStates.Default -> {
 
-                    }
-                    is ViewStates.Error -> {
-                        val errorMessage =  stringResource((state as ViewStates.Error).message)
-
-                        Napier.log(LogLevel.INFO, tag = "fkpekfpw", message = errorMessage.toString())
-                        scope.launch {
-                            snackbarHostState.showSnackbar(
-                                message = "${errorMessage}!",
-                                duration = SnackbarDuration.Short,
-                            )
                         }
-                        viewModel.updateState(ViewStates.Default)
-                    }
-                    ViewStates.Loading -> {
-//                        CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                        is ViewStates.Error -> {
+                            val errorMessage =  stringResource((state as ViewStates.Error).message)
 
-                    }
-                    ViewStates.NoGps -> {
-                        GPS.enableGps(provideAppContext(), disable =  {
-                            scope.launch {
+                            Napier.log(LogLevel.INFO, tag = "fkpekfpw", message = errorMessage.toString())
+                            LaunchedEffect(Unit) {
+                                scaffoldState.snackbarHostState.showSnackbar(message = errorMessage)
                                 viewModel.updateState(ViewStates.Default)
-                                delay(100)
-                                viewModel.updateState(ViewStates.NoGps)
+
                             }
-                        }, enabled = {
-                            viewModel.updateState(ViewStates.Default)
-                        })
+                        }
+                        ViewStates.Loading -> {
+
+                            CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
 
 
+                        }
+                        ViewStates.NoGps -> {
+                            GPS.enableGps(provideAppContext(), disable =  {
+                                scope.launch {
+                                    viewModel.updateState(ViewStates.Loading)
+                                    delay(100)
+                                    viewModel.updateState(ViewStates.NoGps)
+                                }
+                            }, enabled = {
+                                viewModel.updateState(ViewStates.Default)
+                            })
+
+
+                        }
+                        ViewStates.Success -> {
+                        }
                     }
-                    ViewStates.Success -> {
-                        content(snackbarHostState)
-                    }
-                }
                 }
             }
         } else {
@@ -177,42 +182,44 @@ fun <T : BaseViewModel> BaseScreen(
                         .fillMaxHeight()
 
                 ) {
+                    content(snackbarHostState)
+
                     when(state){
                         ViewStates.Default -> {
-                            content(snackbarHostState)
-
+//                            LaunchedEffect(Unit) {
+//                                scaffoldState.snackbarHostState.showSnackbar(message = "sdasdad")
+//
+//                            }
                         }
                         is ViewStates.Error -> {
-                            val errorMessage = (state as ViewStates.Error).message
+                            val errorMessage =  stringResource((state as ViewStates.Error).message)
+                            LaunchedEffect(Unit) {
+                                scaffoldState.snackbarHostState.showSnackbar(message = "$errorMessage")
+                                viewModel.updateState(ViewStates.Default)
 
-                            Napier.log(LogLevel.INFO, tag = "fkpekfpw", message = errorMessage.toString())
-                            scope.launch {
-                                snackbarHostState.showSnackbar(
-                                    message = "${errorMessage}!",
-                                    duration = SnackbarDuration.Short,
-                                )
                             }
-                            viewModel.updateState(ViewStates.Default)
+                            Napier.log(LogLevel.INFO, tag = "fkpekfpw", message = errorMessage.toString())
+
                         }
                         ViewStates.Loading -> {
-//                            CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                            CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
 
                         }
                         ViewStates.NoGps -> {
                             GPS.enableGps(provideAppContext(), disable =  {
                                 scope.launch {
-                                    viewModel.updateState(ViewStates.Default)
+                                    viewModel.updateState(ViewStates.Loading)
                                     delay(100)
                                     viewModel.updateState(ViewStates.NoGps)
                                 }
 
                             }, enabled = {
-                                    viewModel.updateState(ViewStates.Default)
+                                viewModel.updateState(ViewStates.Default)
                             })
 
                         }
                         ViewStates.Success -> {
-                            content(snackbarHostState)
+
                         }
                     }
 

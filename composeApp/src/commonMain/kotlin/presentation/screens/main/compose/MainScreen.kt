@@ -10,7 +10,7 @@ import cafe.adriel.voyager.core.registry.rememberScreen
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import com.irancell.nwg.wfm.presentation.nav.Screen.Main.*
+import presentation.nav.Screen.Main.*
 import com.irancell.nwg.wfm.presentation.components.*
 import presentation.model.BottomSheetDoubleActionModel
 import presentation.screens.main.events.MainEvent
@@ -66,7 +66,7 @@ class MainScreen(
         val suspendTaskState by viewModel.suspendTaskDomain.collectAsState()
 
         val ticketInfoScreen =
-            rememberScreen(com.irancell.nwg.wfm.presentation.nav.Screen.TicketProcess.TicketInfo)
+            rememberScreen(presentation.nav.Screen.TicketProcess.TicketInfo)
         val notificationScreen =
             rememberScreen(Notification)
         val accountScreen =
@@ -77,7 +77,7 @@ class MainScreen(
 
         val aboutScreen = rememberScreen(Menu.About)
         val gpsTrackingReportScreen = rememberScreen(Menu.GpsTrackingReport)
-        val loginScreen = rememberScreen(com.irancell.nwg.wfm.presentation.nav.Screen.Auth.Login)
+        val loginScreen = rememberScreen(presentation.nav.Screen.Auth.Login)
 
         val scope = rememberCoroutineScope()
         val scaffoldState = rememberBottomSheetScaffoldState();
@@ -469,13 +469,8 @@ class MainScreen(
                 }
 
             },
-            snackbarHostState = remember { androidx.compose.material.SnackbarHostState() },
             content = {
-                scope.launch {
-                    checkConnectivity {
-                        Napier.log(LogLevel.ASSERT,tag = "connected",message= it.toString())
-                    }
-                }
+
                 if (openCamera) {
                     viewModel.selectedTask.value?.let {
                         InternalStorage.createWorkItemImages(provideAppContext(),"Suspend",it.workId.toString())

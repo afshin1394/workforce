@@ -4,7 +4,6 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Scaffold
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -50,8 +49,9 @@ class VerifyScreen(private val phoneNumber : String = "") : Screen {
         val smsCode by viewModel.otpCode.collectAsState()
 
         val mainScreen =
-            rememberScreen(com.irancell.nwg.wfm.presentation.nav.Screen.Main.Menu.MyTickets)
-
+            rememberScreen(presentation.nav.Screen.Main.Menu.MyTickets)
+        val crScreen =
+            rememberScreen(presentation.nav.Screen.CRScreen)
         val scope = rememberCoroutineScope()
         val phoneNumberState by remember {
             mutableStateOf(phoneNumber)
@@ -113,7 +113,7 @@ class VerifyScreen(private val phoneNumber : String = "") : Screen {
                         ViewStates.Default -> {
 
                         }
-
+//
                         ViewStates.NoGps -> {
 
                         }
@@ -176,10 +176,12 @@ class VerifyScreen(private val phoneNumber : String = "") : Screen {
                         //onClick
                         if (smsCode.length == 6) {
                             Napier.log(LogLevel.ASSERT,"dadsd",message= smsCode)
+
                             viewModel.verify(smsCode) {
                                 viewModel.disableSMSListener()
                                 navigator.popUntil { it == SplashScreen() }
-                                navigator.push(mainScreen)
+                                navigator.push(crScreen)
+
                             }
 
 

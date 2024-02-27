@@ -42,7 +42,7 @@ class TicketProcessScreen(private val title: String) : Screen {
 
         val currentLevelState = viewModel.currentLevel.collectAsState()
         val listOfSteps = viewModel.listSample.toMutableList()
-        val formViewerScreen = rememberScreen(com.irancell.nwg.wfm.presentation.nav.Screen.Main.Menu.FormViewer)
+        val formViewerScreen = rememberScreen(presentation.nav.Screen.Main.Menu.FormViewer)
 
 
         BaseScreen(

@@ -100,4 +100,7 @@
 
     <string name="otp_failed">Failed in getting verification code</string>
 
+    <string name="open_cr">Open CR</string>
+    <string name="close_cr">Close CR</string>
+
 </resources>

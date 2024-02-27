@@ -25,8 +25,6 @@ import dev.icerock.moko.resources.compose.stringResource
 import io.github.aakira.napier.LogLevel
 import io.github.aakira.napier.Napier
 import irancell.nwg.wfm.MR
-import irancell.nwg.wfm.MR.strings.email
-import irancell.nwg.wfm.MR.strings.update
 import irancell.nwg.wfm.getSharedPref
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
@@ -56,7 +54,7 @@ class LoginScreen : Screen {
 
         val verifyScreen =
             rememberScreen(
-                com.irancell.nwg.wfm.presentation.nav.Screen.Auth.Verify(
+                presentation.nav.Screen.Auth.Verify(
                     phoneNumber = getSharedPref().getString(
                         PhoneNumber
                     ) ?: ""

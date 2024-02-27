@@ -19,6 +19,7 @@ import domain.usecase.ResultStatus
 import domain.usecase.usecase.availability.ChangeServerAvailabilityUseCase
 import domain.usecase.usecase.availability.GetAvailabilityUseCase
 import domain.usecase.usecase.availability.StoreAvailabilityUseCase
+import domain.usecase.usecase.cr.GetAllCR
 import domain.usecase.usecase.suspendTask.GetSuspendTaskById
 import domain.usecase.usecase.suspendTask.StoreSuspendTask
 import domain.usecase.usecase.ticket.UpdateTasksUseCase
@@ -44,7 +45,8 @@ class MainScreenVM(
     private val changeServerAvailabilityUseCase: ChangeServerAvailabilityUseCase,
     private val updateTasksUseCase: UpdateTasksUseCase,
     private val storeSuspendTask: StoreSuspendTask,
-    private val getSuspendTaskById: GetSuspendTaskById
+    private val getSuspendTaskById: GetSuspendTaskById,
+    private val getAllCR: GetAllCR
 ) : BaseViewModel() {
     private val _availability = MutableStateFlow(false)
     val availability = _availability.asStateFlow()
@@ -60,7 +62,30 @@ class MainScreenVM(
 
         getCurrentAvailability()
         getTasks()
+        getAllChangeRequest()
 
+    }
+    private fun getAllChangeRequest(){
+        viewModelScope.launch(Dispatchers.IO) {
+            getAllCR(
+                Unit
+            ).collect {
+                when (it.status) {
+                    AsyncStatus.ERROR -> {
+                        Napier.log(LogLevel.ASSERT,"changeRequest", message = it.resultStatus.toString())
+                    }
+                    AsyncStatus.LOADING -> {
+                        updateState(ViewStates.Loading)
+                    }
+                    AsyncStatus.SUCCESS -> {
+                        updateState(ViewStates.Success)
+                        it.data?.let { cr ->
+                            Napier.log(LogLevel.ASSERT,"changeRequest", message = it.data.toString())
+                        }
+                    }
+                }
+            }
+        }
     }
 
     private fun getCurrentAvailability() {

@@ -104,3 +104,22 @@ object TaskState {
     }
 
 }
+
+
+
+object CRState {
+    object All{
+        const val title = "All"
+        const val id = 0
+    }
+    object CLOSE_CR{
+        const val title = "close_cr"
+        const val id = 1
+    }
+    object OPEN_CR{
+        const val title = "open_cr"
+        const val id = 2
+    }
+
+
+}

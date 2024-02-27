@@ -52,9 +52,12 @@ class SplashScreen() : Screen, KoinComponent {
 
         val scope = rememberCoroutineScope()
         val navigator = LocalNavigator.currentOrThrow
-        val loginScreen = rememberScreen(com.irancell.nwg.wfm.presentation.nav.Screen.Auth.Login)
+        val loginScreen = rememberScreen(presentation.nav.Screen.Auth.Login)
         val mainScreen =
-            rememberScreen(com.irancell.nwg.wfm.presentation.nav.Screen.Main.Menu.MyTickets)
+            rememberScreen(presentation.nav.Screen.Main.Menu.MyTickets)
+
+        val crScreen =
+            rememberScreen(presentation.nav.Screen.CRScreen)
         val snackbarHostState = remember { SnackbarHostState() }
         val viewModel = remember { SplashScreenVM() }
 
@@ -65,11 +68,14 @@ class SplashScreen() : Screen, KoinComponent {
         if (lifecycleEvent == LifecycleEvent.ON_RESUME) {
             viewModel.updateLifeCycleEventState(LifecycleEvent.ON_ANY)
 
-            checkPermission({
-                viewModel.updatePermissionState(PermissionEvent.IsGranted)
-            }, {
-                viewModel.updatePermissionState(PermissionEvent.DeniedPermission)
-            })
+
+            viewModel.updatePermissionState(PermissionEvent.IsGranted)
+
+//            checkPermission({
+//                viewModel.updatePermissionState(PermissionEvent.IsGranted)
+//            }, {
+//                viewModel.updatePermissionState(PermissionEvent.DeniedPermission)
+//            })
         }
 
         OnLifecycleEvent { owner, event ->
@@ -116,7 +122,7 @@ class SplashScreen() : Screen, KoinComponent {
 
                 if (getSharedPref().getBool(SelectLanguage, false)) {
 
-                    navigator.push(mainScreen)
+                    navigator.push(crScreen)
                     getSharedPref().put(SelectLanguage, false)
 
                 } else {
@@ -150,7 +156,7 @@ class SplashScreen() : Screen, KoinComponent {
                         scope.launch {
                             delay(1000)
                             if (getSharedPref().getString(Token).toString().length > 6)
-                                navigator.push(mainScreen)
+                                navigator.push(crScreen)
                             else
                                 navigator.push(loginScreen)
                         }

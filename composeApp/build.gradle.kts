@@ -77,7 +77,6 @@ kotlin {
                 implementation(libs.ktor.client.content.negotiation)
                 implementation(libs.kotlin.serialization)
                 api(libs.calf.ui)
-                implementation(libs.connectivity.status)
 //                implementation(libs.composeImageLoader)
 
 
