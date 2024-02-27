@@ -50,8 +50,7 @@ class VerifyScreen(private val phoneNumber : String = "") : Screen {
 
         val mainScreen =
             rememberScreen(presentation.nav.Screen.Main.Menu.MyTickets)
-        val crScreen =
-            rememberScreen(presentation.nav.Screen.CRScreen)
+
         val scope = rememberCoroutineScope()
         val phoneNumberState by remember {
             mutableStateOf(phoneNumber)
@@ -180,7 +179,7 @@ class VerifyScreen(private val phoneNumber : String = "") : Screen {
                             viewModel.verify(smsCode) {
                                 viewModel.disableSMSListener()
                                 navigator.popUntil { it == SplashScreen() }
-                                navigator.push(crScreen)
+                                navigator.push(mainScreen)
 
                             }
 

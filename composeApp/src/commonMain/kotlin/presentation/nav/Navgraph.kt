@@ -5,7 +5,6 @@ import presentation.screens.auth.compose.VerifyScreen
 import presentation.screens.main.compose.MainScreen
 import presentation.screens.main.compose.AccountScreen
 import com.irancell.nwg.wfm.presentation.screens.main.compose.NotificationScreen
-import presentation.screens.cr.compose.CRScreen
 import presentation.screens.splash.compose.SplashScreen
 import presentation.screens.ticket_process.compose.TicketInfoScreen
 import presentation.screens.main.compose.AboutScreen
@@ -309,9 +308,7 @@ import presentation.screens.ticket_process.compose.TicketProcessScreen
             register<Screen.Splash> {
                 SplashScreen()
             }
-            register<Screen.CRScreen> {
-                CRScreen("CR Management")
-            }
+
             register<Screen.Auth.Login> {
                 LoginScreen()
             }

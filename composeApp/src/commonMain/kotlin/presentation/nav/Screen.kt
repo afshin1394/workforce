@@ -31,7 +31,6 @@ import cafe.adriel.voyager.core.registry.ScreenProvider
 sealed class Screen(val mainRoute: String) : ScreenProvider{
     data object Splash : Screen("splash")
 
-    data object CRScreen : Screen("CR Management")
 
     sealed class Main(val route : String) : Screen("main") {
         sealed class Menu(val subRoute : String) : Main("Menu"){

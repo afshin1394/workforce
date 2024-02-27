@@ -56,8 +56,7 @@ class SplashScreen() : Screen, KoinComponent {
         val mainScreen =
             rememberScreen(presentation.nav.Screen.Main.Menu.MyTickets)
 
-        val crScreen =
-            rememberScreen(presentation.nav.Screen.CRScreen)
+
         val snackbarHostState = remember { SnackbarHostState() }
         val viewModel = remember { SplashScreenVM() }
 
@@ -122,7 +121,7 @@ class SplashScreen() : Screen, KoinComponent {
 
                 if (getSharedPref().getBool(SelectLanguage, false)) {
 
-                    navigator.push(crScreen)
+                    navigator.push(mainScreen)
                     getSharedPref().put(SelectLanguage, false)
 
                 } else {
@@ -156,7 +155,7 @@ class SplashScreen() : Screen, KoinComponent {
                         scope.launch {
                             delay(1000)
                             if (getSharedPref().getString(Token).toString().length > 6)
-                                navigator.push(crScreen)
+                                navigator.push(mainScreen)
                             else
                                 navigator.push(loginScreen)
                         }

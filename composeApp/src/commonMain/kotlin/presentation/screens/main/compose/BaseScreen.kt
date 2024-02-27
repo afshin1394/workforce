@@ -32,7 +32,6 @@ import kotlinx.coroutines.launch
 import utils.BaseViewModel
 import utils.ViewStates
 import androidx.compose.material3.CircularProgressIndicator
-import com.mohamedrejeb.calf.ui.progress.AdaptiveCircularProgressIndicator
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
@@ -78,10 +77,8 @@ fun <T : BaseViewModel> BaseScreen(
                 drawerContent = {
                     drawerContent()
                 },
-                snackbarHost = {
-                    androidx.compose.material3.SnackbarHost(hostState = snackbarHostState)
-                }
-                ,
+
+
                 sheetPeekHeight = 0.dp,
                 sheetGesturesEnabled = false,
                 sheetShape = RoundedCornerShape(topEnd = radius, topStart = radius),
@@ -116,9 +113,10 @@ fun <T : BaseViewModel> BaseScreen(
                         is ViewStates.Error -> {
                             val errorMessage =  stringResource((state as ViewStates.Error).message)
 
-                            Napier.log(LogLevel.INFO, tag = "fkpekfpw", message = errorMessage.toString())
+                            Napier.log(LogLevel.INFO, tag = "fkpekfpw", message = errorMessage)
                             LaunchedEffect(Unit) {
                                 scaffoldState.snackbarHostState.showSnackbar(message = errorMessage)
+
                                 viewModel.updateState(ViewStates.Default)
 
                             }
@@ -143,6 +141,9 @@ fun <T : BaseViewModel> BaseScreen(
 
                         }
                         ViewStates.Success -> {
+                                viewModel.updateState(ViewStates.Default)
+
+
                         }
                     }
                 }
@@ -219,6 +220,8 @@ fun <T : BaseViewModel> BaseScreen(
 
                         }
                         ViewStates.Success -> {
+                                viewModel.updateState(ViewStates.Default)
+
 
                         }
                     }

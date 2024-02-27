@@ -49,7 +49,9 @@ actual class GpsTrackingService : Service() , KoinComponent {
     val sendLocationToServerUseCase : SendLocationToServerUseCase by inject()
 
    actual companion object {
-        lateinit var gpsTrackingIntent : Intent
+        val gpsTrackingIntent : Intent by lazy {
+            Intent((provideAppContext() as Context), GpsTrackingService::class.java)
+        }
 
         const val Notification_ID = 123
         const val CHANNEL_ID = "GPS TRACKER"
@@ -74,8 +76,7 @@ actual class GpsTrackingService : Service() , KoinComponent {
                 message = (provideAppContext() as Context).toString()
             )
 
-            gpsTrackingIntent =
-                Intent((provideAppContext() as Context), GpsTrackingService::class.java)
+
             if (!isRunning) {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                     (provideAppContext() as Context).startForegroundService(gpsTrackingIntent)
