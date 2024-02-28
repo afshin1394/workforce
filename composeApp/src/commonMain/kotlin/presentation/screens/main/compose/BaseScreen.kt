@@ -54,7 +54,6 @@ fun <T : BaseViewModel> BaseScreen(
     val scope = rememberCoroutineScope()
     val state by viewModel.state.collectAsState()
     Napier.log(LogLevel.ASSERT,"BaseScreen", message = "enableGPS")
-    val snackbarHostState = remember { SnackbarHostState() }
 
     GPS.enableGps(provideAppContext(), disable =  {
         viewModel.updateState(ViewStates.NoGps)
@@ -142,8 +141,6 @@ fun <T : BaseViewModel> BaseScreen(
                         }
                         ViewStates.Success -> {
                                 viewModel.updateState(ViewStates.Default)
-
-
                         }
                     }
                 }
@@ -187,10 +184,7 @@ fun <T : BaseViewModel> BaseScreen(
 
                     when(state){
                         ViewStates.Default -> {
-//                            LaunchedEffect(Unit) {
-//                                scaffoldState.snackbarHostState.showSnackbar(message = "sdasdad")
-//
-//                            }
+
                         }
                         is ViewStates.Error -> {
                             val errorMessage =  stringResource((state as ViewStates.Error).message)
@@ -204,7 +198,6 @@ fun <T : BaseViewModel> BaseScreen(
                         }
                         ViewStates.Loading -> {
                             CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-
                         }
                         ViewStates.NoGps -> {
                             GPS.enableGps(provideAppContext(), disable =  {
@@ -221,8 +214,6 @@ fun <T : BaseViewModel> BaseScreen(
                         }
                         ViewStates.Success -> {
                                 viewModel.updateState(ViewStates.Default)
-
-
                         }
                     }
 
