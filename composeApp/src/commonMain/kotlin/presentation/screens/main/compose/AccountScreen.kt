@@ -7,6 +7,7 @@ import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Text
 import androidx.compose.material.rememberBottomSheetScaffoldState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -33,6 +34,8 @@ class AccountScreen(private val title: String) : Screen {
         val scaffoldState: BottomSheetScaffoldState = rememberBottomSheetScaffoldState()
         val navigator = LocalNavigator.currentOrThrow
         val viewModel: AccountScreenVM = koinInject()
+        val profileDomain = viewModel.profileDomain.collectAsState()
+        val roleDomain = viewModel.roles.collectAsState()
 
         BaseScreen(
             viewModel = viewModel,
@@ -41,11 +44,7 @@ class AccountScreen(private val title: String) : Screen {
             topBar = {
                 MenuItemsTopBar(title) {
                     navigator.pop()
-//            navHostController.navigate(Screen.Main.route) {
-//                popUpTo(Screen.Main.route) {
-//
-//                }
-//            }
+
                 }
             },
             content = {
@@ -72,7 +71,7 @@ class AccountScreen(private val title: String) : Screen {
                         Text(text = stringResource(MR.strings.name), style = body_large)
                         Spacer(modifier = Modifier.padding(vertical = spacing05X))
                         ProfileInfoComponent(
-                            "Ali Sohrabi",
+                            "${profileDomain.value.firstName}  ${profileDomain.value.lastName}" ,
                             MR.images.user_account,
                             backgroundColor = surfaceInputReadOnly
                         )
@@ -80,8 +79,9 @@ class AccountScreen(private val title: String) : Screen {
 
                         Text(text = stringResource(MR.strings.expertise), style = body_large)
                         Spacer(modifier = Modifier.padding(vertical = spacing05X))
+
                         ProfileInfoComponent(
-                            "Electrical engineer",
+                            roleDomain.value,
                             MR.images.expertise,
                             backgroundColor = surfaceInputReadOnly
                         )
@@ -90,7 +90,7 @@ class AccountScreen(private val title: String) : Screen {
                         Text(text = stringResource(MR.strings.phone_number), style = body_large)
                         Spacer(modifier = Modifier.padding(vertical = spacing05X))
                         ProfileInfoComponent(
-                            "09352003242",
+                            profileDomain.value.phoneNumber.toString(),
                             MR.images.phone,
                             backgroundColor = surfaceInputReadOnly
                         )
@@ -99,7 +99,7 @@ class AccountScreen(private val title: String) : Screen {
                         Text(text = stringResource(MR.strings.email), style = body_large)
                         Spacer(modifier = Modifier.padding(vertical = spacing05X))
                         ProfileInfoComponent(
-                            "ali.soh@mtnirancell.ir",
+                            profileDomain.value.user?.email ?: "",
                             MR.images.mail1,
                             backgroundColor = surfaceInputReadOnly
                         )

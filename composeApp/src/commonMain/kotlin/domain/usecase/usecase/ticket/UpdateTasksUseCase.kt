@@ -1,5 +1,6 @@
 package domain.usecase.usecase.ticket
 
+import arrow.core.Either
 import domain.mappers.toTaskDomainList
 import domain.mappers.toTaskEntityList
 import domain.models.TaskDomain
@@ -17,7 +18,6 @@ class UpdateTasksUseCase(
         iTaskRepository.insertAll(tasks.toTaskEntityList())
         val domainList = iTaskRepository.getAll().toTaskDomainList()
         Napier.log(LogLevel.ASSERT,tag = "domainList", message =  domainList.toString())
-        delay(2000)
         return iTaskRepository.getAll().toTaskDomainList()
     }
 }

@@ -1,0 +1,22 @@
+CREATE  TABLE ProfileEntity (
+pk TEXT NOT NULL,
+username TEXT NOT NULL,
+email TEXT NOT NULL,
+first_name TEXT NOT NULL,
+last_name TEXT NOT NULL,
+company TEXT NOT NULL,
+organization TEXT NOT NULL,
+national_id  TEXT  NOT NULL ,
+phone_number TEXT NOT NULL
+);
+
+insert:
+INSERT INTO ProfileEntity (pk,username,email,first_name,last_name,company,organization,national_id,phone_number)
+VALUES (?, ?,?,?,?,?,?,?,?);
+
+
+selectAll:
+SELECT * FROM ProfileEntity;
+
+deleteAll:
+DELETE FROM ProfileEntity;

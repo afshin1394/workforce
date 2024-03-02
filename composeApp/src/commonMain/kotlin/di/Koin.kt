@@ -6,11 +6,13 @@ import presentation.screens.ticket_process.viewModel.TicketProcessVM
 import data.AuthRepositoryImpl
 import data.AvailabilityRepositoryImpl
 import data.GeneralLocationRepositoryImpl
+import data.ProfileRepositoryImpl
 import data.SuspendTaskRepositoryImpl
 import data.TaskRepositoryImpl
 import domain.repository.IAuthRepository
 import domain.repository.IAvailabilityRepository
 import domain.repository.IGeneralLocationRepository
+import domain.repository.IProfileRepository
 import domain.repository.ISuspendTaskRepository
 import domain.repository.ITaskRepository
 import domain.usecase.usecase.auth.LoginUseCase
@@ -23,6 +25,8 @@ import domain.usecase.usecase.location.GetGeneralLocationListUseCase
 import domain.usecase.usecase.location.SendLocationToServerUseCase
 import domain.usecase.usecase.availability.StoreAvailabilityUseCase
 import domain.usecase.usecase.location.StoreLocationDataUseCase
+import domain.usecase.usecase.profile.GetProfileUseCase
+import domain.usecase.usecase.profile.StoreProfileUseCase
 import domain.usecase.usecase.suspendTask.GetSuspendTaskById
 import domain.usecase.usecase.suspendTask.StoreSuspendTask
 import domain.usecase.usecase.ticket.UpdateTasksUseCase
@@ -65,6 +69,7 @@ fun repositoryModule() = module {
     single<ISuspendTaskRepository> { SuspendTaskRepositoryImpl(get(), get(named("tokenized"))) }
     single<IAuthRepository> { AuthRepositoryImpl(get(named("noToken"))) }
     single<ITaskRepository> { TaskRepositoryImpl(get(named("tokenized")),get()) }
+    single<IProfileRepository>{ ProfileRepositoryImpl(get(named("tokenized")),get()) }
 
 }
 
@@ -84,6 +89,8 @@ fun useCaseModule() = module {
     single { ResendUseCase(get()) }
     single { StoreSuspendTask(get()) }
     single { GetSuspendTaskById(get()) }
+    single { StoreProfileUseCase(get()) }
+    single { GetProfileUseCase(get()) }
 }
 
 fun httpModule() = module {
@@ -166,13 +173,13 @@ fun httpModule() = module {
 
 fun viewModelModule() = module {
     viewModelDefinition { AboutScreenVM() }
-    viewModelDefinition { MainScreenVM(get(), get(),get(),get(),get(),get()) }
+    viewModelDefinition { MainScreenVM(get(), get(),get(),get(),get(),get(),get()) }
     viewModelDefinition { SettingScreenVM() }
     viewModelDefinition { GpsTrackingReportScreenVM(get()) }
     viewModelDefinition { LoginScreenVM(get()) }
-    viewModelDefinition { VerifyScreenVM(get(),get()) }
+    viewModelDefinition { VerifyScreenVM(get(),get(),get()) }
     viewModelDefinition { TicketInfoVM() }
     viewModelDefinition { TicketProcessVM() }
     viewModelDefinition { FormViewVM() }
-    viewModelDefinition { AccountScreenVM() }
+    viewModelDefinition { AccountScreenVM(get()) }
 }

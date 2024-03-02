@@ -16,7 +16,7 @@ import kotlinx.coroutines.flow.flow
 import utils.AsyncResult
 
 abstract class BaseUseCase<out Type, in Params> {
-    abstract suspend fun run(params: Params) : Type
+    abstract suspend fun run(params: Params) :  Type
     suspend operator fun invoke(params: Params) = flow {
         emit(AsyncResult.Loading(null, isLoading = true))
         try {

@@ -7,6 +7,7 @@ import dev.icerock.moko.resources.StringResource
 import dev.icerock.moko.resources.compose.stringResource
 import domain.usecase.usecase.auth.ResendUseCase
 import domain.usecase.usecase.auth.VerifyUseCase
+import domain.usecase.usecase.profile.StoreProfileUseCase
 import io.github.aakira.napier.LogLevel
 import io.github.aakira.napier.Napier
 import irancell.nwg.wfm.CountdownTimer
@@ -23,7 +24,8 @@ import utils.ViewStates
 
 class VerifyScreenVM(
    private val verifyUseCase: VerifyUseCase,
-   private val resendUseCase: ResendUseCase
+   private val resendUseCase: ResendUseCase,
+   private val storeProfileUseCase: StoreProfileUseCase
 ) : BaseViewModel() {
     private val _remainTime = MutableStateFlow(10)
     var remainTime = _remainTime.asStateFlow()
@@ -32,12 +34,11 @@ class VerifyScreenVM(
     var finishTimer =_finishTimer.asStateFlow()
 
 
-    private val _otpCode = MutableStateFlow("")
-    var otpCode = _otpCode.asStateFlow()
+     val otpCode = MutableStateFlow("")
 
 
     fun updateOtp(smsCode : String){
-        _otpCode.update { smsCode }
+        otpCode.update { smsCode }
     }
 
 
@@ -54,7 +55,7 @@ class VerifyScreenVM(
     init {
       countdownTimer.start()
       SMSListener.enableSMSListener({
-            _otpCode.update { it }
+            otpCode.value = it
       },{
             updateState(ViewStates.Error(MR.strings.form))
       })
@@ -74,23 +75,43 @@ class VerifyScreenVM(
                     AsyncStatus.ERROR -> {
                         handleError(it.resultStatus)
                         Napier.log(LogLevel.ASSERT, tag = "serviice", message = "ERROR")
-
                     }
                     AsyncStatus.LOADING -> {
                         updateState(ViewStates.Loading)
-
                         Napier.log(LogLevel.ASSERT, tag = "serviice", message = "LOADING")
+                    }
+                    AsyncStatus.SUCCESS -> {
+//                        updateState(ViewStates.Success)
+//                        countdownTimer.stop()
+                        getProfile()
+                    }
+                }
+            }
+
+        }
+    }
+    private fun getProfile(){
+        viewModelScope.launch {
+            storeProfileUseCase(Unit).collect {
+                when(it.status){
+                    AsyncStatus.ERROR -> {
+                        handleError(it.resultStatus)
+                        Napier.log(LogLevel.ASSERT, tag = "getProfile", message = "ERROR")
+
+                    }
+                    AsyncStatus.LOADING -> {
+
+                        Napier.log(LogLevel.ASSERT, tag = "getProfile", message = "LOADING")
 
                     }
                     AsyncStatus.SUCCESS -> {
                         updateState(ViewStates.Success)
                         countdownTimer.stop()
-                        Napier.log(LogLevel.ASSERT, tag = "serviice", message = "SUCCESS${it.data}")
+                        Napier.log(LogLevel.ASSERT, tag = "getProfile", message = "SUCCESS${it.data}")
 
                     }
                 }
             }
-
         }
     }
 

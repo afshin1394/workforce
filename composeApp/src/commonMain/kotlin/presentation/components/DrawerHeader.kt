@@ -24,7 +24,7 @@ import utils.Language
 
 
 @Composable
-fun DrawerHeader(onItemClick : (navRoute : String) -> Unit = {}) {
+fun DrawerHeader(title : String,onItemClick : (navRoute : String) -> Unit = {}) {
     Column(modifier = Modifier.background(color = surfaceDefault).padding(end = spacing1X),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally) {
@@ -59,7 +59,7 @@ fun DrawerHeader(onItemClick : (navRoute : String) -> Unit = {}) {
                             .height(40.dp)
                     )
                     Text(
-                        text = "Ali Sohrabi",
+                        text = title,
                         style = body_large,
                         modifier = Modifier.fillMaxWidth(.8f)
                     )

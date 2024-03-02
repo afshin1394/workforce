@@ -64,6 +64,7 @@ class MainScreen(
         val openCamera by viewModel.openCamera.collectAsState()
         val state by viewModel.state.collectAsState()
         val suspendTaskState by viewModel.suspendTaskDomain.collectAsState()
+        val profileName by viewModel.profileName.collectAsState()
 
         val ticketInfoScreen =
             rememberScreen(presentation.nav.Screen.TicketProcess.TicketInfo)
@@ -164,7 +165,7 @@ class MainScreen(
                     })
             },
             drawerContent = {
-                DrawerHeader() {
+                DrawerHeader(profileName) {
                     scope.launch {
                         if (scaffoldState.drawerState.isOpen)
                             scaffoldState.drawerState.close()

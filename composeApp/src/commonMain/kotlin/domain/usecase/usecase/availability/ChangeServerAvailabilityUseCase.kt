@@ -13,7 +13,7 @@ import utils.AvailabilityObjectId
 class ChangeServerAvailabilityUseCase(
     private val iAvailabilityRepository: IAvailabilityRepository
 ) : BaseUseCase<String,Boolean>() {
-    override suspend fun run(params: Boolean) : String  {
+    override suspend fun run(params: Boolean) :  String  {
        val available = getSharedPref().getBool(Availability,false)
        val changeAvailabilityRequest = if (available){
             ChangeAvailabilityRequest(false, getSharedPref().getString(AvailabilityObjectId)?.toInt())
