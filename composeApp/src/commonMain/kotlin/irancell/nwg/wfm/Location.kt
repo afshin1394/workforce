@@ -6,5 +6,7 @@ expect class Location  (){
     companion object {
          fun start( update:  (GeneralLocationEntity) -> Unit)
          fun stop()
+
+         fun getLastLocation() : GeneralLocationEntity
     }
 }

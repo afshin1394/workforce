@@ -97,4 +97,17 @@
     <string name="open_cr">بازکردن CR</string>
     <string name="close_cr">بستن CR</string>
 
+
+    //screens
+    <string name="cr_management"> مدیریت CR</string>
+    <string name="main">اصلی</string>
+    <string name="auth">احراز هویت</string>
+    <string name="login">ورود</string>
+    <string name="ticket_process">مراحل کار</string>
+    <string name="splash_sc">اسپلش</string>
+    <string name="menu_sc">منو</string>
+
+    <string name="describe_the_reason">علت را توضیح دهید</string>
+
+
 </resources>

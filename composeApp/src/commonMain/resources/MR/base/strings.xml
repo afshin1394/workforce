@@ -103,4 +103,17 @@
     <string name="open_cr">Open CR</string>
     <string name="close_cr">Close CR</string>
 
+
+    //screens
+    <string name="cr_management">CR Management</string>
+    <string name="main">Main</string>
+    <string name="auth">Authentication</string>
+    <string name="login">Login</string>
+    <string name="ticket_process">Ticket Process</string>
+    <string name="splash_sc">splash</string>
+    <string name="menu_sc">menu</string>
+
+    <string name="describe_the_reason">describe the reason</string>
+
+
 </resources>

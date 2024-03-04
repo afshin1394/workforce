@@ -10,8 +10,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import com.irancell.nwg.wfm.presentation.components.CustomButton
-import com.irancell.nwg.wfm.presentation.components.CustomButtonData
+import presentation.components.CustomButton
+import presentation.components.CustomButtonData
 import presentation.model.BottomSheetDoubleActionModel
 import com.irancell.nwg.wfm.presentation.theme.spacing2X
 import com.irancell.nwg.wfm.presentation.theme.spacing3X

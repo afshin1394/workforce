@@ -18,6 +18,7 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import presentation.components.MenuItemsTopBar
 import com.irancell.nwg.wfm.presentation.model.ProcessLevel
+import dev.icerock.moko.resources.StringResource
 import presentation.screens.ticket_process.viewModel.TicketProcessVM
 import presentation.screens.ticket_process.components.processBar
 import dev.icerock.moko.resources.compose.stringResource
@@ -26,12 +27,13 @@ import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import presentation.model.SingleButtonActionModel
 import presentation.screens.main.compose.BaseScreen
+import presentation.screens.splash.compose.SplashScreen
 import presentation.screens.ticket_process.components.bottomSingleActionComponent
 import presentation.theme.surfaceBrandDefault
 import presentation.theme.textInverse
 
 
-class TicketProcessScreen(private val title: String) : Screen {
+class TicketProcessScreen() : Screen {
     @OptIn(ExperimentalMaterialApi::class)
     @Composable
     override fun Content() {
@@ -47,14 +49,14 @@ class TicketProcessScreen(private val title: String) : Screen {
 
         BaseScreen(
             viewModel = viewModel,
-            title = title,
+            title = stringResource(MR.strings.ticket_process),
             scaffoldState = scaffoldState,
             hasDrawer = false,
             bottomSheetHasHeader = false,
             topBar = {
-                MenuItemsTopBar(title) {
+                MenuItemsTopBar(stringResource(MR.strings.ticket_process)) {
 
-                    navigator.popUntil { it ==  TicketInfoScreen() }
+                    navigator.pop()
 
                 }
             },

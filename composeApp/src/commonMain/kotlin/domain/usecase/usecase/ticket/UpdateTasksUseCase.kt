@@ -15,6 +15,7 @@ class UpdateTasksUseCase(
 ) : BaseUseCase<List<TaskDomain>, Unit>() {
     override suspend fun run(params: Unit): List<TaskDomain> {
         val tasks = iTaskRepository.fetchWorks()
+        iTaskRepository.deleteAll()
         iTaskRepository.insertAll(tasks.toTaskEntityList())
         val domainList = iTaskRepository.getAll().toTaskDomainList()
         Napier.log(LogLevel.ASSERT,tag = "domainList", message =  domainList.toString())

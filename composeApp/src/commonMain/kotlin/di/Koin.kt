@@ -27,8 +27,9 @@ import domain.usecase.usecase.availability.StoreAvailabilityUseCase
 import domain.usecase.usecase.location.StoreLocationDataUseCase
 import domain.usecase.usecase.profile.GetProfileUseCase
 import domain.usecase.usecase.profile.StoreProfileUseCase
-import domain.usecase.usecase.suspendTask.GetSuspendTaskById
-import domain.usecase.usecase.suspendTask.StoreSuspendTask
+import domain.usecase.usecase.suspendTask.DeleteByTaskIdUseCase
+import domain.usecase.usecase.suspendTask.GetSuspendTaskByIdUseCase
+import domain.usecase.usecase.suspendTask.StoreSuspendTaskUseCase
 import domain.usecase.usecase.ticket.UpdateTasksUseCase
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.HttpTimeout
@@ -87,10 +88,11 @@ fun useCaseModule() = module {
     single { LoginUseCase(get()) }
     single { VerifyUseCase(get()) }
     single { ResendUseCase(get()) }
-    single { StoreSuspendTask(get()) }
-    single { GetSuspendTaskById(get()) }
+    single { StoreSuspendTaskUseCase(get()) }
+    single { GetSuspendTaskByIdUseCase(get()) }
     single { StoreProfileUseCase(get()) }
     single { GetProfileUseCase(get()) }
+    single { DeleteByTaskIdUseCase(get()) }
 }
 
 fun httpModule() = module {
@@ -173,7 +175,7 @@ fun httpModule() = module {
 
 fun viewModelModule() = module {
     viewModelDefinition { AboutScreenVM() }
-    viewModelDefinition { MainScreenVM(get(), get(),get(),get(),get(),get(),get()) }
+    viewModelDefinition { MainScreenVM(get(), get(),get(),get(),get(),get(),get(),get()) }
     viewModelDefinition { SettingScreenVM() }
     viewModelDefinition { GpsTrackingReportScreenVM(get()) }
     viewModelDefinition { LoginScreenVM(get()) }

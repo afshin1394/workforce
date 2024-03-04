@@ -38,7 +38,6 @@ class SplashScreenVM(
 
     fun changeStateDenied(){
         _permissionState.update { PermissionEvent.CheckPermission }
-
     }
 
 

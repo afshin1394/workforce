@@ -1,7 +1,7 @@
-package com.irancell.nwg.wfm.presentation.components
+package presentation.components
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Text
@@ -11,8 +11,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.irancell.nwg.wfm.presentation.screens.auth.components.AuthButtonItem
 import com.irancell.nwg.wfm.presentation.theme.*
+import presentation.theme.strokeDefaultLight
 
 @Composable
 fun CustomButton(
@@ -22,6 +22,7 @@ fun CustomButton(
     Row(
         modifier = modifier
             .background(customButtonData.backgroundColor, shape = RoundedCornerShape(radiusLarge))
+            .border(1.dp, color = strokeDefaultLight, shape = RoundedCornerShape(radiusLarge))
             .fillMaxWidth()
             .wrapContentHeight(),
 

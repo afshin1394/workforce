@@ -7,6 +7,7 @@ import android.net.Uri
 import android.os.Build
 import android.provider.MediaStore
 import android.util.Log
+import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
@@ -29,41 +30,43 @@ import java.util.UUID
 actual class Camera {
 
     actual companion object {
-        @SuppressLint("CoroutineCreationDuringComposition")
+
+        lateinit var cameraLauncher : ManagedActivityResultLauncher<Uri,Boolean>
+        lateinit var uri : Uri
         @Composable
-        actual fun ImagePicker(savePath : String,onSuccess : (uri : Any) -> Unit) {
+        actual fun onResult( onSuccess: (uri: Any) -> Unit) {
             val context = LocalContext.current
-            val file = createImageFile(context.filesDir.path + savePath )
-            Log.i("uriiiii", "ImagePicker: ${file.path}")
 
-            val uri  = InternalStorage.getUriForFile(context,file)
-
-            val cameraLauncher = rememberLauncherForActivityResult(
+            cameraLauncher =  rememberLauncherForActivityResult(
                 contract = ActivityResultContracts.TakePicture(),
                 onResult = { success ->
-                    Log.i("pathtt", "ImagePicker: ${file.path}")
-
+                    Log.i("cameraLauncher", "success: $success")
                     if (success) {
-                        onSuccess(uri)
+
+                        onSuccess(uri.toString())
                     }
                 }
             )
-            LaunchedEffect(Unit) {
-                cameraLauncher.launch(uri)
-                Log.i("uriiiii", "ImagePicker: $uri")
-            }
+        }
+        @Composable
+        actual fun launchCamera(savePath: String){
+            val context = LocalContext.current
+            val file = createImageFile(context.filesDir.path + savePath)
+            Log.i("ImagePicker", "file.path: ${file.path}")
 
+            uri = InternalStorage.getUriForFile(context, file)
+            cameraLauncher.launch(uri)
         }
 
 
-        private fun createImageFile(path : String): File {
+        private fun createImageFile(path: String): File {
+
+
             val uuid = UUID.randomUUID().toString()
             val imageFileName = "${uuid}.jpg"
 
             return File(path, imageFileName)
         }
-
-
 
 
     }

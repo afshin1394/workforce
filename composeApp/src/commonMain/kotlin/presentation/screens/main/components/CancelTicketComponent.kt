@@ -12,13 +12,14 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.irancell.nwg.wfm.presentation.components.CustomButton
-import com.irancell.nwg.wfm.presentation.components.CustomButtonData
-import com.irancell.nwg.wfm.presentation.screens.main.components.DropDownComponent
+
+import presentation.components.DropDownComponent
 import presentation.components.CustomEditTextComponent
 import com.irancell.nwg.wfm.presentation.theme.*
 import dev.icerock.moko.resources.compose.stringResource
 import irancell.nwg.wfm.MR
+import presentation.components.CustomButton
+import presentation.components.CustomButtonData
 
 import presentation.theme.body_large
 import presentation.theme.surfaceBrandDefault
@@ -46,12 +47,12 @@ fun CancelTicketComponent(suspendReasonState: String = "", ticketName : String =
             color = textPrimary
         )
         Spacer(modifier = Modifier.padding(vertical = spacing1X))
-        DropDownComponent(suspendReasonText = suspendReasonState, modifier = Modifier.clickable {
+        DropDownComponent(dropDownText = stringResource(MR.strings.cancel_reason) ,suspendReasonText = suspendReasonState, modifier = Modifier.clickable {
             onSelectReason()
 
         })
         Spacer(modifier = Modifier.padding(vertical = spacing1X))
-        CustomEditTextComponent(defaultText = "",updateText = {
+        CustomEditTextComponent(editTextHint = stringResource(MR.strings.describe_the_reason), defaultText = "",updateText = {
             if (it.text.isNotEmpty()) {
                 onCompleted(true)
             } else {

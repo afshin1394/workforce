@@ -1,6 +1,8 @@
 package presentation.nav
 
 import cafe.adriel.voyager.core.registry.ScreenProvider
+import dev.icerock.moko.resources.StringResource
+import irancell.nwg.wfm.MR
 
 //sealed class Screen(val route: String) {
 //   data object Splash : Screen("splash")
@@ -28,33 +30,35 @@ import cafe.adriel.voyager.core.registry.ScreenProvider
 //}
 
 
-sealed class Screen(val mainRoute: String) : ScreenProvider{
-    data object Splash : Screen("splash")
+sealed class Screen() : ScreenProvider{
+    data object Splash : Screen()
+    data object CRScreen : Screen()
 
-
-    sealed class Main(val route : String) : Screen("main") {
-        sealed class Menu(val subRoute : String) : Main("Menu"){
-            data object Settings : Menu("settings")
-            data object About : Menu("about")
-            data object Logout : Menu("logout")
-            data object FormViewer : Menu("Form Viewer")
-            data object MyTickets : Menu("My Tickets")
-            data object GpsTrackingReport : Menu("GpsTrackingReport")
+    sealed class Main() : Screen() {
+        sealed class Menu() : Main(){
+            data object Settings : Menu()
+            data object About : Menu()
+            data object Logout : Menu()
+            data object FormViewer : Menu()
+            data object MyTickets : Menu()
+            data object GpsTrackingReport : Menu()
         }
-        data object AccountInfo : Main("Account info")
-        data object Notification : Main("Notification")
+        data object AccountInfo : Main()
+        data object Notification : Main()
     }
 
 
-    sealed class  Auth(val route : String) : Screen("auth") {
-        data object Login : Auth("login")
-        data class Verify(val phoneNumber : String = "") : Auth("verify")
+    sealed class  Auth() : Screen() {
+        data object Login : Auth()
+        data class Verify(val phoneNumber : String = "") : Auth()
     }
 
-    sealed class  TicketProcess(val route: String) : Screen("ticket_process"){
-        data object TicketInfo : TicketProcess("ticket_info")
-        data object TicketProcessScreen : TicketProcess("ticket_process")
+    sealed class  TicketProcess() : Screen(){
+        data object TicketInfo : TicketProcess()
+        data object TicketProcessScreen : TicketProcess()
     }
+
+
 
 }
 

@@ -1,5 +1,5 @@
 CREATE TABLE SuspendTaskEntity (
-taskId INTEGER NOT NULL,
+taskId  INTEGER PRIMARY KEY NOT NULL,
 reason TEXT NOT NULL,
 description TEXT NOT NULL,
 attachmentsUri TEXT NOT NULL,
@@ -33,6 +33,9 @@ WHERE taskId = :taskId;
 
 deleteAllSent:
 DELETE FROM SuspendTaskEntity WHERE isSent = 1;
+
+deleteByTaskId:
+DELETE FROM SuspendTaskEntity WHERE taskId = :taskId;
 
 removeSentItems:
 DELETE FROM SuspendTaskEntity WHERE isSent = 1;

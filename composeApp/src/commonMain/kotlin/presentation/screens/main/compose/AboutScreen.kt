@@ -18,10 +18,13 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 
 import com.irancell.nwg.wfm.presentation.components.*
 import com.irancell.nwg.wfm.presentation.theme.*
+import dev.icerock.moko.resources.StringResource
 import dev.icerock.moko.resources.compose.painterResource
 import dev.icerock.moko.resources.compose.stringResource
 import irancell.nwg.wfm.MR
 import org.koin.compose.koinInject
+import presentation.components.CustomButton
+import presentation.components.CustomButtonData
 import presentation.components.MenuItemsTopBar
 import presentation.screens.main.viewmodel.AboutScreenVM
 
@@ -33,7 +36,6 @@ import presentation.theme.textPrimary
 
 @OptIn(ExperimentalMaterialApi::class)
 class AboutScreen(
-    private val title: String
 ) : Screen {
     @Composable
     override fun Content() {

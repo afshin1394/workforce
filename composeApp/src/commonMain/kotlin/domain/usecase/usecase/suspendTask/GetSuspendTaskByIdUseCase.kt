@@ -5,7 +5,7 @@ import domain.models.SuspendTaskDomain
 import domain.repository.ISuspendTaskRepository
 import domain.usecase.BaseUseCase
 
-class GetSuspendTaskById(
+class GetSuspendTaskByIdUseCase(
     private val iSuspendTaskRepository: ISuspendTaskRepository
 ) : BaseUseCase<SuspendTaskDomain,Long>() {
     override suspend fun run(params: Long): SuspendTaskDomain {

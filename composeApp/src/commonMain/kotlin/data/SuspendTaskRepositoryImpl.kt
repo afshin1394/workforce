@@ -40,6 +40,10 @@ class SuspendTaskRepositoryImpl(
        wfmDatabase.suspendTaskEntityQueries.deleteAllSent()
     }
 
+    override suspend fun deleteByTaskId(taskId: Long) {
+        wfmDatabase.suspendTaskEntityQueries.deleteByTaskId(taskId)
+    }
+
     override suspend fun selectUnSend(): List<SuspendTaskEntity> {
      return  wfmDatabase.suspendTaskEntityQueries.selectAllNotSent().executeAsList()
     }

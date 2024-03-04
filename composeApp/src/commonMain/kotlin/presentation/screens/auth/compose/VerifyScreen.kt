@@ -21,6 +21,7 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.irancell.nwg.wfm.presentation.screens.auth.components.*
 import com.irancell.nwg.wfm.presentation.theme.*
+import dev.icerock.moko.resources.StringResource
 import dev.icerock.moko.resources.compose.painterResource
 import dev.icerock.moko.resources.compose.stringResource
 import io.github.aakira.napier.LogLevel
@@ -36,7 +37,7 @@ import presentation.theme.backgroundBackground3
 import presentation.theme.textBrand
 import utils.ViewStates
 
-class VerifyScreen(private val phoneNumber : String = "") : Screen {
+class VerifyScreen(private val phoneNumber: String = "") : Screen {
     @OptIn(ExperimentalMaterialApi::class)
     @Composable
     override fun Content() {
@@ -57,7 +58,7 @@ class VerifyScreen(private val phoneNumber : String = "") : Screen {
         BaseScreen(
             viewModel = viewModel,
             scaffoldState = scaffoldState,
-            title = "",
+            title = stringResource(MR.strings.verify),
             content = {
                     Column(
                         modifier = Modifier

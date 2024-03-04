@@ -5,23 +5,22 @@ import androidx.compose.runtime.MutableState
 import irancell.nwg.wfm.GpsTrackingService
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
+import arrow.core.valid
 
 import com.irancell.nwg.wfm.presentation.components.FilterSectionItem
 import presentation.model.FilterType
 import com.irancell.nwg.wfm.presentation.model.SelectableItem
 import presentation.model.StateFilter
 import presentation.screens.main.events.MainEvent
-import dev.icerock.moko.permissions.Permission
-import dev.icerock.moko.permissions.PermissionsController
 import domain.models.SuspendTaskDomain
 import domain.models.TaskDomain
-import domain.usecase.ResultStatus
 import domain.usecase.usecase.availability.ChangeServerAvailabilityUseCase
 import domain.usecase.usecase.availability.GetAvailabilityUseCase
 import domain.usecase.usecase.availability.StoreAvailabilityUseCase
 import domain.usecase.usecase.profile.GetProfileUseCase
-import domain.usecase.usecase.suspendTask.GetSuspendTaskById
-import domain.usecase.usecase.suspendTask.StoreSuspendTask
+import domain.usecase.usecase.suspendTask.DeleteByTaskIdUseCase
+import domain.usecase.usecase.suspendTask.GetSuspendTaskByIdUseCase
+import domain.usecase.usecase.suspendTask.StoreSuspendTaskUseCase
 import domain.usecase.usecase.ticket.UpdateTasksUseCase
 import io.github.aakira.napier.LogLevel
 import io.github.aakira.napier.Napier
@@ -44,21 +43,22 @@ class MainScreenVM(
     private val getAvailabilityUseCase: GetAvailabilityUseCase,
     private val changeServerAvailabilityUseCase: ChangeServerAvailabilityUseCase,
     private val updateTasksUseCase: UpdateTasksUseCase,
-    private val storeSuspendTask: StoreSuspendTask,
-    private val getSuspendTaskById: GetSuspendTaskById,
-    private val getProfileUseCase: GetProfileUseCase
+    private val storeSuspendTaskUseCase: StoreSuspendTaskUseCase,
+    private val getSuspendTaskByIdUseCase: GetSuspendTaskByIdUseCase,
+    private val getProfileUseCase: GetProfileUseCase,
+    private val deleteByTaskIdUseCase: DeleteByTaskIdUseCase
 ) : BaseViewModel() {
     private val _availability = MutableStateFlow(false)
     val availability = _availability.asStateFlow()
 
     private val _openCamera = MutableStateFlow(false)
     val openCamera = _openCamera.asStateFlow()
-    val tasks  = mutableStateListOf<TaskDomain>()
+    val tasks = mutableStateListOf<TaskDomain>()
 
     private val _profileName = MutableStateFlow("")
     val profileName = _profileName.asStateFlow()
 
-
+    val suspendTaskLoaded = MutableStateFlow(false)
 
 
     init {
@@ -77,14 +77,16 @@ class MainScreenVM(
                         AsyncStatus.ERROR -> {
                             handleError(it.resultStatus)
                         }
+
                         AsyncStatus.LOADING -> {
 
                         }
+
                         AsyncStatus.SUCCESS -> {
-                           it.data?.let{
+                            it.data?.let {
                                 val name = it.firstName + " " + it.lastName
-                               updateState(ViewStates.Success)
-                               _profileName.update { name }
+                                updateState(ViewStates.Success)
+                                _profileName.update { name }
                             }
 
                         }
@@ -102,11 +104,13 @@ class MainScreenVM(
                 when (it.status) {
                     AsyncStatus.ERROR -> {
                         handleError(it.resultStatus)
-                        Napier.log(LogLevel.ASSERT,"resrrrr", message = it.resultStatus.toString())
+                        Napier.log(LogLevel.ASSERT, "resrrrr", message = it.resultStatus.toString())
                     }
+
                     AsyncStatus.LOADING -> {
                         updateState(ViewStates.Loading)
                     }
+
                     AsyncStatus.SUCCESS -> {
                         updateState(ViewStates.Success)
                         it.data?.let { available ->
@@ -128,7 +132,7 @@ class MainScreenVM(
                 when (it) {
                     is AsyncResult.Error -> {
                         handleError(it.resultStatus)
-                        Napier.log(LogLevel.ASSERT,"resrrrr", message = it.resultStatus.toString())
+                        Napier.log(LogLevel.ASSERT, "resrrrr", message = it.resultStatus.toString())
 
                     }
 
@@ -138,7 +142,7 @@ class MainScreenVM(
                     }
 
                     is AsyncResult.Success -> {
-                        Napier.log(LogLevel.ASSERT,"resrrrr", message = it.resultStatus.toString())
+                        Napier.log(LogLevel.ASSERT, "resrrrr", message = it.resultStatus.toString())
 
                         _availability.update { !it }
                         storeAvailabilityUseCase(
@@ -286,7 +290,6 @@ class MainScreenVM(
     var suspendDescription = mutableStateOf("")
     var cancelDescription = mutableStateOf("")
 
-    var suspendImageUri = mutableStateOf("")
 
 
     val suspendItems = mutableStateListOf(
@@ -457,6 +460,8 @@ class MainScreenVM(
     }
 
     fun getTasks() {
+        tasks.clear()
+
         viewModelScope.launch(Dispatchers.IO) {
             updateTasksUseCase(Unit).collect {
                 when (it.status) {
@@ -496,20 +501,32 @@ class MainScreenVM(
 
                     }
 
+
                 }
             }
         }
 
     }
-    private val _suspendTaskDomain = MutableStateFlow<SuspendTaskDomain?>(null)
-    val suspendTaskDomain = _suspendTaskDomain.asStateFlow()
 
-    fun loadSuspendTask(){
+    val suspendTaskDomain = MutableStateFlow<SuspendTaskDomain>(SuspendTaskDomain(
+        selectedTask.value?.workId ?: 0,
+        "",
+        "",
+        "",
+        0,
+        getCurrentDate(),
+        Location.getLastLocation().latitude,
+        Location.getLastLocation().longitude
+    ))
+
+
+    fun loadSuspendTask() {
         viewModelScope.launch {
             selectedTask.value?.let {
-                getSuspendTaskById(it.workId).collect{
+                getSuspendTaskByIdUseCase(it.workId).collect {
                     when (it.status) {
                         AsyncStatus.ERROR -> {
+                            suspendTaskLoaded.value = true
 //                            handleError(it.resultStatus)
                         }
 
@@ -520,66 +537,132 @@ class MainScreenVM(
                         }
 
                         AsyncStatus.SUCCESS -> {
-
+                            suspendTaskLoaded.value = true
                             updateState(ViewStates.Success)
-                            val suspendTaskDomain = it.data
-                            _suspendTaskDomain.update { suspendTaskDomain }
+                            val suspendTask = it.data
+                            suspendTask?.let {
+                               suspendTaskDomain.value = it
 
                             }
+
+                        }
+                    }
+
+                }
+            }
+
+
+        }
+
+    }
+
+
+    fun saveSuspendTask() {
+        Location.start { }
+        Napier.log(LogLevel.ASSERT, "atttacgg", message = suspendTaskDomain.value.attachmentsUri)
+
+
+        viewModelScope.launch {
+            selectedTask.value?.workId?.let {
+                deleteByTaskIdUseCase(it).collect {
+                    when (it.status) {
+                        AsyncStatus.ERROR -> {
+                            handleError(it.resultStatus)
+                            Location.stop()
+
+                        }
+
+                        AsyncStatus.LOADING -> {
+                            Napier.log(LogLevel.ASSERT, "saveSuspendTask", message = "LOADING: ")
+                            updateState(ViewStates.Loading)
+
+                        }
+
+                        AsyncStatus.SUCCESS -> {
+//                            updateState(ViewStates.Success)
+                            storeSuspendTask()
                         }
 
                     }
                 }
-
-
-
             }
+
 
         }
 
 
+    }
 
+    private fun storeSuspendTask() {
+        viewModelScope.launch {
+            storeSuspendTaskUseCase(
+                SuspendTaskDomain(
+                    suspendTaskDomain.value.taskId ,
+                    suspendTaskDomain.value.reason,
+                    suspendTaskDomain.value.description,
+                    suspendTaskDomain.value.attachmentsUri,
+                    0,
+                    getCurrentDate(),
+                    Location.getLastLocation().latitude,
+                    Location.getLastLocation().longitude
+                )
+            ).collect {
+                when (it.status) {
+                    AsyncStatus.ERROR -> {
+                        handleError(it.resultStatus)
+                        Location.stop()
 
-    fun saveSuspendTask() {
-
-                viewModelScope.launch {
-                    storeSuspendTask(
-                        SuspendTaskDomain(
-                            selectedTask.value?.workId ?: 0,
-                            suspendReason.value,
-                            suspendDescription.value,
-                            suspendImageUri.value,
-                            0,
-                            getCurrentDate(),
-                            "",
-                            ""
-                        )
-                    ).collect {
-                        when (it.status) {
-                            AsyncStatus.ERROR -> {
-                                handleError(it.resultStatus)
-                                Location.stop()
-
-                            }
-
-                            AsyncStatus.LOADING -> {
-                                Napier.log(LogLevel.ASSERT, "getAllWorksUseCase", message = "LOADING: ")
-                                updateState(ViewStates.Loading)
-
-                            }
-
-                            AsyncStatus.SUCCESS -> {
-                                updateState(ViewStates.Success)
-                                Location.stop()
-
-                            }
-
-                        }
                     }
-//                }
+
+                    AsyncStatus.LOADING -> {
+                        Napier.log(LogLevel.ASSERT, "getAllWorksUseCase", message = "LOADING: ")
+                        updateState(ViewStates.Loading)
+
+                    }
+
+                    AsyncStatus.SUCCESS -> {
+                        updateState(ViewStates.Success)
+                        Location.stop()
+
+                    }
+
+                }
             }
+        }
+    }
+
+    fun updateSuspendTicketReason(reason: String) {
+
+        suspendTaskDomain.value.reason = reason
 
 
     }
 
+    fun updateSuspendTicketDescription(description: String) {
+        suspendTaskDomain.value.description = description
+
+    }
+
+    fun updateSuspendTicketImageUri(imgUri: String){
+
+        if(suspendTaskDomain.value.attachmentsUri.isEmpty())
+            suspendTaskDomain.value.attachmentsUri =  suspendTaskDomain.value.attachmentsUri.plus(imgUri)
+        else
+            suspendTaskDomain.value.attachmentsUri =  suspendTaskDomain.value.attachmentsUri.plus(",$imgUri")
+
+    }
+
+    fun resetSuspendTask(){
+        suspendTaskLoaded.value = false
+        suspendTaskDomain.value = SuspendTaskDomain(
+            selectedTask.value?.workId ?: 0,
+            "",
+            "",
+            "",
+            0,
+            getCurrentDate(),
+            Location.getLastLocation().latitude,
+            Location.getLastLocation().longitude
+        )
+    }
 }

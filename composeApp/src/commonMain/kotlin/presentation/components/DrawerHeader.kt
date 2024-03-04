@@ -24,7 +24,7 @@ import utils.Language
 
 
 @Composable
-fun DrawerHeader(title : String,onItemClick : (navRoute : String) -> Unit = {}) {
+fun DrawerHeader(title : String,onItemClick : () -> Unit = {}) {
     Column(modifier = Modifier.background(color = surfaceDefault).padding(end = spacing1X),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally) {
@@ -45,7 +45,7 @@ fun DrawerHeader(title : String,onItemClick : (navRoute : String) -> Unit = {}) 
             Row(
                 modifier = Modifier
                     .fillMaxWidth().clickable {
-                        onItemClick(Screen.Main.AccountInfo.route)
+                        onItemClick()
                     },
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically

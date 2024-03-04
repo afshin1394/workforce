@@ -33,6 +33,7 @@ import presentation.screens.ticket_process.viewModel.TicketProcessVM
 import presentation.screens.main.compose.BaseScreen
 import com.irancell.nwg.wfm.presentation.theme.spacing15X
 import com.irancell.nwg.wfm.presentation.theme.spacing2X
+import dev.icerock.moko.resources.StringResource
 import presentation.theme.surfaceBrandDefault
 import presentation.theme.textInverse
 import dev.icerock.moko.resources.compose.painterResource
@@ -61,7 +62,7 @@ class TicketInfoScreen(
 
             BaseScreen(
             viewModel =viewModel,
-            title = "TicketInfo",
+            title = stringResource(MR.strings.ticket_info),
             scaffoldState = scaffoldState,
             hasDrawer = false,
             bottomSheetHasHeader = false,

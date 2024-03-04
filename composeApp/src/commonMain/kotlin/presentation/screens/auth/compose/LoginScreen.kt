@@ -18,6 +18,7 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 
 import com.irancell.nwg.wfm.presentation.screens.auth.components.*
 import com.irancell.nwg.wfm.presentation.theme.*
+import dev.icerock.moko.resources.StringResource
 import dev.icerock.moko.resources.compose.stringResource
 import io.github.aakira.napier.LogLevel
 import io.github.aakira.napier.Napier
@@ -39,7 +40,7 @@ import presentation.theme.error_5
 import utils.PhoneNumber
 import utils.ViewStates
 
-class LoginScreen : Screen {
+class LoginScreen() : Screen {
 
     @OptIn(ExperimentalMaterialApi::class)
     @Composable

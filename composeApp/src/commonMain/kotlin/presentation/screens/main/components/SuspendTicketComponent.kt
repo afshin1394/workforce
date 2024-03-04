@@ -5,6 +5,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -12,15 +13,19 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.irancell.nwg.wfm.presentation.components.CustomButton
-import com.irancell.nwg.wfm.presentation.components.CustomButtonData
-import com.irancell.nwg.wfm.presentation.screens.main.components.DropDownComponent
+import presentation.components.CustomButton
+import presentation.components.CustomButtonData
+import presentation.components.DropDownComponent
 import presentation.components.CustomEditTextComponent
 import presentation.components.TakeImageComponent
 import com.irancell.nwg.wfm.presentation.theme.*
 import dev.icerock.moko.resources.compose.stringResource
 import domain.models.SuspendTaskDomain
+import io.github.aakira.napier.LogLevel
+import io.github.aakira.napier.Napier
+
 import irancell.nwg.wfm.MR
+import presentation.components.ImageRowComponent
 
 import presentation.theme.body_large
 import presentation.theme.surfaceBrandDefault
@@ -32,7 +37,13 @@ import presentation.theme.textPrimary
 
 
 @Composable
-fun SuspendTicketContentComponent(suspendTaskDomain: SuspendTaskDomain?, taskid : String, onSelectReason : () -> Unit = {}, onCompleted : (isComplete : Boolean, text:String) -> Unit = { b: Boolean, s: String -> }, onCameraClick : () -> Unit = {} ) {
+fun SuspendTicketContentComponent(
+    suspendTaskDomain: SuspendTaskDomain?,
+    taskid: String,
+    onSelectReason: () -> Unit = {},
+    onDescription: (text: String) -> Unit = { s: String -> },
+    onCameraClick: () -> Unit = {}
+) {
 
     Column(
         modifier = Modifier
@@ -49,31 +60,43 @@ fun SuspendTicketContentComponent(suspendTaskDomain: SuspendTaskDomain?, taskid 
             color = textPrimary
         )
         Spacer(modifier = Modifier.padding(vertical = spacing1X))
-        DropDownComponent(suspendReasonText = suspendTaskDomain?.reason?:"",modifier = Modifier.clickable {
-            onSelectReason()
+        DropDownComponent(
+            dropDownText = stringResource(MR.strings.suspend_reason),
+            suspendReasonText = suspendTaskDomain?.reason ?: "",
+            modifier = Modifier.clickable {
+                onSelectReason()
 
-        })
+            })
         Spacer(modifier = Modifier.padding(vertical = spacing1X))
-        CustomEditTextComponent(defaultText = suspendTaskDomain?.description?:"",updateText = {
-           if (it.text.isNotEmpty()){
-               onCompleted(true,it.text)
-           }else{
-               onCompleted(false,it.text)
-           }
-        })
+        CustomEditTextComponent(defaultText = suspendTaskDomain?.description ?: "", updateText = {
+            if (it.text.isNotEmpty()) {
+                onDescription(it.text)
+            }
+        }, editTextHint = stringResource(MR.strings.describe_the_reason))
         Spacer(modifier = Modifier.padding(vertical = spacing1X))
-        Text(text = stringResource(MR.strings.photo_for_ticket_suspend), style = body_large, color = textPrimary)
+        Text(
+            text = stringResource(MR.strings.photo_for_ticket_suspend),
+            style = body_large,
+            color = textPrimary
+        )
         Spacer(modifier = Modifier.padding(vertical = spacing1X))
-        TakeImageComponent(){
-            onCameraClick()
+        Row(modifier = Modifier.fillMaxWidth()) {
+
+
+            ImageRowComponent(suspendTaskDomain?.attachmentsUri?.split(","), onCameraClick ={
+                onCameraClick()
+            }) {
+
+            }
         }
+
     }
 
 
 }
 
 @Composable
-fun SuspendTicketBottomBarComponent(isEnabled : Boolean = false,onClick : () -> Unit={}) {
+fun SuspendTicketBottomBarComponent(isEnabled: Boolean = false, onComplete: () -> Unit = {}) {
     Row(
         modifier = Modifier
             .background(surfaceDefault)
@@ -85,16 +108,16 @@ fun SuspendTicketBottomBarComponent(isEnabled : Boolean = false,onClick : () -> 
             )
     ) {
 
-        if (isEnabled){
+        if (isEnabled) {
             CustomButton(
                 customButtonData = CustomButtonData(
                     stringResource(MR.strings.submit), textColor = textInverse,
                     surfaceBrandDefault
                 ), modifier = Modifier.clickable {
-                    onClick()
+                    onComplete()
                 }
             )
-        }else{
+        } else {
             CustomButton(
                 customButtonData = CustomButtonData(
                     stringResource(MR.strings.submit), textColor = textInverseDisabled,

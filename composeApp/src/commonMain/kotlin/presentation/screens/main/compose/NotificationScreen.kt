@@ -31,13 +31,13 @@ import presentation.screens.main.components.NotificationItem
 import presentation.theme.mediumDivider
 import com.irancell.nwg.wfm.presentation.theme.spacing15X
 import com.irancell.nwg.wfm.presentation.theme.spacing2X
+import dev.icerock.moko.resources.StringResource
 import dev.icerock.moko.resources.compose.stringResource
 import irancell.nwg.wfm.MR
 import utils.NotificationState
 
 @OptIn(ExperimentalMaterialApi::class)
 class NotificationScreen (
-    private val title: String
 ) : Screen {
 
 

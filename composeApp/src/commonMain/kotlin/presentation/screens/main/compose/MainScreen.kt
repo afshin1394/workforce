@@ -16,6 +16,7 @@ import presentation.model.BottomSheetDoubleActionModel
 import presentation.screens.main.events.MainEvent
 import presentation.screens.main.viewmodel.MainScreenVM
 import com.irancell.nwg.wfm.presentation.theme.*
+import dev.icerock.moko.resources.StringResource
 import presentation.screens.main.components.TicketListScreen
 
 import dev.icerock.moko.resources.compose.stringResource
@@ -50,7 +51,6 @@ import utils.PhoneNumber
 import utils.Token
 
 class MainScreen(
-    private val title: String,
 
     ) : Screen {
     @OptIn(ExperimentalMaterialApi::class)
@@ -65,6 +65,7 @@ class MainScreen(
         val state by viewModel.state.collectAsState()
         val suspendTaskState by viewModel.suspendTaskDomain.collectAsState()
         val profileName by viewModel.profileName.collectAsState()
+        val suspendTaskLoaded by viewModel.suspendTaskLoaded.collectAsState()
 
         val ticketInfoScreen =
             rememberScreen(presentation.nav.Screen.TicketProcess.TicketInfo)
@@ -91,7 +92,9 @@ class MainScreen(
         val cancelItems by lazy {
             viewModel.cancelItems
         }
-
+        Camera.onResult {
+            viewModel.updateSuspendTicketImageUri(it.toString())
+        }
 
 
         val bottomSheetTitle: String =
@@ -196,7 +199,6 @@ class MainScreen(
                             }
 
                             Menu.MyTickets -> {
-//                        navigator.push(settingsScreen)
 
                             }
 
@@ -219,7 +221,7 @@ class MainScreen(
                     }
                 })
             },
-            title = title,
+            title = stringResource(MR.strings.ticket_list),
             bottomSheetTitle = bottomSheetTitle,
             bottomBarBottomSheetContent = {
                 when (events) {
@@ -305,7 +307,7 @@ class MainScreen(
                     MainEvent.SuspendTicket -> {
 
 
-                        SuspendTicketBottomBarComponent(viewModel.enableSuspendSubmit.value) {
+                        SuspendTicketBottomBarComponent(true) {
                             viewModel.saveSuspendTask()
                             viewModel.events.value = MainEvent.Default
                         }
@@ -394,21 +396,22 @@ class MainScreen(
 //                        val factory: PermissionsControllerFactory =
 //                            rememberPermissionsControllerFactory()
                         viewModel.loadSuspendTask()
-                        SuspendTicketContentComponent(
-                            taskid = viewModel.selectedTask.value!!.instanceTitle,
-                            suspendTaskDomain = viewModel.suspendTaskDomain.value
-                            ,
-                            onSelectReason = {
-                                viewModel.events.value = MainEvent.SuspendReason
-                            },
-                            onCompleted = { isComplete, description ->
-                                viewModel.enableSuspendSubmit.value = isComplete
-                                viewModel.suspendDescription.value = description
-                            },
-                            onCameraClick = {
-                                viewModel.openCamera()
-                            }
-                        )
+                        if (suspendTaskLoaded) {
+                            SuspendTicketContentComponent(
+                                taskid = viewModel.selectedTask.value!!.instanceTitle,
+                                suspendTaskDomain = suspendTaskState,
+                                onSelectReason = {
+                                    viewModel.events.value = MainEvent.SuspendReason
+                                },
+                                onDescription = { description ->
+                                    viewModel.suspendDescription.value = description
+                                    viewModel.updateSuspendTicketDescription(description)
+                                },
+                                onCameraClick = {
+                                    viewModel.openCamera()
+                                }
+                            )
+                        }
 
                         scope.launch {
                             scaffoldState.bottomSheetState.expand()
@@ -424,14 +427,13 @@ class MainScreen(
                                 it.isSelectedState.value = false
                             }
                             viewModel.suspendReason.value = selectableItem.text
+                            viewModel.updateSuspendTicketReason(selectableItem.text)
                             viewModel.events.value = MainEvent.SuspendTicket
                         }, onSearch = { searchQuery ->
                             suspendItems.clear()
                             suspendItems.addAll(viewModel.suspendItems.filter {
                                 it.text.lowercase().contains(searchQuery.lowercase())
                             })
-
-
                         })
                         scope.launch {
                             scaffoldState.bottomSheetState.expand()
@@ -472,13 +474,16 @@ class MainScreen(
             },
             content = {
 
+
                 if (openCamera) {
                     viewModel.selectedTask.value?.let {
                         InternalStorage.createWorkItemImages(provideAppContext(),"Suspend",it.workId.toString())
 
-                        Camera.ImagePicker("/wfmImages/Suspend/${it.workId}") { it ->
-                            viewModel.suspendImageUri.value.plus(it.toString())
-                        }
+
+
+                        Camera.launchCamera("/wfmImages/Suspend/${it.workId}")
+
+
                         viewModel.updateCameraStatus(false)
                     }
                 }
@@ -489,11 +494,12 @@ class MainScreen(
                             Napier.i("TicketListScreen")
                             viewModel.events.value = mainEvent
                             viewModel.selectedTask.value = task
+                            viewModel.resetSuspendTask()
                         },
                         tasks = ArrayList(viewModel.tasks.toList())
                         , onAccept = {
                             viewModel.selectedTask.value = it
-
+                            viewModel.resetSuspendTask()
                             navigator.push(ticketInfoScreen)
                         }
                     )

@@ -316,31 +316,31 @@ import presentation.screens.ticket_process.compose.TicketProcessScreen
                 VerifyScreen(provider.phoneNumber)
             }
             register<Screen.Main.Menu.MyTickets> {
-                MainScreen( "TicketList")
+                MainScreen()
             }
             register<Screen.Main.Menu.About> {
-                AboutScreen( "About")
+                AboutScreen()
             }
             register<Screen.Main.AccountInfo> {
-                AccountScreen("Account")
+                AccountScreen()
             }
             register<Screen.Main.Menu.Settings> {
-                SettingsScreen( "Settings")
+                SettingsScreen()
             }
             register<Screen.Main.Menu.FormViewer> {
-                FormViewerScreen( "FormViewer")
+                FormViewerScreen()
             }
             register<Screen.Main.Menu.GpsTrackingReport> {
-                GpsTrackingReportScreen( "GpsTrackingReport")
+                GpsTrackingReportScreen()
             }
             register<Screen.Main.Notification> {
-                NotificationScreen( "Notification")
+                NotificationScreen()
             }
             register<Screen.TicketProcess.TicketInfo> {
                 TicketInfoScreen()
             }
             register<Screen.TicketProcess.TicketProcessScreen> {
-                TicketProcessScreen( "TicketProcessScreen")
+                TicketProcessScreen()
             }
         }
 

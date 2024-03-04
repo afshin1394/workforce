@@ -34,6 +34,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import com.irancell.nwg.wfm.presentation.components.ItemComponent
+import dev.icerock.moko.resources.StringResource
 import dev.icerock.moko.resources.compose.stringResource
 import io.github.aakira.napier.LogLevel
 import io.github.aakira.napier.Napier
@@ -49,7 +50,7 @@ import presentation.theme.textBrand
 import utils.ViewStates
 
 class GpsTrackingReportScreen(
-    private val title: String
+
 ) : Screen {
     companion object {
         lateinit var gneralLocs: List<GeneralLocationEntity>
@@ -67,7 +68,7 @@ class GpsTrackingReportScreen(
         val generalLocations by rememberUpdatedState(viewModel.generalLocationList)
         val scope = rememberCoroutineScope()
         Scaffold(topBar = {
-            MenuItemsTopBar(title) {
+            MenuItemsTopBar(stringResource(MR.strings.gps_tracker)) {
 
                 navigator.pop()
 //            navHostController.navigate(Screen.Main.route) {

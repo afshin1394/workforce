@@ -1,4 +1,4 @@
-package com.irancell.nwg.wfm.presentation.screens.main.components
+package presentation.components
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Card
@@ -16,23 +16,25 @@ import presentation.theme.textPrimary
 
 
 @Composable
-fun DropDownComponent(modifier : Modifier = Modifier,suspendReasonText : String = "",dropDownText : String ="Select reason*" , onDropDownClick : () -> Unit = {}){
+fun DropDownComponent(
+    modifier: Modifier = Modifier,
+    suspendReasonText: String = "",
+    dropDownText: String = "Select reason*",
+    onDropDownClick: () -> Unit = {}
+) {
 
     val suspendReasonTextString = if (suspendReasonText == "") dropDownText else suspendReasonText
-    val textColor = if ( suspendReasonText == "") textPlaceHolder else textPrimary
+    val textColor = if (suspendReasonText == "") textPlaceHolder else textPrimary
 
     Card(
-        modifier
-
-
-            , ) {
+        modifier,
+    ) {
 
 
         Row(
             modifier = modifier
                 .fillMaxWidth()
-                .padding(spacing15X)
-                ,
+                .padding(spacing15X),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Start
         ) {

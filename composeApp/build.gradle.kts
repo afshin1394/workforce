@@ -66,7 +66,6 @@ kotlin {
                 implementation(libs.voyager.transitions)
                 implementation(libs.moko.mvvm)
                 implementation(libs.moko.permission)
-//                implementation(libs.moko.permission.compose)
                 implementation(libs.essenty.lifecycle)
                 implementation(libs.kotlin.x.datetime)
                 implementation(libs.koin.core)
@@ -77,8 +76,7 @@ kotlin {
                 implementation(libs.ktor.client.content.negotiation)
                 implementation(libs.kotlin.serialization)
                 api(libs.calf.ui)
-//                implementation(libs.composeImageLoader)
-
+                implementation("com.github.skydoves:landscapist-coil3:2.3.2")
 
             }
         }
@@ -99,8 +97,6 @@ kotlin {
                 implementation(libs.ktor.client.okhttp)
                 implementation(libs.ktor.client.logging)
                 implementation(libs.accompanist.permission)
-
-
 //mapbox
 //implementation("com.mapbox.maps:android:11.1.0")
 //// If you're using compose also add the compose extension

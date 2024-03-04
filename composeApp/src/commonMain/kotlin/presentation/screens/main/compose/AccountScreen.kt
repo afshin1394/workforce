@@ -17,6 +17,7 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import presentation.components.MenuItemsTopBar
 import com.irancell.nwg.wfm.presentation.screens.main.components.ProfileInfoComponent
 import com.irancell.nwg.wfm.presentation.theme.*
+import dev.icerock.moko.resources.StringResource
 import dev.icerock.moko.resources.compose.painterResource
 import dev.icerock.moko.resources.compose.stringResource
 import irancell.nwg.wfm.MR
@@ -26,7 +27,7 @@ import presentation.screens.main.viewmodel.AccountScreenVM
 import presentation.theme.body_large
 import presentation.theme.surfaceInputReadOnly
 
-class AccountScreen(private val title: String) : Screen {
+class AccountScreen() : Screen {
 
     @OptIn(ExperimentalMaterialApi::class)
     @Composable
@@ -42,7 +43,7 @@ class AccountScreen(private val title: String) : Screen {
             scaffoldState = scaffoldState,
             title = stringResource(MR.strings.account_info),
             topBar = {
-                MenuItemsTopBar(title) {
+                MenuItemsTopBar(stringResource(MR.strings.account_info)) {
                     navigator.pop()
 
                 }

@@ -20,6 +20,7 @@ import com.irancell.nwg.wfm.presentation.model.SelectableItem
 import com.irancell.nwg.wfm.presentation.screens.main.components.SwitchItem
 import presentation.screens.main.events.SettingEvent
 import com.irancell.nwg.wfm.presentation.screens.main.viewmodel.SettingScreenVM
+import dev.icerock.moko.resources.StringResource
 import dev.icerock.moko.resources.compose.stringResource
 import irancell.nwg.wfm.IntentHandler
 import irancell.nwg.wfm.MR
@@ -39,7 +40,6 @@ import utils.isRunningGPS
 
 @OptIn(ExperimentalMaterialApi::class)
 class SettingsScreen (
-  private val  title: String
 ) : Screen {
     @Composable
     override fun Content() {

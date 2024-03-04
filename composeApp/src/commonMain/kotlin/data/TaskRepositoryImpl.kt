@@ -1,14 +1,10 @@
 package data
 
-import arrow.core.Either
-import arrow.core.right
 import data.network.response.task.TasksNetworkResponse
 import domain.repository.ITaskRepository
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
-import io.ktor.http.HttpStatusCode
-import io.ktor.utils.io.errors.IOException
 import irancell.nwg.wfm.db.TaskEntity
 import irancell.nwg.wfm.db.WFMDatabase
 
@@ -44,6 +40,10 @@ class TaskRepositoryImpl(
 
     override suspend fun getAll(): List<TaskEntity> {
        return wfmDatabase.taskEntityQueries.selectAll().executeAsList()
+    }
+
+    override suspend fun deleteAll() {
+        wfmDatabase.taskEntityQueries.deleteAll()
     }
 
 

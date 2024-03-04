@@ -24,6 +24,7 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 
 
 import com.irancell.nwg.wfm.presentation.theme.spacing2X
+import dev.icerock.moko.resources.StringResource
 
 import dev.icerock.moko.resources.compose.painterResource
 import dev.icerock.moko.resources.compose.stringResource
@@ -81,7 +82,7 @@ class SplashScreen() : Screen, KoinComponent {
 
         BaseScreen(
             viewModel = viewModel,
-            title = "",
+            title = "stringResource(title)",
             scaffoldState = scaffoldState,
             content = {
                 Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
@@ -156,8 +157,6 @@ class SplashScreen() : Screen, KoinComponent {
             }
 
         )
-
-
     }
 }
 

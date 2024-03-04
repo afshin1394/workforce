@@ -87,6 +87,7 @@ import com.mohamedrejeb.calf.ui.sheet.AdaptiveBottomSheet
 import com.mohamedrejeb.calf.ui.sheet.rememberAdaptiveSheetState
 import com.mohamedrejeb.calf.ui.timepicker.AdaptiveTimePicker
 import com.mohamedrejeb.calf.ui.timepicker.rememberAdaptiveTimePickerState
+import dev.icerock.moko.resources.StringResource
 import dev.icerock.moko.resources.compose.painterResource
 import dev.icerock.moko.resources.compose.stringResource
 import io.github.aakira.napier.Napier
@@ -123,7 +124,7 @@ import utils.getLocalDateTimeFromLong
 
 
 @OptIn(ExperimentalMaterialApi::class)
-class FormViewerScreen(private val title: String) : Screen {
+class FormViewerScreen() : Screen {
 
     @Composable
     override fun Content() {
@@ -150,10 +151,10 @@ class FormViewerScreen(private val title: String) : Screen {
         BaseScreen(
             viewModel = viewModel,
 
-            title = title,
+            title = stringResource(MR.strings.form),
             scaffoldState = scaffoldState,
             topBar = {
-                MenuItemsTopBar(title) {
+                MenuItemsTopBar(stringResource(MR.strings.form)) {
                     navigator.pop()
                 }
             },

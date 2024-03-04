@@ -7,6 +7,7 @@ import di.httpModule
 import di.repositoryModule
 import di.useCaseModule
 import di.viewModelModule
+import irancell.nwg.wfm.MR
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 
 import org.koin.core.context.startKoin

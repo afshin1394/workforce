@@ -27,7 +27,7 @@ import presentation.theme.h4
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CustomTopAppBar(availability : Boolean,title: String = "MyTicket",onNavigationItemClick : ()->Unit={} , onAvailabilityClick : () -> Unit = {}, onNotificationClick : (route : String) -> Unit= {}) {
+fun CustomTopAppBar(availability : Boolean,title: String = "MyTicket",onNavigationItemClick : ()->Unit={} , onAvailabilityClick : () -> Unit = {}, onNotificationClick : () -> Unit= {}) {
     val scope = rememberCoroutineScope()
     val availabilityIcon = if (availability) MR.images.ic_on else MR.images.ic_off
     Column {
@@ -74,7 +74,7 @@ fun CustomTopAppBar(availability : Boolean,title: String = "MyTicket",onNavigati
 
                     )
                 }
-                IconButton(onClick = { onNotificationClick(Screen.Main.Notification.route) }) {
+                IconButton(onClick = { onNotificationClick() }) {
                     Image(
                         painterResource(MR.images.notification_med_off),
                         contentDescription = "",

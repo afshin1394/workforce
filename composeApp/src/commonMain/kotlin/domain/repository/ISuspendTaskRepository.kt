@@ -11,6 +11,7 @@ interface ISuspendTaskRepository {
     suspend fun updateSuspendDetails(taskId : Int,dateTime : String,latitude : String,longitude : String)
 
     suspend fun deleteSent()
+    suspend fun deleteByTaskId(taskId: Long)
 
     suspend fun selectUnSend(): List<SuspendTaskEntity>
     suspend fun selectByTaskId(taskId: Long) : SuspendTaskEntity

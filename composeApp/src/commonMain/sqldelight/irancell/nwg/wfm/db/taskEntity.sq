@@ -1,5 +1,5 @@
 CREATE  TABLE TaskEntity (
-wi_id INTEGER NOT NULL,
+wi_id INTEGER PRIMARY KEY NOT NULL,
 ticket_instance_id INTEGER NOT NULL,
 ticket_title TEXT NOT NULL,
 ticket_instance_number TEXT NOT NULL,
