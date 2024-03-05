@@ -1,7 +1,7 @@
 *.iml
 .gradle
 **/build/
-composeApp/**
+composeApp/release/**
 xcuserdata
 !src/**/build/
 local.properties
