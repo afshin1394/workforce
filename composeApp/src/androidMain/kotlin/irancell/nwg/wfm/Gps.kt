@@ -63,9 +63,13 @@ actual class GPS {
             }
         }
         actual fun registerGps(context: Any,onChange : () -> Unit){
-            val receiver = ChangeGpsReceiver {
-                onChange()
-            }
+            val receiver = ChangeGpsReceiver()
+            receiver.initChangeReceiver(object  : IChangeGpsReceiver{
+                override fun onReceiveAction() {
+                    onChange()
+                }
+
+            })
             (context as Context).registerReceiver(
                 receiver,
                 IntentFilter(LocationManager.PROVIDERS_CHANGED_ACTION)

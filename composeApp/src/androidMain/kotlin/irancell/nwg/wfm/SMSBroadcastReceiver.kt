@@ -11,12 +11,17 @@ import android.util.Log
 
 const val pdu_type = "pdus"
 
+interface ISMSReceiver{
+    fun onReceiveMessage(message : String)
+    fun onError()
+}
+class SMSBroadcastReceiver  ()  : BroadcastReceiver() {
 
+    var iSMSReceiver: ISMSReceiver? = null
 
-class SMSBroadcastReceiver  (private val onReceiveMessage : (message: String) -> Unit,private val onError :  () -> Unit )  : BroadcastReceiver() {
-
-
-
+    fun initSmsReceiver(ismsReceiver: ISMSReceiver){
+        this.iSMSReceiver = ismsReceiver
+    }
 
     override fun onReceive(context: Context, intent: Intent) {
         if (intent.action == Telephony.Sms.Intents.SMS_RECEIVED_ACTION)  {
@@ -54,15 +59,18 @@ class SMSBroadcastReceiver  (private val onReceiveMessage : (message: String) ->
 
                     }
                     Log.i("smsssRece", "onReceive: "+strMessage.substringAfter(":").trim())
-
-                    if (strMessage.contains("IOS")) {
-                        onReceiveMessage(strMessage.substringAfter(":").trim())
+                    iSMSReceiver?.let {
+                        if (strMessage.contains("IOS")) {
+                            it.onReceiveMessage(strMessage.substringAfter(":").trim())
+                        }
                     }
 
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
-                onError()
+                iSMSReceiver?.let {
+                   iSMSReceiver?.onError()
+                }
             }
         }
     }

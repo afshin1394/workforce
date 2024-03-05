@@ -8,10 +8,16 @@ actual class SMSListener {
     actual companion object{
         lateinit var smsBroadcastReceiver : SMSBroadcastReceiver
        actual fun enableSMSListener(onMessage : (message : String) -> Unit,onError : () -> Unit){
-           val smsBroadcastReceiver = SMSBroadcastReceiver({
-               onMessage(it)
-           },{
-               onError()
+           val smsBroadcastReceiver = SMSBroadcastReceiver()
+           smsBroadcastReceiver.initSmsReceiver(object :ISMSReceiver{
+               override fun onReceiveMessage(message : String) {
+                   onMessage(message)
+               }
+
+               override fun onError() {
+                   onError()
+               }
+
            })
            this.smsBroadcastReceiver = smsBroadcastReceiver
 
