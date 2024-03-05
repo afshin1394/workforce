@@ -44,7 +44,5 @@ fun ImageBoxComponent(path : String,modifier: Modifier = Modifier, onImageClick 
                 alignment = Alignment.Center
             )
         )
-
     }
-
 }

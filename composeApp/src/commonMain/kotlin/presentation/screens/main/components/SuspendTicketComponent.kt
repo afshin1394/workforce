@@ -80,19 +80,13 @@ fun SuspendTicketContentComponent(
             color = textPrimary
         )
         Spacer(modifier = Modifier.padding(vertical = spacing1X))
-        Row(modifier = Modifier.fillMaxWidth()) {
 
+        ImageRowComponent(suspendTaskDomain?.attachmentsUri?.split(","), onCameraClick = {
+            onCameraClick()
+        }) {
 
-            ImageRowComponent(suspendTaskDomain?.attachmentsUri?.split(","), onCameraClick ={
-                onCameraClick()
-            }) {
-
-            }
         }
-
     }
-
-
 }
 
 @Composable

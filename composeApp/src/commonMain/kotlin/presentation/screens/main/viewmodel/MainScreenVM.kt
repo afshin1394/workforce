@@ -291,7 +291,6 @@ class MainScreenVM(
     var cancelDescription = mutableStateOf("")
 
 
-
     val suspendItems = mutableStateListOf(
         SelectableItem(1, "Equipment failure", false),
         SelectableItem(2, "Weather condition", false),
@@ -508,16 +507,18 @@ class MainScreenVM(
 
     }
 
-    val suspendTaskDomain = MutableStateFlow<SuspendTaskDomain>(SuspendTaskDomain(
-        selectedTask.value?.workId ?: 0,
-        "",
-        "",
-        "",
-        0,
-        getCurrentDate(),
-        Location.getLastLocation().latitude,
-        Location.getLastLocation().longitude
-    ))
+    val suspendTaskDomain = MutableStateFlow<SuspendTaskDomain>(
+        SuspendTaskDomain(
+            selectedTask.value?.workId ?: 0,
+            "",
+            "",
+            "",
+            0,
+            getCurrentDate(),
+            Location.getLastLocation().latitude,
+            Location.getLastLocation().longitude
+        )
+    )
 
 
     fun loadSuspendTask() {
@@ -541,8 +542,7 @@ class MainScreenVM(
                             updateState(ViewStates.Success)
                             val suspendTask = it.data
                             suspendTask?.let {
-                               suspendTaskDomain.value = it
-
+                                suspendTaskDomain.value = it
                             }
 
                         }
@@ -597,7 +597,7 @@ class MainScreenVM(
         viewModelScope.launch {
             storeSuspendTaskUseCase(
                 SuspendTaskDomain(
-                    suspendTaskDomain.value.taskId ,
+                    suspendTaskDomain.value.taskId,
                     suspendTaskDomain.value.reason,
                     suspendTaskDomain.value.description,
                     suspendTaskDomain.value.attachmentsUri,
@@ -643,16 +643,29 @@ class MainScreenVM(
 
     }
 
-    fun updateSuspendTicketImageUri(imgUri: String){
+    fun updateSuspendTicketImageUri(imgUri: String) {
 
-        if(suspendTaskDomain.value.attachmentsUri.isEmpty())
-            suspendTaskDomain.value.attachmentsUri =  suspendTaskDomain.value.attachmentsUri.plus(imgUri)
+        val uriAttachment = if (suspendTaskDomain.value.attachmentsUri.isEmpty())
+            suspendTaskDomain.value.attachmentsUri.plus(imgUri)
         else
-            suspendTaskDomain.value.attachmentsUri =  suspendTaskDomain.value.attachmentsUri.plus(",$imgUri")
+            suspendTaskDomain.value.attachmentsUri.plus(",$imgUri")
+
+        suspendTaskDomain.value =
+            SuspendTaskDomain(
+                suspendTaskDomain.value.taskId,
+                suspendTaskDomain.value.reason,
+                suspendTaskDomain.value.description,
+                uriAttachment,
+                0,
+                suspendTaskDomain.value.datetime,
+                suspendTaskDomain.value.latitude,
+                suspendTaskDomain.value.longitude
+            )
+
 
     }
 
-    fun resetSuspendTask(){
+    fun resetSuspendTask() {
         suspendTaskLoaded.value = false
         suspendTaskDomain.value = SuspendTaskDomain(
             selectedTask.value?.workId ?: 0,

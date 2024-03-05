@@ -2,6 +2,7 @@
 .gradle
 **/build/
 composeApp/release/**
+composeApp/build/**
 xcuserdata
 !src/**/build/
 local.properties
