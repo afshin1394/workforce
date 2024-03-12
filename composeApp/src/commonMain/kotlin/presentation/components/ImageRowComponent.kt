@@ -25,17 +25,20 @@ fun ImageRowComponent(
         Spacer(modifier = Modifier.padding(vertical = spacing2X))
         itemsList?.let {
             Napier.log(LogLevel.ASSERT,tag = "itemsList",message=itemsList.size.toString())
-            if (itemsList.size>1) {
-                LazyRow() {
-                    items(itemsList.size) { index ->
-                        val item = itemsList[index]
+            if (itemsList.isNotEmpty()) {
+                if (itemsList[0] != "") {
+                    LazyRow() {
+                        items(itemsList.size) { index ->
+                            val item = itemsList[index]
 
-                        ImageBoxComponent(item) {
-                            onImageClick(index)
+                            ImageBoxComponent(item) {
+                                onImageClick(index)
+                            }
                         }
                     }
                 }
             }
+
         }
     }
 }

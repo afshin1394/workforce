@@ -58,7 +58,6 @@ class MainScreenVM(
     private val _profileName = MutableStateFlow("")
     val profileName = _profileName.asStateFlow()
 
-    val suspendTaskLoaded = MutableStateFlow(false)
 
 
     init {
@@ -527,7 +526,6 @@ class MainScreenVM(
                 getSuspendTaskByIdUseCase(it.workId).collect {
                     when (it.status) {
                         AsyncStatus.ERROR -> {
-                            suspendTaskLoaded.value = true
 //                            handleError(it.resultStatus)
                         }
 
@@ -538,22 +536,16 @@ class MainScreenVM(
                         }
 
                         AsyncStatus.SUCCESS -> {
-                            suspendTaskLoaded.value = true
                             updateState(ViewStates.Success)
                             val suspendTask = it.data
                             suspendTask?.let {
                                 suspendTaskDomain.value = it
                             }
-
                         }
                     }
-
                 }
             }
-
-
         }
-
     }
 
 
@@ -666,7 +658,6 @@ class MainScreenVM(
     }
 
     fun resetSuspendTask() {
-        suspendTaskLoaded.value = false
         suspendTaskDomain.value = SuspendTaskDomain(
             selectedTask.value?.workId ?: 0,
             "",

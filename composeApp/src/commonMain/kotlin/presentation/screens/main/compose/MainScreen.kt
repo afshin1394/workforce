@@ -65,7 +65,6 @@ class MainScreen(
         val state by viewModel.state.collectAsState()
         val suspendTaskState by viewModel.suspendTaskDomain.collectAsState()
         val profileName by viewModel.profileName.collectAsState()
-        val suspendTaskLoaded by viewModel.suspendTaskLoaded.collectAsState()
 
         val ticketInfoScreen =
             rememberScreen(presentation.nav.Screen.TicketProcess.TicketInfo)
@@ -385,7 +384,9 @@ class MainScreen(
                         MoreOptions(onCancelClick = {
                             viewModel.events.value = MainEvent.CancelTicket
                         }, onSuspendClick = {
+                            viewModel.loadSuspendTask()
                             viewModel.events.value = MainEvent.SuspendTicket
+
                         })
                         scope.launch {
                             scaffoldState.bottomSheetState.expand()
@@ -393,10 +394,7 @@ class MainScreen(
                     }
 
                     MainEvent.SuspendTicket -> {
-//                        val factory: PermissionsControllerFactory =
-//                            rememberPermissionsControllerFactory()
-                        viewModel.loadSuspendTask()
-                        if (suspendTaskLoaded) {
+
                             SuspendTicketContentComponent(
                                 taskid = viewModel.selectedTask.value!!.instanceTitle,
                                 suspendTaskDomain = suspendTaskState,
@@ -411,8 +409,6 @@ class MainScreen(
                                     viewModel.openCamera()
                                 }
                             )
-                        }
-
                         scope.launch {
                             scaffoldState.bottomSheetState.expand()
                         }
