@@ -45,6 +45,7 @@ import com.irancell.nwg.wfm.presentation.theme.spacing05X
 import com.irancell.nwg.wfm.presentation.theme.spacing15X
 import dev.icerock.moko.resources.compose.painterResource
 import dev.icerock.moko.resources.compose.stringResource
+import domain.models.initialForm.ValueDomain
 import irancell.nwg.wfm.MR
 import presentation.theme.strokeDefaultDark
 import presentation.theme.strokeDefaultLight
@@ -54,7 +55,7 @@ import presentation.theme.textSecondary
 @Composable
 fun DropDownSingleChoice(
     titleDropDown: String,
-    itemList: List<String>,
+    itemList: List<ValueDomain>,
     selectItem: String,
     searchText: String,
     onItemSelected: (selectItem: String) -> Unit,
@@ -205,11 +206,11 @@ fun DropDownSingleChoice(
                 Spacer(modifier = Modifier.padding(top = spacing15X))
 
                 val filteredList=itemList.filter { lable->
-                    lable.trim().contains(searchedText)
+                    lable.label?.trim()!!.contains(searchedText)
                 }
 
                 filteredList.forEach { label ->
-                    val isSelected = selectedText == label
+                    val isSelected = selectedText == label.label
 
                     DropdownMenuItemCustom(
                         modifier = Modifier,
@@ -217,7 +218,7 @@ fun DropDownSingleChoice(
                             .also {
                                 Row(
                                     modifier = Modifier.fillMaxWidth()
-                                        .clickable { selectedText = label },
+                                        .clickable { selectedText = label.label?:"" },
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
 
@@ -227,14 +228,14 @@ fun DropDownSingleChoice(
                                             selectedColor = surfaceBrandDefault
                                         ),
                                         onClick = {
-                                            selectedText = label
+                                            selectedText = label.label?:""
                                             expanded = false
-                                            onItemSelected(label)
+                                            onItemSelected(label.label?:"")
                                         }
                                     )
 
                                     Text(
-                                        text = label,
+                                        text = label.label?:"",
                                         style = TextStyle(color = textSecondary)
                                     )
                                 }

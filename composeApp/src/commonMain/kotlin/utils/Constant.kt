@@ -1,5 +1,7 @@
 package utils
 
+import androidx.compose.ui.text.TextRange
+
 const val Availability = "Availability"
 const val AvailabilityObjectId = "AvailabilityObjectId"
 const val SessionId = "SessionId"
@@ -21,6 +23,7 @@ object ErrorCode {
 object FormViewerTypes {
     const val Group = "group"
     const val TextField = "textfield"
+    const val TextAREA = "textarea"
     const val Checklist = "checklist"
     const val Datetime = "datetime"
     const val Number = "number"

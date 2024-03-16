@@ -40,6 +40,7 @@ import presentation.screens.main.components.CancelTicketComponent
 import presentation.screens.main.components.MoreOptions
 import presentation.screens.main.components.SuspendTicketBottomBarComponent
 import presentation.screens.main.components.SuspendTicketContentComponent
+import presentation.screens.ticket_process.compose.TicketInfoScreen
 import presentation.theme.body_large
 import presentation.theme.surfaceBrandDefault
 import presentation.theme.surfaceDefault
@@ -52,7 +53,7 @@ import utils.Token
 
 class MainScreen(
 
-    ) : Screen {
+) : Screen {
     @OptIn(ExperimentalMaterialApi::class)
     @Composable
     override fun Content() {
@@ -66,8 +67,7 @@ class MainScreen(
         val suspendTaskState by viewModel.suspendTaskDomain.collectAsState()
         val profileName by viewModel.profileName.collectAsState()
 
-        val ticketInfoScreen =
-            rememberScreen(presentation.nav.Screen.TicketProcess.TicketInfo)
+
         val notificationScreen =
             rememberScreen(Notification)
         val accountScreen =
@@ -188,9 +188,7 @@ class MainScreen(
 
                         when (it) {
                             Menu.About -> {
-
                                 navigator.push(aboutScreen)
-
                             }
 
                             Menu.Logout -> {
@@ -225,7 +223,7 @@ class MainScreen(
             bottomBarBottomSheetContent = {
                 when (events) {
                     MainEvent.ActionFilter -> {
-                        Napier.log(LogLevel.ASSERT,tag="ActionFilter", message = "ActionFilter")
+                        Napier.log(LogLevel.ASSERT, tag = "ActionFilter", message = "ActionFilter")
 
                         bottomSheetDoubleActionBottomBar(
                             BottomSheetDoubleActionModel(
@@ -275,8 +273,8 @@ class MainScreen(
 
 
                             }, onSecondButtonClick = {
-                                getSharedPref().put(Availability,false)
-                                getSharedPref().put(PhoneNumber,"")
+                                getSharedPref().put(Availability, false)
+                                getSharedPref().put(PhoneNumber, "")
                                 getSharedPref().put(Token, "")
                                 navigator.popAll()
                                 navigator.push(loginScreen)
@@ -304,14 +302,10 @@ class MainScreen(
                     }
 
                     MainEvent.SuspendTicket -> {
-
-
                         SuspendTicketBottomBarComponent(true) {
                             viewModel.saveSuspendTask()
                             viewModel.events.value = MainEvent.Default
                         }
-
-
                     }
 
                     MainEvent.SuspendReason -> {
@@ -395,20 +389,19 @@ class MainScreen(
 
                     MainEvent.SuspendTicket -> {
 
-                            SuspendTicketContentComponent(
-                                taskid = viewModel.selectedTask.value!!.instanceTitle,
-                                suspendTaskDomain = suspendTaskState,
-                                onSelectReason = {
-                                    viewModel.events.value = MainEvent.SuspendReason
-                                },
-                                onDescription = { description ->
-                                    viewModel.suspendDescription.value = description
-                                    viewModel.updateSuspendTicketDescription(description)
-                                },
-                                onCameraClick = {
-                                    viewModel.openCamera()
-                                }
-                            )
+                        SuspendTicketContentComponent(
+                            taskid = viewModel.selectedTask.value!!.instanceTitle,
+                            suspendTaskDomain = suspendTaskState,
+                            onSelectReason = {
+                                viewModel.events.value = MainEvent.SuspendReason
+                            },
+                            onDescription = { description ->
+                                viewModel.updateSuspendTicketDescription(description)
+                            },
+                            onCameraClick = {
+                                viewModel.openCamera()
+                            }
+                        )
                         scope.launch {
                             scaffoldState.bottomSheetState.expand()
                         }
@@ -469,16 +462,22 @@ class MainScreen(
 
             },
             content = {
-
+                val ticketInfoScreen =
+                    rememberScreen(presentation.nav.Screen.TicketProcess.TicketInfo(viewModel.selectedTask.value?.workId?:0L))
 
                 if (openCamera) {
                     viewModel.selectedTask.value?.let {
-                        InternalStorage.createWorkItemImages(provideAppContext(),"Suspend",it.workId.toString())
+                        InternalStorage.createWorkItemImages(
+                            provideAppContext(),
+                            "Suspend/Original/",
+                            it.workId.toString()
+                        )
 
-
-
-                        Camera.launchCamera("/wfmImages/Suspend/${it.workId}")
-
+                        Camera.launchCamera(
+                            InternalStorage.getSuspendRouteOriginal(
+                                provideAppContext()
+                            ) + "${it.workId}"
+                        )
 
                         viewModel.updateCameraStatus(false)
                     }
@@ -492,11 +491,13 @@ class MainScreen(
                             viewModel.selectedTask.value = task
                             viewModel.resetSuspendTask()
                         },
-                        tasks = ArrayList(viewModel.tasks.toList())
-                        , onAccept = {
+                        tasks = ArrayList(viewModel.tasks.toList()), onAccept = {
                             viewModel.selectedTask.value = it
                             viewModel.resetSuspendTask()
-                            navigator.push(ticketInfoScreen)
+                            viewModel.selectedTask.value?.let {
+                                navigator.push(TicketInfoScreen(it.workId))
+                            }
+
                         }
                     )
                 }
@@ -506,7 +507,5 @@ class MainScreen(
                 viewModel.events.value = MainEvent.Default
             })
     }
-
-
 }
 

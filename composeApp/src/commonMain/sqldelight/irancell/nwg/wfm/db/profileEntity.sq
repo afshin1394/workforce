@@ -1,5 +1,5 @@
 CREATE  TABLE ProfileEntity (
-pk TEXT NOT NULL,
+pk  TEXT   NOT NULL ,
 username TEXT NOT NULL,
 email TEXT NOT NULL,
 first_name TEXT NOT NULL,

@@ -1,0 +1,24 @@
+CREATE TABLE InitialFormEntity (
+wi_id  INTEGER PRIMARY KEY NOT NULL,
+structure TEXT NOT NULL
+);
+
+insert:
+INSERT INTO InitialFormEntity (wi_id,structure)
+VALUES (?, ?);
+
+
+deleteAll:
+DELETE FROM InitialFormEntity;
+
+selectAll:
+SELECT * FROM InitialFormEntity;
+
+selectByTaskId:
+SELECT * FROM InitialFormEntity WHERE wi_id = :taskId;
+
+
+updateStructure:
+UPDATE  InitialFormEntity
+SET structure = :structure
+WHERE wi_id = :wi_id;

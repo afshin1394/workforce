@@ -14,5 +14,25 @@ actual class InternalStorage{
 
         }
 
+        actual fun getWFMRoute(context: Any): String {
+            TODO("Not yet implemented")
+        }
+
+        actual fun getSuspendRoute(context: Any): String {
+            TODO("Not yet implemented")
+        }
+
+        actual fun getProcessRoute(context: Any): String {
+            TODO("Not yet implemented")
+        }
+
+        actual fun createWorkItemImages(
+            context: Any,
+            pathName: String,
+            name: String
+        ): Any {
+            TODO("Not yet implemented")
+        }
+
     }
 }

@@ -9,8 +9,6 @@ import domain.usecase.BaseUseCase
 class GetProfileUseCase(
   private val  iProfileRepository: IProfileRepository
 ) : BaseUseCase<ProfileDomain,Unit>() {
-
-
     override suspend fun run(params: Unit): ProfileDomain {
        return iProfileRepository.getProfile().toProfileDomain(iProfileRepository.getRoles())
     }

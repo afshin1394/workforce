@@ -6,12 +6,14 @@ import presentation.screens.ticket_process.viewModel.TicketProcessVM
 import data.AuthRepositoryImpl
 import data.AvailabilityRepositoryImpl
 import data.GeneralLocationRepositoryImpl
+import data.InitialFormRepositoryImpl
 import data.ProfileRepositoryImpl
 import data.SuspendTaskRepositoryImpl
 import data.TaskRepositoryImpl
 import domain.repository.IAuthRepository
 import domain.repository.IAvailabilityRepository
 import domain.repository.IGeneralLocationRepository
+import domain.repository.IInitialFormRepository
 import domain.repository.IProfileRepository
 import domain.repository.ISuspendTaskRepository
 import domain.repository.ITaskRepository
@@ -24,6 +26,7 @@ import domain.usecase.usecase.availability.GetAvailabilityUseCase
 import domain.usecase.usecase.location.GetGeneralLocationListUseCase
 import domain.usecase.usecase.location.SendLocationToServerUseCase
 import domain.usecase.usecase.availability.StoreAvailabilityUseCase
+import domain.usecase.usecase.initialForm.GetInitialFormByTask
 import domain.usecase.usecase.location.StoreLocationDataUseCase
 import domain.usecase.usecase.profile.GetProfileUseCase
 import domain.usecase.usecase.profile.StoreProfileUseCase
@@ -52,6 +55,7 @@ import irancell.nwg.wfm.viewModelDefinition
 import kotlinx.serialization.json.Json
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
+import org.koin.mp.KoinPlatform.getKoin
 import presentation.screens.auth.viewmodel.LoginScreenVM
 import presentation.screens.auth.viewmodel.VerifyScreenVM
 import presentation.screens.main.viewmodel.AboutScreenVM
@@ -71,6 +75,7 @@ fun repositoryModule() = module {
     single<IAuthRepository> { AuthRepositoryImpl(get(named("noToken"))) }
     single<ITaskRepository> { TaskRepositoryImpl(get(named("tokenized")),get()) }
     single<IProfileRepository>{ ProfileRepositoryImpl(get(named("tokenized")),get()) }
+    single<IInitialFormRepository>{ InitialFormRepositoryImpl(get()) }
 
 }
 
@@ -84,7 +89,7 @@ fun useCaseModule() = module {
     single { ChangeServerAvailabilityUseCase(get()) }
     single { GetAvailabilityObjectIdUseCase() }
     single { LoginUseCase(get()) }
-    single { UpdateTasksUseCase(get()) }
+    single { UpdateTasksUseCase(get(),get()) }
     single { LoginUseCase(get()) }
     single { VerifyUseCase(get()) }
     single { ResendUseCase(get()) }
@@ -93,6 +98,7 @@ fun useCaseModule() = module {
     single { StoreProfileUseCase(get()) }
     single { GetProfileUseCase(get()) }
     single { DeleteByTaskIdUseCase(get()) }
+    single{ GetInitialFormByTask(get())}
 }
 
 fun httpModule() = module {
@@ -180,7 +186,7 @@ fun viewModelModule() = module {
     viewModelDefinition { GpsTrackingReportScreenVM(get()) }
     viewModelDefinition { LoginScreenVM(get()) }
     viewModelDefinition { VerifyScreenVM(get(),get(),get()) }
-    viewModelDefinition { TicketInfoVM() }
+    viewModelDefinition { TicketInfoVM(get()) }
     viewModelDefinition { TicketProcessVM() }
     viewModelDefinition { FormViewVM() }
     viewModelDefinition { AccountScreenVM(get()) }

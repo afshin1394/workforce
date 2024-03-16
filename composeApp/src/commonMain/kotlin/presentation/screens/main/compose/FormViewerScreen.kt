@@ -179,18 +179,18 @@ class FormViewerScreen() : Screen {
                 ) {
 
 
-                    DropDownSingleChoice(
-                        titleDropDown = stringResource(MR.strings.select_an_item),
-                        itemList = items,
-                        selectItem = selectedItem,
-                        searchText = "",
-                        onItemSelected = {
-                            selectedItem = it
-                            println("selectSingleChoice>>>>${it}")
-                        },
-                        onSearchButtonClicked = {
-                            println("searchSingleChoice>>>>${it}")
-                        })
+//                    DropDownSingleChoice(
+//                        titleDropDown = stringResource(MR.strings.select_an_item),
+//                        itemList = items,
+//                        selectItem = selectedItem,
+//                        searchText = "",
+//                        onItemSelected = {
+//                            selectedItem = it
+//                            println("selectSingleChoice>>>>${it}")
+//                        },
+//                        onSearchButtonClicked = {
+//                            println("searchSingleChoice>>>>${it}")
+//                        })
 
                     Spacer(modifier = Modifier.padding(vertical = 4.dp))
 
@@ -228,23 +228,23 @@ class FormViewerScreen() : Screen {
                         },
                         onTimeSelected = {})
 
+//
+//                    Radio(title=stringResource(MR.strings.select_an_item),itemList = items, selectItem = "", onItemSelected = {
+//
+//                        println("multiChoooice>>>>${it}")
+//
+//                    })
 
-                    Radio(title=stringResource(MR.strings.select_an_item),itemList = items, selectItem = "", onItemSelected = {
-
-                        println("multiChoooice>>>>${it}")
-
-                    })
-
-                    CheckList(
-
-                        title=stringResource(MR.strings.choose_more),
-
-                        itemList = items,
-                        onItemSelected = {
-
-                            println("multiChoooice>>>>${it.size}")
-
-                        })
+//                    CheckList(
+//
+//                        title=stringResource(MR.strings.choose_more),
+//
+//                        itemList = items,
+//                        onItemSelected = {
+//
+//                            println("multiChoooice>>>>${it.size}")
+//
+//                        })
 
                     Editable(TypeEditable.EMAIL, placeholder = "email", imeAction = ImeAction.Next, leadingIcon =null , trailingIcon =null, keyboardType = KeyboardType.Text, maxLines = 2, readOnly = false,onValueChange = {} )
 

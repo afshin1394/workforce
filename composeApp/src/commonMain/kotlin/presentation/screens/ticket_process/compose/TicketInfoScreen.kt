@@ -29,23 +29,28 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 
 import presentation.components.MenuItemsTopBar
-import presentation.screens.ticket_process.viewModel.TicketProcessVM
 import presentation.screens.main.compose.BaseScreen
 import com.irancell.nwg.wfm.presentation.theme.spacing15X
 import com.irancell.nwg.wfm.presentation.theme.spacing2X
-import dev.icerock.moko.resources.StringResource
 import presentation.theme.surfaceBrandDefault
 import presentation.theme.textInverse
 import dev.icerock.moko.resources.compose.painterResource
 import dev.icerock.moko.resources.compose.stringResource
+import io.github.aakira.napier.LogLevel
+import io.github.aakira.napier.Napier
 import irancell.nwg.wfm.MR
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import presentation.model.SingleButtonActionModel
 import presentation.screens.ticket_process.components.bottomSingleActionComponent
+import presentation.screens.ticket_process.viewModel.TicketInfoVM
 import presentation.theme.body_large_strong
+import utils.FormViewer
+import utils.ViewStates
+import utils.initialize
 
 class TicketInfoScreen(
+    private val taskId : Long
 ) : Screen {
     @OptIn(ExperimentalMaterialApi::class)
     @Composable
@@ -55,13 +60,17 @@ class TicketInfoScreen(
         val scaffoldState = rememberBottomSheetScaffoldState()
         val navigator = LocalNavigator.currentOrThrow
         val ticketProcessScreen =
-            rememberScreen(presentation.nav.Screen.TicketProcess.TicketProcessScreen)
+            rememberScreen(presentation.nav.Screen.TicketProcess.TicketProcessScreen(taskId))
 
+        val viewModel: TicketInfoVM = koinInject()
+        viewModel.taskId.value = taskId
+        viewModel.getInitialForm(taskId)
 
-        val viewModel: TicketProcessVM = koinInject()
+        val state = viewModel.state.collectAsState()
+        val initialFormState = viewModel.initialFormDomain.collectAsState()
 
-            BaseScreen(
-            viewModel =viewModel,
+        BaseScreen(
+            viewModel = viewModel,
             title = stringResource(MR.strings.ticket_info),
             scaffoldState = scaffoldState,
             hasDrawer = false,
@@ -90,23 +99,30 @@ class TicketInfoScreen(
 
             },
             content = {
-                Column(Modifier.fillMaxHeight().verticalScroll(rememberScrollState())) {
-                    TicketInfoItem(
-                        stringResource(MR.strings.general_information),
-                        false,
-                        content = {
-                            Box(modifier = Modifier.height(200.dp))
-                        })
-                    TicketInfoItem(
-                        stringResource(MR.strings.resource_information),
-                        false,
-                        content = {
-                            Box(modifier = Modifier.height(200.dp))
-                        })
-                    TicketInfoItem(stringResource(MR.strings.fault_information), false, content = {
-                        Box(modifier = Modifier.height(2000.dp))
-                    })
-                }
+                initialize(modifier = Modifier,initialFormState.value?.components?: arrayListOf())
+
+//                if(state.value == ViewStates.Success){
+//
+//                }
+
+//                Column(Modifier.fillMaxHeight().verticalScroll(rememberScrollState())) {
+//                    TicketInfoItem(
+//                        stringResource(MR.strings.general_information),
+//                        false,
+//                        content = {
+//                            Box(modifier = Modifier.height(200.dp))
+//                        })
+//                    TicketInfoItem(
+//                        stringResource(MR.strings.resource_information),
+//                        false,
+//                        content = {
+//                            Box(modifier = Modifier.height(200.dp))
+//                        })
+//                    TicketInfoItem(stringResource(MR.strings.fault_information), false, content = {
+//                        Box(modifier = Modifier.height(2000.dp))
+//                    })
+//                }
+
             })
     }
 
@@ -131,6 +147,7 @@ private fun TicketInfoItem(text: String, expanded: Boolean, content: @Composable
                 },
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
+
             Text(text = text, style = body_large_strong, modifier = Modifier)
             Spacer(modifier = Modifier.padding(spacing2X))
             if (expandedState) {

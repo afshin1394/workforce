@@ -33,7 +33,9 @@ import presentation.theme.surfaceBrandDefault
 import presentation.theme.textInverse
 
 
-class TicketProcessScreen() : Screen {
+class TicketProcessScreen(
+    private val taskId : Long
+) : Screen {
     @OptIn(ExperimentalMaterialApi::class)
     @Composable
     override fun Content() {

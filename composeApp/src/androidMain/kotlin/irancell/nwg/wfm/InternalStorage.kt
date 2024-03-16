@@ -46,22 +46,53 @@ actual class InternalStorage {
             return folder
         }
 
-        actual fun initWFMImages(context: Any) : Any {
+        actual fun initWFMImages(context: Any)  {
             val ctx =context as Context
-           return createFolderFromPath(ctx,"/wfmImages/")
+            createFolderFromPath(ctx,"/wfmImages/")
         }
-        actual fun initSuspendImages(context: Any) : Any {
+        actual fun initSuspendImages(context: Any)  {
             val ctx = context as Context
-           return createFolderFromPath(ctx,"/wfmImages/","Suspend")
+            createFolderFromPath(ctx,"/wfmImages/","Suspend")
+            createFolderFromPath(ctx,"/wfmImages/Suspend","Edited")
+            createFolderFromPath(ctx,"/wfmImages/Suspend","Original")
+
         }
-        actual fun initProcessImages(context: Any) : Any {
+        actual fun initProcessImages(context: Any)  {
             val ctx =context as Context
-           return createFolderFromPath(ctx,"/wfmImages/","Process")
+            createFolderFromPath(ctx,"/wfmImages/","Process")
+            createFolderFromPath(ctx,"/wfmImages/Process/","Edited")
+            createFolderFromPath(ctx,"/wfmImages/Process/","Original")
+
         }
 
         actual fun createWorkItemImages(context: Any,pathName : String, name: String): Any {
             val ctx =context as Context
             return createFolderFromPath(ctx,"/wfmImages/$pathName/",name)
+        }
+
+        actual fun getWFMRoute(context: Any): String {
+            val ctx =context as Context
+            return ctx.filesDir.path + "/wfmImages/"
+        }
+
+        actual fun getSuspendRouteEdited(context: Any): String {
+            val ctx =context as Context
+            return ctx.filesDir.path + "/wfmImages/Suspend/Edited/"
+        }
+
+        actual fun getProcessRouteEdited(context: Any): String {
+            val ctx =context as Context
+            return ctx.filesDir.path + "/wfmImages/Process/Edited/"
+        }
+
+        actual fun getSuspendRouteOriginal(context: Any): String {
+            val ctx =context as Context
+            return ctx.filesDir.path + "/wfmImages/Suspend/Original/"
+        }
+
+        actual fun getProcessRouteOriginal(context: Any): String {
+            val ctx =context as Context
+            return ctx.filesDir.path + "/wfmImages/Process/Original/"
         }
 
     }

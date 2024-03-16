@@ -19,6 +19,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import domain.models.initialForm.ValueDomain
 import irancell.nwg.wfm.getSharedPref
 import presentation.theme.strokeDefaultLight
 import presentation.theme.surfaceBrandDefault
@@ -27,7 +28,7 @@ import utils.Language
 
 
 @Composable
-fun CheckList(title:String,  itemList: List<String>, onItemSelected: (List<String>) -> Unit) {
+fun CheckList(title:String,  itemList: List<ValueDomain>, onItemSelected: (List<String>) -> Unit) {
     val selectedItems = remember { mutableStateListOf<String>() }
 
     Column(Modifier.padding(16.dp)) {
@@ -45,14 +46,14 @@ fun CheckList(title:String,  itemList: List<String>, onItemSelected: (List<Strin
 
                 ItemCheckList(
 
-                    item = item,
+                    item = item.label?:"",
                     onItemSelected = {
 
                         val isSelected = selectedItems.contains(it)
                         if (isSelected) {
-                            selectedItems.remove(item)
+                            selectedItems.remove(item.label)
                         } else {
-                            selectedItems.add(item)
+                            selectedItems.add(item.label?:"")
                         }
                         onItemSelected(selectedItems)
 

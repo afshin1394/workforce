@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.irancell.nwg.wfm.presentation.theme.spacing15X
 import dev.icerock.moko.resources.compose.painterResource
+import domain.models.initialForm.ValueDomain
 import irancell.nwg.wfm.MR
 import irancell.nwg.wfm.getSharedPref
 import presentation.theme.h4
@@ -33,7 +34,7 @@ import presentation.theme.textSecondary
 import utils.Language
 
 @Composable
-fun Radio( title:String, itemList: List<String>, selectItem: String, onItemSelected: (selectItem: String) -> Unit) {
+fun Radio( title:String, itemList: List<ValueDomain>, selectItem: String, onItemSelected: (selectItem: String) -> Unit) {
 
     var select by remember { mutableStateOf(selectItem) }
 
@@ -54,9 +55,9 @@ fun Radio( title:String, itemList: List<String>, selectItem: String, onItemSelec
 
                 ItemRadioList(
                     isSelected = select,
-                    item = item,
+                    item = item.label?:"",
                     onItemSelected = {
-                        select = item
+                        select = item.label?:""
                         onItemSelected(it)
 
                     }

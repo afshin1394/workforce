@@ -458,7 +458,6 @@ class MainScreenVM(
     }
 
     fun getTasks() {
-        tasks.clear()
 
         viewModelScope.launch(Dispatchers.IO) {
             updateTasksUseCase(Unit).collect {
@@ -482,6 +481,8 @@ class MainScreenVM(
                     }
 
                     AsyncStatus.SUCCESS -> {
+                        tasks.clear()
+
                         updateState(ViewStates.Success)
 
                         Napier.log(
@@ -551,7 +552,7 @@ class MainScreenVM(
 
     fun saveSuspendTask() {
         Location.start { }
-        Napier.log(LogLevel.ASSERT, "atttacgg", message = suspendTaskDomain.value.attachmentsUri)
+        Napier.log(LogLevel.ASSERT, "atttac", message = suspendTaskDomain.value.attachmentsUri)
 
 
         viewModelScope.launch {
