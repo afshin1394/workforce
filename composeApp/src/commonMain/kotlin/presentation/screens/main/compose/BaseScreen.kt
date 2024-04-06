@@ -140,7 +140,7 @@ fun <T : BaseViewModel> BaseScreen(
 
                         }
                         ViewStates.Success -> {
-                                viewModel.updateState(ViewStates.Default)
+                            viewModel.updateState(ViewStates.Default)
                         }
                     }
                 }

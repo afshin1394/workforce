@@ -36,11 +36,9 @@ class TicketInfoVM(
                     val initialFormDomain = it.data
                     _initialFormStructureDomain.update { initialFormDomain?.structure }
                     updateState(ViewStates.Success)
-
                 }
             }
         }
-
         }
 
     }

@@ -154,9 +154,9 @@ class FormViewerScreen() : Screen {
             title = stringResource(MR.strings.form),
             scaffoldState = scaffoldState,
             topBar = {
-                MenuItemsTopBar(stringResource(MR.strings.form)) {
-                    navigator.pop()
-                }
+//                MenuItemsTopBar(stringResource(MR.strings.form)) {
+//                    navigator.pop()
+//                }
             },
 
             bottomSheetTitle = "",
@@ -174,7 +174,7 @@ class FormViewerScreen() : Screen {
 
                 Column(
                     modifier = Modifier.fillMaxHeight().verticalScroll(rememberScrollState()),
-                    verticalArrangement = Arrangement.Center,
+                    verticalArrangement = Arrangement.Top,
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
 

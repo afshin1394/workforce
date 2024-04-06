@@ -160,9 +160,7 @@ class VerifyScreen(private val phoneNumber: String = "") : Screen {
                             }
                         }
                     }
-
             }
-
         )
     }
 }

@@ -10,6 +10,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.irancell.nwg.wfm.presentation.components.CustomCheckbox
 import domain.models.initialForm.ComponentDomain
+import presentation.components.ImageRowComponent
 import presentation.screens.main.components.formViewer.CheckList
 import presentation.screens.main.components.formViewer.DropDownSingleChoice
 import presentation.screens.main.components.formViewer.Editable
@@ -42,7 +43,9 @@ import presentation.screens.main.components.formViewer.TypeEditable
 
                     }
                     FormViewerTypes.Email->{
+                        Editable(TypeEditable.EMAIL,"", ImeAction.None, keyboardType =  KeyboardType.Email, readOnly =  false, maxLines =  1){
 
+                        }
                     }
                     FormViewerTypes.FileUpload->{
 
@@ -55,6 +58,7 @@ import presentation.screens.main.components.formViewer.TypeEditable
                     }
                     FormViewerTypes.LatLong->{
 
+
                     }
                     FormViewerTypes.Radio->{
 
@@ -66,6 +70,9 @@ import presentation.screens.main.components.formViewer.TypeEditable
                         }
                     }
                     FormViewerTypes.Phone->{
+                        Editable(TypeEditable.PHONE,"", ImeAction.None, keyboardType =  KeyboardType.Phone, readOnly =  false, maxLines =  1){
+
+                        }
 
                     }
                     FormViewerTypes.TextField->{

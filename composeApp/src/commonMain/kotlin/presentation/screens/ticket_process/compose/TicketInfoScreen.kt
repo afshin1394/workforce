@@ -63,7 +63,6 @@ class TicketInfoScreen(
             rememberScreen(presentation.nav.Screen.TicketProcess.TicketProcessScreen(taskId))
 
         val viewModel: TicketInfoVM = koinInject()
-        viewModel.taskId.value = taskId
         viewModel.getInitialForm(taskId)
 
         val state = viewModel.state.collectAsState()
@@ -99,6 +98,7 @@ class TicketInfoScreen(
 
             },
             content = {
+                Napier.log(LogLevel.ASSERT,"CurrentState",message = state.value.toString())
                 initialize(modifier = Modifier,initialFormState.value?.components?: arrayListOf())
 
 //                if(state.value == ViewStates.Success){

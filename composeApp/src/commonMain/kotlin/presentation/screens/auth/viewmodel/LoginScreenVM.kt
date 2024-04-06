@@ -59,24 +59,17 @@ class LoginScreenVM(
 
 
     fun login(userName: String, password: String) {
-
-
         viewModelScope.launch {
-
             loginUseCase(LoginRequestDomain(userName, password)).collect {
                 when (it.status) {
                     AsyncStatus.ERROR -> {
                         handleError(it.resultStatus)
-
                         Napier.log(LogLevel.ASSERT, tag = "serviice", message = "ERROR"+it.message)
-
                     }
 
                     AsyncStatus.LOADING -> {
                         updateState(ViewStates.Loading)
-
                         Napier.log(LogLevel.ASSERT, tag = "serviice", message = "LOADING")
-
                     }
 
                     AsyncStatus.SUCCESS -> {

@@ -44,6 +44,7 @@ import presentation.screens.splash.viewmodel.SplashScreenVM
 import presentation.theme.body_small
 
 import utils.Token
+import utils.ViewStates
 
 
 class SplashScreen() : Screen, KoinComponent {
@@ -64,6 +65,7 @@ class SplashScreen() : Screen, KoinComponent {
 
         val permissionState by viewModel.permissionState.collectAsState()
         val lifecycleEvent by viewModel.lifeCycleEvent.collectAsState()
+        val state by viewModel.state.collectAsState()
 
         if (lifecycleEvent == LifecycleEvent.ON_RESUME) {
             viewModel.updateLifeCycleEventState(LifecycleEvent.ON_ANY)
@@ -145,10 +147,12 @@ class SplashScreen() : Screen, KoinComponent {
 
                         scope.launch {
                             delay(1000)
-                            if (getSharedPref().getString(Token).toString().length > 6)
-                                navigator.push(mainScreen)
-                            else
-                                navigator.push(loginScreen)
+                            if(state != ViewStates.NoGps) {
+                                if (getSharedPref().getString(Token).toString().length > 6)
+                                    navigator.push(mainScreen)
+                                else
+                                    navigator.push(loginScreen)
+                            }
                         }
                     }
 
