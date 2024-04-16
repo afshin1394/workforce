@@ -10,11 +10,13 @@ import io.github.aakira.napier.LogLevel
 import io.github.aakira.napier.Napier
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
+import io.ktor.client.request.get
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 
 class AuthRepositoryImpl(
-    private val httpClient: HttpClient
+    private val httpClient: HttpClient,
+    private val httpClientWithToken: HttpClient
 ) : IAuthRepository {
     override suspend fun login(loginNetworkRequest: LoginNetworkRequest) : LoginNetworkResponse {
       val response = httpClient.post("auth/token/2fa/login"){
@@ -37,5 +39,9 @@ class AuthRepositoryImpl(
             setBody(resendNetworkRequest)
         }
         Napier.log(LogLevel.ASSERT,"resend" ,  message = "sessionId ${resendNetworkRequest.session_id}")
+    }
+
+    override suspend fun logout() {
+        httpClientWithToken.get("auth/token/logout")
     }
 }

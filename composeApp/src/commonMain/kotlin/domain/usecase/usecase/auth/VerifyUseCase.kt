@@ -13,8 +13,8 @@ import utils.Token
 
 class VerifyUseCase(
     private val iAuthRepository: IAuthRepository
-) : BaseUseCase<Unit, String>() {
-    override suspend fun run(otpCode: String) {
+) : BaseUseCase<String, String>() {
+    override suspend fun run(otpCode: String) : String {
         val verifyResponseDomain = iAuthRepository.verify(
             VerifyRequestDomain(
                 session_id = getSharedPref().getString(
@@ -23,6 +23,7 @@ class VerifyUseCase(
             ).toVerifyNetworkRequest()
         ).toVerifyResponseDomain()
         getSharedPref().put(Token, verifyResponseDomain.auth_token)
+        return verifyResponseDomain.auth_token
     }
 
 }

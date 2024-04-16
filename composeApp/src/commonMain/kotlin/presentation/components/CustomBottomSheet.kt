@@ -132,3 +132,34 @@ fun bottomSheetDoubleActionBottomBar(
 
     }
 }
+
+
+
+@Composable
+fun bottomSheetSingleActionBottomBar(
+    bottomSheetDoubleActionModel: BottomSheetDoubleActionModel,
+    onFirstButtonClick: () -> Unit = {},
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(surfaceDefault)
+            .padding(vertical = spacing3X, horizontal = spacing2X),
+        verticalAlignment = Alignment.Bottom,
+        horizontalArrangement = Arrangement.Center
+    ) {
+        CustomButton(
+            customButtonData = CustomButtonData(
+                title = bottomSheetDoubleActionModel.firstButtonText,
+                textColor = bottomSheetDoubleActionModel.firstButtonTextColor,
+                bottomSheetDoubleActionModel.firstButtonColor
+            ),
+            modifier = Modifier
+                .weight(1f).clickable {
+                    onFirstButtonClick()
+                }
+        )
+
+
+    }
+}

@@ -65,7 +65,8 @@ class LoginScreen() : Screen {
         BaseScreen(
             viewModel = viewModel,
             scaffoldState = scaffoldState,
-            title = "",
+            title = "notStartService",
+            onBackPressed = { navigator.pop()},
             content = {
                 Column(
                     modifier = Modifier
@@ -80,7 +81,7 @@ class LoginScreen() : Screen {
                         }
                         ViewStates.Loading -> {
                         }
-                        ViewStates.Success -> {
+                        is ViewStates.Success -> {
                             scope.launch {
                                 navigator.push(verifyScreen)
                             }
@@ -89,7 +90,8 @@ class LoginScreen() : Screen {
                         ViewStates.Default -> {
 
                         }
-                        ViewStates.NoGps -> {
+
+                        ViewStates.Reload -> {
 
                         }
                     }

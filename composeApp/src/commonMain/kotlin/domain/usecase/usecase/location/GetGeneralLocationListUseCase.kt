@@ -8,6 +8,7 @@ import irancell.nwg.wfm.db.GeneralLocationEntity
 class GetGeneralLocationListUseCase(
    private val iGeneralLocationRepository: IGeneralLocationRepository
 ): BaseUseCase<List<GeneralLocationEntity>, Unit>() {
+
     override suspend fun run(params: Unit): List<GeneralLocationEntity> {
         return iGeneralLocationRepository.selectUnSend()
     }

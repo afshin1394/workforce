@@ -8,13 +8,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -27,11 +24,14 @@ import io.github.aakira.napier.LogLevel
 import io.github.aakira.napier.Napier
 import irancell.nwg.wfm.GPS
 import irancell.nwg.wfm.provideAppContext
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
+
 import utils.BaseViewModel
 import utils.ViewStates
 import androidx.compose.material3.CircularProgressIndicator
+import cafe.adriel.voyager.navigator.OnBackPressed
+import irancell.nwg.wfm.BackButtonHandler
+
+import utils.GpsState
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
@@ -40,7 +40,7 @@ fun <T : BaseViewModel> BaseScreen(
     scaffoldState: BottomSheetScaffoldState,
     title: String,
     hasDrawer: Boolean = false,
-    content: @Composable (snackBarHost: androidx.compose.material.SnackbarHostState) -> Unit = {},
+    content: @Composable (snackBarHost: SnackbarHostState) -> Unit = {},
     topBar: @Composable () -> Unit = {},
     drawerContent: @Composable () -> Unit = {},
     bottomSheetHasHeader: Boolean = true,
@@ -48,18 +48,16 @@ fun <T : BaseViewModel> BaseScreen(
     bottomSheetContent: @Composable (bottomSheetState: BottomSheetState) -> Unit = {},
     bottomBarBottomSheetContent: @Composable (bottomSheetState: BottomSheetState) -> Unit = {},
     onCloseBottomSheet: () -> Unit = {},
+    onBackPressed: () -> Unit={}
 
-    ) {
+) {
 
-    val scope = rememberCoroutineScope()
     val state by viewModel.state.collectAsState()
-    Napier.log(LogLevel.ASSERT,"BaseScreen", message = "enableGPS")
+    val gpsState by viewModel.gpsState.collectAsState()
+    Napier.log(LogLevel.ASSERT, "BaseScreen", message = state.toString())
 
-    GPS.enableGps(provideAppContext(), disable =  {
-        viewModel.updateState(ViewStates.NoGps)
-    }, enabled =  {
-        viewModel.updateState(ViewStates.Default)
-    })
+
+
 
     Box(
         modifier = Modifier
@@ -102,15 +100,34 @@ fun <T : BaseViewModel> BaseScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .fillMaxHeight()
+                        .background( backgroundBackground3)
+
                 ) {
                     content(scaffoldState.snackbarHostState)
+                    BackButtonHandler.backPress( onBackPressed = {
+                        println("checkkkkvalueeee")
+                        onBackPressed()
 
-                    when(state){
+
+                    })
+                    when(gpsState){
+                        GpsState.Default -> {
+
+                        }
+                        GpsState.Disabled -> {
+                            GPS.enableGpsDialog(provideAppContext())
+                        }
+                        GpsState.Enabled -> {
+
+                        }
+                    }
+                    when (state) {
                         ViewStates.Default -> {
 
                         }
+
                         is ViewStates.Error -> {
-                            val errorMessage =  stringResource((state as ViewStates.Error).message)
+                            val errorMessage = stringResource((state as ViewStates.Error).message)
 
                             Napier.log(LogLevel.INFO, tag = "fkpekfpw", message = errorMessage)
                             LaunchedEffect(Unit) {
@@ -120,27 +137,18 @@ fun <T : BaseViewModel> BaseScreen(
 
                             }
                         }
+
                         ViewStates.Loading -> {
-
                             CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-
-
                         }
-                        ViewStates.NoGps -> {
-                            GPS.enableGps(provideAppContext(), disable =  {
-                                scope.launch {
-                                    viewModel.updateState(ViewStates.Loading)
-                                    delay(100)
-                                    viewModel.updateState(ViewStates.NoGps)
-                                }
-                            }, enabled = {
-                                viewModel.updateState(ViewStates.Default)
-                            })
 
 
-                        }
-                        ViewStates.Success -> {
+                        is ViewStates.Success -> {
                             viewModel.updateState(ViewStates.Default)
+                        }
+
+                        ViewStates.Reload -> {
+
                         }
                     }
                 }
@@ -172,48 +180,68 @@ fun <T : BaseViewModel> BaseScreen(
             ) {
 
 
-
-
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
                         .fillMaxHeight()
+                        .background( backgroundBackground3)
+
+
 
                 ) {
                     content(scaffoldState.snackbarHostState)
 
-                    when(state){
+                    BackButtonHandler.backPress( onBackPressed = {
+                        println("checkkkkvalueeee")
+                        onBackPressed()
+
+
+                    })
+
+
+                    when(gpsState){
+                        GpsState.Default -> {
+
+                        }
+                        GpsState.Disabled -> {
+                            GPS.enableGpsDialog(provideAppContext())
+                        }
+                        GpsState.Enabled -> {
+
+                        }
+                    }
+
+                    when (state) {
                         ViewStates.Default -> {
 
                         }
+
                         is ViewStates.Error -> {
-                            val errorMessage =  stringResource((state as ViewStates.Error).message)
+                            val errorMessage = stringResource((state as ViewStates.Error).message)
                             LaunchedEffect(Unit) {
                                 scaffoldState.snackbarHostState.showSnackbar(message = "$errorMessage")
                                 viewModel.updateState(ViewStates.Default)
 
                             }
-                            Napier.log(LogLevel.INFO, tag = "fkpekfpw", message = errorMessage.toString())
-
+                            Napier.log(
+                                LogLevel.INFO,
+                                tag = "fkpekfpw",
+                                message = errorMessage.toString()
+                            )
                         }
+
                         ViewStates.Loading -> {
                             CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
                         }
-                        ViewStates.NoGps -> {
-                            GPS.enableGps(provideAppContext(), disable =  {
-                                scope.launch {
-                                    viewModel.updateState(ViewStates.Loading)
-                                    delay(100)
-                                    viewModel.updateState(ViewStates.NoGps)
-                                }
 
-                            }, enabled = {
-                                viewModel.updateState(ViewStates.Default)
-                            })
 
+
+                        is ViewStates.Success -> {
+                            viewModel.updateState(ViewStates.Default)
                         }
-                        ViewStates.Success -> {
-                                viewModel.updateState(ViewStates.Default)
+
+                        ViewStates.Reload -> {
+
                         }
                     }
 

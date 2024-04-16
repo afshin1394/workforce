@@ -7,9 +7,11 @@ import data.network.response.auth.LoginNetworkResponse
 import data.network.response.auth.VerifyNetworkResponse
 
 interface IAuthRepository {
+
     suspend fun login(loginNetworkRequest: LoginNetworkRequest) : LoginNetworkResponse
 
     suspend fun verify(verifyNetworkRequest: VerifyNetworkRequest) : VerifyNetworkResponse
 
     suspend fun resend(resendNetworkRequest: ResendNetworkRequest)
+    suspend fun logout()
 }

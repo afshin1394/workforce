@@ -6,8 +6,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 expect class GPS {
     companion object {
         @Composable
-         fun enableGps(context: Any, enabled: () -> Unit,disable : () -> Unit)
+        fun enableGpsDialog(context: Any)
 
-         fun registerGps(context: Any,onChange : () -> Unit)
+        fun getLocationsState(): Boolean
+        fun registerGps(context: Any, onChange: (boolean: Boolean) -> Unit)
     }
 }

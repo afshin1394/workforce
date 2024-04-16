@@ -123,6 +123,9 @@ class TicketInfoScreen(
 //                    })
 //                }
 
+            },
+            onBackPressed = {
+                navigator.pop()
             })
     }
 

@@ -17,4 +17,10 @@ class SettingScreenVM : BaseViewModel() {
         SelectableItem(1, "English", false),
         SelectableItem(2, "Farsi", false),
     )
+
+
+    val mutableChangeModeOptions =  mutableStateListOf(
+        SelectableItem(1, "Online", false),
+        SelectableItem(2, "Offline", false),
+    )
 }

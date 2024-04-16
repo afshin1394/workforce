@@ -137,10 +137,11 @@ class AboutScreen(
 
                 }
             }
-        ) {
-
-
-        }
+            ,
+            onBackPressed = {
+                navigator.pop()
+            }
+        )
 
     }
 }

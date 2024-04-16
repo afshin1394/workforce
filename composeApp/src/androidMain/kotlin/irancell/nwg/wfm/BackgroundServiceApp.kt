@@ -1,5 +1,6 @@
 package irancell.nwg.wfm
 
+import android.accessibilityservice.AccessibilityService
 import android.annotation.SuppressLint
 import android.app.AlarmManager
 import android.app.Notification
@@ -9,11 +10,13 @@ import android.app.PendingIntent
 import android.app.Service
 import android.content.Context
 import android.content.Intent
+import android.location.LocationManager
 import android.os.Build
 import android.os.IBinder
 import android.os.SystemClock
+import android.provider.Settings
 import android.util.Log
-import androidx.compose.runtime.rememberCoroutineScope
+import android.view.accessibility.AccessibilityEvent
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import domain.models.LiveLocationDomain
@@ -26,20 +29,17 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.MainCoroutineDispatcher
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
-import org.koin.core.context.stopKoin
 import utils.AsyncStatus
-import utils.Language
-import utils.SelectLanguage
 import utils.getCurrentDate
 import utils.isRunningGPS
 import java.util.concurrent.TimeUnit
 
-actual class GpsTrackingService : Service() , KoinComponent {
+
+actual class BackgroundServiceApp : Service() , KoinComponent {
 
 
     lateinit var pendingIntent: PendingIntent
@@ -50,13 +50,13 @@ actual class GpsTrackingService : Service() , KoinComponent {
 
    actual companion object {
         val gpsTrackingIntent : Intent by lazy {
-            Intent((provideAppContext() as Context), GpsTrackingService::class.java)
+            Intent((provideAppContext() as Context), BackgroundServiceApp::class.java)
         }
 
         const val Notification_ID = 123
         const val CHANNEL_ID = "GPS TRACKER"
        var isRunning: Boolean = getSharedPref().getBool(isRunningGPS, false)
-        actual fun stopLocationTracker(){
+        actual fun stopBackgroundService(){
             Napier.log(
                 LogLevel.ASSERT,
                 tag = "serviice",
@@ -69,7 +69,7 @@ actual class GpsTrackingService : Service() , KoinComponent {
         }
 
 
-        actual fun startLocationTracker() {
+        actual fun startBackgroundService() {
             Napier.log(
                 LogLevel.ASSERT,
                 tag = "serviice",
@@ -85,6 +85,7 @@ actual class GpsTrackingService : Service() , KoinComponent {
                 }
             }
         }
+
     }
 
 
@@ -96,7 +97,7 @@ actual class GpsTrackingService : Service() , KoinComponent {
         getSharedPref().put(isRunningGPS, true)
         val notification =
             createNotification(applicationContext, "Gps Tracking On", "retrieving gps data")
-        val intent = Intent(this, GpsTrackingService::class.java)
+        val intent = Intent(this, BackgroundServiceApp::class.java)
         startForeground(Notification_ID, notification);
 
         Location.start() {
@@ -117,10 +118,18 @@ actual class GpsTrackingService : Service() , KoinComponent {
         return null
     }
 
+
+     private fun isLocationEnabled(): Boolean {
+        val locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
+         Napier.log(LogLevel.ASSERT,"serviice", message =  locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER).toString())
+        return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
+    }
+
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         Napier.log(LogLevel.ASSERT, tag = "serviice", message = "scope")
         var scope = CoroutineScope(Dispatchers.IO)
 
+        println("checkGpsPer${isLocationEnabled()}")
 
 
 
@@ -193,14 +202,6 @@ actual class GpsTrackingService : Service() , KoinComponent {
 
 
 
-//            Log.i("locationServicess", "onStartCommand:  latitude:" + lat + "longitude" + lon)
-//            isWifi(this@SendGpsService).let {
-//                if (it) {
-//            val response =
-//                sendLocationService.sendLocation(SendLocationRequest(lon, lat)).execute()
-//                }
-//            }
-
 
 
               startAlarm()
@@ -229,7 +230,7 @@ actual class GpsTrackingService : Service() , KoinComponent {
 
         val alarmManager = getSystemService(ALARM_SERVICE) as AlarmManager
         val currentTimeMillis = SystemClock.elapsedRealtime()
-        val intervalMillis = TimeUnit.SECONDS.toMillis(5)
+        val intervalMillis = TimeUnit.MILLISECONDS.toMillis(500)
         Napier.log(LogLevel.ASSERT, tag = "serviice", message = "Alarm lat: $lat  + lon: $lon" )
 
         alarmManager.setExact(
@@ -300,3 +301,5 @@ actual class GpsTrackingService : Service() , KoinComponent {
 
 
 }
+
+

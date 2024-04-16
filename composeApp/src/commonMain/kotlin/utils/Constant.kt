@@ -12,6 +12,8 @@ const val Token = "Token"
 const val Language = "Language"
 const val SelectLanguage = "SelectLanguage"
 const val isRunningGPS = "isRunningGPS"
+const val ModeApp = "modeApp"
+
 
 object ErrorCode {
     const val NETWORK_NOT_AVAILABLE = 1001

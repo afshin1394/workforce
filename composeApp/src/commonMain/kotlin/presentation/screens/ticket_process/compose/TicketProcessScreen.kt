@@ -100,6 +100,8 @@ class TicketProcessScreen(
 //                    navigator.push(formViewerScreen)
 //                    formView(listOfSteps[currentLevelState.value])
                 }
+            }, onBackPressed = {
+                navigator.pop()
             })
 
     }

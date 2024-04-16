@@ -2,6 +2,8 @@ package utils
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import com.plusmobileapps.konnectivity.Konnectivity
+import com.plusmobileapps.konnectivity.NetworkConnection
 import dev.icerock.moko.mvvm.viewmodel.ViewModel
 import dev.icerock.moko.resources.StringResource
 import dev.icerock.moko.resources.compose.stringResource
@@ -10,69 +12,148 @@ import io.github.aakira.napier.LogLevel
 import io.github.aakira.napier.Napier
 import io.ktor.http.HttpMessage
 import irancell.nwg.wfm.GPS
+import irancell.nwg.wfm.Location
 import irancell.nwg.wfm.MR
+import irancell.nwg.wfm.getSharedPref
 import irancell.nwg.wfm.provideAppContext
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 
 sealed class ViewStates() {
     data object Default : ViewStates()
     data object Loading : ViewStates()
-    data object NoGps : ViewStates()
-    data class Error(val message : StringResource) : ViewStates()
-    data object Success : ViewStates()
+    data class Error(val message: StringResource) : ViewStates()
+    data class Success(val message : StringResource? = MR.strings.success) : ViewStates()
+    data object Reload : ViewStates()
 }
 
+sealed interface GpsState{
+    data object Default : GpsState
+    data object Enabled : GpsState
+    data object Disabled : GpsState
+}
+sealed class NetworkStates() {
+    data object Default : NetworkStates()
+    data object NetworkConnectionNONE : NetworkStates()
+    data object NetworkConnectionWIFI : NetworkStates()
+    data object NetworkConnectionCELLULAR : NetworkStates()
+
+}
 
 open class BaseViewModel : ViewModel() {
     val loading = MutableStateFlow(false)
 
-     private val _state = MutableStateFlow<ViewStates>(ViewStates.Default)
-     val state = _state.asStateFlow()
+    private val _state = MutableStateFlow<ViewStates>(ViewStates.Default)
+    private val _networkState = MutableStateFlow<NetworkStates>(NetworkStates.Default)
+    private val _gpsState = MutableStateFlow<GpsState>(GpsState.Default)
 
 
-       init {
+    val state = _state.asStateFlow()
+    val networkState = _networkState.asStateFlow()
+    val gpsState = _gpsState.asStateFlow()
+    val konnectivity: Konnectivity = Konnectivity()
 
-           GPS.registerGps(provideAppContext()){
-               Napier.log(LogLevel.ASSERT,"BaseViewModel", message = "enableGPS")
+    init {
 
-               _state.update { ViewStates.NoGps }
+
+        traceNetwork()
+        traceLocation()
+
+
+
+    }
+
+    private fun traceLocation() {
+        GPS.registerGps(provideAppContext()) {
+            if (it)
+                _gpsState.update { GpsState.Enabled }
+            else
+                _gpsState.update { GpsState.Disabled }
+        }
+        when (GPS.getLocationsState()){
+            true->{
+                _gpsState.update { GpsState.Enabled }
+
             }
-       }
+            false->{
+                _gpsState.update { GpsState.Disabled }
+
+            }
+        }
+    }
 
 
-        fun updateState(viewStates: ViewStates){
+    private fun traceNetwork() {
+
+
+        viewModelScope.launch(Dispatchers.Main) {
+            konnectivity.currentNetworkConnectionState.collect { connection ->
+                when (connection) {
+                    NetworkConnection.NONE -> {
+
+                        _networkState.update { NetworkStates.NetworkConnectionNONE }
+
+                    }
+
+                    NetworkConnection.WIFI -> {
+
+                        _networkState.update { NetworkStates.NetworkConnectionWIFI }
+
+                    }
+
+                    NetworkConnection.CELLULAR -> {
+
+                        _networkState.update { NetworkStates.NetworkConnectionCELLULAR }
+
+                    }
+                }
+
+            }
+
+        }
+    }
+
+    fun updateState(viewStates: ViewStates) {
         _state.update { viewStates }
     }
-    fun handleError(resultStatus: ResultStatus?){
-        when(resultStatus) {
+
+    fun handleError(resultStatus: ResultStatus?) {
+        when (resultStatus) {
             is ResultStatus.CLIENT_EXCEPTION -> {
                 _state.update { ViewStates.Error(MR.strings.client_error) }
             }
+
             is ResultStatus.EXCEPTION -> {
                 _state.update { ViewStates.Error(MR.strings.general_error) }
 
 
             }
+
             is ResultStatus.IO_EXCEPTION -> {
                 _state.update { ViewStates.Error(MR.strings.general_error) }
 
 
             }
+
             is ResultStatus.REDIRECT_EXCEPTION -> {
 
             }
+
             is ResultStatus.SERVER_EXCEPTION -> {
                 _state.update { ViewStates.Error(MR.strings.server_error) }
 
 
             }
+
             is ResultStatus.SUCCESS -> {
                 _state.update { ViewStates.Error(MR.strings.success) }
 
 
             }
+
             is ResultStatus.TIME_OUT -> {
                 _state.update { ViewStates.Error(MR.strings.timeout_error) }
 

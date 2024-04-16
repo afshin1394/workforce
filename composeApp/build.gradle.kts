@@ -76,6 +76,7 @@ kotlin {
                 implementation(libs.ktor.client.content.negotiation)
                 implementation(libs.kotlin.serialization)
                 api(libs.calf.ui)
+                implementation(libs.konnectivity)
                 implementation("com.github.skydoves:landscapist-coil3:2.3.2")
 
             }
@@ -97,6 +98,10 @@ kotlin {
                 implementation(libs.ktor.client.okhttp)
                 implementation(libs.ktor.client.logging)
                 implementation(libs.accompanist.permission)
+                implementation (libs.android.database.sqlcipher)
+
+
+
 //mapbox
 //implementation("com.mapbox.maps:android:11.1.0")
 //// If you're using compose also add the compose extension

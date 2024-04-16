@@ -108,6 +108,8 @@ class AccountScreen() : Screen {
                     }
 
                 }
+            }, onBackPressed = {
+                navigator.pop()
             }
         )
     }

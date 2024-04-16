@@ -18,6 +18,7 @@ import domain.repository.IProfileRepository
 import domain.repository.ISuspendTaskRepository
 import domain.repository.ITaskRepository
 import domain.usecase.usecase.auth.LoginUseCase
+import domain.usecase.usecase.auth.LogoutUseCase
 import domain.usecase.usecase.auth.ResendUseCase
 import domain.usecase.usecase.auth.VerifyUseCase
 import domain.usecase.usecase.availability.ChangeServerAvailabilityUseCase
@@ -62,6 +63,7 @@ import presentation.screens.main.viewmodel.AboutScreenVM
 import presentation.screens.main.viewmodel.AccountScreenVM
 import presentation.screens.main.viewmodel.FormViewVM
 import presentation.screens.main.viewmodel.GpsTrackingReportScreenVM
+import presentation.screens.main.viewmodel.NotificationScreenVM
 import presentation.screens.ticket_process.viewModel.TicketInfoVM
 import utils.Token
 
@@ -72,7 +74,7 @@ fun repositoryModule() = module {
     single<IGeneralLocationRepository> { GeneralLocationRepositoryImpl(get(), get(named("tokenized"))) }
     single<IAvailabilityRepository> { AvailabilityRepositoryImpl(get(named("tokenized"))) }
     single<ISuspendTaskRepository> { SuspendTaskRepositoryImpl(get(), get(named("tokenized"))) }
-    single<IAuthRepository> { AuthRepositoryImpl(get(named("noToken"))) }
+    single<IAuthRepository> { AuthRepositoryImpl(get(named("noToken")),get(named("tokenized"))) }
     single<ITaskRepository> { TaskRepositoryImpl(get(named("tokenized")),get()) }
     single<IProfileRepository>{ ProfileRepositoryImpl(get(named("tokenized")),get()) }
     single<IInitialFormRepository>{ InitialFormRepositoryImpl(get()) }
@@ -99,6 +101,8 @@ fun useCaseModule() = module {
     single { GetProfileUseCase(get()) }
     single { DeleteByTaskIdUseCase(get()) }
     single{ GetInitialFormByTask(get())}
+    single { LogoutUseCase(get()) }
+
 }
 
 fun httpModule() = module {
@@ -190,4 +194,5 @@ fun viewModelModule() = module {
     viewModelDefinition { TicketProcessVM() }
     viewModelDefinition { FormViewVM() }
     viewModelDefinition { AccountScreenVM(get()) }
+    viewModelDefinition { NotificationScreenVM() }
 }

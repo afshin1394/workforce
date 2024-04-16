@@ -89,7 +89,7 @@ fun AuthVerificationCodeRow(
                         index = index,
                         otpValue = otpText
                     )
-                    Spacer(modifier = Modifier.width(spacing2X))
+                    Spacer(modifier = Modifier.width(spacing15X))
                 }
             }
         }

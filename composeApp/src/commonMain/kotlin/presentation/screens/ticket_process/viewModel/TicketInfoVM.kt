@@ -35,7 +35,7 @@ class TicketInfoVM(
                 AsyncStatus.SUCCESS -> {
                     val initialFormDomain = it.data
                     _initialFormStructureDomain.update { initialFormDomain?.structure }
-                    updateState(ViewStates.Success)
+                    updateState(ViewStates.Success())
                 }
             }
         }

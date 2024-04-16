@@ -251,6 +251,8 @@ class FormViewerScreen() : Screen {
 
                 }
 
+            }, onBackPressed = {
+                navigator.pop()
             }
 
         )

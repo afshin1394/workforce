@@ -11,6 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
@@ -34,17 +35,19 @@ import presentation.theme.textBrand
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import presentation.components.MenuItemsTopBar
+import presentation.screens.main.components.SelectableSingleItemComponent
 import utils.Language
+import utils.ModeApp
 import utils.SelectLanguage
 import utils.isRunningGPS
 
 @OptIn(ExperimentalMaterialApi::class)
-class SettingsScreen (
+class SettingsScreen(
 ) : Screen {
     @Composable
     override fun Content() {
         val scaffoldState: BottomSheetScaffoldState = rememberBottomSheetScaffoldState()
-        val viewModel : SettingScreenVM  = koinInject()
+        val viewModel: SettingScreenVM = koinInject()
         val events by viewModel.events
         val navigator = LocalNavigator.currentOrThrow
 
@@ -61,10 +64,14 @@ class SettingsScreen (
                     stringResource(MR.strings.language)
                 }
 
+                SettingEvent.ChangeMode -> {
+                    stringResource(MR.strings.offline_mode)
+                }
+
 
             }
 
-        BaseScreen(viewModel = viewModel,title = stringResource(MR.strings.settings), topBar = {
+        BaseScreen(viewModel = viewModel, title = stringResource(MR.strings.settings), topBar = {
             MenuItemsTopBar(stringResource(MR.strings.settings)) {
                 navigator.pop()
             }
@@ -76,35 +83,29 @@ class SettingsScreen (
                 when (events) {
                     SettingEvent.ChangeLanguage -> {
                         ChangeLanguageBottomSheetComponent(
-                            list =
-
-                            viewModel.mutableChangeLanguageOptions,
+                            list = viewModel.mutableChangeLanguageOptions,
                             onItemSelected = { index, selectableItem ->
-                                apply {
 
+                                scope.launch(Dispatchers.Main) {
 
-                                    scope.launch(Dispatchers.Main) {
+                                    when (index) {
+                                        0 -> {
+                                            getSharedPref().put(Language, "en")
 
-                                        when (index) {
-                                            0 -> {
-                                                getSharedPref().put(Language, "en")
-
-                                            }
-                                            1 -> {
-                                                getSharedPref().put(Language, "fa")
-
-                                            }
                                         }
 
-                                        getSharedPref().put(SelectLanguage, true)
-                                        getSharedPref().put(isRunningGPS, false)
+                                        1 -> {
+                                            getSharedPref().put(Language, "fa")
 
-                                        delay(1000)
-                                        IntentHandler(provideAppContext())
-
+                                        }
                                     }
 
+                                    getSharedPref().put(SelectLanguage, true)
+                                    getSharedPref().put(isRunningGPS, false)
 
+
+                                    delay(1000)
+                                    IntentHandler(provideAppContext())
 
 
                                 }
@@ -112,6 +113,38 @@ class SettingsScreen (
                         scope.launch {
                             scaffoldState.bottomSheetState.expand()
                         }
+                    }
+
+                    SettingEvent.ChangeMode -> {
+
+                        ChangeModeBottomSheetComponent(
+                            list = viewModel.mutableChangeModeOptions,
+                            onItemSelected = { index, selectableItem ->
+
+                                scope.launch(Dispatchers.Main) {
+
+                                    when (index) {
+                                        0 -> {
+                                            getSharedPref().put(ModeApp, "on")
+                                            viewModel.events.value = SettingEvent.Default
+
+                                        }
+
+                                        1 -> {
+                                            getSharedPref().put(ModeApp, "of")
+                                            viewModel.events.value = SettingEvent.Default
+
+                                        }
+
+                                    }
+
+
+                                }
+                            })
+                        scope.launch {
+                            scaffoldState.bottomSheetState.expand()
+                        }
+
                     }
 
                     SettingEvent.Default -> {
@@ -124,44 +157,48 @@ class SettingsScreen (
                 }
             }, onCloseBottomSheet = {
                 viewModel.events.value = SettingEvent.Default
-            }, bottomBarBottomSheetContent = {
-                when (events) {
-
-                    SettingEvent.Default -> {
-
-                    }
-
-                    SettingEvent.ChangeLanguage -> {
-
-                    }
-                }
-
             }, content = {
                 Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
-                    val tagSelectLanguage=if ( getSharedPref().getString(Language)=="fa") "Farsi"
+                    val tagSelectLanguage = if (getSharedPref().getString(Language) == "fa") "Farsi"
                     else "English"
                     ItemComponent(itemComponentModel = ItemComponentModel(
                         text = stringResource(MR.strings.language),
                         hasTag = true,
-                        color = surfaceDefault,
+                        color = Color.Transparent,
                         textTag = tagSelectLanguage,
                         textTagColor = textBrand,
                         tagColor = subtleDefault
                     ), modifier = Modifier.clickable {
                         viewModel.events.value = SettingEvent.ChangeLanguage
                     })
+                    val tagSelectMode = if (getSharedPref().getString(ModeApp) == "on") "Online"
+                    else "Offline"
                     ItemComponent(itemComponentModel = ItemComponentModel(
-                        text = stringResource(MR.strings.help_support), hasTag = false,
-                        color = surfaceDefault
+                        text = stringResource(MR.strings.offline_mode),
+                        hasTag = true,
+                        color = Color.Transparent,
+                        textTag = tagSelectMode,
+                        textTagColor = textBrand,
+                        tagColor = subtleDefault
                     ), modifier = Modifier.clickable {
-
+                        viewModel.events.value = SettingEvent.ChangeMode
                     })
-                    SwitchItem(text = stringResource(MR.strings.darkMode), false) {
 
-                    }
                 }
 
-            }, scaffoldState = scaffoldState
+            }, scaffoldState = scaffoldState,
+            onBackPressed = {
+
+                if (viewModel.events.value == SettingEvent.Default) {
+                    navigator.pop()
+
+                } else {
+                    viewModel.events.value = SettingEvent.Default
+
+                }
+
+
+            }
         )
 
     }
@@ -174,9 +211,22 @@ fun ChangeLanguageBottomSheetComponent(
     list: MutableList<SelectableItem>,
     onItemSelected: (Int, SelectableItem) -> Unit
 ) {
-    SelectableComponent(
+    SelectableSingleItemComponent(
         selectableItems = list,
-        hasSearch = false,
+        itemSelected = getSharedPref().getString(Language) ?: "",
+        onOptionSelected = { index, selectableItem ->
+            onItemSelected(index, selectableItem)
+        })
+}
+
+@Composable
+fun ChangeModeBottomSheetComponent(
+    list: MutableList<SelectableItem>,
+    onItemSelected: (Int, SelectableItem) -> Unit
+) {
+    SelectableSingleItemComponent(
+        selectableItems = list,
+        itemSelected = getSharedPref().getString(ModeApp) ?: "",
         onOptionSelected = { index, selectableItem ->
             onItemSelected(index, selectableItem)
         })

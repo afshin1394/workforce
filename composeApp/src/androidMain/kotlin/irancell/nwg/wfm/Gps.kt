@@ -2,15 +2,24 @@ package irancell.nwg.wfm
 
 import android.app.Activity
 import android.content.Context
+import android.content.Intent
 import android.content.IntentFilter
 import android.content.IntentSender
 import android.location.LocationManager
-import androidx.activity.compose.rememberLauncherForActivityResult
+import android.provider.Settings
 import androidx.activity.result.IntentSenderRequest
-import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Box
+import androidx.compose.material.AlertDialog
+import androidx.compose.material.Button
+import androidx.compose.material.ButtonDefaults
+import androidx.compose.material.Text
+import androidx.compose.material.rememberDismissState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.fragment.app.FragmentActivity
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
 import com.google.android.gms.common.api.ResolvableApiException
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationServices
@@ -18,55 +27,24 @@ import com.google.android.gms.location.LocationSettingsRequest
 import com.google.android.gms.location.LocationSettingsResponse
 import com.google.android.gms.location.SettingsClient
 import com.google.android.gms.tasks.Task
+import dev.icerock.moko.resources.compose.stringResource
 import io.github.aakira.napier.LogLevel
 import io.github.aakira.napier.Napier
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
-import org.koin.core.context.stopKoin
+import presentation.theme.surfaceBrandDefault
 
 actual class GPS {
+
     actual companion object {
-
-        fun checkLocationSetting(
-            context: Context,
-            onDisabled: (IntentSenderRequest) -> Unit,
-            onEnabled: () -> Unit
-        ) {
-
-            val locationRequest = LocationRequest.create().apply {
-                interval = 1000
-                fastestInterval = 1000
-                priority = LocationRequest.PRIORITY_HIGH_ACCURACY
-            }
-
-            val client: SettingsClient = LocationServices.getSettingsClient(context)
-            val builder: LocationSettingsRequest.Builder = LocationSettingsRequest
-                .Builder()
-                .addLocationRequest(locationRequest)
-
-            val gpsSettingTask: Task<LocationSettingsResponse> =
-                client.checkLocationSettings(builder.build())
-
-            gpsSettingTask.addOnSuccessListener { onEnabled() }
-            gpsSettingTask.addOnFailureListener { exception ->
-                if (exception is ResolvableApiException) {
-                    try {
-                        val intentSenderRequest = IntentSenderRequest
-                            .Builder(exception.resolution)
-                            .build()
-                        onDisabled(intentSenderRequest)
-                    } catch (sendEx: IntentSender.SendIntentException) {
-                        // ignore here
-                    }
-                }
-            }
-        }
-        actual fun registerGps(context: Any,onChange : () -> Unit){
+        actual fun registerGps(context: Any,onChange : (boolean:Boolean) -> Unit){
             val receiver = ChangeGpsReceiver()
             receiver.initChangeReceiver(object  : IChangeGpsReceiver{
-                override fun onReceiveAction() {
-                    onChange()
+                override fun locationOn() {
+                    onChange(true)
+                }
+
+                override fun locationOff() {
+                    onChange(false)
+
                 }
 
             })
@@ -76,27 +54,46 @@ actual class GPS {
             )
         }
 
-        @Composable
-        actual fun enableGps(context: Any, enabled: () -> Unit,disable : () -> Unit) {
-
-            Napier.log(LogLevel.ASSERT,"GPS", message = "enableGPS")
-
-                val settingResultRequest = rememberLauncherForActivityResult(
-                    contract = ActivityResultContracts.StartIntentSenderForResult()
-                ) { activityResult ->
-                    if (activityResult.resultCode == FragmentActivity.RESULT_OK)
-                        enabled()
-                    else
-                        disable()
-                }
-
-                checkLocationSetting(context as Context, onDisabled = {
-                    settingResultRequest.launch(it)
-
-                }, onEnabled = {
-                    enabled()
-                })
-
+        actual fun getLocationsState() : Boolean{
+            val locationManager =
+                (provideAppContext() as Context)!!.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+            return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
         }
+
+        @Composable
+        actual fun enableGpsDialog(context: Any) {
+
+            Napier.log(LogLevel.ASSERT,"GPSPermission", message = "enableGPS")
+            Box(modifier = Modifier.border(BorderStroke(1.dp, color = Color.Black))) {
+                AlertDialog(
+                    onDismissRequest = { false },
+                    title = { Text(text = stringResource(MR.strings.GPS_Permission)) },
+                    text = { Text(text = stringResource(MR.strings.disc_gps_permission)) },
+                    confirmButton = {
+                        Button(
+                            colors = ButtonDefaults.buttonColors(
+                                backgroundColor = surfaceBrandDefault,
+                                contentColor = Color.White
+                            ),
+                            onClick = {
+                                val intent = Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
+                                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                                (context as Context).startActivity(intent)
+                            }
+                        ) {
+                            Text(text = stringResource(MR.strings.enable))
+                        }
+                    },
+                )
+            }
+        }
+
+
+
     }
+
+
+
+
+
 }

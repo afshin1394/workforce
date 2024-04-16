@@ -13,6 +13,8 @@ sealed interface MainEvent : Event {
    data object CancelReason : MainEvent
    data object AcceptTicket : MainEvent
 
+   data object Exit : MainEvent
+
 
 }
 

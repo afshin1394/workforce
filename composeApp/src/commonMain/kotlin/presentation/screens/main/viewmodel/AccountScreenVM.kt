@@ -53,7 +53,7 @@ class AccountScreenVM(
                                _roles.update { it.plus("${roleDomain.name},") }
                             }
                         }
-                        updateState(ViewStates.Success)
+                        updateState(ViewStates.Success())
 
                     }
                 }

@@ -122,7 +122,7 @@ class GpsTrackingReportScreen(
                         CircularProgressIndicator()
                     }
 
-                    ViewStates.Success -> {
+                    is ViewStates.Success -> {
                         val message = stringResource(MR.strings.success)
                         scope.launch {
                             snackbarHostState.showSnackbar(
@@ -152,7 +152,7 @@ class GpsTrackingReportScreen(
 
                     }
 
-                    ViewStates.NoGps -> {
+                    ViewStates.Reload -> {
 
                     }
                 }

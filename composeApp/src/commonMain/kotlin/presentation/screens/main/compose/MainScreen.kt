@@ -24,6 +24,7 @@ import domain.models.TaskDomain
 import io.github.aakira.napier.LogLevel
 import io.github.aakira.napier.Napier
 import irancell.nwg.wfm.Camera
+import irancell.nwg.wfm.ExitApp
 import irancell.nwg.wfm.InternalStorage
 import irancell.nwg.wfm.MR
 import irancell.nwg.wfm.checkConnectivity
@@ -50,6 +51,7 @@ import presentation.theme.textPrimary
 import utils.Availability
 import utils.PhoneNumber
 import utils.Token
+import utils.ViewStates
 
 class MainScreen(
 
@@ -139,6 +141,10 @@ class MainScreen(
 
                 MainEvent.AcceptTicket -> {
                     ""
+                }
+
+                MainEvent.Exit -> {
+                    stringResource(MR.strings.exit)
                 }
             }
 
@@ -323,6 +329,30 @@ class MainScreen(
 
                     }
 
+                    MainEvent.Exit -> {
+                        bottomSheetDoubleActionBottomBar(
+                            BottomSheetDoubleActionModel(
+                                stringResource(MR.strings.cancel),
+                                surfaceDefault,
+                                textPrimary,
+                                stringResource(MR.strings.exit),
+                                Color.Red,
+                                textInverse
+                            ), onFirstButtonClick = {
+                                viewModel.events.value = MainEvent.Default
+
+                                scope.launch {
+                                    scaffoldState.bottomSheetState.collapse()
+                                }
+
+                            }, onSecondButtonClick = {
+                                ExitApp()
+
+                            })
+                        scope.launch {
+                            scaffoldState.bottomSheetState.expand()
+                        }
+                    }
                 }
             },
             bottomSheetContent = {
@@ -458,6 +488,16 @@ class MainScreen(
 //                        navigator.push(ticketInfoScreen)
                     }
 
+                    MainEvent.Exit -> {
+                        Text(
+                            text = stringResource(MR.strings.sure_exit_app),
+                            style = body_large,
+                            modifier = Modifier.padding(start = spacing2X)
+                        )
+                        scope.launch {
+                            scaffoldState.bottomSheetState.expand()
+                        }
+                    }
                 }
 
             },
@@ -505,7 +545,23 @@ class MainScreen(
             },
             onCloseBottomSheet = {
                 viewModel.events.value = MainEvent.Default
+            },
+            onBackPressed = {
+                if (viewModel.events.value == MainEvent.Default) {
+                    scope.launch {
+                        if (scaffoldState.drawerState.isOpen)
+                            scaffoldState.drawerState.close()
+                        viewModel.events.value = MainEvent.Exit
+                    }
+
+
+                } else {
+                    viewModel.events.value = MainEvent.Default
+
+
+                }
             })
+
     }
 }
 

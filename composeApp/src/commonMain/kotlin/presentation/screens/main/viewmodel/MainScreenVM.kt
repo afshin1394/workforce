@@ -2,7 +2,6 @@ package presentation.screens.main.viewmodel
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
-import irancell.nwg.wfm.GpsTrackingService
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import arrow.core.valid
@@ -24,6 +23,7 @@ import domain.usecase.usecase.suspendTask.StoreSuspendTaskUseCase
 import domain.usecase.usecase.ticket.UpdateTasksUseCase
 import io.github.aakira.napier.LogLevel
 import io.github.aakira.napier.Napier
+import irancell.nwg.wfm.BackgroundServiceApp
 import irancell.nwg.wfm.Location
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
@@ -84,7 +84,7 @@ class MainScreenVM(
                         AsyncStatus.SUCCESS -> {
                             it.data?.let {
                                 val name = it.firstName + " " + it.lastName
-                                updateState(ViewStates.Success)
+                                updateState(ViewStates.Success())
                                 _profileName.update { name }
                             }
 
@@ -111,7 +111,7 @@ class MainScreenVM(
                     }
 
                     AsyncStatus.SUCCESS -> {
-                        updateState(ViewStates.Success)
+                        updateState(ViewStates.Success())
                         it.data?.let { available ->
                             _availability.update { available }
                         }
@@ -124,7 +124,7 @@ class MainScreenVM(
 
     fun changeAvailability() {
 
-        viewModelScope.launch(Dispatchers.Main) {
+        viewModelScope.launch(Dispatchers.IO) {
 
 
             changeServerAvailabilityUseCase(!_availability.value).collect {
@@ -158,16 +158,16 @@ class MainScreenVM(
                                 }
 
                                 AsyncStatus.SUCCESS -> {
-                                    updateState(ViewStates.Success)
+                                    updateState(ViewStates.Success())
                                     Napier.log(
                                         LogLevel.ASSERT,
                                         "storeAvailabilityUseCase",
                                         message = _availability.value.toString()
                                     )
                                     if (_availability.value) {
-                                        GpsTrackingService.startLocationTracker()
+                                        BackgroundServiceApp.startBackgroundService()
                                     } else {
-                                        GpsTrackingService.stopLocationTracker()
+                                        BackgroundServiceApp.stopBackgroundService()
                                     }
 
                                 }
@@ -483,7 +483,7 @@ class MainScreenVM(
                     AsyncStatus.SUCCESS -> {
                         tasks.clear()
 
-                        updateState(ViewStates.Success)
+                        updateState(ViewStates.Success())
 
                         Napier.log(
                             LogLevel.ASSERT,
@@ -537,7 +537,7 @@ class MainScreenVM(
                         }
 
                         AsyncStatus.SUCCESS -> {
-                            updateState(ViewStates.Success)
+                            updateState(ViewStates.Success())
                             val suspendTask = it.data
                             suspendTask?.let {
                                 suspendTaskDomain.value = it
@@ -614,7 +614,7 @@ class MainScreenVM(
                     }
 
                     AsyncStatus.SUCCESS -> {
-                        updateState(ViewStates.Success)
+                        updateState(ViewStates.Success())
                         Location.stop()
 
                     }

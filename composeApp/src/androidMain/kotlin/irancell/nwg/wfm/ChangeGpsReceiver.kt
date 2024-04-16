@@ -5,27 +5,27 @@ import android.content.Context
 import android.content.Intent
 import android.location.LocationManager
 
-interface IChangeGpsReceiver{
-    fun onReceiveAction()
+interface IChangeGpsReceiver {
+    fun locationOn()
+    fun locationOff()
 }
 
 class ChangeGpsReceiver() : BroadcastReceiver() {
     var iChangeGpsReceiver: IChangeGpsReceiver? = null
-    var changed : Boolean = true
-    fun initChangeReceiver(iChangeGpsReceiver: IChangeGpsReceiver){
+    fun initChangeReceiver(iChangeGpsReceiver: IChangeGpsReceiver) {
         this.iChangeGpsReceiver = iChangeGpsReceiver
     }
-    override fun onReceive(context: Context?, intent : Intent) {
+
+    override fun onReceive(context: Context?, intent: Intent) {
 
         if (intent.action == (LocationManager.PROVIDERS_CHANGED_ACTION)) {
-
-            iChangeGpsReceiver?.let {
-                changed = if (changed) {
-                    it.onReceiveAction()
-                    false
-                } else
-                    true
-            }
+            val locationManager =
+                context!!.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+            val gpsEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
+            if (gpsEnabled)
+                iChangeGpsReceiver?.locationOn()
+            else
+                iChangeGpsReceiver?.locationOff()
 
         }
 

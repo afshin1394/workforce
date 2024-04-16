@@ -7,6 +7,7 @@ import android.os.Build
 import android.provider.Telephony
 import android.telephony.SmsMessage
 import android.util.Log
+import kotlinx.coroutines.delay
 
 
 const val pdu_type = "pdus"
@@ -51,10 +52,7 @@ class SMSBroadcastReceiver  ()  : BroadcastReceiver() {
                         }
                         // Build the message to show.
 //                        strMessage += "SMS from " + msgs[i]!!.getOriginatingAddress()
-                        strMessage += """ ${msgs[i]!!.messageBody}
-"""
-
-
+                        strMessage += """ ${msgs[i]!!.messageBody}"""
                         // Log and display the SMS message.
 
                     }

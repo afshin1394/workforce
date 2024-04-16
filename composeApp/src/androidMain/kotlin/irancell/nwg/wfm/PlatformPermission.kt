@@ -16,16 +16,13 @@ import com.google.accompanist.permissions.shouldShowRationale
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
 actual fun checkPermission(granted : () -> Unit, showRational : () -> Unit) {
-    val externalPermission =
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) Manifest.permission.READ_MEDIA_IMAGES else Manifest.permission.READ_EXTERNAL_STORAGE
-
 
     val permissions = listOf<String>(
         android.Manifest.permission.RECEIVE_SMS,
         android.Manifest.permission.CAMERA,
         android.Manifest.permission.ACCESS_COARSE_LOCATION,
         android.Manifest.permission.ACCESS_FINE_LOCATION,
-        externalPermission
+        android.Manifest.permission.SEND_SMS
     )
     val allPermissionState = rememberMultiplePermissionsState(permissions)
 

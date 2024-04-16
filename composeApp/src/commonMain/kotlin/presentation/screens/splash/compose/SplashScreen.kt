@@ -84,7 +84,7 @@ class SplashScreen() : Screen, KoinComponent {
 
         BaseScreen(
             viewModel = viewModel,
-            title = "stringResource(title)",
+            title = "notStartService",
             scaffoldState = scaffoldState,
             content = {
                 Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
@@ -147,12 +147,10 @@ class SplashScreen() : Screen, KoinComponent {
 
                         scope.launch {
                             delay(1000)
-                            if(state != ViewStates.NoGps) {
-                                if (getSharedPref().getString(Token).toString().length > 6)
-                                    navigator.push(mainScreen)
-                                else
-                                    navigator.push(loginScreen)
-                            }
+                            if (getSharedPref().getString(Token).toString().length > 6)
+                                navigator.push(mainScreen)
+                            else
+                                navigator.push(loginScreen)
                         }
                     }
 

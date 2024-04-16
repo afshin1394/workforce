@@ -88,16 +88,18 @@ class VerifyScreen(private val phoneNumber: String = "") : Screen {
                                 ViewStates.Loading -> {
                                 }
 
-                                ViewStates.Success -> {
-                                    viewModel.disableSMSListener()
-                                    navigator.popUntil { it == SplashScreen() }
-                                    navigator.push(mainScreen)
-                                }
+
 
                                 ViewStates.Default -> {
                                 }
-                                ViewStates.NoGps -> {
 
+                                ViewStates.Reload -> {
+
+                                }
+                                is ViewStates.Success -> {
+                                    viewModel.disableSMSListener()
+                                    navigator.popUntil { it == SplashScreen() }
+                                    navigator.push(mainScreen)
                                 }
                             }
 

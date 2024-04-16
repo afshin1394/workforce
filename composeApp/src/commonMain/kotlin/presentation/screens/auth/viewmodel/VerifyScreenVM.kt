@@ -1,33 +1,35 @@
 package presentation.screens.auth.viewmodel
 
 
-import androidx.compose.runtime.asIntState
-import androidx.compose.runtime.mutableStateOf
-import dev.icerock.moko.resources.StringResource
-import dev.icerock.moko.resources.compose.stringResource
+
 import domain.usecase.usecase.auth.ResendUseCase
 import domain.usecase.usecase.auth.VerifyUseCase
 import domain.usecase.usecase.profile.StoreProfileUseCase
 import io.github.aakira.napier.LogLevel
 import io.github.aakira.napier.Napier
+import irancell.nwg.wfm.BackgroundServiceApp
 import irancell.nwg.wfm.CountdownTimer
 import irancell.nwg.wfm.MR
 import irancell.nwg.wfm.SMSListener
 import irancell.nwg.wfm.TimerListener
+import irancell.nwg.wfm.getSharedPref
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import utils.AsyncStatus
 import utils.BaseViewModel
+import utils.Token
 import utils.ViewStates
+import utils.isRunningGPS
 
 class VerifyScreenVM(
    private val verifyUseCase: VerifyUseCase,
    private val resendUseCase: ResendUseCase,
    private val storeProfileUseCase: StoreProfileUseCase
 ) : BaseViewModel() {
-    private val _remainTime = MutableStateFlow(10)
+    private val _remainTime = MutableStateFlow(59)
     var remainTime = _remainTime.asStateFlow()
 
     private val _finishTimer = MutableStateFlow(false)
@@ -56,6 +58,10 @@ class VerifyScreenVM(
       countdownTimer.start()
       SMSListener.enableSMSListener({
             otpCode.value = it
+          Napier.log(LogLevel.ASSERT,tag="otpCodess",message= otpCode.value)
+          if (otpCode.value.length == 6) {
+              verify(otpCode.value)
+          }
       },{
             updateState(ViewStates.Error(MR.strings.form))
       })
@@ -71,19 +77,23 @@ class VerifyScreenVM(
         viewModelScope.launch {
 
             verifyUseCase(otpCode).collect{
+                val authToken = it.data ?:""
+                Napier.log(LogLevel.ASSERT, tag = "gettoken", message = authToken)
+
                 when(it.status){
                     AsyncStatus.ERROR -> {
                         handleError(it.resultStatus)
-                        Napier.log(LogLevel.ASSERT, tag = "serviice", message = "ERROR")
+                        Napier.log(LogLevel.ASSERT, tag = "gettoken", message = "ERROR"+it.message)
                     }
                     AsyncStatus.LOADING -> {
                         updateState(ViewStates.Loading)
-                        Napier.log(LogLevel.ASSERT, tag = "serviice", message = "LOADING")
+                        Napier.log(LogLevel.ASSERT, tag = "gettoken", message = "LOADING")
                     }
                     AsyncStatus.SUCCESS -> {
-//                        updateState(ViewStates.Success)
-//                        countdownTimer.stop()
+                        getSharedPref().put(Token, authToken)
                         getProfile()
+
+
                     }
                 }
             }
@@ -105,9 +115,9 @@ class VerifyScreenVM(
 
                     }
                     AsyncStatus.SUCCESS -> {
-                        updateState(ViewStates.Success)
+                        updateState(ViewStates.Success())
                         countdownTimer.stop()
-                        Napier.log(LogLevel.ASSERT, tag = "getProfile", message = "SUCCESS${it.data}")
+                        Napier.log(LogLevel.ASSERT, tag = "serviice", message = "SUCCESS${it.data}")
 
                     }
                 }
@@ -133,7 +143,7 @@ class VerifyScreenVM(
                     }
                     AsyncStatus.SUCCESS -> {
                         _finishTimer.update { false }
-                        _remainTime.update { 10 }
+                        _remainTime.update { 59 }
                         countdownTimer.start()
                         Napier.log(LogLevel.ASSERT, tag = "serviice", message = "SUCCESS${it.data}")
                     }
