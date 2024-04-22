@@ -13,6 +13,7 @@ androidx-espresso-core = "3.5.1"
 androidx-material = "1.10.0"
 androidx-test-junit = "1.1.5"
 calfUi = "0.3.1"
+coilCompose = "2.6.0"
 compose = "1.5.4"
 compose-compiler = "1.5.6"
 compose-plugin = "1.5.11"
@@ -46,7 +47,7 @@ ktor = "2.3.7"
 sentry-android = "7.2.0"
 google-map = "4.3.1"
 kotlin1920-RC2 = "1.9.20-RC2"
-composeImageLoader = "1.7.1"
+composeImageLoader = "1.7.8"
 kotlinx-serialization = "1.6.2"
 connectivity_status= "1.2.0"
 orbital = "0.3.4"
@@ -55,6 +56,8 @@ accompanist = "0.32.0"
 
 
 [libraries]
+coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coilCompose" }
+
 android-database-sqlcipher = { module = "net.zetetic:android-database-sqlcipher", version.ref = "androidDatabaseSqlcipher" }
 android-maps-utils = { module = "com.google.maps.android:android-maps-utils", version.ref = "androidMapsUtils" }
 calf-ui = { module = "com.mohamedrejeb.calf:calf-ui", version.ref = "calfUi" }

@@ -126,3 +126,5 @@ val mediumDivider = gray_3
 
 val errorIcon = error_5
 
+val iconPrimary= gray_7
+

@@ -13,10 +13,10 @@ actual fun mapView(generalLocations : List<GeneralLocationEntity>){
    val context = LocalContext.current
 
 
-    val intent = Intent(context,MapActivity::class.java)
-
-
-    context.startActivity(intent)
+//    val intent = Intent(context,MapActivity::class.java)
+//
+//
+//    context.startActivity(intent)
 
 
 //    val mapbox = MapboxMap(

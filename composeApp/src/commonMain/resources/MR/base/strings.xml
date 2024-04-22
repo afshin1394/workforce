@@ -102,19 +102,14 @@
 
     <string name="open_cr">Open CR</string>
     <string name="close_cr">Close CR</string>
-    <string name="start_cr">Start CR</string>
-    <string name="finish_cr">Finish CR</string>
-    <string name="close_cr_question">Are you sure you want to close this CR?</string>
-    <string name="open_cr_question">Are you sure you want to open this CR?</string>
-    <string name="start_cr_question">Are you sure you want to start this CR?</string>
-    <string name="finish_cr_question">Are you sure you want to finish this CR?</string>
+    <string name="sure_delete_photo">Are you sure want to delete this photo?</string>
+    <string name="delete">Delete</string>
+    <string name="discard">Discard</string>
+    <string name="sure_discard_change">Are you sure want to discard change?</string>
+    <string name="exit">Exit</string>
+    <string name="sure_exit_app">Are you sure exit the app?</string>
 
-    <string name="success_open_cr_action">opening CR successfully done</string>
-    <string name="success_close_cr_action">closing CR successfully done</string>
-    <string name="success_start_cr_action">starting CR successfully done</string>
-    <string name="success_finish_cr_action">finishing CR successfully done</string>
 
-    <string name="value_not_selected">No Selected Item</string>
 
     //screens
     <string name="cr_management">CR Management</string>
@@ -133,6 +128,10 @@
     <string name="offline_mode">Offline Mode</string>
 
     <string name="describe_the_reason">describe the reason</string>
+    <string name="photo_preview">PhotoPreview</string>
+    <string name="delete_photo">DeletePhoto</string>
+    <string name="edit_photo">EditPhoto</string>
+    <string name="save_change">SaveChange</string>
 
 
 </resources>

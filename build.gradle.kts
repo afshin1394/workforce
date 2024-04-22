@@ -17,6 +17,5 @@ buildscript {
 
     dependencies {
         classpath(libs.moko.classpath)
-
     }
 }

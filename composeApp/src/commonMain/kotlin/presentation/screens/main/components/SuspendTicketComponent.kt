@@ -42,7 +42,8 @@ fun SuspendTicketContentComponent(
     taskid: String,
     onSelectReason: () -> Unit = {},
     onDescription: (text: String) -> Unit = { s: String -> },
-    onCameraClick: () -> Unit = {}
+    onCameraClick: () -> Unit = {},
+    onImageClick: (index: Int) -> Unit
 ) {
 
     Column(
@@ -53,6 +54,8 @@ fun SuspendTicketContentComponent(
                 rememberScrollState()
             )
     ) {
+
+
         val taskTitle = suspendTaskDomain?.taskId ?: taskid
         Text(
             text = "${stringResource(MR.strings.why_canceled_ticket)}${taskTitle}",
@@ -84,8 +87,9 @@ fun SuspendTicketContentComponent(
         ImageRowComponent(suspendTaskDomain?.attachmentsUri?.split(","), onCameraClick = {
             onCameraClick()
         }) {
-
+            onImageClick(it)
         }
+
     }
 }
 

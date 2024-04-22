@@ -96,20 +96,7 @@
 
     <string name="open_cr">بازکردن CR</string>
     <string name="close_cr">بستن CR</string>
-    <string name="start_cr">شروع CR</string>
-    <string name="finish_cr">پایان CR</string>
 
-    <string name="close_cr_question">آیا از بستن CR مطمئن هستید؟</string>
-    <string name="open_cr_question">آیا از باز کردن CR مطمئن هستید؟</string>
-    <string name="start_cr_question">آیا از شروع CR مطمئن هستید؟</string>
-    <string name="finish_cr_question">آیا از پایان CR مطمئن هستید؟</string>
-
-    <string name="success_open_cr_action">عملیات باز کردن CR با موفقیت انجام شد</string>
-    <string name="success_close_cr_action">عملیات بستن CR با موفقیت انجام شد</string>
-    <string name="success_start_cr_action">عملیات شروع CR با موفقیت انجام شد</string>
-    <string name="success_finish_cr_action">عملیات پایان CR با موفقیت انجام شد</string>
-
-    <string name="value_not_selected">موردی انتخاب نشده است</string>
 
     //screens
     <string name="cr_management"> مدیریت CR</string>
@@ -125,9 +112,16 @@
 
     <string name="describe_the_reason">علت را توضیح دهید</string>
 
-    <string name="error_receive_sms">خطا در دریافت پیامک تایید</string>
+
+    <string name="sure_delete_photo">آیا این تصویرحذف گردد؟ </string>
+    <string name="delete">حذف</string>
+    <string name="discard">حذف تغییرات</string>
+    <string name="sure_discard_change">آیا می خواهید تغییرات را حذف کنید؟</string>
     <string name="exit">خروج</string>
     <string name="sure_exit_app">آیا می خواهید از برنامه خارج شوید؟</string>
-    <string name="offline_mode">حالت آفلاین</string>
+    <string name="photo_preview">پیش نمایش عکس</string>
+    <string name="delete_photo">پاک کردن عکس</string>
+    <string name="edit_photo"> ویرایش عکس</string>
+    <string name="save_change">ذخیره تغییرات</string>
 
 </resources>

@@ -48,7 +48,9 @@ fun <T : BaseViewModel> BaseScreen(
     bottomSheetContent: @Composable (bottomSheetState: BottomSheetState) -> Unit = {},
     bottomBarBottomSheetContent: @Composable (bottomSheetState: BottomSheetState) -> Unit = {},
     onCloseBottomSheet: () -> Unit = {},
-    onBackPressed: () -> Unit={}
+    onBackPressed: () -> Unit={} ,
+    hasSwipeDrawer:Boolean=true,
+
 
 ) {
 
@@ -67,6 +69,9 @@ fun <T : BaseViewModel> BaseScreen(
         if (hasDrawer) {
             BottomSheetScaffold(modifier = Modifier.background(color = backgroundBackground3),
                 scaffoldState = scaffoldState,
+               drawerGesturesEnabled=hasSwipeDrawer,
+
+
                 topBar = {
                     topBar()
                 },

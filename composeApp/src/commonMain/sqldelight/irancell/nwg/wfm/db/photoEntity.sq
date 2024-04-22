@@ -1,0 +1,38 @@
+CREATE TABLE PhotoEntity (
+pk INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+component_key INTEGER NOT NULL,
+index_row INTEGER NOT NULL,
+origin_uri TEXT NOT NULL,
+edited_uri TEXT NOT NULL,
+angle TEXT NOT NULL
+);
+
+insert:
+INSERT OR REPLACE INTO PhotoEntity (component_key,index_row,origin_uri,edited_uri,angle)
+VALUES (?,?,?,?,?);
+
+
+deletePhoto:
+DELETE FROM  PhotoEntity WHERE origin_uri=:origin_uri;
+
+
+deleteByComponentKey:
+DELETE FROM PhotoEntity WHERE component_key = :component_key ;
+
+
+selectByComponentKey:
+SELECT * FROM PhotoEntity WHERE component_key=:component_key;
+
+
+updateAngle:
+UPDATE  PhotoEntity
+SET angle = :angle
+WHERE origin_uri = :origin_uri ;
+
+updateEditUri:
+UPDATE PhotoEntity
+SET edited_uri=:edited_uri
+WHERE origin_uri=:origin_uri;
+
+
+

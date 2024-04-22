@@ -12,8 +12,13 @@ sealed interface MainEvent : Event {
    data object CancelTicket : MainEvent
    data object CancelReason : MainEvent
    data object AcceptTicket : MainEvent
-
    data object Exit : MainEvent
+   data object PhotoPreview:MainEvent
+   data object DeletePhoto:MainEvent
+   data object EditPhoto:MainEvent
+   data object DiscardSuspendTicket:MainEvent
+
+
 
 
 }

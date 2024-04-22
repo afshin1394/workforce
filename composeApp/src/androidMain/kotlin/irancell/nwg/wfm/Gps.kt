@@ -30,6 +30,7 @@ import com.google.android.gms.tasks.Task
 import dev.icerock.moko.resources.compose.stringResource
 import io.github.aakira.napier.LogLevel
 import io.github.aakira.napier.Napier
+import presentation.components.CustomDialog
 import presentation.theme.surfaceBrandDefault
 
 actual class GPS {
@@ -64,36 +65,17 @@ actual class GPS {
         actual fun enableGpsDialog(context: Any) {
 
             Napier.log(LogLevel.ASSERT,"GPSPermission", message = "enableGPS")
-            Box(modifier = Modifier.border(BorderStroke(1.dp, color = Color.Black))) {
-                AlertDialog(
-                    onDismissRequest = { false },
-                    title = { Text(text = stringResource(MR.strings.GPS_Permission)) },
-                    text = { Text(text = stringResource(MR.strings.disc_gps_permission)) },
-                    confirmButton = {
-                        Button(
-                            colors = ButtonDefaults.buttonColors(
-                                backgroundColor = surfaceBrandDefault,
-                                contentColor = Color.White
-                            ),
-                            onClick = {
-                                val intent = Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
-                                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                                (context as Context).startActivity(intent)
-                            }
-                        ) {
-                            Text(text = stringResource(MR.strings.enable))
-                        }
-                    },
-                )
-            }
+
+            CustomDialog(true, message =  MR.strings.disc_gps_permission, title = MR.strings.GPS_Permission,
+                onConfirm = {
+                    val intent = Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    (context as Context).startActivity(intent)
+
+                }, onDismiss = {}, titleButton = MR.strings.enable)
+
         }
-
-
-
     }
-
-
-
 
 
 }

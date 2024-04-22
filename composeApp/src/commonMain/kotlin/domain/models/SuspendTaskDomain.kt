@@ -1,13 +1,16 @@
 package domain.models
 
-data class SuspendTaskDomain(val taskId: Long,
+import kotlinx.serialization.Serializable
+
+@Serializable
+data class SuspendTaskDomain(var taskId: Long,
                              var reason: String,
                              var description: String,
-                             val attachmentsUri: String,
-                             val isSent: Long,
-                             val datetime: String,
-                             val latitude: String,
-                             val longitude: String,)
+                             var attachmentsUri: String,
+                             var isSent: Long,
+                             var datetime: String,
+                             var latitude: String,
+                             var longitude: String,)
 
 
 

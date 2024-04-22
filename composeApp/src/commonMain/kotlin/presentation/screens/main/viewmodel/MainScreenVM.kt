@@ -4,11 +4,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
-import arrow.core.valid
 
 import com.irancell.nwg.wfm.presentation.components.FilterSectionItem
 import presentation.model.FilterType
 import com.irancell.nwg.wfm.presentation.model.SelectableItem
+import domain.models.PhotoDomain
 import presentation.model.StateFilter
 import presentation.screens.main.events.MainEvent
 import domain.models.SuspendTaskDomain
@@ -16,6 +16,9 @@ import domain.models.TaskDomain
 import domain.usecase.usecase.availability.ChangeServerAvailabilityUseCase
 import domain.usecase.usecase.availability.GetAvailabilityUseCase
 import domain.usecase.usecase.availability.StoreAvailabilityUseCase
+import domain.usecase.usecase.photo.DeleteByComponentKeyUseCase
+import domain.usecase.usecase.photo.GetPhotoByComponentKeyUseCase
+import domain.usecase.usecase.photo.InsertPhotoUseCase
 import domain.usecase.usecase.profile.GetProfileUseCase
 import domain.usecase.usecase.suspendTask.DeleteByTaskIdUseCase
 import domain.usecase.usecase.suspendTask.GetSuspendTaskByIdUseCase
@@ -25,6 +28,7 @@ import io.github.aakira.napier.LogLevel
 import io.github.aakira.napier.Napier
 import irancell.nwg.wfm.BackgroundServiceApp
 import irancell.nwg.wfm.Location
+import irancell.nwg.wfm.MR
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -46,7 +50,10 @@ class MainScreenVM(
     private val storeSuspendTaskUseCase: StoreSuspendTaskUseCase,
     private val getSuspendTaskByIdUseCase: GetSuspendTaskByIdUseCase,
     private val getProfileUseCase: GetProfileUseCase,
-    private val deleteByTaskIdUseCase: DeleteByTaskIdUseCase
+    private val deleteByTaskIdUseCase: DeleteByTaskIdUseCase,
+    private val insertPhotoUseCase: InsertPhotoUseCase,
+    private val getPhotoByComponentKeyUseCase: GetPhotoByComponentKeyUseCase,
+    private val deleteByComponentKeyUseCase: DeleteByComponentKeyUseCase
 ) : BaseViewModel() {
     private val _availability = MutableStateFlow(false)
     val availability = _availability.asStateFlow()
@@ -60,14 +67,37 @@ class MainScreenVM(
 
 
 
-    init {
 
+    private val _positionSelected = MutableStateFlow(0)
+    val positionSelected = _positionSelected.asStateFlow()
+
+
+    var selectedTask: MutableState<TaskDomain?> = mutableStateOf(null)
+
+    var events = mutableStateOf<MainEvent>(MainEvent.Default)
+
+
+    var enableSuspendSubmit = mutableStateOf(false)
+    var enableCancelSubmit = mutableStateOf(false)
+
+    var suspendReason = mutableStateOf("")
+    var cancelReason = mutableStateOf("")
+
+
+    var suspendDescription = mutableStateOf("")
+    var cancelDescription = mutableStateOf("")
+
+    init {
         getCurrentAvailability()
         getTasks()
         getProfileName()
 
     }
 
+
+    fun updatePositionSelected(position:Int){
+        _positionSelected.update { position }
+    }
     private fun getProfileName() {
         viewModelScope.launch {
             getProfileUseCase(Unit)
@@ -96,6 +126,8 @@ class MainScreenVM(
 
 
     private fun getCurrentAvailability() {
+        Napier.log(LogLevel.ASSERT, "getCurrentAvailability", message = "sdasddad")
+
         viewModelScope.launch(Dispatchers.Main) {
             getAvailabilityUseCase(
                 Unit
@@ -184,110 +216,7 @@ class MainScreenVM(
     }
 
 
-//    private val initialTasks = arrayListOf(
-//        TaskDomain(
-//            1235,
-//        ),
-//        TaskDomain(
-//            1236,
-//            "Huawei External Alarm, T5713, Bater ... Huawei External Alarm, T5713, Bater ...",
-//            "HSE pre-check",
-//            "Level 3",
-//            "CR",
-//            "Tehran, Amanieh, Zarin stre...",
-//            "0h 43m",
-//            "Done",
-//            3
-//        ),
-//        TaskDomain(
-//            1237,
-//
-//            "Huawei External Alarm, T5722, Bater ... Huawei External Alarm, T5722, Bater ...",
-//            "HSE pre-check",
-//            "Level 3",
-//            "TT",
-//            "Tehran, Nelson mandela, Zarin stre...",
-//            "2h 43m",
-//            "Pending",
-//            1
-//        ),
-//        TaskDomain(
-//            1238,
-//
-//            "Huawei External Alarm, T5742, Bater ... Huawei External Alarm, T5742, Bater ...",
-//            "HSE pre-check",
-//            "Level 2",
-//            "TT",
-//            "Tehran, Zafar, Zarin stre...",
-//            "4h 43m",
-//            "Done",
-//            3
-//        ), TaskDomain(
-//            1239,
-//
-//            "Huawei External Alarm, T5744, Bater ... Huawei External Alarm, T5744, Bater ...",
-//            "Departed",
-//            "Level 2",
-//            "CR",
-//            "Tehran, Takhti, Zarin stre...",
-//            "1h 43m",
-//            "Suspended",
-//            4
-//        ), TaskDomain(
-//            1339,
-//
-//            "Huawei External Alarm, T5754, Bater ... Huawei External Alarm, T5754, Bater ...",
-//            "Departed",
-//            "Level 1",
-//            "PT",
-//            "Tehran, Takhti, Zarin stre...",
-//            "1h 43m",
-//            "Completed",
-//            5
-//
-//        ), TaskDomain(
-//            1439,
-//
-//            "Huawei External Alarm, T5754, Bater ... Huawei External Alarm, T5754, Bater ...",
-//            "Departed",
-//            "Level 1",
-//            "TT",
-//            "Tehran, Mirdamad, Zarin stre...",
-//            "4h 43m",
-//            "Doing",
-//            2
-//
-//        ), TaskDomain(
-//            1429,
-//
-//            "Huawei External Alarm, T3754, Bater ... Huawei External Alarm, T3754, Bater ...",
-//            "Departed",
-//            "Level 1",
-//            "CR",
-//            "Tehran, Ghoba, Zarin stre...",
-//            "2h 44m",
-//            "Pending",
-//            1
-//
-//
-//        )
-//    )
 
-
-    var selectedTask: MutableState<TaskDomain?> = mutableStateOf(null)
-
-    var events = mutableStateOf<MainEvent>(MainEvent.Default)
-
-
-    var enableSuspendSubmit = mutableStateOf(false)
-    var enableCancelSubmit = mutableStateOf(false)
-
-    var suspendReason = mutableStateOf("")
-    var cancelReason = mutableStateOf("")
-
-
-    var suspendDescription = mutableStateOf("")
-    var cancelDescription = mutableStateOf("")
 
 
     val suspendItems = mutableStateListOf(
@@ -386,13 +315,7 @@ class MainScreenVM(
         for (key in filterMaps) {
             when (key.type) {
                 FilterType.CURRENT_STEP -> {
-//
-//                    val ix = tasksList.filter {
-//                        it.step.trim() == key.filter.title.trim()
-//                    }
-//                    tasksList.clear()
-//                    tasksList.addAll(ix)
-//                    filteredList.addAll(ix)
+
 
                 }
 
@@ -401,10 +324,6 @@ class MainScreenVM(
                 }
 
                 FilterType.SEVERITY_LEVEL -> {
-//                    val ix = tasksList.filter { it.faultLevel.trim() == key.filter.title.trim() }
-//                    tasksList.clear()
-//                    tasksList.addAll(ix)
-//                    filteredList.addAll(ix)
 
                 }
 
@@ -443,13 +362,6 @@ class MainScreenVM(
     fun openCamera() {
         viewModelScope.launch {
             _openCamera.update { true }
-
-//            val cameraPermission = Permission.CAMERA
-//            val isGranted = permissionsController.isPermissionGranted(cameraPermission)
-//            if (isGranted) {
-//            } else {
-//                permissionsController.providePermission(cameraPermission)
-//            }
         }
     }
 
@@ -532,7 +444,7 @@ class MainScreenVM(
 
                         AsyncStatus.LOADING -> {
                             Napier.log(LogLevel.ASSERT, "getAllWorksUseCase", message = "LOADING: ")
-                            updateState(ViewStates.Loading)
+//                            updateState(ViewStates.Loading)
 
                         }
 
@@ -541,6 +453,7 @@ class MainScreenVM(
                             val suspendTask = it.data
                             suspendTask?.let {
                                 suspendTaskDomain.value = it
+                                getPhotoByComponentKey()
                             }
                         }
                     }
@@ -572,8 +485,11 @@ class MainScreenVM(
                         }
 
                         AsyncStatus.SUCCESS -> {
-//                            updateState(ViewStates.Success)
+
                             storeSuspendTask()
+                            saveAndDeletePhotoByComponentKey()
+
+
                         }
 
                     }
@@ -656,7 +572,14 @@ class MainScreenVM(
             )
 
 
+
+        updatePhotoDomain(imgUri)
+
+
     }
+
+
+
 
     fun resetSuspendTask() {
         suspendTaskDomain.value = SuspendTaskDomain(
@@ -670,4 +593,191 @@ class MainScreenVM(
             Location.getLastLocation().longitude
         )
     }
-}
+
+
+
+
+
+/////////////////////////////photo//////////////////////////////////////////////////////////
+
+
+
+
+    private val photoDomain = MutableStateFlow<PhotoDomain>(
+        PhotoDomain(
+            selectedTask.value?.workId ?: 0,
+            0,
+            "",
+            "",
+            "0"
+        )
+    )
+    var photoDomainList = mutableStateListOf<PhotoDomain>()
+
+
+
+
+
+    private fun getPhotoByComponentKey() {
+
+        viewModelScope.launch {
+
+            getPhotoByComponentKeyUseCase(selectedTask.value?.workId ?: 0).collect {
+                when (it.status) {
+                    AsyncStatus.ERROR -> {
+                        handleError(it.resultStatus)
+                    }
+
+                    AsyncStatus.LOADING -> {
+                        Napier.log(LogLevel.ASSERT, "getAllPhotoUseCase", message = "LOADING: ")
+                        updateState(ViewStates.Loading)
+
+                    }
+
+                    AsyncStatus.SUCCESS -> {
+                        photoDomainList.clear()
+                        updateState(ViewStates.Success())
+
+
+                        it.data?.let { it1 ->
+                            for (i in it1.indices) {
+                                photoDomain.value =
+                                    PhotoDomain(
+                                        selectedTask.value?.workId ?: 0,
+                                        i.toLong(),
+                                        it1[i].origin_uri,
+                                        it1[i].edited_uri,
+                                        it1[i].angle
+                                    )
+
+                                photoDomainList.add(photoDomain.value)
+                            }
+                        }
+
+
+                    }
+
+                }
+            }
+        }
+
+
+    }
+
+    private fun updatePhotoDomain(imgUri: String) {
+
+            photoDomain.value =
+                PhotoDomain(
+                    selectedTask.value?.workId ?: 0,
+                    0,
+                    imgUri,
+                    "",
+                    "0"
+                )
+            photoDomainList.add(photoDomain.value)
+
+    }
+
+    private fun insertNewPhoto() {
+
+        viewModelScope.launch {
+
+            for (i in photoDomainList.indices) {
+                insertPhotoUseCase(
+                    PhotoDomain(
+                        selectedTask.value?.workId ?: 0,
+                        photoDomainList[i].index_row,
+                        photoDomainList[i].origin_uri,
+                        photoDomainList[i].edited_uri,
+                        photoDomainList[i].angle
+                    )
+
+                ).collect {
+                    when (it.status) {
+                        AsyncStatus.ERROR -> {
+                            handleError(it.resultStatus)
+
+                        }
+
+                        AsyncStatus.LOADING -> {
+                            updateState(ViewStates.Loading)
+
+                        }
+
+                        AsyncStatus.SUCCESS -> {
+                            updateState(ViewStates.Success())
+
+
+                        }
+
+                    }
+                }
+
+            }
+
+
+        }
+
+    }
+
+
+    fun updateSuspendTicketImageUriForDeletePhoto(imgUri: String, po: Int) {
+
+        val attachmentUriList: List<String> = suspendTaskDomain.value.attachmentsUri.split(",")
+        val updatedList = attachmentUriList.filter { it != imgUri }
+        val updatedListAsString = updatedList.joinToString(",")
+
+        suspendTaskDomain.value =
+            SuspendTaskDomain(
+                suspendTaskDomain.value.taskId,
+                suspendTaskDomain.value.reason,
+                suspendTaskDomain.value.description,
+                updatedListAsString,
+                0,
+                suspendTaskDomain.value.datetime,
+                suspendTaskDomain.value.latitude,
+                suspendTaskDomain.value.longitude
+            )
+        photoDomainList.removeAt(po)
+        events.value = MainEvent.SuspendTicket
+
+//        if (photoDomainList.size == 0) {
+//            events.value = MainEvent.SuspendTicket
+//        } else {
+//            events.value = MainEvent.PhotoPreview
+//
+//        }
+    }
+
+    private fun saveAndDeletePhotoByComponentKey(){
+        viewModelScope.launch {
+            selectedTask.value?.workId?.let {
+                deleteByComponentKeyUseCase(it).collect {
+                    when (it.status) {
+                        AsyncStatus.ERROR -> {
+                            handleError(it.resultStatus)
+                            Location.stop()
+
+                        }
+
+                        AsyncStatus.LOADING -> {
+                            Napier.log(LogLevel.ASSERT, "saveSuspendTask", message = "LOADING: ")
+                            updateState(ViewStates.Loading)
+
+                        }
+
+                        AsyncStatus.SUCCESS -> {
+                            updateState(ViewStates.Success())
+                            insertNewPhoto()
+                        }
+
+                    }
+                }
+            }
+
+
+        }
+
+    }
+
+    }

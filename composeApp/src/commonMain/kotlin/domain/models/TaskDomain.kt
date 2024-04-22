@@ -1,5 +1,8 @@
 package domain.models
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class TaskDomain(
     val workId: Long,
     val instanceId: Long,

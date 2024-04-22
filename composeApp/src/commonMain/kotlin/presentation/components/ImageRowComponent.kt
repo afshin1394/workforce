@@ -30,7 +30,6 @@ fun ImageRowComponent(
                     LazyRow() {
                         items(itemsList.size) { index ->
                             val item = itemsList[index]
-
                             ImageBoxComponent(item) {
                                 onImageClick(index)
                             }

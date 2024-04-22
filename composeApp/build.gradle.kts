@@ -100,15 +100,6 @@ kotlin {
                 implementation(libs.accompanist.permission)
                 implementation (libs.android.database.sqlcipher)
 
-
-
-//mapbox
-//implementation("com.mapbox.maps:android:11.1.0")
-//// If you're using compose also add the compose extension
-// implementation("com.mapbox.extension:maps-compose:11.1.0")
-
-
-//osmdroid
                 implementation("org.osmdroid:osmdroid-android:6.1.6")
 
             }
