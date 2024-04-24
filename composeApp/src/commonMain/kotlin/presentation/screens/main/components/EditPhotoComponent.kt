@@ -5,10 +5,13 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
@@ -30,6 +33,7 @@ import irancell.nwg.wfm.ImageBitmapToBitmap
 import irancell.nwg.wfm.ParseUri
 import irancell.nwg.wfm.SaveBitmapToFile
 import irancell.nwg.wfm.UriToImageBitmap
+import irancell.nwg.wfm.getDpi
 import presentation.screens.main.components.formViewer.draw.BrushModal
 import presentation.screens.main.components.formViewer.draw.ColorModal
 import presentation.screens.main.components.formViewer.draw.ControlsBarEditPhoto
@@ -46,9 +50,8 @@ import presentation.theme.surfaceDefault
 fun EditPhotoComponent(
     angle: Float,
     originUriPhotoSelected: String,
-    onEditUri: (newUri: String,originUri:String) -> Unit
+    onEditUri: (newUri: String, originUri: String) -> Unit
 ) {
-
 
 
     val bitmapNew = UriToImageBitmap(ParseUri(originUriPhotoSelected), angle)
@@ -58,7 +61,7 @@ fun EditPhotoComponent(
     val redoVisibility = remember { mutableStateOf(false) }
     val colorBarVisibility = remember { mutableStateOf(false) }
     val sizeBarVisibility = remember { mutableStateOf(false) }
-    val currentColor = remember { mutableStateOf(defaultSelectedColor) }
+    val currentColor = remember { mutableStateOf(DrawController.getColor()) }
     val bg = androidx.compose.material.MaterialTheme.colors.background
     val currentBgColor = remember { mutableStateOf(bg) }
     val currentSize = remember { mutableStateOf(10) }
@@ -88,29 +91,30 @@ fun EditPhotoComponent(
         95
     )
     val sizBrush: List<Int> = sizeBrushArray
+    bitmapNew as ImageBitmap
+    val widthImage = bitmapNew.width/ getDpi()
+    val heightImage = bitmapNew.height / getDpi()
 
-
-//            Napier.log(LogLevel.ASSERT,"height",bitmapNew.height.)
+    Napier.log(LogLevel.ASSERT,tag = "andazee", message = widthImage.toString())
+    Napier.log(LogLevel.ASSERT,tag = "andazee", message = heightImage.toString())
     Column(
         modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
 
         CreateDrawBox(
-            imageBitmap = (bitmapNew as ImageBitmap),
+            imageBitmap = bitmapNew as ImageBitmap,
 
 
             backgroundColor = currentBgColor.value,
             modifier = Modifier.padding(
-                bottom = 24.dp,
-                start = 12.dp,
-                end = 12.dp,
-                top = 24.dp
+                bottom = 2.dp,
+                end = 2.dp,
+                start = 2.dp,
             )
-
+                .weight(.8f)
                 .clipToBounds()
-                .fillMaxWidth()
-                .height(370.dp),
+                .fillMaxWidth(),
             bitmapCallback = { imageBitmap, error ->
                 imageBitmap?.let { image ->
 
@@ -134,84 +138,74 @@ fun EditPhotoComponent(
         }
 
 
-                Spacer(modifier = Modifier.weight(1f))
         if (savedImageUriCheck.value) {
 
             onEditUri(savedImageUri.value, originUriPhotoSelected)
             DrawController.reset()
-
-
         }
 
-        if (drawBottomMenu.value) {
-            ControlsBarEditPhoto(
+        Column(Modifier) {
+            if (drawBottomMenu.value) {
+                ControlsBarEditPhoto(
+                    onSaveClick = {
+                        DrawController.saveBitmap()
+                    },
+                    onColorClick =
+                    {
+                        colorBarVisibility.value =
+                            when (colorBarVisibility.value) {
+                                false -> true
+                                colorIsBg.value -> true
+                                else -> false
+                            }
+                        colorIsBg.value = false
+                        sizeBarVisibility.value = false
+                        drawBottomMenu.value = false
+                    }, onSizeClick = {
+                        sizeBarVisibility.value =
+                            !sizeBarVisibility.value
+                        colorBarVisibility.value = false
+                        drawBottomMenu.value = false
+                    },
+                    undoVisibility = undoVisibility,
+                    colorValue = currentColor,
+                    sizeValue = currentSize
+                )
+            }
+            ColorModal(
+                isVisible = colorBarVisibility.value,
+                showShades = true,
+                colors = colors,
+                defaultColor = defaultSelectedColor,
 
-                onSaveClick = {
-
-                    DrawController.saveBitmap()
-
-
-                },
-                onColorClick =
-                {
-                    colorBarVisibility.value =
-                        when (colorBarVisibility.value) {
-                            false -> true
-                            colorIsBg.value -> true
-                            else -> false
-                        }
-                    colorIsBg.value = false
-                    sizeBarVisibility.value = false
-                    drawBottomMenu.value = false
-                }, onSizeClick = {
-                    sizeBarVisibility.value =
-                        !sizeBarVisibility.value
+                clickedColor = {
+                    if (colorIsBg.value) {
+                        currentBgColor.value = it
+                        DrawController.changeBgColor(it)
+                    } else {
+                        currentColor.value = it
+                        DrawController.changeColor(it)
+                    }
+                    drawBottomMenu.value = true
                     colorBarVisibility.value = false
-                    drawBottomMenu.value = false
-                },
-                undoVisibility = undoVisibility,
-                colorValue = currentColor,
-                sizeValue = currentSize
+                }
             )
-        }
-        ColorModal(
-            isVisible = colorBarVisibility.value,
-            showShades = true,
-            colors = colors,
-            defaultColor = defaultSelectedColor,
+
+            BrushModal(
+                isVisible = sizeBarVisibility.value,
+                sizeBrush = sizBrush
 
             ) {
-            if (colorIsBg.value) {
-                currentBgColor.value = it
-                DrawController.changeBgColor(it)
-            } else {
-                currentColor.value = it
-                DrawController.changeColor(it)
+                currentSize.value = it
+                DrawController.changeStrokeWidth(it.toFloat())
+                sizeBarVisibility.value = false
+                drawBottomMenu.value = true
             }
-            drawBottomMenu.value = true
-            colorBarVisibility.value = false
-        }
-
-        BrushModal(
-            isVisible = sizeBarVisibility.value,
-            sizeBrush = sizBrush
-
-        ) {
-            currentSize.value = it
-            DrawController.changeStrokeWidth(it.toFloat())
-            sizeBarVisibility.value = false
-            drawBottomMenu.value = true
-        }
 //                Spacer(modifier = Modifier.weight(1f))
-
+        }
 
 
     }
-
-
-
-
-
 
 
 }

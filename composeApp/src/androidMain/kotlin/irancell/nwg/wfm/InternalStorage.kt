@@ -47,7 +47,7 @@ actual class InternalStorage {
         }
 
         actual fun initWFMImages(context: Any)  {
-            val ctx =context as Context
+            val ctx = context as Context
             createFolderFromPath(ctx,"/wfmImages/")
         }
         actual fun initSuspendImages(context: Any)  {
@@ -55,18 +55,16 @@ actual class InternalStorage {
             createFolderFromPath(ctx,"/wfmImages/","Suspend")
             createFolderFromPath(ctx,"/wfmImages/Suspend","Edited")
             createFolderFromPath(ctx,"/wfmImages/Suspend","Original")
-
         }
         actual fun initProcessImages(context: Any)  {
             val ctx =context as Context
             createFolderFromPath(ctx,"/wfmImages/","Process")
             createFolderFromPath(ctx,"/wfmImages/Process/","Edited")
             createFolderFromPath(ctx,"/wfmImages/Process/","Original")
-
         }
 
         actual fun createWorkItemImages(context: Any,pathName : String, name: String): Any {
-            val ctx =context as Context
+            val ctx = context as Context
             return createFolderFromPath(ctx,"/wfmImages/$pathName/",name)
         }
 

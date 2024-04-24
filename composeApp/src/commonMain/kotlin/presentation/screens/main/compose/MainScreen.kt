@@ -529,7 +529,6 @@ class MainScreen(
                             onImageClick = {
                                 indexPhotoSelected=it
                                 viewModel.events.value = MainEvent.PhotoPreview
-
                             }
                         )
 
@@ -569,7 +568,7 @@ class MainScreen(
 
                         EditPhotoComponent(
                             angle =0.0F,
-                            originUriPhotoSelected =viewModel.photoDomainList[positionSelectedPhotoForEdit].origin_uri,
+                            originUriPhotoSelected = viewModel.photoDomainList[positionSelectedPhotoForEdit].origin_uri,
                             onEditUri = { editUri, originUri ->
 
                                 viewModel. photoDomainList.getOrNull(positionSelectedPhotoForEdit)?.let {

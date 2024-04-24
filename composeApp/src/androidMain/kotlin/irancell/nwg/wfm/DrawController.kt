@@ -38,7 +38,7 @@ actual class DrawController  {
         var strokeWidth by mutableStateOf(10f)
             private set
 
-        var color by mutableStateOf(Color.Red)
+        var color = mutableStateOf(Color.Red)
             private set
 
         var bgColor by mutableStateOf(Color.Black)
@@ -62,7 +62,7 @@ actual class DrawController  {
         }
 
         actual fun changeColor(value: Color) {
-            color = value
+            color.value = value
         }
 
         actual fun changeBgColor(value: Color) {
@@ -110,7 +110,7 @@ actual class DrawController  {
         actual fun insertNewPath(newPoint: Offset) {
             val pathWrapper = PathWrapper(
                 points = mutableStateListOf(newPoint),
-                strokeColor = color,
+                strokeColor = color.value,
                 alpha = opacity,
                 strokeWidth = strokeWidth,
             )
@@ -129,6 +129,9 @@ actual class DrawController  {
                 .catch { error -> onCaptured(null, error) }
                 .launchIn(coroutineScope)
 
+        }
+        actual fun getColor() : Color{
+            return color.value
         }
     }
 

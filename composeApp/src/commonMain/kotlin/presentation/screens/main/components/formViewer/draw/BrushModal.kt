@@ -31,7 +31,6 @@ fun BrushModal(
     isVisible: Boolean,
     max: Int = 200,
     sizeBrush: List<Int>,
-
     onProgressChanged: (Int) -> Unit
 ) {
 

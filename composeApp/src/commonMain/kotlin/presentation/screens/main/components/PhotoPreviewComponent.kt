@@ -5,7 +5,9 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -27,15 +29,23 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import com.irancell.nwg.wfm.presentation.theme.spacing05X
+import com.skydoves.landscapist.ImageOptions
+import com.skydoves.landscapist.coil3.CoilImage
 import domain.models.PhotoDomain
+import io.github.aakira.napier.LogLevel
+import io.github.aakira.napier.Napier
 import irancell.nwg.wfm.ParseUri
 import irancell.nwg.wfm.UriToImageBitmap
+import irancell.nwg.wfm.getDpi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import presentation.screens.main.components.formViewer.draw.ControlsBarPreview
@@ -46,11 +56,11 @@ import presentation.theme.surfaceDefault
 @Composable
 fun PhotoPreviewComponent(
 
-     photoDomainList:MutableList<PhotoDomain>,
-     positionPhotoSelected:Int,
-     onEditPhotoClick:(position:Int)->Unit,
-     onDeletePhoto:(position:Int)->Unit={},
-     onSaveChangeAngle:(MutableList<PhotoDomain>)->Unit={}
+    photoDomainList: MutableList<PhotoDomain>,
+    positionPhotoSelected: Int,
+    onEditPhotoClick: (position: Int) -> Unit,
+    onDeletePhoto: (position: Int) -> Unit = {},
+    onSaveChangeAngle: (MutableList<PhotoDomain>) -> Unit = {}
 
 ) {
 
@@ -71,36 +81,34 @@ fun PhotoPreviewComponent(
             .padding(horizontal = spacing05X)
             .verticalScroll(
                 rememberScrollState()
-            )
-            ,verticalArrangement = Arrangement.Center,
+            ), verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
 
 
-
-
-       println("Photoselected${selectedItemImage}")
-        LaunchedEffect(Unit){
-//            delay(100)
-            firstTimeInitPager=false
+        println("Photoselected${selectedItemImage}")
+        LaunchedEffect(Unit) {
+            delay(300)
+            firstTimeInitPager = false
 
         }
-
+        Column(
+            modifier = Modifier.fillMaxSize().weight(0.8f),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
 
 
             Pager(
                 items = photoDomainList,
                 firstTimeInit = firstTimeInitPager,
                 modifier = Modifier
-                    .width(500.dp)
-                    .height(256.dp),
-                itemFraction = .75f,
-                initialIndex = selectedItemImage,
-                overshootFraction = .75f,
-                angle = angle.value,
+                    .fillMaxWidth().weight(.8f).clipToBounds(),
                 itemSpacing = 50.dp,
+                initialIndex = selectedItemImage,
+                angle = angle.value,
                 onItemSelectedPosition = {
-                    firstTimeInitPager=false
+                    firstTimeInitPager = false
                     selectedItemImage = it
 
                     println("onItemSelectedPosition${it}")
@@ -108,36 +116,29 @@ fun PhotoPreviewComponent(
                 onItemSelect = {
 
                     imageSelected.value = it.origin_uri
+                    Napier.log(
+                        LogLevel.ASSERT,
+                        "indexPic",
+                        message = positionPhotoSelected.toString()
+                    )
                     angle.value = it.angle.toFloat()
 
                 },
-                contentFactory = { item ->
-                    Box(
-                        modifier = Modifier
-                            .background(Color.Transparent).fillMaxSize().align(alignment = Alignment.CenterHorizontally),
-                        contentAlignment = Alignment.Center
-                    ) {
+            ) { item ->
 
 
+                CoilImage(
 
-                        Image(
-                            bitmap = (UriToImageBitmap(
-                                ParseUri(  if(item.edited_uri=="")item.origin_uri else item.edited_uri),
-                                item.angle.toFloat()
+                    modifier = Modifier.rotate(item.angle.toFloat()).aspectRatio(.8f),
+                    imageModel = { if (item.edited_uri == "") item.origin_uri else item.edited_uri },
+                    imageOptions = ImageOptions(
+                        contentScale = ContentScale.Fit,
+                        alignment = Alignment.Center
+                    )
+                )
 
 
-                            ) as ImageBitmap),
-                            contentDescription = null,
-                            modifier = Modifier
-                                //.rotate(item.angle.toFloat())
-                                .background(Color.Transparent)
-                                .clip(shape = RoundedCornerShape(2.dp)),
-                            contentScale = ContentScale.FillBounds
-                        )
-
-                    }
-                },
-            )
+            }
 
             Spacer(modifier = Modifier.weight(1f))
             Text(
@@ -150,7 +151,7 @@ fun PhotoPreviewComponent(
 
 
                 onRotateClick = {
-                    firstTimeInitPager=false
+                    firstTimeInitPager = false
                     isRotate.value = true
                     angle.value = (angle.value + 90)
 
@@ -164,15 +165,15 @@ fun PhotoPreviewComponent(
 
 
                 onEditClick = {
-                    firstTimeInitPager=false
+                    firstTimeInitPager = false
                     onEditPhotoClick(selectedItemImage)
 
                 }, onDeletePhoto = {
-                    firstTimeInitPager=false
+                    firstTimeInitPager = false
                     onDeletePhoto(selectedItemImage)
 
                 }, onSaveClick = {
-                    firstTimeInitPager=false
+                    firstTimeInitPager = false
                     onSaveChangeAngle(photoDomainList)
 
                 },
@@ -180,12 +181,7 @@ fun PhotoPreviewComponent(
             )
 
 
-
-
-
-
-
-
+        }
     }
 
 

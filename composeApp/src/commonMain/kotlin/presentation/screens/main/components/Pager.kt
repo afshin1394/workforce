@@ -98,7 +98,7 @@ fun <T : Any> Pager(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(top = 150.dp),
+            .padding(top = 50.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {

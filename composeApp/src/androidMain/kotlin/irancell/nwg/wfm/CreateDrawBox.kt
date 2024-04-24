@@ -21,6 +21,7 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.text.ExperimentalTextApi
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -66,22 +67,19 @@ actual  fun CreateDrawBox(
                                     DrawController.updateLatestPath(newPoint)
                                 }
                             }
-                            .requiredSize(
-                                width = 900.dp,
-                                height = 950.dp,
-                            ),
+
                     ) {
 
                         val canvasWidth = size.width
                         val canvasHeight = size.height
-                        drawImage(
 
+
+                        drawImage(
                             image = imageBitmap,
-                            topLeft = Offset(
-                                (canvasWidth - imageBitmap.width) / 2f,
-                                (canvasHeight - imageBitmap.height) / 2f
-                            ),
+                            dstSize = IntSize(canvasWidth.toInt(),canvasHeight.toInt()),
                         )
+
+
 
                         DrawController.pathList.forEach { pw ->
                             drawPath(

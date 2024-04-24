@@ -62,12 +62,11 @@ import irancell.nwg.wfm.viewModelDefinition
 import kotlinx.serialization.json.Json
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
-import org.koin.mp.KoinPlatform.getKoin
 import presentation.screens.auth.viewmodel.LoginScreenVM
 import presentation.screens.auth.viewmodel.VerifyScreenVM
 import presentation.screens.main.viewmodel.AboutScreenVM
 import presentation.screens.main.viewmodel.AccountScreenVM
-import presentation.screens.main.viewmodel.FormViewVM
+import presentation.screens.main.viewmodel.FormViewerScreenVM
 import presentation.screens.main.viewmodel.GpsTrackingReportScreenVM
 import presentation.screens.main.viewmodel.MapVM
 import presentation.screens.main.viewmodel.NotificationScreenVM
@@ -202,7 +201,7 @@ fun viewModelModule() = module {
     viewModelDefinition { VerifyScreenVM(get(),get(),get()) }
     viewModelDefinition { TicketInfoVM(get()) }
     viewModelDefinition { TicketProcessVM() }
-    viewModelDefinition { FormViewVM() }
+    viewModelDefinition { FormViewerScreenVM() }
     viewModelDefinition { MapVM() }
     viewModelDefinition { AccountScreenVM(get()) }
     viewModelDefinition { NotificationScreenVM() }

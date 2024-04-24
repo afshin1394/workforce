@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -65,7 +66,7 @@ fun ColorModal(
 
     ChangeVisibility(isVisible, density) {
         val parentList = colors.chunked(rowElementsCount)
-        Column(modifier = Modifier.padding(16.dp, 0.dp)) {
+        Column(modifier = Modifier) {
 
             if (showShades) {
                 ChangeVisibility(

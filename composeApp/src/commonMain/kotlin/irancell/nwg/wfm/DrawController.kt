@@ -26,6 +26,7 @@ expect class DrawController {
         fun insertNewPath(newPoint: Offset)
         fun trackBitmaps(it: Any, coroutineScope: CoroutineScope, onCaptured: (ImageBitmap?, Throwable?) -> Unit)
 
+        fun getColor() : Color
 
 
     }

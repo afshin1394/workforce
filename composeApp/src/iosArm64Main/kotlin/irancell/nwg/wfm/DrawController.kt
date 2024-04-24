@@ -57,5 +57,8 @@ actual class DrawController {
             if (it is View) {
             }
         }
+        actual fun getColor() : Color{
+            return Color.Red
+        }
     }
 }

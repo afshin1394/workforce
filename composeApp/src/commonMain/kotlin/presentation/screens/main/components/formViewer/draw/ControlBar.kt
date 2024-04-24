@@ -42,7 +42,7 @@ fun ControlsBarEditPhoto(
     onSizeClick: () -> Unit,
     undoVisibility: MutableState<Boolean>,
     colorValue: MutableState<Color>,
-    sizeValue: MutableState<Int>
+    sizeValue: MutableState<Int>,
 ) {
 
     Surface(
@@ -50,7 +50,7 @@ fun ControlsBarEditPhoto(
         color = MaterialTheme.colors.surface,
         shape = Shapes.medium,
     ) {
-        Row(modifier = Modifier.padding(12.dp), horizontalArrangement = Arrangement.SpaceAround) {
+        Row(modifier = Modifier, horizontalArrangement = Arrangement.SpaceAround) {
             MenuItems(MR.images.edit, "stroke color", colorValue.value) {
                 onColorClick()
             }
