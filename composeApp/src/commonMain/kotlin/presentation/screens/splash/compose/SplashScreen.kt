@@ -32,6 +32,7 @@ import dev.icerock.moko.resources.compose.stringResource
 import irancell.nwg.wfm.LifecycleEvent
 import irancell.nwg.wfm.MR
 import irancell.nwg.wfm.OnLifecycleEvent
+import irancell.nwg.wfm.SentryLog
 import irancell.nwg.wfm.checkPermission
 import irancell.nwg.wfm.getSharedPref
 import irancell.nwg.wfm.openAppSettings
@@ -54,7 +55,7 @@ class SplashScreen() : Screen, KoinComponent {
     @Composable
     override fun Content() {
 
-
+        SentryLog("testing log")
         val scaffoldState: BottomSheetScaffoldState = rememberBottomSheetScaffoldState()
         val scope = rememberCoroutineScope()
         val navigator = LocalNavigator.currentOrThrow

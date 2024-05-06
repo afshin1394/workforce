@@ -8,7 +8,8 @@ plugins {
 
     id("dev.icerock.mobile.multiplatform-resources")
     alias(libs.plugins.sqlDelight)
-    id ("io.sentry.android.gradle") version "4.2.0"
+    id ("io.sentry.android.gradle") version "3.12.0"
+
 
 }
 
