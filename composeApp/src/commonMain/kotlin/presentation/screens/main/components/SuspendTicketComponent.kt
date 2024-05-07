@@ -20,6 +20,7 @@ import presentation.components.CustomEditTextComponent
 import presentation.components.TakeImageComponent
 import com.irancell.nwg.wfm.presentation.theme.*
 import dev.icerock.moko.resources.compose.stringResource
+import domain.models.PhotoDomain
 import domain.models.SuspendTaskDomain
 import io.github.aakira.napier.LogLevel
 import io.github.aakira.napier.Napier
@@ -39,6 +40,7 @@ import presentation.theme.textPrimary
 @Composable
 fun SuspendTicketContentComponent(
     suspendTaskDomain: SuspendTaskDomain?,
+    photoDomainList:MutableList<PhotoDomain>,
     taskid: String,
     onSelectReason: () -> Unit = {},
     onDescription: (text: String) -> Unit = { s: String -> },
@@ -84,7 +86,7 @@ fun SuspendTicketContentComponent(
         )
         Spacer(modifier = Modifier.padding(vertical = spacing1X))
 
-        ImageRowComponent(suspendTaskDomain?.attachmentsUri?.split(","), onCameraClick = {
+        ImageRowComponent(photoDomainList, onCameraClick = {
             onCameraClick()
         }) {
             onImageClick(it)

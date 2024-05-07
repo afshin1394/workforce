@@ -2,13 +2,17 @@ package presentation.screens.ticket_process.viewModel
 
 import androidx.compose.runtime.MutableLongState
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.mutableStateListOf
 import domain.models.initialForm.InitialFormDomain
 import domain.models.initialForm.InitialFormStructureDomain
 import domain.usecase.usecase.initialForm.GetInitialFormByTask
+import io.github.aakira.napier.LogLevel
+import io.github.aakira.napier.Napier
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import presentation.model.UploadFileModel
 import utils.AsyncStatus
 import utils.BaseViewModel
 import utils.ViewStates
@@ -34,6 +38,7 @@ class TicketInfoVM(
                 }
                 AsyncStatus.SUCCESS -> {
                     val initialFormDomain = it.data
+                    Napier.log(LogLevel.ASSERT, tag = "initialform12345", message = initialFormDomain.toString())
                     _initialFormStructureDomain.update { initialFormDomain?.structure }
                     updateState(ViewStates.Success())
                 }
@@ -42,4 +47,14 @@ class TicketInfoVM(
         }
 
     }
+
+
+    val uploadDomain = MutableStateFlow<UploadFileModel>(
+        UploadFileModel(
+            path = Unit,
+            fileName = ""
+
+        )
+    )
+    var uploadDomainList = mutableStateListOf<UploadFileModel>()
 }

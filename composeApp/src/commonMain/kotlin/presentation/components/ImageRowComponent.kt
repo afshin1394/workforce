@@ -8,12 +8,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.irancell.nwg.wfm.presentation.theme.spacing1X
 import com.irancell.nwg.wfm.presentation.theme.spacing2X
+import domain.models.PhotoDomain
 import io.github.aakira.napier.LogLevel
 import io.github.aakira.napier.Napier
 
 @Composable
 fun ImageRowComponent(
-    itemsList: List<String>?,
+    itemsList: List<PhotoDomain>?,
     modifier: Modifier = Modifier,
     onCameraClick: () -> Unit = {},
     onImageClick: (index: Int) -> Unit
@@ -26,10 +27,10 @@ fun ImageRowComponent(
         itemsList?.let {
             Napier.log(LogLevel.ASSERT,tag = "itemsList",message=itemsList.size.toString())
             if (itemsList.isNotEmpty()) {
-                if (itemsList[0] != "") {
+                if (itemsList[0] .origin_uri!= "") {
                     LazyRow() {
                         items(itemsList.size) { index ->
-                            val item = itemsList[index]
+                            val item = if (itemsList[index].edited_uri=="")itemsList[index].origin_uri else itemsList[index].edited_uri
                             ImageBoxComponent(item) {
                                 onImageClick(index)
                             }

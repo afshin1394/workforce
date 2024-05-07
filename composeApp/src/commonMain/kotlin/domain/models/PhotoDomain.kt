@@ -8,7 +8,7 @@ data class PhotoDomain(
     val component_key: Long,
     val index_row: Long,
     val origin_uri: String,
-    val edited_uri: String,
+    var edited_uri: String,
     val angle: String
 ){
     constructor(    component_key: Long,

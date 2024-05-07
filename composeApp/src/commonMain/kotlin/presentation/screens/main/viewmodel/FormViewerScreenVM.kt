@@ -1,15 +1,10 @@
 package presentation.screens.main.viewmodel
 
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateListOf
-import domain.models.SuspendTaskDomain
-import irancell.nwg.wfm.Camera
-import irancell.nwg.wfm.InternalStorage
-import irancell.nwg.wfm.provideAppContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
-import presentation.screens.main.events.MainEvent
+import presentation.model.UploadFileModel
 import presentation.screens.ticket_process.events.ImageEvent
 import utils.BaseViewModel
 
@@ -40,4 +35,17 @@ class FormViewerScreenVM : BaseViewModel() {
 
         attachmentsUri.value =  updatedListAsString
     }
+
+
+
+    //////////////////////////upload/////////////////
+
+     val uploadDomain = MutableStateFlow<UploadFileModel>(
+        UploadFileModel(
+            path = Unit,
+            fileName = ""
+
+        )
+    )
+    var uploadDomainList = mutableStateListOf<UploadFileModel>()
 }

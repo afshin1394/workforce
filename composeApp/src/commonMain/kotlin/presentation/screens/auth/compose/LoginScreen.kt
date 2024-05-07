@@ -181,16 +181,16 @@ class LoginScreen() : Screen {
                         Spacer(modifier = Modifier.height(spacing5X))
 
                         AuthButton(authButtonItem = AuthButtonItem(stringResource(MR.strings.sign_in))) {
-                              throw RuntimeException()
+
                             //onClick
-//                            if (viewModel.performLogin(email, password)) {
-//                                Napier.log(
-//                                    LogLevel.ASSERT,
-//                                    "email & password",
-//                                    message = "email ${email} password ${password}"
-//                                )
-//                                viewModel.login(email, password)
-//                            }
+                            if (viewModel.performLogin(email, password)) {
+                                Napier.log(
+                                    LogLevel.ASSERT,
+                                    "email & password",
+                                    message = "email ${email} password ${password}"
+                                )
+                                viewModel.login(email, password)
+                            }
                         }
                     }
                 }

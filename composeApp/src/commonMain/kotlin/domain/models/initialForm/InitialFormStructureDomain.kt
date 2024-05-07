@@ -9,7 +9,7 @@ data class InitialFormStructureDomain (
     val id: String? = null,
     val hide: String?= null,
     val type: String?= null,
-    val components: List<ComponentDomain>?= null,
+    val components: ArrayList<ComponentDomain>?= null,
     val conditional : ConditionalDomain?= null,
     val schemaVersion : Int?= null,
 ){

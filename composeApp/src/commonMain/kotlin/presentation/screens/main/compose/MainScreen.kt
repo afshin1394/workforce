@@ -515,6 +515,8 @@ class MainScreen(
 
                         SuspendTicketContentComponent(
                             taskid = viewModel.selectedTask.value!!.instanceTitle,
+                            photoDomainList = viewModel.photoDomainList,
+
                             suspendTaskDomain = suspendTaskState,
                             onSelectReason = {
                                 viewModel.events.value = MainEvent.SuspendReason
@@ -568,7 +570,7 @@ class MainScreen(
 
                         EditPhotoComponent(
                             angle =0.0F,
-                            originUriPhotoSelected = viewModel.photoDomainList[positionSelectedPhotoForEdit].origin_uri,
+                            photoDomain = viewModel.photoDomainList[positionSelectedPhotoForEdit],
                             onEditUri = { editUri, originUri ->
 
                                 viewModel. photoDomainList.getOrNull(positionSelectedPhotoForEdit)?.let {

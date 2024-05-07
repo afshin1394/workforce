@@ -12,8 +12,12 @@ data class ComponentDomain(
     val layout: LayoutDomain?= null,
     val subType : String?= null,
     val validate : ValidateDomain?= null,
-    val values: List<ValueDomain>?= null,
+    var values: List<ValueDomain>?= null,
     val conditional : ConditionalDomain?= null,
-    val components : List<ComponentDomain>?= null,
+    val components : ArrayList<ComponentDomain>?= null,
     val logics : List<LogicDomain>?= null
-)
+){
+    override fun toString(): String {
+        return "ComponentDomain(id=$id, hide=$hide, type=$type, label=$label, layout=$layout, subType=$subType, validate=$validate, values=$values, conditional=$conditional, components=$components, logics=$logics)"
+    }
+}

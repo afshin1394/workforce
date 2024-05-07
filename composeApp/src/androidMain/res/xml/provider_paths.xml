@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <paths>
     <files-path name="wfmImages" path="wfmImages/"/>
+    <files-path name="wfmFiles" path="wfmFiles/"/>
 </paths>

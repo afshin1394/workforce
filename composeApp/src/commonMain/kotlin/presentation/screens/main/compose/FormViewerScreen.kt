@@ -3,12 +3,18 @@
 package presentation.screens.main.compose
 
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.sizeIn
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.BottomSheetScaffoldState
@@ -16,6 +22,7 @@ import androidx.compose.material.ExperimentalMaterialApi
 
 
 import androidx.compose.material.rememberBottomSheetScaffoldState
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -46,9 +53,10 @@ import presentation.screens.main.components.formViewer.ModalDatePicker
 import presentation.screens.main.components.formViewer.ModalDateTimePicker
 import presentation.screens.main.components.formViewer.ModalTimePicker
 import presentation.screens.main.components.formViewer.TypeEditable
-import presentation.screens.main.events.MainEvent
+import presentation.screens.main.components.formViewer.UploadFileComponent
 import presentation.screens.main.viewmodel.FormViewerScreenVM
 import presentation.screens.ticket_process.events.ImageEvent
+import presentation.theme.body_small
 import presentation.theme.surfaceDefault
 import presentation.theme.textInverse
 import presentation.theme.textPrimary
@@ -56,6 +64,7 @@ import presentation.theme.textPrimary
 
 @OptIn(ExperimentalMaterialApi::class)
 class FormViewerScreen() : Screen {
+
 
     @Composable
     override fun Content() {
@@ -73,10 +82,8 @@ class FormViewerScreen() : Screen {
 
             )
         var selectedItem by remember { mutableStateOf("") }
-        val viewModel : FormViewerScreenVM =  koinInject()
+        val viewModel: FormViewerScreenVM = koinInject()
         val imageState = viewModel.imageEvent.collectAsState()
-
-
 
 
 
@@ -87,13 +94,10 @@ class FormViewerScreen() : Screen {
             title = stringResource(MR.strings.form),
             scaffoldState = scaffoldState,
             topBar = {
-//                MenuItemsTopBar(stringResource(MR.strings.form)) {
-//                    navigator.pop()
-//                }
 
             },
 
-            bottomSheetTitle =   when(imageState.value){
+            bottomSheetTitle = when (imageState.value) {
                 ImageEvent.Default -> {
                     ""
                 }

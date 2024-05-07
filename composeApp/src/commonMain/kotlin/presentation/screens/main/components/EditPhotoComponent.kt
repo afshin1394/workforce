@@ -15,8 +15,10 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
@@ -25,6 +27,7 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.stack.Stack
 import com.irancell.nwg.wfm.presentation.theme.spacing05X
+import domain.models.PhotoDomain
 import io.github.aakira.napier.LogLevel
 import io.github.aakira.napier.Napier
 import irancell.nwg.wfm.CreateDrawBox
@@ -49,12 +52,13 @@ import presentation.theme.surfaceDefault
 @Composable
 fun EditPhotoComponent(
     angle: Float,
-    originUriPhotoSelected: String,
+    photoDomain: PhotoDomain,
+
     onEditUri: (newUri: String, originUri: String) -> Unit
 ) {
 
 
-    val bitmapNew = UriToImageBitmap(ParseUri(originUriPhotoSelected), angle)
+
 
 
     val undoVisibility = remember { mutableStateOf(false) }
@@ -67,6 +71,7 @@ fun EditPhotoComponent(
     val currentSize = remember { mutableStateOf(10) }
     val colorIsBg = remember { mutableStateOf(false) }
     val drawBottomMenu = remember { mutableStateOf(true) }
+    val changePhoto = remember { mutableStateOf(false) }
 
 
     val savedImageUri = remember { mutableStateOf("") }
@@ -91,56 +96,113 @@ fun EditPhotoComponent(
         95
     )
     val sizBrush: List<Int> = sizeBrushArray
-    bitmapNew as ImageBitmap
-    val widthImage = bitmapNew.width/ getDpi()
-    val heightImage = bitmapNew.height / getDpi()
+
+   //
+
+   val bitmapNewState= UriToImageBitmap(ParseUri(if (photoDomain.edited_uri=="") photoDomain.origin_uri else photoDomain.edited_uri), angle)
+    bitmapNewState as ImageBitmap
+
+    println("checkForRecompose${photoDomain.edited_uri}")
+    val widthImage =  bitmapNewState.width/ getDpi()
+    val heightImage =  bitmapNewState.height / getDpi()
 
     Napier.log(LogLevel.ASSERT,tag = "andazee", message = widthImage.toString())
     Napier.log(LogLevel.ASSERT,tag = "andazee", message = heightImage.toString())
+
+
+
+
+
     Column(
         modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
 
-        CreateDrawBox(
-            imageBitmap = bitmapNew as ImageBitmap,
+        if (!changePhoto.value) {
+            CreateDrawBox(
+                imageBitmap = bitmapNewState,
 
 
-            backgroundColor = currentBgColor.value,
-            modifier = Modifier.padding(
-                bottom = 2.dp,
-                end = 2.dp,
-                start = 2.dp,
-            )
-                .weight(.8f)
-                .clipToBounds()
-                .fillMaxWidth(),
-            bitmapCallback = { imageBitmap, error ->
-                imageBitmap?.let { image ->
+                backgroundColor = currentBgColor.value,
+                modifier = Modifier.padding(
+                    bottom = 2.dp,
+                    end = 2.dp,
+                    start = 2.dp,
+                )
+                    .weight(0.8F)
+                    .clipToBounds()
+                    .fillMaxWidth(),
+                bitmapCallback = { imageBitmap, error ->
+                    imageBitmap?.let { image ->
 
-                    savedImageUriCheck.value = true
+                        savedImageUriCheck.value = true
 
-                    savedImageUri.value = SaveBitmapToFile(
-                        "/wfmImages/Suspend/",
-                        ImageBitmapToBitmap(image)
-                    ).toString()
+                        savedImageUri.value = SaveBitmapToFile(
+                            "/wfmImages/Suspend/",
+                            ImageBitmapToBitmap(image)
+                        ).toString()
 
 
+                    }
                 }
-            }
-        ) { undoCount, redoCount ->
-            drawBottomMenu.value = true
+            ) { undoCount, redoCount ->
+                drawBottomMenu.value = true
 
-            sizeBarVisibility.value = false
-            colorBarVisibility.value = false
-            undoVisibility.value = undoCount != 0
-            redoVisibility.value = redoCount != 0
+                sizeBarVisibility.value = false
+                colorBarVisibility.value = false
+                undoVisibility.value = undoCount != 0
+                redoVisibility.value = redoCount != 0
+            }
+
+
+
+        }else{
+
+
+
+            CreateDrawBox(
+                imageBitmap =  UriToImageBitmap(ParseUri( photoDomain.origin_uri ), angle) as ImageBitmap ,
+
+
+                backgroundColor = currentBgColor.value,
+                modifier = Modifier.padding(
+                    bottom = 2.dp,
+                    end = 2.dp,
+                    start = 2.dp,
+                )
+                    .weight(0.8F)
+                    .clipToBounds()
+                    .fillMaxWidth(),
+                bitmapCallback = { imageBitmap, error ->
+                    imageBitmap?.let { image ->
+
+                        savedImageUriCheck.value = true
+
+                        savedImageUri.value = SaveBitmapToFile(
+                            "/wfmImages/Suspend/",
+                            ImageBitmapToBitmap(image)
+                        ).toString()
+
+
+                    }
+                }
+            ) { undoCount, redoCount ->
+                drawBottomMenu.value = true
+
+                sizeBarVisibility.value = false
+                colorBarVisibility.value = false
+                undoVisibility.value = undoCount != 0
+                redoVisibility.value = redoCount != 0
+            }
+
+            changePhoto.value=false
+
         }
 
 
         if (savedImageUriCheck.value) {
 
-            onEditUri(savedImageUri.value, originUriPhotoSelected)
+            onEditUri(savedImageUri.value, photoDomain.origin_uri)
             DrawController.reset()
         }
 
@@ -166,6 +228,19 @@ fun EditPhotoComponent(
                             !sizeBarVisibility.value
                         colorBarVisibility.value = false
                         drawBottomMenu.value = false
+                    },
+                    onDeleteClick = {
+
+                        if (photoDomain.edited_uri==""){
+
+                            DrawController.reset()
+                        }else{
+
+                            changePhoto.value=true
+                            photoDomain.edited_uri=""
+
+                        }
+
                     },
                     undoVisibility = undoVisibility,
                     colorValue = currentColor,

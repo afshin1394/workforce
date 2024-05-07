@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -56,11 +57,11 @@ import presentation.theme.surfaceDefault
 @Composable
 fun PhotoPreviewComponent(
 
-    photoDomainList: MutableList<PhotoDomain>,
-    positionPhotoSelected: Int,
-    onEditPhotoClick: (position: Int) -> Unit,
-    onDeletePhoto: (position: Int) -> Unit = {},
-    onSaveChangeAngle: (MutableList<PhotoDomain>) -> Unit = {}
+     photoDomainList:MutableList<PhotoDomain>,
+     positionPhotoSelected:Int,
+     onEditPhotoClick:(position:Int)->Unit,
+     onDeletePhoto:(position:Int)->Unit={},
+     onSaveChangeAngle:(MutableList<PhotoDomain>)->Unit={}
 
 ) {
 
@@ -81,7 +82,8 @@ fun PhotoPreviewComponent(
             .padding(horizontal = spacing05X)
             .verticalScroll(
                 rememberScrollState()
-            ), verticalArrangement = Arrangement.Center,
+            )
+            ,verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
 
@@ -92,29 +94,31 @@ fun PhotoPreviewComponent(
             firstTimeInitPager = false
 
         }
+
+
+
         Column(
-            modifier = Modifier.fillMaxSize().weight(0.8f),
-            verticalArrangement = Arrangement.Center,
+            modifier = Modifier.fillMaxSize(),
+
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-
-
             Pager(
                 items = photoDomainList,
                 firstTimeInit = firstTimeInitPager,
                 modifier = Modifier
-                    .fillMaxWidth().weight(.8f).clipToBounds(),
-                itemSpacing = 50.dp,
+                .weight(0.8F)
+                .clipToBounds()
+                .fillMaxWidth(),
+
                 initialIndex = selectedItemImage,
+                itemSpacing = 30.dp,
                 angle = angle.value,
                 onItemSelectedPosition = {
                     firstTimeInitPager = false
                     selectedItemImage = it
-
                     println("onItemSelectedPosition${it}")
                 },
                 onItemSelect = {
-
                     imageSelected.value = it.origin_uri
                     Napier.log(
                         LogLevel.ASSERT,
@@ -122,67 +126,80 @@ fun PhotoPreviewComponent(
                         message = positionPhotoSelected.toString()
                     )
                     angle.value = it.angle.toFloat()
-
                 },
-            ) { item ->
+                contentFactory = { item ->
 
+                        CoilImage(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .aspectRatio(0.8f)
+                                .rotate(item.angle.toFloat()),
+                            imageModel = { if (item.edited_uri == "") item.origin_uri else item.edited_uri },
+                            imageOptions = ImageOptions(
+                                contentScale = ContentScale.Fit,
+                                alignment = Alignment.Center
+                            )
+                        )
 
-                CoilImage(
-
-                    modifier = Modifier.rotate(item.angle.toFloat()).aspectRatio(.8f),
-                    imageModel = { if (item.edited_uri == "") item.origin_uri else item.edited_uri },
-                    imageOptions = ImageOptions(
-                        contentScale = ContentScale.Fit,
-                        alignment = Alignment.Center
-                    )
-                )
-
-
-            }
-
-            Spacer(modifier = Modifier.weight(1f))
-            Text(
-                text = "${selectedItemImage + 1} of ${photoDomainList.size}",
-                textAlign = TextAlign.Center,
-                modifier = Modifier.padding(bottom = 12.dp)
+                }
             )
-
-            ControlsBarPreview(
-
-
-                onRotateClick = {
-                    firstTimeInitPager = false
-                    isRotate.value = true
-                    angle.value = (angle.value + 90)
-
-                    photoDomainList.getOrNull(selectedItemImage)?.let {
-
-                        photoDomainList[selectedItemImage] =
-                            it.copy(angle = angle.value.toString())
-
-                    }
-                },
-
-
-                onEditClick = {
-                    firstTimeInitPager = false
-                    onEditPhotoClick(selectedItemImage)
-
-                }, onDeletePhoto = {
-                    firstTimeInitPager = false
-                    onDeletePhoto(selectedItemImage)
-
-                }, onSaveClick = {
-                    firstTimeInitPager = false
-                    onSaveChangeAngle(photoDomainList)
-
-                },
-                isRotate = isRotate
-            )
-
-
         }
+
+
+        Spacer(modifier = Modifier.weight(1f))
+        Text(
+            text = "${selectedItemImage + 1} of ${photoDomainList.size}",
+            textAlign = TextAlign.Center,
+            modifier = Modifier.padding(bottom = 12.dp)
+        )
+
+        ControlsBarPreview(
+
+
+            onRotateClick = {
+                firstTimeInitPager=false
+                isRotate.value = true
+                angle.value = (angle.value + 90)
+
+                photoDomainList.getOrNull(selectedItemImage)?.let {
+
+                    photoDomainList[selectedItemImage] =
+                        it.copy(angle = angle.value.toString())
+
+                }
+            },
+
+
+            onEditClick = {
+                firstTimeInitPager=false
+                onEditPhotoClick(selectedItemImage)
+
+            }, onDeletePhoto = {
+                firstTimeInitPager=false
+                onDeletePhoto(selectedItemImage)
+
+            }, onSaveClick = {
+                firstTimeInitPager=false
+                onSaveChangeAngle(photoDomainList)
+
+            },
+            isRotate = isRotate
+        )
+
+
+
+
+
+
+
+
     }
 
 
+
+
 }
+
+
+
+

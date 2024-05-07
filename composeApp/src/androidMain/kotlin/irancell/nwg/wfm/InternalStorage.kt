@@ -88,6 +88,11 @@ actual class InternalStorage {
             return ctx.filesDir.path + "/wfmImages/Suspend/Original/"
         }
 
+
+        actual fun getUploadFileRouteOriginal(context: Any): String {
+            val ctx =context as Context
+            return ctx.filesDir.path + "/wfmFiles/"
+        }
         actual fun getProcessRouteOriginal(context: Any): String {
             val ctx =context as Context
             return ctx.filesDir.path + "/wfmImages/Process/Original/"

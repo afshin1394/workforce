@@ -40,6 +40,7 @@ fun ControlsBarEditPhoto(
     onSaveClick: () -> Unit,
     onColorClick: () -> Unit,
     onSizeClick: () -> Unit,
+    onDeleteClick: () -> Unit,
     undoVisibility: MutableState<Boolean>,
     colorValue: MutableState<Color>,
     sizeValue: MutableState<Int>,
@@ -64,7 +65,8 @@ fun ControlsBarEditPhoto(
                 "reset",
                 iconPrimary
             ) {
-                DrawController.reset()
+                onDeleteClick()
+
             }
 
             Button(

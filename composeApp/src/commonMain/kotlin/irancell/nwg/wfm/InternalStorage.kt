@@ -10,6 +10,7 @@ expect class InternalStorage {
         fun getWFMRoute(context: Any): String
 
         fun getSuspendRouteOriginal(context: Any): String
+        fun getUploadFileRouteOriginal(context: Any): String
         fun getSuspendRouteEdited(context: Any): String
 
 

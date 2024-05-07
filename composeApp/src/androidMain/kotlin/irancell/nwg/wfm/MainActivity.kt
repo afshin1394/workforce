@@ -46,7 +46,11 @@ class MainActivity : FragmentActivity() {
         val packageInfo: PackageInfo =
             (provideAppContext() as Context).packageManager.getPackageInfo((provideAppContext() as Context).packageName, 0)
 
-
+        Sentry.init { options ->
+            options.dsn = "https://c38def8cf951033c69c3c1cdfe6ec3e7@o4505880661065728.ingest.us.sentry.io/4507055751036928"
+            options.environment = "production"
+            options.release = packageInfo.versionName // Set the release version
+        }
         setContent {
           App()
         }
