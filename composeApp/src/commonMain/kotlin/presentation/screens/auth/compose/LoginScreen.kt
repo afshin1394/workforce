@@ -94,6 +94,10 @@ class LoginScreen() : Screen {
                         ViewStates.Reload -> {
 
                         }
+
+                        is ViewStates.UnAuthorized -> {
+
+                        }
                     }
 
                     Image(

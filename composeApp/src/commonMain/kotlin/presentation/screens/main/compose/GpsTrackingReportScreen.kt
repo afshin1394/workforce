@@ -155,6 +155,10 @@ class GpsTrackingReportScreen(
                     ViewStates.Reload -> {
 
                     }
+
+                    is ViewStates.UnAuthorized -> {
+
+                    }
                 }
             }
         }

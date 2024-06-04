@@ -163,7 +163,6 @@ class MainScreenVM(
                 when (it) {
                     is AsyncResult.Error -> {
                         handleError(it.resultStatus)
-                        Napier.log(LogLevel.ASSERT, "resrrrr", message = it.resultStatus.toString())
 
                     }
 
@@ -173,7 +172,6 @@ class MainScreenVM(
                     }
 
                     is AsyncResult.Success -> {
-                        Napier.log(LogLevel.ASSERT, "resrrrr", message = it.resultStatus.toString())
 
                         _availability.update { !it }
                         storeAvailabilityUseCase(
@@ -191,6 +189,7 @@ class MainScreenVM(
 
                                 AsyncStatus.SUCCESS -> {
                                     updateState(ViewStates.Success())
+                                    events.value = MainEvent.Default
                                     Napier.log(
                                         LogLevel.ASSERT,
                                         "storeAvailabilityUseCase",

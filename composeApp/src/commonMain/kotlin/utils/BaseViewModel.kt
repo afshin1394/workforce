@@ -1,18 +1,11 @@
 package utils
 
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import com.plusmobileapps.konnectivity.Konnectivity
 import com.plusmobileapps.konnectivity.NetworkConnection
 import dev.icerock.moko.mvvm.viewmodel.ViewModel
 import dev.icerock.moko.resources.StringResource
-import dev.icerock.moko.resources.compose.stringResource
 import domain.usecase.ResultStatus
-import io.github.aakira.napier.LogLevel
-import io.github.aakira.napier.Napier
-import io.ktor.http.HttpMessage
 import irancell.nwg.wfm.GPS
-import irancell.nwg.wfm.Location
 import irancell.nwg.wfm.MR
 import irancell.nwg.wfm.getSharedPref
 import irancell.nwg.wfm.provideAppContext
@@ -28,6 +21,8 @@ sealed class ViewStates() {
     data class Error(val message: StringResource) : ViewStates()
     data class Success(val message : StringResource? = MR.strings.success) : ViewStates()
     data object Reload : ViewStates()
+
+    data class UnAuthorized(val message: StringResource) : ViewStates()
 }
 
 sealed interface GpsState{
@@ -42,6 +37,10 @@ sealed class NetworkStates() {
     data object NetworkConnectionCELLULAR : NetworkStates()
 
 }
+
+
+
+
 
 open class BaseViewModel : ViewModel() {
     val loading = MutableStateFlow(false)
@@ -122,8 +121,25 @@ open class BaseViewModel : ViewModel() {
 
     fun handleError(resultStatus: ResultStatus?) {
         when (resultStatus) {
+            is ResultStatus.CLIENT_EXCEPTION.FORBIDDEN ->{
+                getSharedPref().put(Availability, false)
+                getSharedPref().put(PhoneNumber, "")
+                getSharedPref().put(Token, "")
+                getSharedPref().put(SessionId,"")
+                _state.update { ViewStates.UnAuthorized(MR.strings.unauthorized) }
+            }
+            is ResultStatus.CLIENT_EXCEPTION.UNATHORIZED->{
+                getSharedPref().put(Availability, false)
+                getSharedPref().put(PhoneNumber, "")
+                getSharedPref().put(Token, "")
+                getSharedPref().put(SessionId,"")
+                _state.update { ViewStates.UnAuthorized(MR.strings.unauthorized) }
+            }
             is ResultStatus.CLIENT_EXCEPTION -> {
+
                 _state.update { ViewStates.Error(MR.strings.client_error) }
+
+
             }
 
             is ResultStatus.EXCEPTION -> {
@@ -145,13 +161,10 @@ open class BaseViewModel : ViewModel() {
             is ResultStatus.SERVER_EXCEPTION -> {
                 _state.update { ViewStates.Error(MR.strings.server_error) }
 
-
             }
 
             is ResultStatus.SUCCESS -> {
                 _state.update { ViewStates.Error(MR.strings.success) }
-
-
             }
 
             is ResultStatus.TIME_OUT -> {

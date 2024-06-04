@@ -28,8 +28,14 @@ import irancell.nwg.wfm.provideAppContext
 import utils.BaseViewModel
 import utils.ViewStates
 import androidx.compose.material3.CircularProgressIndicator
-import cafe.adriel.voyager.navigator.OnBackPressed
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
+import cafe.adriel.voyager.core.registry.rememberScreen
+import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.currentOrThrow
 import irancell.nwg.wfm.BackButtonHandler
+import irancell.nwg.wfm.MR
+import kotlinx.coroutines.delay
 
 import utils.GpsState
 
@@ -51,12 +57,11 @@ fun <T : BaseViewModel> BaseScreen(
     onBackPressed: () -> Unit={} ,
     hasSwipeDrawer:Boolean=true,
 
-
 ) {
-
+    val navigator = LocalNavigator.currentOrThrow
+    val loginScreen = rememberScreen(presentation.nav.Screen.Auth.Login)
     val state by viewModel.state.collectAsState()
     val gpsState by viewModel.gpsState.collectAsState()
-    Napier.log(LogLevel.ASSERT, "BaseScreen", message = state.toString())
 
 
 
@@ -66,6 +71,7 @@ fun <T : BaseViewModel> BaseScreen(
             .background(color = backgroundBackground3)
             .fillMaxSize()
     ) {
+
         if (hasDrawer) {
             BottomSheetScaffold(modifier = Modifier.background(color = backgroundBackground3),
                 scaffoldState = scaffoldState,
@@ -144,7 +150,20 @@ fun <T : BaseViewModel> BaseScreen(
                         }
 
                         ViewStates.Loading -> {
-                            CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .background(Color.Transparent)
+                                    .pointerInput(Unit) {
+                                        awaitPointerEventScope {
+                                            while (true) {
+                                                awaitPointerEvent()
+                                            }
+                                        }
+                                    }
+                            ){
+                                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                            }
                         }
 
 
@@ -154,6 +173,20 @@ fun <T : BaseViewModel> BaseScreen(
 
                         ViewStates.Reload -> {
 
+                        }
+
+                        is ViewStates.UnAuthorized -> {
+                            val message = stringResource((state as ViewStates.UnAuthorized).message)
+
+                            LaunchedEffect(Unit) {
+                                scaffoldState.snackbarHostState.showSnackbar(message = message)
+
+                                delay(200)
+                                if (navigator.items[navigator.items.lastIndex].key != loginScreen.key) {
+                                    navigator.popAll()
+                                    navigator.push(loginScreen)
+                                }
+                            }
                         }
                     }
                 }
@@ -236,7 +269,20 @@ fun <T : BaseViewModel> BaseScreen(
                         }
 
                         ViewStates.Loading -> {
-                            CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .background(Color.Transparent)
+                                    .pointerInput(Unit) {
+                                        awaitPointerEventScope {
+                                            while (true) {
+                                                awaitPointerEvent()
+                                            }
+                                        }
+                                    }
+                            ){
+                                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                            }
                         }
 
 
@@ -248,6 +294,21 @@ fun <T : BaseViewModel> BaseScreen(
                         ViewStates.Reload -> {
 
                         }
+
+                        is ViewStates.UnAuthorized -> {
+                            val message = stringResource((state as ViewStates.UnAuthorized).message)
+
+
+                            LaunchedEffect(Unit) {
+                                scaffoldState.snackbarHostState.showSnackbar(message = message)
+
+                                delay(200)
+                                if (navigator.items[navigator.items.lastIndex].key != loginScreen.key) {
+                                    navigator.popAll()
+                                    navigator.push(loginScreen)
+                                }
+                            }
+                        }
                     }
 
 
@@ -255,6 +316,8 @@ fun <T : BaseViewModel> BaseScreen(
             }
         }
 
+
     }
 
 }
+

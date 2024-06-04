@@ -101,6 +101,10 @@ class VerifyScreen(private val phoneNumber: String = "") : Screen {
                                     navigator.popUntil { it == SplashScreen() }
                                     navigator.push(mainScreen)
                                 }
+
+                                is ViewStates.UnAuthorized -> {
+
+                                }
                             }
 
                             Text(text =

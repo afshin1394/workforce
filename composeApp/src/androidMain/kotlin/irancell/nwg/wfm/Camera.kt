@@ -37,7 +37,6 @@ actual class Camera {
         lateinit var uri : Uri
         @Composable
         actual fun onResult( onSuccess: (uri: Any) -> Unit) {
-            val context = LocalContext.current
 
             cameraLauncher =  rememberLauncherForActivityResult(
                 contract = ActivityResultContracts.TakePicture(),

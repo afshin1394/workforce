@@ -670,6 +670,7 @@ class MainScreen(
                     }
 
                     MainEvent.Default -> {
+
                     }
                     MainEvent.AcceptTicket -> {
 
@@ -685,7 +686,6 @@ class MainScreen(
 
                     scope.launch {
                         scaffoldState.drawerState.close()
-
                     }
 
                 }

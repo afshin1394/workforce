@@ -123,5 +123,6 @@
     <string name="delete_photo">پاک کردن عکس</string>
     <string name="edit_photo"> ویرایش عکس</string>
     <string name="save_change">ذخیره تغییرات</string>
+    <string name="unauthorized">درخواست شما معتبر نیست لطفا مجددا وارد شوید!</string>
 
 </resources>

@@ -57,7 +57,7 @@ actual class GPS {
 
         actual fun getLocationsState() : Boolean{
             val locationManager =
-                (provideAppContext() as Context)!!.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+                (provideAppContext() as Context).getSystemService(Context.LOCATION_SERVICE) as LocationManager
             return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
         }
 

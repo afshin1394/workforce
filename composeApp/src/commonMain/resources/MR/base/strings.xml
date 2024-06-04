@@ -132,6 +132,8 @@
     <string name="delete_photo">DeletePhoto</string>
     <string name="edit_photo">EditPhoto</string>
     <string name="save_change">SaveChange</string>
+    <string name="unauthorized">Your request is no longer valid please login again!</string>
+
 
 
 </resources>

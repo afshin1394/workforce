@@ -148,12 +148,7 @@ actual class BackgroundServiceApp : Service() , KoinComponent {
               ).collect{
                   when(it.status){
                       AsyncStatus.ERROR -> {
-                          val errorMessage = it.message!!
-                          Napier.log(
-                              LogLevel.ASSERT,
-                              tag = "serviice",
-                              message = it.message
-                          )
+
                       }
                       AsyncStatus.LOADING -> {
                       }
@@ -181,12 +176,7 @@ actual class BackgroundServiceApp : Service() , KoinComponent {
               ).collect{
                   when(it.status){
                       AsyncStatus.ERROR -> {
-                          val errorMessage = it.message!!
-                          Napier.log(
-                              LogLevel.ASSERT,
-                              tag = "serviice",
-                              message = it.message
-                          )
+
                       }
                       AsyncStatus.LOADING -> {
                       }
