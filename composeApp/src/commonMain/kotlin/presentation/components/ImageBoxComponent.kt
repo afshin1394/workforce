@@ -26,7 +26,7 @@ import presentation.theme.strokeDefaultLight
 import presentation.theme.surfaceDefault
 @Composable
 fun ImageBoxComponent(path : String,modifier: Modifier = Modifier, onImageClick : () -> Unit = {}){
-    var imageUrl by remember { mutableStateOf(path) }
+   // var imageUrl by remember { mutableStateOf(path) }
 
     Card(modifier = modifier
         .clickable {
@@ -38,7 +38,7 @@ fun ImageBoxComponent(path : String,modifier: Modifier = Modifier, onImageClick 
         ),
         border = BorderStroke(1.dp, strokeDefaultLight)) {
         CoilImage(modifier= Modifier.size(98.dp),
-            imageModel = { imageUrl }, // loading a network image or local resource using an URL.
+            imageModel = { path }, // loading a network image or local resource using an URL.
             imageOptions = ImageOptions(
                 contentScale = ContentScale.FillBounds,
                 alignment = Alignment.Center

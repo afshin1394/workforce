@@ -4,12 +4,12 @@ import data.network.response.task.Component
 import data.network.response.task.Conditional
 import kotlinx.serialization.Serializable
 
-@Serializable
+
 data class InitialFormStructureDomain (
     val id: String? = null,
     val hide: String?= null,
     val type: String?= null,
-    val components: ArrayList<ComponentDomain>?= null,
+    var components: List<ComponentDomain>?= null,
     val conditional : ConditionalDomain?= null,
     val schemaVersion : Int?= null,
 ){

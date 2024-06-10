@@ -6,8 +6,9 @@ import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 
-fun getCurrentDate() : String =
-    Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).toString()
+fun getCurrentDate() : String {
+   return Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).toString()
+}
 
 
 fun getLocalDateTimeFromLong(long: Long): LocalDateTime {

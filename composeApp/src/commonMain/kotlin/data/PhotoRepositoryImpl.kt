@@ -8,6 +8,7 @@ class PhotoRepositoryImpl(private val wfmDatabase: WFMDatabase) : IPhotoReposito
 
     override suspend fun insert(photoEntity: PhotoEntity) {
         wfmDatabase.photoEntityQueries.insert(
+            photoEntity.task_id,
             photoEntity.component_key,
             photoEntity.index_row,
             photoEntity.origin_uri,
@@ -19,15 +20,15 @@ class PhotoRepositoryImpl(private val wfmDatabase: WFMDatabase) : IPhotoReposito
 
 
 
-    override suspend fun getPhotoListByComponentKey(component_key: Long): List<PhotoEntity>  {
-      return wfmDatabase.photoEntityQueries.selectByComponentKey(component_key).executeAsList()
+    override suspend fun getPhotoListByComponentKey(taskId: Long): List<PhotoEntity>  {
+      return wfmDatabase.photoEntityQueries.selectByComponentKey(taskId).executeAsList()
     }
 
 
 
-    override suspend fun deleteByComponentKey(component_key: Long) {
+    override suspend fun deleteByComponentKey(taskId: Long) {
 
-        wfmDatabase.photoEntityQueries.deleteByComponentKey(component_key)
+        wfmDatabase.photoEntityQueries.deleteByComponentKey(taskId)
     }
 
 

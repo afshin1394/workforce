@@ -59,12 +59,12 @@ import com.mohamedrejeb.calf.ui.timepicker.AdaptiveTimePicker
 import com.mohamedrejeb.calf.ui.timepicker.rememberAdaptiveTimePickerState
 import dev.icerock.moko.resources.compose.painterResource
 import dev.icerock.moko.resources.compose.stringResource
+import irancell.nwg.wfm.ConvertStringToTimeStamp
 import irancell.nwg.wfm.DatePickerFormat.format
 import irancell.nwg.wfm.MR
+import irancell.nwg.wfm.getSharedPref
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
-import kotlinx.datetime.LocalDateTime
-import kotlinx.datetime.LocalTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import presentation.theme.h4
@@ -72,6 +72,7 @@ import presentation.theme.strokeDefaultLight
 import presentation.theme.subtleDefault
 import presentation.theme.surfaceBrandDefault
 import presentation.theme.textSecondary
+import utils.IsScrollDateTimePickerInList
 import utils.getLocalDateTimeFromLong
 
 
@@ -80,18 +81,27 @@ import utils.getLocalDateTimeFromLong
 fun ModalDateTimePicker(
     title: String,
     titleDatePiker: String,
-    onDateSelected: (selectItem: String) -> Unit,
-    onTimeSelected: (selectItem: String) -> Unit
+    onDateSelected: (selectDateItem: String) -> Unit,
+
+
 ) {
+
+    println("recomposeeee ${"DateTime"}")
 
     val scope = rememberCoroutineScope()
     var isBottomSheetVisible by rememberSaveable { mutableStateOf(false) }
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     var title by remember { mutableStateOf(title) }
-    var selectDate by remember { mutableStateOf("") }
+    var selectDate by remember { mutableStateOf(if(title.take(2).all{it.isDigit()}) title.trim().substringBefore("  ")else "") }
     var selectTime by remember { mutableStateOf("") }
 
-    Column(Modifier.padding(16.dp)) {
+
+    fun updateTitleAndDate() {
+        val updatedValue = "${selectDate}  ${selectTime}"
+        title = updatedValue
+        onDateSelected(updatedValue)
+    }
+    Column(Modifier.padding(12.dp)) {
         TextField(value = title,
             onValueChange = { },
             modifier = Modifier.fillMaxWidth()
@@ -105,7 +115,7 @@ fun ModalDateTimePicker(
                     }
                 },
             readOnly = true,
-            shape = RoundedCornerShape(8.dp),
+            shape = RoundedCornerShape(15.dp),
             textStyle = TextStyle(color = textSecondary),
             colors = TextFieldDefaults.colors(
                 focusedIndicatorColor = Color.Transparent,
@@ -122,11 +132,12 @@ fun ModalDateTimePicker(
                     painter = painterResource(MR.images.calendar),
                     "deleteAllSelected",
                     Modifier.width(28.dp).height(28.dp).padding(end = 8.dp).clickable {
-                            scope.launch {
-                                isBottomSheetVisible = !isBottomSheetVisible
-                                sheetState.expand()
-                            }
-                        },
+                        scope.launch {
+                            isBottomSheetVisible = !isBottomSheetVisible
+                            sheetState.expand()
+                            getSharedPref().put(IsScrollDateTimePickerInList,true)
+                        }
+                    },
                     tint = textSecondary
                 )
 
@@ -134,27 +145,24 @@ fun ModalDateTimePicker(
 
         BottomSheetDate(isBottomSheetVisible = isBottomSheetVisible,
             sheetState = sheetState,
+            dateSelected =title ,
             onDateSelected = {
-
                 selectDate = it
-                title = "$selectDate    $selectTime"
-                onDateSelected(it)
+                updateTitleAndDate()
 
             },
             titleDatePiker = titleDatePiker,
             onTimeSelected = {
                 selectTime = it
-
-                title = "$selectDate    $selectTime"
-                onTimeSelected(it)
+                updateTitleAndDate()
 
 
             },
             onDismiss = {
                 scope.launch { sheetState.hide() }
-
                 isBottomSheetVisible = false
-            }
+            },
+
 
         )
     }
@@ -168,9 +176,11 @@ fun BottomSheetDate(
     isBottomSheetVisible: Boolean,
     sheetState: SheetState,
     titleDatePiker: String,
+    dateSelected:String,
     onDateSelected: (selectItem: String) -> Unit,
     onTimeSelected: (selectItem: String) -> Unit,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
+
 ) {
 
 
@@ -180,21 +190,36 @@ fun BottomSheetDate(
     var isCancelclick by rememberSaveable { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
     val datePickerState = rememberAdaptiveDatePickerState()
-    var data by remember { mutableStateOf("") }
-    var timeSelected by remember { mutableStateOf("") }
+    var data by remember { mutableStateOf(dateSelected) }
+    var timeSelected by remember { mutableStateOf( if (dateSelected.contains("AM")|| dateSelected.contains("PM")) dateSelected.substringAfter("  ") else "") }
 
-    LaunchedEffect(datePickerState.selectedDateMillis) {
+
+
+    LaunchedEffect(datePickerState.selectedDateMillis ) {
         datePickerState.selectedDateMillis?.let {
 
 
             if (isCancelclick) {
 
                 isCancelclick = false
+
             } else {
-                data = getLocalDateTimeFromLong(it).format("yyyy-mm-dd")
-                onDateSelected(data)
+
+                if (getSharedPref().getBool(IsScrollDateTimePickerInList,false)){
+                    data = getLocalDateTimeFromLong(it).format("yyyy-MM-dd")
+                    onDateSelected(data)
+                    if (dateSelected.contains("AM")|| dateSelected.contains("PM"))
+                    onTimeSelected(dateSelected.substringAfter("  "))
+
+                }
+
+
             }
 
+        }?:let {
+
+            if(dateSelected.take(2).all{it.isDigit()})
+            datePickerState.setSelection(ConvertStringToTimeStamp(dateSelected.trim().substringBefore("  ")))
         }
 
     }
@@ -218,7 +243,7 @@ fun BottomSheetDate(
 
                     .clip(shape = RoundedCornerShape(topEnd = 4.dp, topStart = 4.dp))
                     .background(color = MaterialTheme.colorScheme.background).fillMaxWidth()
-                    .padding(20.dp)
+                    .padding(12.dp)
             ) {
 
                 Column(
@@ -235,10 +260,10 @@ fun BottomSheetDate(
                         Image(painter = painterResource(MR.images.close),
                             contentDescription = "ic_close",
                             modifier = Modifier.clickable {
-                                    onDismiss()
-                                    isCancelclick = true
+                                onDismiss()
+                                isCancelclick = true
 
-                                })
+                            })
 
                         Text(
                             text = titleDatePiker,
@@ -315,14 +340,14 @@ fun BottomSheetDate(
                             style = TextStyle(color = Color.Blue),
                             modifier = Modifier.weight(1f).padding(top = 18.dp).clickable {
 
-                                    val currentTime = Clock.System.now()
-                                        .toLocalDateTime(TimeZone.currentSystemDefault())
-                                        .format("HH:mm a")
-                                    timeSelected = currentTime
-                                    onTimeSelected(timeSelected)
+                                val currentTime = Clock.System.now()
+                                    .toLocalDateTime(TimeZone.currentSystemDefault())
+                                    .format("HH:mm a")
+                                timeSelected = currentTime
+                                onTimeSelected(timeSelected)
 
 
-                                },
+                            },
                             textAlign = TextAlign.Center
                         )
 
@@ -387,6 +412,7 @@ fun BottomSheetDate(
                 onTimeSelected = {
                     timeSelected = it
                     onTimeSelected(it)
+
 
                 },
                 titleDatePiker = titleDatePiker,
@@ -479,8 +505,8 @@ fun BottomSheetTimeDate(
                         Image(painter = painterResource(MR.images.close),
                             contentDescription = "ic_close",
                             modifier = Modifier.clickable {
-                                    onDismiss()
-                                })
+                                onDismiss()
+                            })
 
                         Text(
                             text = titleDatePiker,

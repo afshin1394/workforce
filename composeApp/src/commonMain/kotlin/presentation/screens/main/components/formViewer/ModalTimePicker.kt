@@ -93,7 +93,9 @@ fun ModalTimePicker(title:String,titleDatePiker:String, onTimeSelected: (selectI
                     width = 1.dp,
                     color = strokeDefaultLight,
                     shape = RoundedCornerShape(15.dp)
-                ).clickable {
+                )
+                .background(color = Color.White, shape = RoundedCornerShape(15.dp))
+                .clickable {
                     scope.launch {
                         isBottomSheetVisible = !isBottomSheetVisible
                         sheetState.expand()
@@ -101,7 +103,7 @@ fun ModalTimePicker(title:String,titleDatePiker:String, onTimeSelected: (selectI
                 }
             ,
             readOnly = true,
-            shape = RoundedCornerShape(8.dp),
+            shape = RoundedCornerShape(15.dp),
             textStyle = TextStyle(color = textSecondary),
             colors = TextFieldDefaults.colors(
                 focusedIndicatorColor = Color.Transparent,

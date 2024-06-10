@@ -1,6 +1,7 @@
 CREATE TABLE PhotoEntity (
 pk INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-component_key INTEGER NOT NULL,
+task_id INTEGER NOT NULL ,
+component_key TEXT NOT NULL,
 index_row INTEGER NOT NULL,
 origin_uri TEXT NOT NULL,
 edited_uri TEXT NOT NULL,
@@ -8,8 +9,8 @@ angle TEXT NOT NULL
 );
 
 insert:
-INSERT OR REPLACE INTO PhotoEntity (component_key,index_row,origin_uri,edited_uri,angle)
-VALUES (?,?,?,?,?);
+INSERT OR REPLACE INTO PhotoEntity (task_id,component_key,index_row,origin_uri,edited_uri,angle)
+VALUES (?,?,?,?,?,?);
 
 
 deletePhoto:
@@ -17,11 +18,11 @@ DELETE FROM  PhotoEntity WHERE origin_uri=:origin_uri;
 
 
 deleteByComponentKey:
-DELETE FROM PhotoEntity WHERE component_key = :component_key ;
+DELETE FROM PhotoEntity WHERE task_id = :task_id ;
 
 
 selectByComponentKey:
-SELECT * FROM PhotoEntity WHERE component_key=:component_key;
+SELECT * FROM PhotoEntity WHERE task_id=:task_id;
 
 
 updateAngle:

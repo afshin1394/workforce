@@ -62,12 +62,13 @@ fun DropDownSingleChoice(
     onSearchButtonClicked: (query: String) -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
-    var selectedText by remember { mutableStateOf(selectItem) }
+    //var selectedText = selectItem
+    var selectedText  by remember { mutableStateOf(selectItem) }
     var searchedText by remember { mutableStateOf(searchText) }
     var textFieldSize by remember { mutableStateOf(Size.Zero) }
     val icon = if (expanded) Icons.Filled.KeyboardArrowUp
     else Icons.Filled.KeyboardArrowDown
-
+    println("recomposeeee ${"SingleChoice"}")
 
     Column(Modifier.padding(16.dp)) {
         TextField(value = selectedText.ifEmpty { titleDropDown },
@@ -83,7 +84,7 @@ fun DropDownSingleChoice(
                     textFieldSize = coordinates.size.toSize()
                 },
             readOnly = true,
-            shape = RoundedCornerShape(8.dp),
+            shape = RoundedCornerShape(15.dp),
             textStyle = TextStyle(color = textSecondary),
             colors = TextFieldDefaults.colors(
                 focusedIndicatorColor = Color.Transparent,

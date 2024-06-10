@@ -50,8 +50,10 @@ import androidx.compose.foundation.selection.toggleable
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.runtime.LaunchedEffect
 import com.irancell.nwg.wfm.presentation.theme.spacing15X
 import dev.icerock.moko.resources.compose.stringResource
+import domain.models.initialForm.ValueDomain
 import presentation.theme.strokeDefaultDark
 import presentation.theme.strokeDefaultLight
 import presentation.theme.subtleDefault
@@ -63,18 +65,27 @@ import presentation.theme.textSecondary
 fun DropDownMultiChoice(
     titleDropDown: String,
     searchText: String,
-    itemList: List<String>,
-    onItemSelected: (List<String>) -> Unit,
+    itemList: List<ValueDomain>,
+    onItemSelected: (List<ValueDomain>) -> Unit,
     onSearchButtonClicked: (query: String) -> Unit
 ) {
 
     var expanded by remember { mutableStateOf(false) }
-    val selectedItems = remember { mutableStateListOf<String>() }
+
     var textFieldSize by remember { mutableStateOf(Size.Zero) }
     var searchedText by remember { mutableStateOf(searchText) }
     val icon = if (expanded) Icons.Filled.KeyboardArrowUp
     else Icons.Filled.KeyboardArrowDown
 
+
+
+    val selectedItems = remember { mutableStateListOf<ValueDomain>() }
+
+
+    LaunchedEffect(itemList) {
+        selectedItems.clear()
+        selectedItems.addAll(itemList.filter { it.isSelected })
+    }
 
     Column(Modifier.padding(16.dp)) {
 
@@ -86,7 +97,6 @@ fun DropDownMultiChoice(
                 .border(width = 1.dp, color = strokeDefaultLight, shape = RoundedCornerShape(15.dp))
                 .background(color = White, shape = RoundedCornerShape(15.dp))
                 .onGloballyPositioned { coordinates ->
-                    //This value is used to assign to the DropDown the same width
                     textFieldSize = coordinates.size.toSize()
                 }
                 .wrapContentHeight(), verticalAlignment = Alignment.CenterVertically
@@ -118,7 +128,7 @@ fun DropDownMultiChoice(
                                     )
                                 ) {
                                     Text(
-                                        text = selectedItem,
+                                        text = selectedItem.label!!,
                                         modifier = Modifier.padding(all = 8.dp),
                                         style = TextStyle(color = textSecondary)
                                     )
@@ -272,7 +282,7 @@ fun DropDownMultiChoice(
 
 
             val filteredList=itemList.filter { lable->
-                lable.trim().contains(searchedText)
+                lable.label!!.trim().contains(searchedText)
             }
             filteredList.forEach { label ->
 
@@ -304,7 +314,7 @@ fun DropDownMultiChoice(
                                         onItemSelected(selectedItems)
                                     }
                                 })
-                                Text(text = label, style = TextStyle(color = textSecondary))
+                                Text(text = label.label!!, style = TextStyle(color = textSecondary))
                             }
 
                         }

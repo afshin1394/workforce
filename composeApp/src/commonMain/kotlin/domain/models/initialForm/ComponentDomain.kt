@@ -3,7 +3,7 @@ package domain.models.initialForm
 import kotlinx.serialization.Serializable
 
 
-@Serializable
+
 data class ComponentDomain(
     val id: String?= null,
     val hide: String?= null,
@@ -14,10 +14,19 @@ data class ComponentDomain(
     val validate : ValidateDomain?= null,
     var values: List<ValueDomain>?= null,
     val conditional : ConditionalDomain?= null,
-    val components : ArrayList<ComponentDomain>?= null,
-    val logics : List<LogicDomain>?= null
+    var components : List<ComponentDomain>?= null,
+    val logics : List<LogicDomain>?= null,
+    val repeatable:Boolean=false,
+    val removable:Boolean=false,
+    val isMulti:Boolean=false,
+
+
 ){
     override fun toString(): String {
         return "ComponentDomain(id=$id, hide=$hide, type=$type, label=$label, layout=$layout, subType=$subType, validate=$validate, values=$values, conditional=$conditional, components=$components, logics=$logics)"
+    }
+
+    fun ComponentDomain.copy() : ComponentDomain{
+              return ComponentDomain(this.id)
     }
 }

@@ -344,9 +344,7 @@ class MainScreen(
                                 viewModel.events.value = MainEvent.PhotoPreview
                             }, onSecondButtonClick = {
                                 viewModel.updateSuspendTicketImageUriForDeletePhoto(
-                                    viewModel.photoDomainList[positionSelectedPhotoForEdit].origin_uri,
-                                    positionSelectedPhotoForEdit
-                                )
+                                    viewModel.photoDomainList[positionSelectedPhotoForEdit].origin_uri, positionSelectedPhotoForEdit)
 
 
                             })

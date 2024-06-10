@@ -193,7 +193,7 @@ class FormViewerScreen() : Screen {
 
                     Spacer(modifier = Modifier.padding(vertical = 4.dp))
 
-                    DropDownMultiChoice(
+            /*        DropDownMultiChoice(
                         titleDropDown = stringResource(MR.strings.select_an_item),
                         searchText = "",
                         itemList = items,
@@ -201,7 +201,7 @@ class FormViewerScreen() : Screen {
 
                         },
                         onSearchButtonClicked = {
-                        })
+                        })*/
 
 
                     ModalDatePicker(
@@ -219,13 +219,13 @@ class FormViewerScreen() : Screen {
 
                         })
 
-                    ModalDateTimePicker(
+/*                    ModalDateTimePicker(
                         stringResource(MR.strings.selected_date_time),
                         stringResource(MR.strings.date_time_picker),
                         onDateSelected = {
 
                         },
-                        onTimeSelected = {})
+                        onTimeSelected = {})*/
 
 //
 //                    Radio(title=stringResource(MR.strings.select_an_item),itemList = items, selectItem = "", onItemSelected = {

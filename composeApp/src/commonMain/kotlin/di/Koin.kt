@@ -199,7 +199,7 @@ fun viewModelModule() = module {
     viewModelDefinition { GpsTrackingReportScreenVM(get()) }
     viewModelDefinition { LoginScreenVM(get()) }
     viewModelDefinition { VerifyScreenVM(get(),get(),get()) }
-    viewModelDefinition { TicketInfoVM(get()) }
+    viewModelDefinition { TicketInfoVM(get(),get()) }
     viewModelDefinition { TicketProcessVM() }
     viewModelDefinition { FormViewerScreenVM() }
     viewModelDefinition { MapVM() }

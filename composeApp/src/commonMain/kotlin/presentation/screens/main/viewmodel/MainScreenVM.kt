@@ -605,6 +605,7 @@ class MainScreenVM(
     private val photoDomain = MutableStateFlow<PhotoDomain>(
         PhotoDomain(
             selectedTask.value?.workId ?: 0,
+            "0",
             0,
             "",
             "",
@@ -643,6 +644,7 @@ class MainScreenVM(
                                 photoDomain.value =
                                     PhotoDomain(
                                         selectedTask.value?.workId ?: 0,
+                                        "0",
                                         i.toLong(),
                                         it1[i].origin_uri,
                                         it1[i].edited_uri,
@@ -668,6 +670,7 @@ class MainScreenVM(
             photoDomain.value =
                 PhotoDomain(
                     selectedTask.value?.workId ?: 0,
+                    "0",
                     0,
                     imgUri,
                     "",
@@ -685,6 +688,7 @@ class MainScreenVM(
                 insertPhotoUseCase(
                     PhotoDomain(
                         selectedTask.value?.workId ?: 0,
+                        "0",
                         photoDomainList[i].index_row,
                         photoDomainList[i].origin_uri,
                         photoDomainList[i].edited_uri,

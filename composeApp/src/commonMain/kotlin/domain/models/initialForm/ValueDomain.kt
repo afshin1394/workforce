@@ -1,8 +1,19 @@
 package domain.models.initialForm
 
+import irancell.nwg.wfm.MR
 import kotlinx.serialization.Serializable
 
-@Serializable
+
 data class ValueDomain(
-    val label : String?= null,val value : String
-)
+    val label : String?= null,var value : String?, var valueDate : ValueDate = ValueDate("",""),   var isSelected: Boolean = false
+){
+    override fun toString(): String {
+        return "ValueDomain(label=$label, value='$value')"
+    }
+}
+
+data class ValueDate(var date : String,var time : String){
+    override fun toString(): String {
+        return "ValueDate(date='$date', time='$time')"
+    }
+}

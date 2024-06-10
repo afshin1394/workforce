@@ -8,6 +8,7 @@ import irancell.nwg.wfm.db.SuspendTaskEntity
 fun PhotoDomain.toPhotoEntity() : PhotoEntity {
     return PhotoEntity(
         pk=0,
+        task_id = this.task_id,
         component_key=this.component_key,
         index_row=this.index_row,
         origin_uri=this.origin_uri,
@@ -23,6 +24,7 @@ fun List<PhotoEntity>.toPhotoDomainList():List<PhotoDomain>{
 
 fun PhotoEntity.toPhotoDomain() : PhotoDomain {
     return PhotoDomain(
+        task_id=this.task_id,
         component_key=this.component_key,
         index_row=this.index_row,
         origin_uri=this.origin_uri,

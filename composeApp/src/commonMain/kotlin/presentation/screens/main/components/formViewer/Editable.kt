@@ -69,7 +69,7 @@ fun Editable(
                     shape = RoundedCornerShape(15.dp)
                 ),
             readOnly = readOnly,
-            shape = RoundedCornerShape(8.dp),
+            shape = RoundedCornerShape(15.dp),
             textStyle = TextStyle(color = textSecondary),
             colors = TextFieldDefaults.colors(
                 focusedIndicatorColor = Color.Transparent,

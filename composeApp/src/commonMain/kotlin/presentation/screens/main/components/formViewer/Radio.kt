@@ -36,14 +36,17 @@ import utils.Language
 @Composable
 fun Radio( title:String, itemList: List<ValueDomain>, selectItem: String, onItemSelected: (selectItem: String) -> Unit) {
 
-    var select by remember { mutableStateOf(selectItem) }
+   var select by remember { mutableStateOf(selectItem) }
+ // var select =selectItem
+
+    println("recomposeeee ${"Radio"}")
 
 
     Column(Modifier.padding(16.dp)) {
 
         Text(
             text = title,
-            style = TextStyle(color = textSecondary, fontSize = 16.sp),
+            style = TextStyle(color = textSecondary, fontSize = 14.sp),
             modifier = Modifier.fillMaxWidth().wrapContentHeight(),
 
             )

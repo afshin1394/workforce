@@ -1,6 +1,6 @@
 package utils
 
-import androidx.compose.ui.text.TextRange
+
 
 const val Availability = "Availability"
 const val AvailabilityObjectId = "AvailabilityObjectId"
@@ -13,6 +13,10 @@ const val Language = "Language"
 const val SelectLanguage = "SelectLanguage"
 const val isRunningGPS = "isRunningGPS"
 const val ModeApp = "modeApp"
+const val IsScrollDateTimePickerInList = "isScrollDateTimePickerInList"
+
+
+
 
 
 object ErrorCode {
@@ -109,6 +113,7 @@ object TaskState {
     }
 
 }
+
 
 
 
