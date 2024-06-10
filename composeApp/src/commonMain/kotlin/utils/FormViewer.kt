@@ -34,6 +34,8 @@ import presentation.screens.main.components.formViewer.DropDownSingleChoice
 import presentation.screens.main.components.formViewer.Editable
 import presentation.screens.main.components.formViewer.ModalDateTimePicker
 import presentation.screens.main.components.formViewer.ImagePicker
+import presentation.screens.main.components.formViewer.ModalDatePicker
+import presentation.screens.main.components.formViewer.ModalTimePicker
 import presentation.screens.main.components.formViewer.Radio
 import presentation.screens.main.components.formViewer.TypeEditable
 import presentation.screens.main.components.formViewer.UploadFileComponent
@@ -131,12 +133,48 @@ fun initialize(
                             item.label.toString(),
 
                             ) { dateSelected ->
-                            val newValues = listOf(ValueDomain("datetime", "$dateSelected"))
+                            val newValues = listOf(ValueDomain(FormViewerTypes.Datetime,
+                                dateSelected
+                            ))
                             item.values = newValues
                             onChanges(components, newValues, currentParentIndex, index)
 
 
                         }
+                    }
+
+
+                    FormViewerTypes.Date -> {
+
+                        ModalDatePicker(
+                            item.values?.getOrNull(0)?.value ?: item.label.toString(),
+                            item.label.toString(),
+
+                            ) { dateSelected ->
+                            val newValues = listOf(ValueDomain( FormViewerTypes.Date, dateSelected))
+                            item.values = newValues
+                            onChanges(components, newValues, currentParentIndex, index)
+
+
+                        }
+
+                    }
+
+
+                    FormViewerTypes.Time -> {
+
+                        ModalTimePicker(
+                            item.values?.getOrNull(0)?.value ?: item.label.toString(),
+                            item.label.toString(),
+
+                            ) { timeSelected ->
+                            val newValues = listOf(ValueDomain(FormViewerTypes.Time, timeSelected))
+                            item.values = newValues
+                            onChanges(components, newValues, currentParentIndex, index)
+
+
+                        }
+
                     }
 
                     FormViewerTypes.Email -> {
@@ -176,8 +214,6 @@ fun initialize(
                         )
                     }
 
-                    FormViewerTypes.GridField -> {
-                    }
 
                     FormViewerTypes.ImageView -> {
 
@@ -249,7 +285,9 @@ fun initialize(
                         ) {}
                     }
 
-                    FormViewerTypes.Select -> {
+
+                    FormViewerTypes.Multi-> {
+
                         val componentLabel = item.label
                         item.values?.let { values ->
                             if (item.isMulti) {
@@ -257,11 +295,26 @@ fun initialize(
                                     componentLabel.toString(), "",
                                     values, onItemSelected = { selectedItems ->
                                         updateValuesForSelectType(values, selectedItems)
-                                        onChanges(components, item.values, currentParentIndex, index)
+                                        onChanges(
+                                            components,
+                                            item.values,
+                                            currentParentIndex,
+                                            index
+                                        )
                                     },
                                     onSearchButtonClicked = {}
                                 )
-                            } else {
+                            }
+
+                        }
+                    }
+
+
+
+
+                    FormViewerTypes.Select -> {
+                        val componentLabel = item.label
+                        item.values?.let { values ->
                                 DropDownSingleChoice(
                                     componentLabel.toString(),
                                     values,
@@ -284,7 +337,7 @@ fun initialize(
                                     {}
                                 )
                             }
-                        }
+
                     }
 
                 }

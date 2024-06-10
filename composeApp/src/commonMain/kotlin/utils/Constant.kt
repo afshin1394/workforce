@@ -41,17 +41,12 @@ object FormViewerTypes {
     const val FileUpload = "fileupload"
     const val GridField = "gridfield"
     const val ImageView = "image"
-}
-
-object DateTimeSubType {
-    const val Datetime = "datetime"
     const val Date = "date"
     const val Time = "time"
-}
-
-object SelectSubType {
     const val Multi = "multi"
 }
+
+
 
 object LogicType {
     const val Hide = "Hide"

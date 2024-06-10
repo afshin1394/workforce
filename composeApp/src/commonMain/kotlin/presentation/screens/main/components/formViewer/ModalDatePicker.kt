@@ -88,7 +88,7 @@ fun ModalDatePicker(title:String,titleDatePiker:String, onDateSelected: (selectI
                 }
             ,
             readOnly = true,
-            shape = RoundedCornerShape(8.dp),
+            shape = RoundedCornerShape(15.dp),
             textStyle = TextStyle(color = textSecondary),
             colors = TextFieldDefaults.colors(
                 focusedIndicatorColor = Color.Transparent,
