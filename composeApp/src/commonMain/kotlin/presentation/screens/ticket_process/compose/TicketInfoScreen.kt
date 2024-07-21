@@ -23,7 +23,11 @@ import presentation.theme.textInverse
 import dev.icerock.moko.resources.compose.stringResource
 import irancell.nwg.wfm.DrawController
 import irancell.nwg.wfm.MR
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
 import org.koin.compose.koinInject
 import presentation.model.BottomSheetDoubleActionModel
 import presentation.model.SingleButtonActionModel
@@ -38,11 +42,13 @@ import presentation.theme.textPrimary
 
 
 import utils.initialize
+import utils.validateComponents
+import kotlin.random.Random
 
 class TicketInfoScreen(
-    private val taskId: Long
+    private val ticket_number: String
 ) : Screen {
-    @OptIn(ExperimentalMaterialApi::class)
+    @OptIn(ExperimentalMaterialApi::class, FlowPreview::class)
     @Composable
     override fun Content() {
 
@@ -51,27 +57,23 @@ class TicketInfoScreen(
         val navigator = LocalNavigator.currentOrThrow
 
         val ticketProcessScreen =
-            rememberScreen(presentation.nav.Screen.TicketProcess.TicketProcessScreen(taskId))
+            rememberScreen(presentation.nav.Screen.TicketProcess.TicketProcessScreen(ticket_number))
 
         val viewModel: TicketInfoVM = koinInject()
-        val taskIDValue by viewModel.taskId.collectAsState()
+        val taskIDValue by viewModel.ticketNumber.collectAsState()
         val positionSelectedPhotoForEdit by viewModel.positionSelected.collectAsState()
         var indexPhotoSelected by remember { mutableStateOf(0) }
         var componentId by remember { mutableStateOf("0") }
         var isBottomSheetOpen by remember { mutableStateOf(true) }
+        var changeState = MutableStateFlow(0)
 
         val events by viewModel.events
 
+
+
         LaunchedEffect(Unit) {
-
-
-            viewModel.getInitialForm(taskId)
-            viewModel.updateTaskId(taskId)
-        }
-
-
-        LaunchedEffect(viewModel.events.value) {
-
+            viewModel.getInitialForm(ticket_number)
+            viewModel.updateTicketNumber(ticket_number)
         }
 
 
@@ -160,7 +162,15 @@ class TicketInfoScreen(
                                 surfaceBrandDefault,
                                 textInverse
                             ), onClick = {
-                                navigator.push(ticketProcessScreen)
+
+                                val errors = validateComponents(viewModel.tempComponentList) {
+                                    viewModel.updateTempComponentList(it)
+                                }
+
+                                if (errors.isEmpty()) {
+                                    navigator.push(ticketProcessScreen)
+                                }
+
                             })
 
                         scope.launch {
@@ -238,6 +248,7 @@ class TicketInfoScreen(
                         }
 
                     }
+
                     TicketInfoEvent.Default -> {
 
                     }
@@ -259,11 +270,17 @@ class TicketInfoScreen(
                         viewModel.events.value = TicketInfoEvent.PhotoPreview
 
                     },
+                    onFixChange = { text ->
+                        changeState.update { Random.nextInt() }
+
+                    },
                     onChanges = { listComponent, listValueDomain, listIndexParent, indexChild ->
 
-                       viewModel.addOrRemoveComponentDomainRepeatableToList(listComponent, indexChild)
-
-
+                        viewModel.handleLogics()
+                        viewModel.addOrRemoveComponentDomainRepeatableToList(
+                            listComponent,
+                            indexChild
+                        )
                         listValueDomain?.let { it1 ->
                             viewModel.updateUriPhotoComponent(
                                 viewModel.tempComponentList, listIndexParent, indexChild,
@@ -284,13 +301,16 @@ class TicketInfoScreen(
                     TicketInfoEvent.PhotoPreview -> {
                         viewModel.events.value = TicketInfoEvent.Default
                     }
+
                     TicketInfoEvent.EditPhoto -> {
                         DrawController.reset()
                         viewModel.events.value = TicketInfoEvent.PhotoPreview
                     }
+
                     TicketInfoEvent.DeletePhoto -> {
                         viewModel.events.value = TicketInfoEvent.PhotoPreview
                     }
+
                     else -> {
                         viewModel.events.value = TicketInfoEvent.Default
                     }
@@ -306,13 +326,16 @@ class TicketInfoScreen(
                         TicketInfoEvent.PhotoPreview -> {
                             viewModel.events.value = TicketInfoEvent.Default
                         }
+
                         TicketInfoEvent.EditPhoto -> {
                             DrawController.reset()
                             viewModel.events.value = TicketInfoEvent.PhotoPreview
                         }
+
                         TicketInfoEvent.DeletePhoto -> {
                             viewModel.events.value = TicketInfoEvent.PhotoPreview
                         }
+
                         else -> {
                             viewModel.events.value = TicketInfoEvent.Default
 
@@ -325,6 +348,7 @@ class TicketInfoScreen(
         )
 
     }
+
 
 }
 

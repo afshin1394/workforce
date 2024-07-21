@@ -8,7 +8,7 @@ interface IInitialFormRepository {
 
     suspend fun getAll() : List<InitialFormEntity>
 
-    suspend fun getInitialFormByTaskId(taskId : Long) : InitialFormEntity
+    suspend fun getInitialFormByTicketNumber(ticketNumber : String) : InitialFormEntity
 
     suspend fun deleteAll()
 }

@@ -22,12 +22,13 @@ import androidx.compose.ui.unit.sp
 
 import com.irancell.nwg.wfm.presentation.theme.*
 import dev.icerock.moko.resources.compose.painterResource
-import domain.models.TaskDomain
+import domain.models.task.TaskDomain
 import irancell.nwg.wfm.MR
 
 import presentation.theme.body_large
 import presentation.theme.body_large_strong
 import presentation.theme.body_small
+import presentation.theme.caption
 import presentation.theme.strokeDefaultLight
 import presentation.theme.subtleDefault
 import presentation.theme.surfaceBrandDefault
@@ -38,12 +39,11 @@ import presentation.theme.textError
 import presentation.theme.textInverse
 import presentation.theme.textPrimary
 import presentation.theme.textWarning
-import utils.TaskState.Completed
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ticketCard(
-    modifier: Modifier = Modifier, task: TaskDomain ,
+    modifier: Modifier = Modifier, task: TaskDomain,
     onActionClick: () -> Unit = {},
     onMoreOptionsClick: () -> Unit = {}
 ) =
@@ -76,7 +76,7 @@ fun ticketCard(
 
             Row(verticalAlignment = Alignment.CenterVertically) {
                 androidx.compose.material3.Text(
-                    text = task.instanceNumber,
+                    text = task.basic_info.ticket_number?:"",
                     style = body_large_strong,
                     maxLines = 1,
                     modifier = modifier
@@ -111,7 +111,7 @@ fun ticketCard(
 
                 ) {
                     androidx.compose.material3.Text(
-                        text =  task.instanceId.toString(),
+                        text =  task.basic_info.province.toString(),
                         style = body_small,
                         color = textError
                     )
@@ -134,7 +134,7 @@ fun ticketCard(
 
                 ) {
                     androidx.compose.material3.Text(
-                        text = task.instanceState,
+                        text = task.basic_info.region.toString(),
                         style = body_small, color = textBrand
                     )
                 }
@@ -156,46 +156,46 @@ fun ticketCard(
                         )
                 ) {
                     androidx.compose.material3.Text(
-                        text = task.title,
+                        text = task.basic_info.site.toString(),
                         style = body_small, color = textBrand
                     )
                 }
             }
             Spacer(modifier = modifier.padding(vertical = spacing05X))
 
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Image(
-                    painterResource(MR.images.location),
-                    contentDescription = "",
-                    modifier = modifier
-                        .width(20.dp)
-                        .height(20.dp)
-                )
-                androidx.compose.material3.Text(
-                    text = "Amanieh,Miradamad Bv,Naft St", style = body_small,
-                    modifier = modifier
-                        .width(200.dp)
-                        .height(20.dp),
-                    color = Color(0xFF666666),
-                )
-
-                Spacer(modifier = modifier.padding(spacing2X))
-
-
-                Image(
-                    painterResource(MR.images.durartion),
-                    contentDescription = "",
-                    contentScale = ContentScale.Crop,
-                    modifier = modifier
-                        .width(20.dp)
-                        .height(20.dp)
-                )
-                androidx.compose.material3.Text(
-                    text = "4h 13m", style = body_small, color = textWarning
-                )
-
-            }
-            Spacer(modifier = modifier.padding(vertical = spacing05X))
+//            Row(verticalAlignment = Alignment.CenterVertically) {
+//                Image(
+//                    painterResource(MR.images.location),
+//                    contentDescription = "",
+//                    modifier = modifier
+//                        .width(20.dp)
+//                        .height(20.dp)
+//                )
+//                androidx.compose.material3.Text(
+//                    text = "Amanieh,Miradamad Bv,Naft St", style = body_small,
+//                    modifier = modifier
+//                        .width(200.dp)
+//                        .height(20.dp),
+//                    color = Color(0xFF666666),
+//                )
+//
+//                Spacer(modifier = modifier.padding(spacing2X))
+//
+//
+//                Image(
+//                    painterResource(MR.images.durartion),
+//                    contentDescription = "",
+//                    contentScale = ContentScale.Crop,
+//                    modifier = modifier
+//                        .width(20.dp)
+//                        .height(20.dp)
+//                )
+//                androidx.compose.material3.Text(
+//                    text = "4h 13m", style = body_small, color = textWarning
+//                )
+//
+//            }
+//            Spacer(modifier = modifier.padding(vertical = spacing05X))
 
             Row(verticalAlignment = Alignment.CenterVertically) {
 //                if (task.instanceStateId != Completed.id) {

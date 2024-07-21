@@ -1,5 +1,3 @@
-@file:Suppress("NAME_SHADOWING")
-
 package utils
 
 
@@ -19,14 +17,32 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import com.benasher44.uuid.uuid4
+import dev.icerock.moko.resources.compose.localized
+import dev.icerock.moko.resources.desc.Raw
+import dev.icerock.moko.resources.desc.ResourceFormattedStringDesc
+
+import dev.icerock.moko.resources.desc.StringDesc
 import domain.models.PhotoDomain
 
 import domain.models.initialForm.ComponentDomain
+import domain.models.initialForm.ProcessLogicDomain
+import domain.models.initialForm.ValidateDomain
 
 import domain.models.initialForm.ValueDomain
 import io.github.aakira.napier.LogLevel
 import io.github.aakira.napier.Napier
+import irancell.nwg.wfm.MR
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.updateAndGet
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 import presentation.screens.main.components.formViewer.CheckList
 import presentation.screens.main.components.formViewer.DropDownMultiChoice
@@ -42,6 +58,7 @@ import presentation.screens.main.components.formViewer.UploadFileComponent
 import presentation.screens.main.components.formViewer.groupComponent
 
 
+@OptIn(FlowPreview::class)
 @Composable
 fun initialize(
     taskID: String,
@@ -49,16 +66,14 @@ fun initialize(
     photoDomainList: MutableList<PhotoDomain>,
     components: List<ComponentDomain>,
     onChanges: (list: List<ComponentDomain>, listValueDomain: List<ValueDomain>?, indexParent: List<Int>, indexChild: Int) -> Unit,
+    onFixChange: (text: MutableStateFlow<String>) -> Unit,
     onClickImage: (indexPhotoSelected: Int, componentId: String) -> Unit,
     currentParentIndex: List<Int> = listOf()
 ) {
 
 
-
     val listState = rememberLazyListState()
     val scope = rememberCoroutineScope()
-    var counter by remember { mutableStateOf(0) }
-
 
     LazyColumn(
         state = listState,
@@ -81,14 +96,16 @@ fun initialize(
                             modifier.heightIn(0.dp, 1000.dp),
                             photoDomainList,
                             onChanges,
+                            onFixChange,
                             onClickImage,
                             updatedParentIndex,
                             item,
+
                             onAddClick = {
 
-                                val newComponents =listOf( copyComponentWithValues(item,counter))
-                                counter++
-                                onChanges(newComponents,null,currentParentIndex,index)
+                                val newComponents =
+                                    listOf(copyComponentWithValues(item, uuid4().toString()))
+                                onChanges(newComponents, null, currentParentIndex, index)
                                 scope.launch {
                                     listState.scrollToItem(index + 1)
                                 }
@@ -97,8 +114,9 @@ fun initialize(
                             },
                             onDeleteClick = {
 
-                                val newComponents = item.id?.let { it1 -> removeComponentById(components, it1) }
-                                onChanges(newComponents!! ,null,currentParentIndex,index)
+                                val newComponents =
+                                    item.id?.let { it1 -> removeComponentById(components, it1) }
+                                onChanges(newComponents!!, null, currentParentIndex, index)
 
                                 scope.launch {
                                     listState.animateScrollToItem(index - 1)
@@ -110,49 +128,328 @@ fun initialize(
 
                     }
 
-
-                    FormViewerTypes.Checklist -> {
-                        val componentLabel = item.label
-                        item.values?.let { values ->
-                            CheckList(
-                                componentLabel.toString(),
-                                values,
-                                onSelect =  { valueDomain->
-                                    onChanges(components, listOf(valueDomain),currentParentIndex,index)
-                                }
+                    FormViewerTypes.Number -> {
+                        val initialMessageError: ResourceFormattedStringDesc =
+                            item.validate?.messageError ?: ResourceFormattedStringDesc(
+                                MR.strings.empty_error_message,
+                                emptyList()
                             )
-                        }
+
+                        val errorMessageState = remember { mutableStateOf(initialMessageError) }
+
+
+
+
+                        Editable(
+                            processLogicDomain = item.processLogicDomain,
+                            type = TypeEditable.NUMBER,
+                            value = item.values?.get(0)?.value ?: "",
+                            placeholder = item.label.toString(),
+                            imeAction = ImeAction.None,
+                            errorMessage = if (errorMessageState.value == initialMessageError) errorMessageState.value else initialMessageError,
+                            keyboardType = KeyboardType.Number,
+                            readOnly = false,
+                            maxLines = 1,
+                            onValueChange = { newValue ->
+
+                                val updatedValueDomain = updateValueDomain(
+                                    item.values?.get(0) ?: ValueDomain(),
+                                    newValue
+                                )
+                                item.values = listOf(updatedValueDomain)
+                                updateNumberValidationError(item, errorMessageState)
+
+
+//                                onFixChange(
+//                                    textEmit,
+//                                )
+
+                                onChanges(
+                                    components,
+                                    listOf(updatedValueDomain),
+                                    currentParentIndex,
+                                    index
+                                )
+
+                            }
+                        )
+                    }
+
+
+                    FormViewerTypes.TextAREA -> {
+                        val initialMessageError: ResourceFormattedStringDesc =
+                            item.validate?.messageError ?: ResourceFormattedStringDesc(
+                                MR.strings.empty_error_message,
+                                emptyList()
+                            )
+
+                        val errorMessageState = remember { mutableStateOf(initialMessageError) }
+
+                        Editable(
+                            processLogicDomain = item.processLogicDomain,
+                            type = TypeEditable.TEXTAREA,
+                            value = item.values?.get(0)?.value ?: "",
+                            placeholder = item.label.toString(),
+                            imeAction = ImeAction.None,
+                            errorMessage = if (errorMessageState.value == initialMessageError) errorMessageState.value else initialMessageError,
+                            keyboardType = KeyboardType.Text,
+                            readOnly = false,
+                            maxLines = 1,
+                            onValueChange = { newValue ->
+                                val updatedValueDomain = updateValueDomain(
+                                    item.values?.get(0) ?: ValueDomain(),
+                                    newValue
+                                )
+                                item.values = listOf(updatedValueDomain)
+                                updateNumberValidationError(item, errorMessageState)
+
+
+
+                                onChanges(
+                                    components,
+                                    listOf(updatedValueDomain),
+                                    currentParentIndex,
+                                    index
+                                )
+                            }
+                        )
+                    }
+
+                    FormViewerTypes.TextField -> {
+
+                        val initialMessageError: ResourceFormattedStringDesc =
+                            item.validate?.messageError ?: ResourceFormattedStringDesc(
+                                MR.strings.empty_error_message,
+                                emptyList()
+                            )
+
+                        val errorMessageState = remember { mutableStateOf(initialMessageError) }
+
+                        Editable(
+                            processLogicDomain = item.processLogicDomain,
+                            type = TypeEditable.SHORT_TEXT,
+                            value = item.values?.get(0)?.value ?: "",
+                            placeholder = item.label.toString(),
+                            imeAction = ImeAction.None,
+                            errorMessage = if (errorMessageState.value == initialMessageError) errorMessageState.value else initialMessageError,
+                            keyboardType = KeyboardType.Text,
+                            readOnly = false,
+                            maxLines = 1,
+                            onValueChange = { newValue ->
+
+                                val updatedValueDomain = updateValueDomain(
+                                    item.values?.get(0) ?: ValueDomain(), newValue
+                                )
+                                item.values = listOf(updatedValueDomain)
+
+
+                                updateShortTextValidationError(item, errorMessageState)
+
+
+
+                                onChanges(
+                                    components,
+                                    listOf(updatedValueDomain),
+                                    currentParentIndex,
+                                    index
+                                )
+                            }
+                        )
+                    }
+
+
+                    FormViewerTypes.LatLong -> {
+
+                        val initialMessageError: ResourceFormattedStringDesc =
+                            item.validate?.messageError ?: ResourceFormattedStringDesc(
+                                MR.strings.empty_error_message,
+                                emptyList()
+                            )
+
+                        val errorMessageState = remember { mutableStateOf(initialMessageError) }
+
+
+                        Editable(
+                            processLogicDomain = item.processLogicDomain,
+                            type = TypeEditable.LATLONG,
+                            value = item.values?.get(0)?.value ?: "",
+                            placeholder = item.label.toString(),
+                            imeAction = ImeAction.None,
+                            errorMessage = if (errorMessageState.value == initialMessageError) errorMessageState.value else initialMessageError,
+                            keyboardType = KeyboardType.Number,
+                            readOnly = false,
+                            maxLines = 1,
+                            onValueChange = { newValue ->
+
+                                val updatedValueDomain = updateValueDomain(
+                                    item.values?.get(0) ?: ValueDomain(), newValue
+                                )
+                                item.values = listOf(updatedValueDomain)
+
+
+                                updateLatLongValidationError(item, errorMessageState)
+
+                                onChanges(
+                                    components,
+                                    listOf(updatedValueDomain),
+                                    currentParentIndex,
+                                    index
+                                )
+                            }
+                        )
+
+
+                    }
+
+
+                    FormViewerTypes.Phone -> {
+
+                        val initialMessageError: ResourceFormattedStringDesc =
+                            item.validate?.messageError ?: ResourceFormattedStringDesc(
+                                MR.strings.empty_error_message,
+                                emptyList()
+                            )
+
+                        val errorMessageState = remember { mutableStateOf(initialMessageError) }
+
+                        Editable(
+                            processLogicDomain = item.processLogicDomain,
+                            type = TypeEditable.PHONE,
+                            value = item.values?.get(0)?.value ?: "",
+                            placeholder = item.label.toString(),
+                            imeAction = ImeAction.None,
+                            errorMessage = if (errorMessageState.value == initialMessageError) errorMessageState.value else initialMessageError,
+                            keyboardType = KeyboardType.Number,
+                            readOnly = false,
+                            maxLines = 1,
+                            onValueChange = { newValue ->
+
+                                val updatedValueDomain = updateValueDomain(
+                                    item.values?.get(0) ?: ValueDomain(), newValue
+                                )
+                                item.values = listOf(updatedValueDomain)
+
+
+                                updatePhoneValidationError(item, errorMessageState)
+
+
+                                onChanges(
+                                    components,
+                                    listOf(updatedValueDomain),
+                                    currentParentIndex,
+                                    index
+                                )
+                            }
+                        )
+
+
+                    }
+
+                    FormViewerTypes.Email -> {
+
+                        val initialMessageError: ResourceFormattedStringDesc =
+                            item.validate?.messageError ?: ResourceFormattedStringDesc(
+                                MR.strings.empty_error_message,
+                                emptyList()
+                            )
+
+                        val errorMessageState = remember { mutableStateOf(initialMessageError) }
+                        Editable(
+                            processLogicDomain = item.processLogicDomain,
+                            type = TypeEditable.EMAIL,
+                            value = item.values?.get(0)?.value ?: "",
+                            placeholder = item.label.toString(),
+                            imeAction = ImeAction.None,
+                            keyboardType = KeyboardType.Email,
+                            readOnly = false,
+                            maxLines = 1,
+                            errorMessage = if (errorMessageState.value == initialMessageError) errorMessageState.value else initialMessageError,
+                            onValueChange = { newValue ->
+
+
+                                val updatedValueDomain = updateValueDomain(
+                                    item.values?.get(0) ?: ValueDomain(),
+                                    newValue
+                                )
+                                item.values = listOf(updatedValueDomain)
+
+
+                                updateEmailValidationError(item, errorMessageState)
+
+
+
+                                onChanges(
+                                    components,
+                                    listOf(updatedValueDomain),
+                                    currentParentIndex,
+                                    index
+                                )
+
+                            }
+                        )
                     }
 
 
                     FormViewerTypes.Datetime -> {
 
 
+                        val initialMessageError: ResourceFormattedStringDesc =
+                            item.validate?.messageError ?: ResourceFormattedStringDesc(
+                                MR.strings.empty_error_message,
+                                emptyList()
+                            )
+
+                        val errorMessageState = remember { mutableStateOf(initialMessageError) }
+                        val selectedDateState = remember {
+                            mutableStateOf(
+                                item.values?.getOrNull(0)?.value ?: " "
+                            )
+                        }
+
                         ModalDateTimePicker(
-                            item.values?.getOrNull(0)?.value ?: item.label.toString(),
+                            processLogicDomain = item.processLogicDomain,
+                            selectedDateState.value,
                             item.label.toString(),
-
-                            ) { dateSelected ->
-                            val newValues = listOf(ValueDomain(FormViewerTypes.Datetime,
-                                dateSelected
-                            ))
+                            if (errorMessageState.value == initialMessageError) errorMessageState.value else initialMessageError,
+                        ) { dateSelected ->
+                            val newValues =
+                                listOf(ValueDomain(FormViewerTypes.Datetime, dateSelected))
                             item.values = newValues
+                            selectedDateState.value = dateSelected
+
+                            updateDateTimeValidationError(item, errorMessageState)
+
                             onChanges(components, newValues, currentParentIndex, index)
-
-
                         }
                     }
 
 
                     FormViewerTypes.Date -> {
+                        val initialMessageError: ResourceFormattedStringDesc =
+                            item.validate?.messageError ?: ResourceFormattedStringDesc(
+                                MR.strings.empty_error_message,
+                                emptyList()
+                            )
+
+                        val errorMessageState = remember { mutableStateOf(initialMessageError) }
+                        val selectedDateState = remember {
+                            mutableStateOf(
+                                item.values?.getOrNull(0)?.value ?: " "
+                            )
+                        }
 
                         ModalDatePicker(
-                            item.values?.getOrNull(0)?.value ?: item.label.toString(),
+                            item.processLogicDomain,
+                            selectedDateState.value,
                             item.label.toString(),
-
-                            ) { dateSelected ->
-                            val newValues = listOf(ValueDomain( FormViewerTypes.Date, dateSelected))
+                            if (errorMessageState.value == initialMessageError) errorMessageState.value else initialMessageError,
+                        ) { dateSelected ->
+                            val newValues = listOf(ValueDomain(FormViewerTypes.Date, dateSelected))
                             item.values = newValues
+                            selectedDateState.value = dateSelected
+
+                            updateDateTimeValidationError(item, errorMessageState)
+
                             onChanges(components, newValues, currentParentIndex, index)
 
 
@@ -163,13 +460,32 @@ fun initialize(
 
                     FormViewerTypes.Time -> {
 
+                        val initialMessageError: ResourceFormattedStringDesc =
+                            item.validate?.messageError ?: ResourceFormattedStringDesc(
+                                MR.strings.empty_error_message,
+                                emptyList()
+                            )
+
+                        val errorMessageState = remember { mutableStateOf(initialMessageError) }
+                        val selectedDateState = remember {
+                            mutableStateOf(
+                                item.values?.getOrNull(0)?.value ?: " "
+                            )
+                        }
+
                         ModalTimePicker(
-                            item.values?.getOrNull(0)?.value ?: item.label.toString(),
+                            item.processLogicDomain,
+                            selectedDateState.value,
                             item.label.toString(),
+                            if (errorMessageState.value == initialMessageError) errorMessageState.value else initialMessageError,
 
                             ) { timeSelected ->
                             val newValues = listOf(ValueDomain(FormViewerTypes.Time, timeSelected))
                             item.values = newValues
+                            selectedDateState.value = timeSelected
+
+                            updateDateTimeValidationError(item, errorMessageState)
+
                             onChanges(components, newValues, currentParentIndex, index)
 
 
@@ -177,55 +493,63 @@ fun initialize(
 
                     }
 
-                    FormViewerTypes.Email -> {
-                        Editable(
-                            TypeEditable.EMAIL,
-                            "",
-                            ImeAction.None,
-                            keyboardType = KeyboardType.Email,
-                            readOnly = false,
-                            maxLines = 1
-                        ) {
-                        }
-                    }
 
                     FormViewerTypes.FileUpload -> {
                         val uploadDomainList =
                             remember { mutableStateOf(item.values ?: emptyList()) }
+                        val initialMessageError: ResourceFormattedStringDesc =
+                            item.validate?.messageError ?: ResourceFormattedStringDesc(
+                                MR.strings.empty_error_message,
+                                emptyList()
+                            )
+
+                        val errorMessage = remember { mutableStateOf(initialMessageError) }
 
                         UploadFileComponent(
+                            processLogicDomain = item.processLogicDomain,
                             titlePicker = item.label.toString(),
+                            errorMessage = if (errorMessage.value == initialMessageError) errorMessage.value else initialMessageError,
                             modifier = Modifier,
                             uploadList = uploadDomainList.value,
                             onSelected = { list ->
                                 val oldList = uploadDomainList.value
-                                val newValues = list.map { valueMap ->
-                                    ValueDomain(
-                                        "${item.type}:${item.id}/${valueMap.label}",
-                                        valueMap.value
-                                    )
-                                }
+                                val newValues = mutableListOf<ValueDomain>()
+
+                                updateFileUploadValidationError(item, list, errorMessage, newValues)
+
                                 val newList = (oldList + newValues).distinct()
                                 uploadDomainList.value = newList
                                 item.values = newList
 
                                 onChanges(components, newValues, currentParentIndex, index)
+
+
                             }
                         )
                     }
 
-
                     FormViewerTypes.ImageView -> {
+                        val initialMessageError: ResourceFormattedStringDesc =
+                            item.validate?.messageError ?: ResourceFormattedStringDesc(
+                                MR.strings.empty_error_message,
+                                emptyList()
+                            )
 
+                        val errorMessageState = remember { mutableStateOf(initialMessageError) }
                         ImagePicker(
+                            item.processLogicDomain,
                             item.label.toString(),
                             taskID,
+                            if (errorMessageState.value == initialMessageError) errorMessageState.value else initialMessageError,
                             findPhotosByComponentId(photoDomainList, item.id),
                             onTakePhoto = {
 
                                 val newValues =
                                     listOf(ValueDomain("${item.type}:${item.id}", "${it}"))
                                 item.values = newValues
+
+                                updateImageViewValidationError(item, errorMessageState)
+
                                 onChanges(components, newValues, currentParentIndex, index)
 
                             },
@@ -235,66 +559,116 @@ fun initialize(
                             })
                     }
 
-                    FormViewerTypes.LatLong -> {}
 
                     FormViewerTypes.Radio -> {
+                        val initialMessageError: ResourceFormattedStringDesc =
+                            item.validate?.messageError ?: ResourceFormattedStringDesc(
+                                MR.strings.empty_error_message,
+                                emptyList()
+                            )
+
+                        val errorMessageState = remember { mutableStateOf(initialMessageError) }
                         val componentLabel = item.label
-                        item.values?.let { values ->
-                            Radio(
-                                componentLabel.toString(),
-                                values,
-                                values.firstOrNull { it.isSelected }?.label ?: ""
-                            ) { selectedValue ->
-                                val updatedValues = values.map { item ->
-                                    if (item.label == selectedValue) {
-                                        item.copy(isSelected = true)
-                                    } else {
-                                        item.copy(isSelected = false)
-                                    }
+                        val valuesState = remember {
+                            mutableStateListOf( *item.values?.toTypedArray() ?: arrayOf())
+                        }
+
+                        Radio(
+                            item.processLogicDomain ?: ProcessLogicDomain().copy(),
+                            componentLabel.toString(),
+                            if (errorMessageState.value == initialMessageError) errorMessageState.value else initialMessageError,
+                            valuesState,
+                            valuesState.firstOrNull { it.isSelected }?.label ?: ""
+                        ) { selectedValue ->
+
+                            valuesState.forEachIndexed { index, item ->
+                                valuesState[index] = if (item.label == selectedValue) {
+                                    item.copy(isSelected = true)
+                                } else {
+                                    item.copy(isSelected = false)
                                 }
-                                item.values = updatedValues
-                                Napier.log(
-                                    LogLevel.ASSERT,
-                                    tag = "RadioChanges",
-                                    message = item.values.toString()
-                                )
-                                onChanges(components, updatedValues, currentParentIndex, index)
                             }
+                            item.values = valuesState
+
+                            updateSelectedComponentValidationError(item, errorMessageState)
+
+
+
+                            onChanges(components, valuesState, currentParentIndex, index)
                         }
                     }
 
-                    FormViewerTypes.Phone -> {
-                        Editable(
-                            TypeEditable.PHONE,
-                            "",
-                            ImeAction.None,
-                            keyboardType = KeyboardType.Phone,
-                            readOnly = false,
-                            maxLines = 1
-                        ) {}
+                    FormViewerTypes.Checklist -> {
+
+                        val initialMessageError: ResourceFormattedStringDesc =
+                            item.validate?.messageError ?: ResourceFormattedStringDesc(
+                                MR.strings.empty_error_message,
+                                emptyList()
+                            )
+
+                        val errorMessageState = remember { mutableStateOf(initialMessageError) }
+                        val valuesState = remember { mutableStateOf("") }
+
+
+                        val componentLabel = item.label
+                        item.values?.let { values ->
+                            CheckList(
+                                item.processLogicDomain,
+                                componentLabel.toString(),
+                                if (errorMessageState.value == initialMessageError) errorMessageState.value else initialMessageError,
+                                valuesState.value,
+                                values,
+
+                                onSelect = { valueDomain ->
+
+
+                                    updateSelectedComponentValidationError(item, errorMessageState)
+
+
+                                    valuesState.value = valueDomain.value ?: ""
+                                    onChanges(
+                                        components,
+                                        listOf(valueDomain),
+                                        currentParentIndex,
+                                        index
+                                    )
+                                }
+                            )
+                        }
                     }
 
-                    FormViewerTypes.TextField -> {
-                        Editable(
-                            TypeEditable.LONG_TEXT,
-                            "",
-                            ImeAction.None,
-                            keyboardType = KeyboardType.Text,
-                            readOnly = false,
-                            maxLines = 4
-                        ) {}
-                    }
 
+                    FormViewerTypes.Multi -> {
 
-                    FormViewerTypes.Multi-> {
+                        val initialMessageError: ResourceFormattedStringDesc =
+                            item.validate?.messageError ?: ResourceFormattedStringDesc(
+                                MR.strings.empty_error_message,
+                                emptyList()
+                            )
 
+                        val errorMessageState = remember { mutableStateOf(initialMessageError) }
+                        val valuesState = remember { mutableStateOf("") }
                         val componentLabel = item.label
                         item.values?.let { values ->
                             if (item.isMulti) {
                                 DropDownMultiChoice(
-                                    componentLabel.toString(), "",
-                                    values, onItemSelected = { selectedItems ->
+                                    item.processLogicDomain,
+                                    componentLabel.toString(),
+                                    if (errorMessageState.value == initialMessageError) errorMessageState.value else initialMessageError,
+                                    "",
+                                    valuesState.value,
+                                    values, onItemSelected = { selectedItems, oneItem ->
+
                                         updateValuesForSelectType(values, selectedItems)
+
+
+                                        valuesState.value = oneItem.value ?: ""
+
+                                        updateSelectedComponentValidationError(
+                                            item,
+                                            errorMessageState
+                                        )
+
                                         onChanges(
                                             components,
                                             item.values,
@@ -310,46 +684,56 @@ fun initialize(
                     }
 
 
-
-
                     FormViewerTypes.Select -> {
-                        val componentLabel = item.label
-                        item.values?.let { values ->
-                                DropDownSingleChoice(
-                                    componentLabel.toString(),
-                                    values,
-                                    values.firstOrNull { it.isSelected }?.label ?: "",
-                                    "",
-                                    { selectedValue ->
-                                        val updatedValues = mutableListOf<ValueDomain>()
-                                        for (item in values) {
-                                            updatedValues.add(
-                                                if (item.label == selectedValue) {
-                                                    item.copy(isSelected = true)
-                                                } else {
-                                                    item.copy(isSelected = false)
-                                                }
-                                            )
-                                        }
-                                        item.values = updatedValues
-                                        onChanges(components, updatedValues, currentParentIndex, index)
-                                    },
-                                    {}
-                                )
-                            }
+                        val initialMessageError: ResourceFormattedStringDesc =
+                            item.validate?.messageError ?: ResourceFormattedStringDesc(
+                                MR.strings.empty_error_message,
+                                emptyList()
+                            )
 
+                        val errorMessageState = remember { mutableStateOf(initialMessageError) }
+                        val componentLabel = item.label
+                        val valuesState = remember {
+                            mutableStateListOf(
+                                *item.values?.toTypedArray() ?: arrayOf()
+                            )
+                        }
+
+                        DropDownSingleChoice(
+                            item.processLogicDomain,
+                            componentLabel.toString(),
+                            if (errorMessageState.value == initialMessageError) errorMessageState.value else initialMessageError,
+                            valuesState,
+                            valuesState.firstOrNull { it.isSelected }?.label ?: "",
+                            "",
+                            { selectedValue ->
+                                valuesState.forEachIndexed { index, item ->
+                                    valuesState[index] = if (item.label == selectedValue) {
+                                        item.copy(isSelected = true)
+                                    } else {
+                                        item.copy(isSelected = false)
+                                    }
+                                }
+                                item.values = valuesState
+
+                                updateSelectedComponentValidationError(item, errorMessageState)
+
+                                onChanges(components, valuesState, currentParentIndex, index)
+                            },
+                            {}
+                        )
                     }
 
                 }
+
             }
-
-
         }
+
 
     }
 
-
 }
+
 
 private fun updateValuesForSelectType(values: List<ValueDomain>, selectedItems: List<ValueDomain>) {
     for (item in values) {
@@ -357,42 +741,40 @@ private fun updateValuesForSelectType(values: List<ValueDomain>, selectedItems: 
     }
 }
 
-fun copyComponentWithValues(component: ComponentDomain, counter: Int): ComponentDomain {
 
+fun copyComponentWithValues(
+    component: ComponentDomain,
+    uuid: String = uuid4().toString()
+): ComponentDomain {
+    val updatedValidate = component.validate?.copy(
+        messageError = ResourceFormattedStringDesc(
+            MR.strings.empty_error_message,
+            emptyList()
+        )
+    )
 
-
-
-    if (component.type == FormViewerTypes.Select||component.type ==FormViewerTypes.Checklist||component.type== FormViewerTypes.Radio) {
-        val values = component.values?.map { value ->
-            value.copy(isSelected = false)
+    val values =
+        if (component.type == FormViewerTypes.Select || component.type == FormViewerTypes.Checklist || component.type == FormViewerTypes.Radio) {
+            component.values?.map { value ->
+                value.copy(isSelected = false)
+            }
+        } else {
+            null
         }
-        return component.copy(
-            id = "${component.id}copy$counter",
-            components = component.components?.map { copyComponentWithValues(it, counter) }
-                ?.toMutableList(),
-            values = values?.toMutableList(),
-            removable = true
-        )
 
+    val copiedComponents = component.components?.map { subComponent ->
+        copyComponentWithValues(subComponent, uuid4().toString())
+    }?.toMutableList()
 
-    }else{
-
-        return component.copy(
-            id = "${component.id}copy$counter",
-            components = component.components?.map { copyComponentWithValues(it, counter) }
-                ?.toMutableList(),
-            values = null,
-            removable = true
-        )
-
-    }
-
-
-
-
-
-
+    return component.copy(
+        id = "${component.id}copy$uuid",
+        components = copiedComponents,
+        values = values?.toMutableList(),
+        removable = true,
+        validate = updatedValidate
+    )
 }
+
 
 fun removeComponentById(components: List<ComponentDomain>, id: String): List<ComponentDomain> {
     val mutableComponents = components.toMutableList()
@@ -408,8 +790,6 @@ fun removeComponentById(components: List<ComponentDomain>, id: String): List<Com
 }
 
 
-
-
 fun findPhotosByComponentId(components: List<PhotoDomain>, id: String?): MutableList<PhotoDomain> {
     val list: MutableList<PhotoDomain> = arrayListOf()
     components.forEach {
@@ -420,4 +800,206 @@ fun findPhotosByComponentId(components: List<PhotoDomain>, id: String?): Mutable
     return list
 }
 
+fun updateValueDomain(
+    valueDomain: ValueDomain,
+    newValue: String,
+
+    ): ValueDomain {
+
+    return valueDomain.copy(
+        value = newValue,
+    )
+}
+
+
+fun updateNumberValidationError(
+    item: ComponentDomain,
+    errorMessageState: MutableState<ResourceFormattedStringDesc>
+) {
+    val validationErrors = validateNumber(item, item.validate ?: ValidateDomain(), null)
+    val messageError: ResourceFormattedStringDesc = validationErrors
+        ?: ResourceFormattedStringDesc(
+            MR.strings.empty_error_message,
+            emptyList()
+        )
+    errorMessageState.value = messageError
+    val updatedValidate = item.validate?.copy(messageError = messageError)
+    item.validate = updatedValidate
+}
+
+fun updateTextareaValidationError(
+    item: ComponentDomain,
+    errorMessageState: MutableState<ResourceFormattedStringDesc>
+) {
+    val validationErrors = validateTextarea(item, item.validate ?: ValidateDomain(), null)
+    val messageError: ResourceFormattedStringDesc = validationErrors
+        ?: ResourceFormattedStringDesc(
+            MR.strings.empty_error_message,
+            emptyList()
+        )
+    errorMessageState.value = messageError
+    val updatedValidate = item.validate?.copy(messageError = messageError)
+    item.validate = updatedValidate
+}
+
+fun updateShortTextValidationError(
+    item: ComponentDomain,
+    errorMessageState: MutableState<ResourceFormattedStringDesc>
+) {
+    val validationErrors =
+        validateShortText(item, item.validate ?: ValidateDomain())
+    val messageError: ResourceFormattedStringDesc = validationErrors
+        ?: ResourceFormattedStringDesc(
+            MR.strings.empty_error_message,
+            emptyList()
+        )
+    errorMessageState.value = messageError
+    val updatedValidate = item.validate?.copy(messageError = messageError)
+    item.validate = updatedValidate
+}
+
+fun updateLatLongValidationError(
+    item: ComponentDomain,
+    errorMessageState: MutableState<ResourceFormattedStringDesc>
+) {
+    val validationErrors =
+        validateLatLong(item, item.validate ?: ValidateDomain())
+    val messageError: ResourceFormattedStringDesc = validationErrors
+        ?: ResourceFormattedStringDesc(
+            MR.strings.empty_error_message,
+            emptyList()
+        )
+    errorMessageState.value = messageError
+    val updatedValidate = item.validate?.copy(messageError = messageError)
+    item.validate = updatedValidate
+}
+
+fun updatePhoneValidationError(
+    item: ComponentDomain,
+    errorMessageState: MutableState<ResourceFormattedStringDesc>
+) {
+    val validationErrors =
+        validatePhone(item, item.validate ?: ValidateDomain(), null)
+    val messageError: ResourceFormattedStringDesc = validationErrors
+        ?: ResourceFormattedStringDesc(
+            MR.strings.empty_error_message,
+            emptyList()
+        )
+    errorMessageState.value = messageError
+    val updatedValidate = item.validate?.copy(messageError = messageError)
+    item.validate = updatedValidate
+}
+
+fun updateEmailValidationError(
+    item: ComponentDomain,
+    errorMessageState: MutableState<ResourceFormattedStringDesc>
+) {
+    val validationErrors = validateEmail(item, item.validate ?: ValidateDomain(), null)
+    val messageError: ResourceFormattedStringDesc = validationErrors
+        ?: ResourceFormattedStringDesc(
+            MR.strings.empty_error_message,
+            emptyList()
+        )
+    errorMessageState.value = messageError
+    val updatedValidate = item.validate?.copy(messageError = messageError)
+    item.validate = updatedValidate
+}
+
+fun updateDateTimeValidationError(
+    item: ComponentDomain,
+    errorMessageState: MutableState<ResourceFormattedStringDesc>
+) {
+
+    val validationErrors = validateRequired(item, item.validate ?: ValidateDomain())
+    val messageError: ResourceFormattedStringDesc = validationErrors
+        ?: ResourceFormattedStringDesc(
+            MR.strings.empty_error_message,
+            emptyList()
+        )
+    errorMessageState.value = messageError
+    val updatedValidate = item.validate?.copy(messageError = messageError)
+    item.validate = updatedValidate
+
+}
+
+fun updateFileUploadValidationError(
+    item: ComponentDomain,
+    list: List<ValueDomain>,
+    errorMessageState: MutableState<ResourceFormattedStringDesc>,
+    newValues: MutableList<ValueDomain>
+) {
+    var tempErrorMessage = ResourceFormattedStringDesc(MR.strings.empty_error_message, emptyList())
+
+    list.forEachIndexed { index, valueMap ->
+        val tempErrors = validateFileUpload(
+            item,
+            item.validate ?: ValidateDomain(),
+            mutableListOf(valueMap),
+            null
+        )
+        if (tempErrors == null) {
+            newValues.add(
+                ValueDomain(
+                    "${item.type}:${item.id}/${valueMap.label}",
+                    valueMap.value
+                )
+            )
+
+            errorMessageState.value = tempErrorMessage
+            val updatedValidate = item.validate?.copy(
+                messageError = ResourceFormattedStringDesc(
+                    MR.strings.empty_error_message,
+                    emptyList()
+                )
+            )
+            item.validate = updatedValidate
+        } else {
+            if (index == 0) {
+                tempErrorMessage = tempErrors ?: ResourceFormattedStringDesc(
+                    MR.strings.empty_error_message,
+                    emptyList()
+                )
+
+                errorMessageState.value = tempErrorMessage
+                val updatedValidate = item.validate?.copy(
+                    messageError = tempErrorMessage
+                )
+                item.validate = updatedValidate
+            }
+        }
+    }
+}
+
+fun updateImageViewValidationError(
+    item: ComponentDomain,
+    errorMessageState: MutableState<ResourceFormattedStringDesc>
+) {
+    val validationErrors = validateRequired(item, item.validate ?: ValidateDomain())
+    val messageError: ResourceFormattedStringDesc = validationErrors
+        ?: ResourceFormattedStringDesc(
+            MR.strings.empty_error_message,
+            emptyList()
+        )
+    errorMessageState.value = messageError
+    val updatedValidate = item.validate?.copy(messageError = messageError)
+
+    item.validate = updatedValidate
+}
+
+fun updateSelectedComponentValidationError(
+    item: ComponentDomain,
+    errorMessageState: MutableState<ResourceFormattedStringDesc>
+) {
+
+
+    val validationErrors = validateSelected(item, item.validate ?: ValidateDomain())
+    val messageError: ResourceFormattedStringDesc = validationErrors
+        ?: ResourceFormattedStringDesc(
+            MR.strings.empty_error_message,
+            emptyList()
+        )
+    errorMessageState.value = messageError
+    val updatedValidate = item.validate?.copy(messageError = messageError)
+    item.validate = updatedValidate
+}
 

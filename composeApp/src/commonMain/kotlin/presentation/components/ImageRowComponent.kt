@@ -8,21 +8,25 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import com.irancell.nwg.wfm.presentation.theme.spacing1X
 import com.irancell.nwg.wfm.presentation.theme.spacing2X
 import domain.models.PhotoDomain
 import io.github.aakira.napier.LogLevel
 import io.github.aakira.napier.Napier
+import presentation.theme.surfaceBrandDefault
+import presentation.theme.surfaceDefault
 
 @Composable
 fun ImageRowComponent(
+    backgroundColor : Color = surfaceBrandDefault,
     itemsList: List<PhotoDomain>?,
     modifier: Modifier = Modifier,
     onCameraClick: () -> Unit = {},
     onImageClick: (index: Int) -> Unit
 ) {
     Row(modifier) {
-        TakeImageComponent() {
+        TakeImageComponent(backgroundColor) {
             onCameraClick()
         }
         Spacer(modifier = Modifier.padding(vertical = spacing2X))

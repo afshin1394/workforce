@@ -11,6 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.registry.rememberScreen
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
@@ -101,9 +102,11 @@ class LoginScreen() : Screen {
                     }
 
                     Image(
-                        painter = dev.icerock.moko.resources.compose.painterResource(MR.images.ic_sdm),
+                        painter = dev.icerock.moko.resources.compose.painterResource(MR.images.ic_iTicket_text),
                         contentDescription = "ic_wfm",
                         modifier = Modifier
+                            .width(72.dp)
+                            .height(72.dp)
                             .weight(2f)
                             .wrapContentSize()
                     )
@@ -187,14 +190,14 @@ class LoginScreen() : Screen {
                         AuthButton(authButtonItem = AuthButtonItem(stringResource(MR.strings.sign_in))) {
 
                             //onClick
-                            if (viewModel.performLogin(email, password)) {
+//                            if (viewModel.performLogin(email, password)) {
                                 Napier.log(
                                     LogLevel.ASSERT,
                                     "email & password",
                                     message = "email ${email} password ${password}"
                                 )
                                 viewModel.login(email, password)
-                            }
+//                            }
                         }
                     }
                 }

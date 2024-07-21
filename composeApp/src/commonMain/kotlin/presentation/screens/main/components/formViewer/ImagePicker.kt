@@ -19,27 +19,55 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import dev.icerock.moko.resources.compose.localized
+import dev.icerock.moko.resources.desc.ResourceFormattedStringDesc
 import domain.models.PhotoDomain
+import domain.models.initialForm.ProcessLogicDomain
 import irancell.nwg.wfm.Camera
 import irancell.nwg.wfm.InternalStorage
 import irancell.nwg.wfm.provideAppContext
 import presentation.components.ImageRowComponent
 import presentation.theme.h4
+import presentation.theme.strokeDefaultLight
+import presentation.theme.surfaceBrandDefault
+import presentation.theme.surfaceBrandDisabled
+import presentation.theme.textInverseDisabled
 import presentation.theme.textSecondary
 
 @Composable
 fun ImagePicker(
+    processLogicDomain : ProcessLogicDomain,
     titlePicker:String,
     componentId: String,
+    errorMessage: ResourceFormattedStringDesc,
     photoDomainList: List<PhotoDomain>,
     onTakePhoto: (resultTakePhoto: String) -> Unit = {},
     onImageClick: (index: Int) -> Unit
 ) {
-    println("recomposeeee ${photoDomainList.toString()}")
+
+
+    val disableLogic = processLogicDomain.disabled
+    val hideLogic = processLogicDomain.shouldHide
+    val readOnlyLogic = processLogicDomain.readOnly
+    val requiredLogic = processLogicDomain.required
+    val validateLogic = processLogicDomain.validate
+    val errorMessageValidateLogic = processLogicDomain.errorMessage
+
+    val backgroundColor = if (errorMessage.localized() != "" || validateLogic) {
+        Color.Red
+    } else if (readOnlyLogic || disableLogic) {
+        surfaceBrandDisabled
+    } else {
+        surfaceBrandDefault
+    }
 
     var openCamera by remember { mutableStateOf(false) }
 
@@ -65,30 +93,63 @@ fun ImagePicker(
 
     }
 
+    if(!hideLogic) {
+        Column(
+            modifier = Modifier
 
-    Column(
-        modifier = Modifier
+                .clip(shape = RoundedCornerShape(topEnd = 4.dp, topStart = 4.dp))
+                .fillMaxWidth()
+                .padding(18.dp)
+        ) {
+            val styledString = buildAnnotatedString {
+                withStyle(
+                    style = SpanStyle(
+                        color = if (disableLogic || readOnlyLogic) textInverseDisabled else textSecondary,
+                        fontSize = 14.sp
+                    )
+                ) {
+                    append(titlePicker)
+                }
+                if (requiredLogic) {
+                    withStyle(style = SpanStyle(color = Color.Red, fontSize = 18.sp)) {
+                        append(" *")
+                    }
+                }
+            }
 
-            .clip(shape = RoundedCornerShape(topEnd = 4.dp, topStart = 4.dp))
+            Text(
+                text = styledString,
+                style = TextStyle(color = textSecondary, fontSize = 14.sp),
+                modifier = Modifier.fillMaxWidth().wrapContentHeight(),
+            )
 
-            .fillMaxWidth()
-            .padding(18.dp)
-    ) {
+            Spacer(modifier = Modifier.height(12.dp))
+            ImageRowComponent(backgroundColor,photoDomainList, onCameraClick = {
+                if(!(disableLogic || readOnlyLogic))
+                    openCamera = true
 
-        Text(
-            text = titlePicker,
-            style = TextStyle(color = textSecondary, fontSize = 14.sp),
-            modifier = Modifier.fillMaxWidth().wrapContentHeight(),
-            textAlign = TextAlign.Left
-        )
+            }) {
+                onImageClick(it)
+            }
+            Spacer(modifier = Modifier.height(6.dp))
+            errorMessage.localized().let {
+                Text(
+                    text = it,
+                    color = Color.Red,
+                    modifier = Modifier
+                )
+            }
 
-        Spacer(modifier = Modifier.height(12.dp))
-        ImageRowComponent(photoDomainList, onCameraClick = {
-
-            openCamera = true
-
-        }) {
-            onImageClick(it)
+            if (validateLogic) {
+                errorMessageValidateLogic?.let {
+                    Text(
+                        text = errorMessageValidateLogic.localized(),
+                        color = Color.Red,
+                        style = TextStyle(fontSize = 12.sp),
+                        modifier = Modifier.padding(top = 4.dp)
+                    )
+                }
+            }
         }
     }
 

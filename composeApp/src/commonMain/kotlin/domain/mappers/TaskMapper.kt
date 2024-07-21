@@ -1,28 +1,27 @@
 package domain.mappers
 
-import data.network.response.task.TasksNetworkResponse
-import domain.models.TaskDomain
+import data.network.response.task.task.Detail
+import data.network.response.task.task.TasksNetworkResponse
+import domain.models.task.BasicInfoDomain
+import domain.models.task.TaskDomain
 import irancell.nwg.wfm.db.TaskEntity
 import utils.TaskState
 
 
-fun TasksNetworkResponse.toTaskEntity(): TaskEntity {
+fun Detail.toTaskEntity(): TaskEntity {
     return   TaskEntity(
-        wi_id = this.wi_id,
-        ticket_instance_id = this.ticket_instance_id,
-        ticket_title = this.ticket_title.orEmpty(),
-        ticket_instance_number = this.ticket_instance_number.orEmpty(),
-        ticket_instance_state = this.ticket_instance_state.orEmpty(),
-        ticket_instance_title = this.ticket_instance_title.orEmpty(),
-        type = "" /*this.ticket_instance_action.type.orEmpty()*/,
-        description = ""/*this.ticket_instance_action.description.orEmpty()*/,
-        category = ""/*this.ticket_instance_action.category.orEmpty()*/,
-        subCategory = ""/*this.ticket_instance_action.subCategory.orEmpty()*/,
-        attachment = "" /*this.ticket_instance_action.attachment.orEmpty()*/
+        ticket_number = this.basic_info.ticket_number?:"",
+        ticket_state = this.basic_info.ticket_state?:"",
+        city = this.basic_info.city?:"",
+        site = this.basic_info.site?:"",
+        level = this.basic_info.level?.toLong()?:-1,
+        region = this.basic_info.region?:"",
+        location = this.basic_info.location?:"",
+        province = this.basic_info.province?:""
     )
 }
 
-fun List<TasksNetworkResponse>.toTaskEntityList(): List<TaskEntity> {
+fun List<Detail>.toTaskEntityList(): List<TaskEntity> {
     return map {
        it.toTaskEntity()
     }
@@ -30,14 +29,18 @@ fun List<TasksNetworkResponse>.toTaskEntityList(): List<TaskEntity> {
 
 fun TaskEntity.toTaskDomain(): TaskDomain {
     return  TaskDomain(
-            workId = this.wi_id,
-            instanceId = this.ticket_instance_id,
-            title = this.ticket_title,
-            instanceNumber = this.ticket_instance_number,
-            instanceState = this.ticket_instance_state,
-            instanceStateId = checkForInstanceStateId(this.ticket_instance_state),
-            instanceTitle = this.ticket_instance_title,
-            status = this.type,
+         initial_form = null,
+         basic_info = BasicInfoDomain(
+             ticket_number =this.ticket_number,
+             ticket_state = this.ticket_state,
+             level = this.level.toInt(),
+             location= this.location,
+             site = this.site,
+             region = this.region,
+             province = this.province,
+             city= this.city,
+             instanceStateId = checkForInstanceStateId(this.ticket_state)
+         )
         )
 
 }

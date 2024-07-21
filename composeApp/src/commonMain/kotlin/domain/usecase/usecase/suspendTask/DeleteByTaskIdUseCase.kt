@@ -5,8 +5,8 @@ import domain.usecase.BaseUseCase
 
 class DeleteByTaskIdUseCase(
     private val iSuspendTaskRepository: ISuspendTaskRepository
-) : BaseUseCase<Unit,Long>() {
-    override suspend fun run(params: Long) {
+) : BaseUseCase<Unit,String>() {
+    override suspend fun run(params: String) {
         iSuspendTaskRepository.deleteByTaskId(params)
     }
 }

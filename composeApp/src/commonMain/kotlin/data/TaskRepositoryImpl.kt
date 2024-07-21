@@ -1,6 +1,6 @@
 package data
 
-import data.network.response.task.TasksNetworkResponse
+import data.network.response.task.task.TasksNetworkResponse
 import domain.repository.ITaskRepository
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
@@ -12,9 +12,9 @@ class TaskRepositoryImpl(
     private val httpClient: HttpClient,
     private val wfmDatabase: WFMDatabase
 ) : ITaskRepository {
-    override suspend fun fetchWorks(): List<TasksNetworkResponse> {
+    override suspend fun fetchWorks(): TasksNetworkResponse {
            return httpClient.get("workforce_management/user/my-tasks/")
-                .body<List<TasksNetworkResponse>>()
+                .body<TasksNetworkResponse>()
     }
 
     override suspend fun insertAll(tickets: List<TaskEntity>) {
@@ -22,17 +22,14 @@ class TaskRepositoryImpl(
             val insertStatement = wfmDatabase.taskEntityQueries::insert
             tickets.forEach {
                 insertStatement.invoke(
-                    it.wi_id,
-                    it.ticket_instance_id,
-                    it.ticket_title,
-                    it.ticket_instance_number,
-                    it.ticket_instance_state,
-                    it.ticket_instance_title,
-                    it.type,
-                    it.description,
-                    it.category,
-                    it.subCategory,
-                    it.attachment
+                    it.ticket_number,
+                    it.ticket_state,
+                    it.level,
+                    it.location,
+                    it.site,
+                    it.region,
+                    it.province,
+                    it.city,
                 )
             }
         }

@@ -4,10 +4,10 @@ import kotlinx.serialization.Serializable
 
 
 data class InitialFormDomain(
-     val wi_id : Long,
+     val ticket_number : String,
      val structure : InitialFormStructureDomain
 ){
      override fun toString(): String {
-          return "InitialFormDomain(wi_id=$wi_id, structure=$structure)"
+          return "InitialFormDomain(wi_id=$ticket_number, structure=$structure)"
      }
 }

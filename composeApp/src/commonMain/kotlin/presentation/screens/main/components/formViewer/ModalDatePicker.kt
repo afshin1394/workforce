@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -43,127 +44,236 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.irancell.nwg.wfm.presentation.theme.spacing05X
 import com.mohamedrejeb.calf.ui.datepicker.AdaptiveDatePicker
 import com.mohamedrejeb.calf.ui.datepicker.rememberAdaptiveDatePickerState
+import dev.icerock.moko.resources.compose.localized
 import dev.icerock.moko.resources.compose.painterResource
 import dev.icerock.moko.resources.compose.stringResource
+import dev.icerock.moko.resources.desc.ResourceFormattedStringDesc
+import domain.models.initialForm.ProcessLogicDomain
+import irancell.nwg.wfm.ConvertStringToTimeStamp
 import irancell.nwg.wfm.DatePickerFormat.format
 import irancell.nwg.wfm.MR
+import irancell.nwg.wfm.getSharedPref
 import kotlinx.coroutines.launch
+import kotlinx.datetime.Clock
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 import presentation.theme.h4
 import presentation.theme.strokeDefaultLight
 import presentation.theme.surfaceBrandDefault
+import presentation.theme.surfaceBrandDisabled
+import presentation.theme.textInverseDisabled
 import presentation.theme.textSecondary
+import utils.IsScrollDateTimePickerInList
 import utils.getLocalDateTimeFromLong
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ModalDatePicker(title:String,titleDatePiker:String, onDateSelected: (selectItem: String) -> Unit) {
+fun ModalDatePicker(
+    processLogicDomain: ProcessLogicDomain,
+    title: String,
+    titleDatePiker: String,
+    errorMessage: ResourceFormattedStringDesc,
+    onDateSelected: (selectItem: String) -> Unit
+) {
+
+    val disableLogic = processLogicDomain.disabled
+    val hideLogic = processLogicDomain.shouldHide
+    val readOnlyLogic = processLogicDomain.readOnly
+    val requiredLogic = processLogicDomain.required
+    val validateLogic = processLogicDomain.validate
+    val errorMessageValidateLogic = processLogicDomain.errorMessage
+
+
+
 
     val scope = rememberCoroutineScope()
     var isBottomSheetVisible by rememberSaveable { mutableStateOf(false) }
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     var title by remember { mutableStateOf(title) }
 
-    Column(Modifier.padding(16.dp)) {
-        TextField(value = title,
-            onValueChange = {  },
-            modifier = Modifier
-                .fillMaxWidth()
 
-                .border(
-                    width = 1.dp,
-                    color = strokeDefaultLight,
-                    shape = RoundedCornerShape(15.dp)
-                ).clickable {
-                    scope.launch {
-                        isBottomSheetVisible = !isBottomSheetVisible
-                        sheetState.expand()
-                    }
-                }
-            ,
-            readOnly = true,
-            shape = RoundedCornerShape(15.dp),
-            textStyle = TextStyle(color = textSecondary),
-            colors = TextFieldDefaults.colors(
-                focusedIndicatorColor = Color.Transparent,
-                disabledIndicatorColor = Color.Transparent,
-                unfocusedIndicatorColor = Color.Transparent,
-                focusedContainerColor = Color.White,
-                unfocusedContainerColor = Color.White,
-                disabledContainerColor = Color.White
-            ),
-
-            trailingIcon = {
-
-                Icon(
-                    painter = painterResource(MR.images.calendar),
-                    "deleteAllSelected",
-                    Modifier.width(28.dp).height(28.dp).padding(end = 8.dp)
-                        .clickable {
-                            scope.launch {
-                                isBottomSheetVisible = !isBottomSheetVisible
-                                sheetState.expand()
-                            }
-                        },
-                    tint = textSecondary)
-
-            })
-
-        BottomSheet(
-            isBottomSheetVisible = isBottomSheetVisible,
-            sheetState = sheetState,
-            onDateSelected = {
-                title = it
-                onDateSelected(it)
-
-            },
-            titleDatePiker = titleDatePiker,
-            onDismiss = {
-                scope.launch { sheetState.hide() }
-
-                isBottomSheetVisible = false
-            }
-
+    var selectDate by remember {
+        mutableStateOf(
+            if (title.take(2).all { it.isDigit() }) title.trim().substringBefore("  ") else ""
         )
     }
 
-}
 
+    fun updateTitleAndDate() {
+        val updatedValue = "${selectDate} "
+        title = updatedValue
+        onDateSelected(updatedValue)
+    }
+    if(!hideLogic) {
+        Column(Modifier.padding(16.dp)) {
+
+            val styledString = buildAnnotatedString {
+                withStyle(
+                    style = SpanStyle(
+                        color = if (disableLogic || readOnlyLogic) textInverseDisabled else textSecondary,
+                        fontSize = 14.sp
+                    )
+                ) {
+                    append(titleDatePiker)
+                }
+                if (requiredLogic) {
+                    withStyle(style = SpanStyle(color = Color.Red, fontSize = 18.sp)) {
+                        append(" *")
+                    }
+                }
+            }
+
+            Text(
+                text = styledString,
+                modifier = Modifier.fillMaxWidth().wrapContentHeight(),
+            )
+            Spacer(modifier = Modifier.padding(top = spacing05X))
+
+            TextField(value = title,
+                onValueChange = { },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .border(
+                        width = 1.dp,
+                        color = if (errorMessage.localized() != "") Color.Red else strokeDefaultLight,
+                        shape = RoundedCornerShape(15.dp)
+                    ).clickable {
+                        scope.launch {
+                            if (!(disableLogic || readOnlyLogic)) {
+                                isBottomSheetVisible = !isBottomSheetVisible
+                                sheetState.expand()
+                            }
+                        }
+                    },
+                readOnly = true,
+                shape = RoundedCornerShape(15.dp),
+                textStyle = TextStyle(color = textSecondary),
+                colors = TextFieldDefaults.colors(
+                    focusedIndicatorColor = if (readOnlyLogic || disableLogic) surfaceBrandDisabled else Color.Transparent,
+                    disabledIndicatorColor = if (readOnlyLogic || disableLogic) surfaceBrandDisabled else Color.Transparent,
+                    unfocusedIndicatorColor = if (readOnlyLogic || disableLogic) surfaceBrandDisabled else Color.Transparent,
+                    focusedContainerColor = if (readOnlyLogic || disableLogic) surfaceBrandDisabled else Color.White,
+                    unfocusedContainerColor = if (readOnlyLogic || disableLogic) surfaceBrandDisabled else Color.White,
+                    disabledContainerColor = if (readOnlyLogic || disableLogic) surfaceBrandDisabled else Color.White
+                ),
+
+                trailingIcon = {
+
+                    Icon(
+                        painter = painterResource(MR.images.calendar),
+                        "deleteAllSelected",
+                        Modifier.width(28.dp).height(28.dp).padding(end = 8.dp)
+                            .clickable {
+                                scope.launch {
+                                    if (!(disableLogic || readOnlyLogic)) {
+                                        isBottomSheetVisible = !isBottomSheetVisible
+                                        sheetState.expand()
+                                    }
+                                }
+                            },
+                        tint = textSecondary
+                    )
+
+                })
+
+
+            if (errorMessage.localized() != "") {
+                Text(
+                    text = errorMessage.localized(),
+                    color = Color.Red,
+                    style = TextStyle(fontSize = 12.sp),
+                    modifier = Modifier.padding(top = 4.dp)
+                )
+            }
+
+            if (validateLogic) {
+                errorMessageValidateLogic?.let {
+                    Text(
+                        text = errorMessageValidateLogic.localized(),
+                        color = Color.Red,
+                        style = TextStyle(fontSize = 12.sp),
+                        modifier = Modifier.padding(top = 4.dp)
+                    )
+                }
+            }
+
+            BottomSheet(
+                isBottomSheetVisible = isBottomSheetVisible,
+                sheetState = sheetState,
+                dateSelected = title,
+                onDateSelected = {
+                    selectDate = it
+                    updateTitleAndDate()
+
+                },
+                titleDatePiker = titleDatePiker,
+                onDismiss = {
+                    scope.launch { sheetState.hide() }
+
+                    isBottomSheetVisible = false
+                }
+
+            )
+        }
+    }
+
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BottomSheet(
     isBottomSheetVisible: Boolean,
     sheetState: SheetState,
-    titleDatePiker:String,
+    titleDatePiker: String,
+    dateSelected: String,
     onDateSelected: (selectItem: String) -> Unit,
-    onDismiss: () -> Unit
-) {
+    onDismiss: () -> Unit,
 
+    ) {
 
     var isCancelclick by rememberSaveable { mutableStateOf(false) }
-
     val datePickerState = rememberAdaptiveDatePickerState()
-    var data by remember { mutableStateOf("") }
+    var data by remember { mutableStateOf(dateSelected) }
+
 
     LaunchedEffect(datePickerState.selectedDateMillis) {
         datePickerState.selectedDateMillis?.let {
 
 
-            if (isCancelclick){
+            if (isCancelclick) {
 
-                isCancelclick=false
-            }else{
-                data = getLocalDateTimeFromLong(it).format("yyyy-mm-dd")
-                onDateSelected(data)
+                isCancelclick = false
+
+            } else {
+
+                if (getSharedPref().getBool(IsScrollDateTimePickerInList, false)) {
+                    data = getLocalDateTimeFromLong(it).format("yyyy-MM-dd")
+                    onDateSelected(data)
+
+                }
+
+
             }
 
+        } ?: let {
+
+            if (dateSelected.take(2).all { it.isDigit() })
+                datePickerState.setSelection(
+                    ConvertStringToTimeStamp(
+                        dateSelected.trim().substringBefore("  ")
+                    )
+                )
         }
 
     }
@@ -179,16 +289,15 @@ fun BottomSheet(
 
             dragHandle = null,
             scrimColor = Color.Black.copy(alpha = .5f),
-           windowInsets = WindowInsets(0, 0, 0, 0)
+            windowInsets = WindowInsets(0, 0, 0, 0)
         ) {
 
             Column(
                 modifier = Modifier
 
                     .clip(shape = RoundedCornerShape(topEnd = 4.dp, topStart = 4.dp))
-                    .background(color = MaterialTheme.colorScheme.background)
-                    .fillMaxWidth()
-                    .padding(20.dp)
+                    .background(color = MaterialTheme.colorScheme.background).fillMaxWidth()
+                    .padding(12.dp)
             ) {
 
                 Column(
@@ -199,21 +308,16 @@ fun BottomSheet(
 
 
                     Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .wrapContentHeight()
+                        modifier = Modifier.fillMaxWidth().wrapContentHeight()
                     ) {
 
-                        Image(
-                            painter = painterResource(MR.images.close),
+                        Image(painter = painterResource(MR.images.close),
                             contentDescription = "ic_close",
-                            modifier = Modifier
-                                .clickable {
-                                    onDismiss()
-                                    isCancelclick=true
+                            modifier = Modifier.clickable {
+                                onDismiss()
+                                isCancelclick = true
 
-                                }
-                        )
+                            })
 
                         Text(
                             text = titleDatePiker,
@@ -240,23 +344,22 @@ fun BottomSheet(
 
 
 
+
+
+
                     Row(Modifier.height(IntrinsicSize.Min).padding(bottom = 16.dp)) {
 
                         OutlinedButton(
                             onClick = {
                                 onDismiss()
-                                isCancelclick=true
-                                      },
-                            modifier = Modifier
-                                .fillMaxHeight()
-                                .padding(end = 12.dp)
-                                .height(48.dp)
+                                isCancelclick = true
+                            },
+                            modifier = Modifier.fillMaxHeight().padding(end = 12.dp).height(48.dp)
                                 .weight(1f),
                             border = BorderStroke(1.dp, strokeDefaultLight),
                             shape = RoundedCornerShape(20),
                             colors = ButtonDefaults.buttonColors(
-                                contentColor = Color.Black,
-                                containerColor = Color.White
+                                contentColor = Color.Black, containerColor = Color.White
                             )
                         ) {
 
@@ -276,10 +379,7 @@ fun BottomSheet(
                             },
                             shape = RoundedCornerShape(20),
                             colors = ButtonDefaults.buttonColors(containerColor = surfaceBrandDefault),
-                            modifier = Modifier
-                                .fillMaxHeight()
-                                .padding(start = 12.dp)
-                                .height(48.dp)
+                            modifier = Modifier.fillMaxHeight().padding(start = 12.dp).height(48.dp)
                                 .weight(1f)
                         ) {
                             Text(
@@ -291,9 +391,11 @@ fun BottomSheet(
                         }
                     }
 
+
                 }
 
             }
+
 
         }
 

@@ -15,7 +15,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.unit.dp
 
 import cafe.adriel.voyager.core.registry.rememberScreen
 import cafe.adriel.voyager.core.screen.Screen
@@ -96,13 +99,16 @@ class SplashScreen() : Screen, KoinComponent {
                             painter = painterResource(MR.images.bg_splash_screen),
                             contentScale = ContentScale.FillBounds,
                             contentDescription = "",
+                            colorFilter = ColorFilter.tint(color = Color.LightGray),
                             modifier = Modifier.fillMaxSize()
                         )
                         Image(
-                            painter = painterResource(MR.images.ic_sdm),
+                            painter = painterResource(MR.images.ic_iTicket_text),
                             contentScale = ContentScale.FillBounds,
                             contentDescription = "",
                             modifier = Modifier
+                                .width(72.dp)
+                                .height(72.dp)
                                 .wrapContentSize()
                                 .align(Alignment.Center)
                         )
@@ -110,7 +116,7 @@ class SplashScreen() : Screen, KoinComponent {
                             modifier = Modifier
                                 .align(Alignment.BottomCenter)
                                 .padding(bottom = spacing2X),
-                            text = stringResource(MR.strings.work_force_management),
+                            text = stringResource(MR.strings.i_ticket),
                             style = body_small
                         )
                     }

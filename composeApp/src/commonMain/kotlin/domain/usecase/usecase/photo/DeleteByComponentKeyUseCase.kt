@@ -5,9 +5,9 @@ import domain.repository.IPhotoRepository
 import domain.usecase.BaseUseCase
 
 class DeleteByComponentKeyUseCase(  private val iPhotoRepository: IPhotoRepository
-) : BaseUseCase<Unit, Long>() {
-    override suspend fun run(params: Long) {
-        iPhotoRepository.deleteByComponentKey(params)
+) : BaseUseCase<Unit, String>() {
+    override suspend fun run(params: String) {
+        iPhotoRepository.deleteByKey(params)
     }
 
 

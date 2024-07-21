@@ -41,7 +41,7 @@ import presentation.theme.textPrimary
 fun SuspendTicketContentComponent(
     suspendTaskDomain: SuspendTaskDomain?,
     photoDomainList:MutableList<PhotoDomain>,
-    taskid: String,
+    ticketNumber: String,
     onSelectReason: () -> Unit = {},
     onDescription: (text: String) -> Unit = { s: String -> },
     onCameraClick: () -> Unit = {},
@@ -58,7 +58,7 @@ fun SuspendTicketContentComponent(
     ) {
 
 
-        val taskTitle = suspendTaskDomain?.taskId ?: taskid
+        val taskTitle = suspendTaskDomain?.ticket_number ?: ticketNumber
         Text(
             text = "${stringResource(MR.strings.why_canceled_ticket)}${taskTitle}",
             style = body_large,
@@ -86,7 +86,7 @@ fun SuspendTicketContentComponent(
         )
         Spacer(modifier = Modifier.padding(vertical = spacing1X))
 
-        ImageRowComponent(photoDomainList, onCameraClick = {
+        ImageRowComponent(itemsList = photoDomainList, onCameraClick = {
             onCameraClick()
         }) {
             onImageClick(it)

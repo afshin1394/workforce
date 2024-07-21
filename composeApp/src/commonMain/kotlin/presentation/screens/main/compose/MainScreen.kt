@@ -16,20 +16,17 @@ import presentation.model.BottomSheetDoubleActionModel
 import presentation.screens.main.events.MainEvent
 import presentation.screens.main.viewmodel.MainScreenVM
 import com.irancell.nwg.wfm.presentation.theme.*
-import dev.icerock.moko.resources.StringResource
 import presentation.screens.main.components.TicketListScreen
 
 import dev.icerock.moko.resources.compose.stringResource
-import domain.models.TaskDomain
+import domain.models.task.TaskDomain
 import io.github.aakira.napier.LogLevel
 import io.github.aakira.napier.Napier
-import irancell.nwg.wfm.BackButtonHandler
 import irancell.nwg.wfm.Camera
 import irancell.nwg.wfm.DrawController
 import irancell.nwg.wfm.ExitApp
 import irancell.nwg.wfm.InternalStorage
 import irancell.nwg.wfm.MR
-import irancell.nwg.wfm.checkConnectivity
 import irancell.nwg.wfm.getSharedPref
 import irancell.nwg.wfm.provideAppContext
 import kotlinx.coroutines.launch
@@ -56,7 +53,6 @@ import presentation.theme.textPrimary
 import utils.Availability
 import utils.PhoneNumber
 import utils.Token
-import utils.ViewStates
 
 class MainScreen(
 
@@ -512,7 +508,7 @@ class MainScreen(
 
 
                         SuspendTicketContentComponent(
-                            taskid = viewModel.selectedTask.value!!.instanceTitle,
+                            ticketNumber = viewModel.selectedTask.value!!.basic_info.ticket_number?:"0",
                             photoDomainList = viewModel.photoDomainList,
 
                             suspendTaskDomain = suspendTaskState,
@@ -693,13 +689,13 @@ class MainScreen(
                         InternalStorage.createWorkItemImages(
                             provideAppContext(),
                             "Suspend/Original/",
-                            it.workId.toString()
+                            it.basic_info.ticket_number.toString()
                         )
 
                         Camera.launchCamera(
                             InternalStorage.getSuspendRouteOriginal(
                                 provideAppContext()
-                            ) + "${it.workId}"
+                            ) + "${it.basic_info.ticket_number}"
                         )
 
                         viewModel.updateCameraStatus(false)
@@ -718,7 +714,7 @@ class MainScreen(
                             viewModel.selectedTask.value = it
                             viewModel.resetSuspendTask()
                             viewModel.selectedTask.value?.let {
-                                navigator.push(TicketInfoScreen(it.workId))
+                                navigator.push(TicketInfoScreen(it.basic_info.ticket_number?:"0"))
                             }
 
                         }

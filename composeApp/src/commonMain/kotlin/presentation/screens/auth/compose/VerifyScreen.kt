@@ -14,6 +14,7 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import cafe.adriel.voyager.core.registry.rememberScreen
 import cafe.adriel.voyager.core.screen.Screen
@@ -68,9 +69,11 @@ class VerifyScreen(private val phoneNumber: String = "") : Screen {
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Image(
-                            painter = painterResource(MR.images.ic_sdm),
+                            painter = painterResource(MR.images.ic_iTicket),
                             contentDescription = "ic_wfm",
                             modifier = Modifier
+                                .width(82.dp)
+                                .height(82.dp)
                                 .weight(2f)
                                 .wrapContentSize()
                         )

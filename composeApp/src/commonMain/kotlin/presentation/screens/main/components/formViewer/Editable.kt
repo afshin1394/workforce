@@ -3,137 +3,166 @@ package presentation.screens.main.components.formViewer
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
-import dev.icerock.moko.resources.ImageResource
-import dev.icerock.moko.resources.compose.painterResource
+import androidx.compose.ui.unit.sp
+import com.irancell.nwg.wfm.presentation.theme.spacing05X
+import dev.icerock.moko.resources.compose.localized
+import dev.icerock.moko.resources.desc.ResourceFormattedStringDesc
+import domain.models.initialForm.ProcessLogicDomain
+import io.github.aakira.napier.LogLevel
+import io.github.aakira.napier.Napier
 import presentation.theme.strokeDefaultLight
+import presentation.theme.surfaceBrandDisabled
+import presentation.theme.textInverseDisabled
 import presentation.theme.textSecondary
 
 
 @Composable
 fun Editable(
     type: TypeEditable,
-    placeholder:String,
+    processLogicDomain : ProcessLogicDomain,
+    value: String,
+    placeholder: String,
     imeAction: ImeAction,
-    leadingIcon: ImageResource?=null,
-    trailingIcon: ImageResource?=null,
-    keyboardType : KeyboardType,
-    readOnly:Boolean,
-    maxLines:Int,
-   onValueChange: (value: String) -> Unit
+    keyboardType: KeyboardType,
+    readOnly: Boolean,
+    maxLines: Int,
+    errorMessage: ResourceFormattedStringDesc,
+    onValueChange: (value: String) -> Unit
 ) {
-
-    var valueChange by remember { mutableStateOf("") }
-
-
-    Column(Modifier.padding(16.dp)) {
-        TextField(
-            keyboardOptions = KeyboardOptions(
-                capitalization = KeyboardCapitalization.None,
-                keyboardType = keyboardType,
-                imeAction = imeAction
-            ),
-
-            maxLines =maxLines ,
-            value = valueChange,
-            onValueChange = {
-                valueChange=it
-                onValueChange(valueChange) },
-            modifier = Modifier
-                .fillMaxWidth()
-                .border(
-                    width = 1.dp,
-                    color = strokeDefaultLight,
-                    shape = RoundedCornerShape(15.dp)
-                ),
-            readOnly = readOnly,
-            shape = RoundedCornerShape(15.dp),
-            textStyle = TextStyle(color = textSecondary),
-            colors = TextFieldDefaults.colors(
-                focusedIndicatorColor = Color.Transparent,
-                disabledIndicatorColor = Color.Transparent,
-                unfocusedIndicatorColor = Color.Transparent,
-                focusedContainerColor = Color.White,
-                unfocusedContainerColor = Color.White,
-                disabledContainerColor = Color.White
-            ),
-
-            trailingIcon = {
-
-                if (trailingIcon!=null){
-                    Icon(
-
-                        painter = painterResource(trailingIcon),
-                        "",
-                        Modifier.width(28.dp).height(28.dp).padding(end = 8.dp)
-                            .clickable {},
-                        tint = textSecondary
-                    )
-
-                }
-
-
-
-
-            },
-            leadingIcon = {
-
-                if (leadingIcon!=null){
-                    Icon(
-                        painter = painterResource(leadingIcon),
-                        "",
-                        Modifier.width(28.dp).height(28.dp).padding(end = 8.dp)
-                            .clickable {},
-                        tint = textSecondary
-                    )
-
-                }
-
-
-
-
-            },
-            placeholder = { Text(text = placeholder, style = TextStyle(color = textSecondary)) }
-
-
-        )
-
+    var valueChange by remember { mutableStateOf(value) }
+    processLogicDomain.calculatedValue?.let{
+        if(it.isNotEmpty())
+        valueChange = it
     }
+    val disableLogic = processLogicDomain.disabled
+    val hideLogic = processLogicDomain.shouldHide
+    val readOnlyLogic = processLogicDomain.readOnly
+    val requiredLogic = processLogicDomain.required
+    val validateLogic = processLogicDomain.validate
+    val errorMessageValidateLogic = processLogicDomain.errorMessage
+    val textFieldBackground = if (errorMessage.localized() != "" || validateLogic){
+        Color.Red
+    }else if(readOnlyLogic || disableLogic){
+        surfaceBrandDisabled
+    }else{
+        strokeDefaultLight
+    }
+    Napier.log(LogLevel.ASSERT, tag = "processLogicDomain", message = processLogicDomain.toString())
+
+    if(!hideLogic) {
+        Column(Modifier.padding(16.dp)) {
+
+            val styledString = buildAnnotatedString {
+                withStyle(
+                    style = SpanStyle(
+                        color = if (disableLogic || readOnlyLogic) textInverseDisabled else textSecondary,
+                        fontSize = 14.sp
+                    )
+                ) {
+                    append(placeholder)
+                }
+                if (requiredLogic) {
+                    withStyle(style = SpanStyle(color = Color.Red, fontSize = 18.sp)) {
+                        append(" *")
+                    }
+                }
+            }
 
 
+
+            Text(
+                text = styledString,
+                modifier = Modifier.fillMaxWidth().wrapContentHeight(),
+            )
+            Spacer(modifier = Modifier.padding(top = spacing05X))
+
+            TextField(
+                keyboardOptions = KeyboardOptions(
+                    capitalization = KeyboardCapitalization.None,
+                    keyboardType = keyboardType,
+                    imeAction = imeAction
+                ),
+                maxLines = maxLines,
+                value = valueChange,
+                onValueChange = {
+                    if (!disableLogic && !readOnlyLogic) {
+                        valueChange = it
+                        onValueChange(valueChange)
+                    }
+
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .border(
+                        width = 1.dp,
+                        color = textFieldBackground,
+                        shape = RoundedCornerShape(15.dp)
+                    ),
+                readOnly = readOnly,
+                shape = RoundedCornerShape(15.dp),
+                textStyle = TextStyle(color = textSecondary),
+                colors = TextFieldDefaults.colors(
+                    focusedIndicatorColor = if (readOnlyLogic || disableLogic) surfaceBrandDisabled else Color.Transparent,
+                    disabledIndicatorColor = if (readOnlyLogic || disableLogic) surfaceBrandDisabled else Color.Transparent,
+                    unfocusedIndicatorColor = if (readOnlyLogic || disableLogic) surfaceBrandDisabled else Color.Transparent,
+                    focusedContainerColor = if (readOnlyLogic || disableLogic) surfaceBrandDisabled else Color.White,
+                    unfocusedContainerColor = if (readOnlyLogic || disableLogic) surfaceBrandDisabled else Color.White,
+                    disabledContainerColor = if (readOnlyLogic || disableLogic) surfaceBrandDisabled else Color.White
+                ),
+
+
+            )
+            if (errorMessage.localized() != "") {
+                Text(
+                    text = errorMessage.localized(),
+                    color = Color.Red,
+                    style = TextStyle(fontSize = 12.sp),
+                    modifier = Modifier.padding(top = 4.dp)
+                )
+            }
+
+            if (validateLogic) {
+                errorMessageValidateLogic?.let {
+                    Text(
+                        text = errorMessageValidateLogic.localized(),
+                        color = Color.Red,
+                        style = TextStyle(fontSize = 12.sp),
+                        modifier = Modifier.padding(top = 4.dp)
+                    )
+                }
+            }
+        }
+    }
 }
-
-
 enum class TypeEditable{
     PHONE,
     EMAIL,
     SHORT_TEXT,
-    LONG_TEXT,
-    LAT,
-    LONG,
+    TEXTAREA,
+    LATLONG,
     NUMBER
-
-
 }

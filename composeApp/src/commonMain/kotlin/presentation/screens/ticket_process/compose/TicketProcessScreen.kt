@@ -34,7 +34,7 @@ import presentation.theme.textInverse
 
 
 class TicketProcessScreen(
-    private val taskId : Long
+    private val ticketNumber : String
 ) : Screen {
     @OptIn(ExperimentalMaterialApi::class)
     @Composable

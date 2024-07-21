@@ -11,7 +11,7 @@ class SuspendTaskRepositoryImpl(
 ) : ISuspendTaskRepository {
     override suspend fun insert(suspendTask: SuspendTaskEntity) {
         wfmDatabase.suspendTaskEntityQueries.insert(
-            suspendTask.taskId,
+            suspendTask.ticket_number,
             suspendTask.reason,
             suspendTask.description,
             suspendTask.attachmentsUri,
@@ -27,12 +27,12 @@ class SuspendTaskRepositoryImpl(
 
     }
 
-    override suspend fun updateAttachments(attachments : String,taskId: Int) {
-        wfmDatabase.suspendTaskEntityQueries.updateAttachements(attachments,taskId.toLong())
+    override suspend fun updateAttachments(attachments : String,ticketNumber: String) {
+        wfmDatabase.suspendTaskEntityQueries.updateAttachements(attachments, ticket_number = ticketNumber)
     }
 
-    override suspend fun updateSuspendDetails(taskId: Int,dateTime : String,latitude : String,longitude : String) {
-        wfmDatabase.suspendTaskEntityQueries.updateSuspendDetails(dateTime,latitude,longitude,taskId.toLong())
+    override suspend fun updateSuspendDetails(ticketNumber: String,dateTime : String,latitude : String,longitude : String) {
+        wfmDatabase.suspendTaskEntityQueries.updateSuspendDetails(dateTime,latitude,longitude, ticket_number = ticketNumber)
 
     }
 
@@ -40,19 +40,19 @@ class SuspendTaskRepositoryImpl(
        wfmDatabase.suspendTaskEntityQueries.deleteAllSent()
     }
 
-    override suspend fun deleteByTaskId(taskId: Long) {
-        wfmDatabase.suspendTaskEntityQueries.deleteByTaskId(taskId)
+    override suspend fun deleteByTaskId(ticketNumber: String) {
+        wfmDatabase.suspendTaskEntityQueries.deleteByTicketNumber(ticketNumber)
     }
 
     override suspend fun selectUnSend(): List<SuspendTaskEntity> {
      return  wfmDatabase.suspendTaskEntityQueries.selectAllNotSent().executeAsList()
     }
 
-    override suspend fun selectByTaskId(taskId: Long): SuspendTaskEntity {
-        return wfmDatabase.suspendTaskEntityQueries.selectByTaskId(taskId).executeAsOne()
+    override suspend fun selectByTaskId(ticketNumber: String): SuspendTaskEntity {
+        return wfmDatabase.suspendTaskEntityQueries.selectByTaskId(ticketNumber).executeAsOne()
     }
 
-    override suspend fun sendSuspendedTask(taskId: Int) {
+    override suspend fun sendSuspendedTask(ticketNumber: String) {
     }
 
     override suspend fun sendNotSendSuspendedTasks() {

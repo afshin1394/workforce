@@ -77,7 +77,6 @@ val Teal200 = Color(0xFF03DAC5)
 val blue_1=Color(0xFFF3F9FC)
 
 
-
 val surfacePressed = gray_3
 
 val surfaceDefault = gray_1
@@ -86,11 +85,12 @@ val surfaceDefaultLight = gray_4
 
 val surfaceInputDefault = gray_1
 
-val surfaceInputReadOnly = gray_2
+val surfaceInputReadOnly = gray_5
 
 val surfaceBrandDefault = brand_blue_7
-val surfaceBrandDisabled = gray_2
+val surfaceBrandDisabled = gray_5
 val surfaceSuccessStrong = success_6
+val surfaceBrandDark = gray_9
 
 
 val strokeDefaultLight = gray_4

@@ -41,15 +41,23 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.irancell.nwg.wfm.presentation.theme.spacing05X
 import com.irancell.nwg.wfm.presentation.theme.spacing15X
 import com.mohamedrejeb.calf.ui.datepicker.rememberAdaptiveDatePickerState
 import com.mohamedrejeb.calf.ui.timepicker.AdaptiveTimePicker
 import com.mohamedrejeb.calf.ui.timepicker.rememberAdaptiveTimePickerState
+import dev.icerock.moko.resources.compose.localized
 import dev.icerock.moko.resources.compose.painterResource
+import dev.icerock.moko.resources.desc.ResourceFormattedStringDesc
+import domain.models.initialForm.ProcessLogicDomain
 import irancell.nwg.wfm.DatePickerFormat.format
 import irancell.nwg.wfm.IntentHandler
 import irancell.nwg.wfm.MR
@@ -65,6 +73,8 @@ import presentation.theme.h4
 import presentation.theme.strokeDefaultLight
 import presentation.theme.subtleDefault
 import presentation.theme.surfaceBrandDefault
+import presentation.theme.surfaceBrandDisabled
+import presentation.theme.textInverseDisabled
 import presentation.theme.textSecondary
 import utils.Language
 import utils.SelectLanguage
@@ -73,88 +83,147 @@ import utils.isRunningGPS
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ModalTimePicker(title:String,titleDatePiker:String, onTimeSelected: (selectItem: String) -> Unit) {
+fun ModalTimePicker(
+    processLogicDomain: ProcessLogicDomain,
+    title: String,
+    titleDatePiker: String,
+    errorMessage: ResourceFormattedStringDesc,
+    onTimeSelected: (selectItem: String) -> Unit
+) {
 
     val scope = rememberCoroutineScope()
     var isBottomSheetVisible by rememberSaveable { mutableStateOf(false) }
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     var title by remember { mutableStateOf(title) }
 
+    val disableLogic = processLogicDomain.disabled
+    val hideLogic = processLogicDomain.shouldHide
+    val readOnlyLogic = processLogicDomain.readOnly
+    val requiredLogic = processLogicDomain.required
+    val validateLogic = processLogicDomain.validate
+    val errorMessageValidateLogic = processLogicDomain.errorMessage
 
+    val backgroundColor = if (errorMessage.localized() != "" || validateLogic){
+        Color.Red
+    }else if(readOnlyLogic || disableLogic){
+        surfaceBrandDisabled
+    }else{
+        strokeDefaultLight
+    }
 
+    if(!hideLogic) {
 
-    Column(Modifier.padding(16.dp)) {
-        TextField(value = title,
-            onValueChange = {  },
-            modifier = Modifier
-                .fillMaxWidth()
+        Column(Modifier.padding(16.dp)) {
 
-                .border(
-                    width = 1.dp,
-                    color = strokeDefaultLight,
-                    shape = RoundedCornerShape(15.dp)
-                )
-                .background(color = Color.White, shape = RoundedCornerShape(15.dp))
-                .clickable {
-                    scope.launch {
-                        isBottomSheetVisible = !isBottomSheetVisible
-                        sheetState.expand()
+            val styledString = buildAnnotatedString {
+                withStyle(
+                    style = SpanStyle(
+                        color = if (disableLogic || readOnlyLogic) textInverseDisabled else textSecondary,
+                        fontSize = 14.sp
+                    )
+                ) {
+                    append(titleDatePiker)
+                }
+                if (requiredLogic) {
+                    withStyle(style = SpanStyle(color = Color.Red, fontSize = 18.sp)) {
+                        append(" *")
                     }
                 }
-            ,
-            readOnly = true,
-            shape = RoundedCornerShape(15.dp),
-            textStyle = TextStyle(color = textSecondary),
-            colors = TextFieldDefaults.colors(
-                focusedIndicatorColor = Color.Transparent,
-                disabledIndicatorColor = Color.Transparent,
-                unfocusedIndicatorColor = Color.Transparent,
-                focusedContainerColor = Color.White,
-                unfocusedContainerColor = Color.White,
-                disabledContainerColor = Color.White
-            ),
+            }
+            Text(
+                text = styledString,
+                modifier = Modifier.fillMaxWidth().wrapContentHeight(),
+            )
+            Spacer(modifier = Modifier.padding(top = spacing05X))
+            TextField(value = title,
+                onValueChange = { },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .border(
+                        width = 1.dp,
+                        color = backgroundColor,
+                        shape = RoundedCornerShape(15.dp)
+                    )
+                    .background(color = Color.White, shape = RoundedCornerShape(15.dp))
+                    .clickable {
+                        scope.launch {
+                            if (!(disableLogic || readOnlyLogic)) {
 
-            trailingIcon = {
-
-                Icon(
-                    painter = painterResource(MR.images.clock),
-                    "deleteAllSelected",
-                    Modifier.width(28.dp).height(28.dp).padding(end = 8.dp)
-                        .clickable {
-
-
-                            scope.launch {
                                 isBottomSheetVisible = !isBottomSheetVisible
                                 sheetState.expand()
                             }
-                        },
-                    tint = textSecondary
+                        }
+                    },
+                readOnly = true,
+                shape = RoundedCornerShape(15.dp),
+                textStyle = TextStyle(color = textSecondary),
+                colors = TextFieldDefaults.colors(
+                    focusedIndicatorColor = if (readOnlyLogic || disableLogic) surfaceBrandDisabled else Color.Transparent,
+                    disabledIndicatorColor = if (readOnlyLogic || disableLogic) surfaceBrandDisabled else Color.Transparent,
+                    unfocusedIndicatorColor = if (readOnlyLogic || disableLogic) surfaceBrandDisabled else Color.Transparent,
+                    focusedContainerColor = if (readOnlyLogic || disableLogic) surfaceBrandDisabled else Color.White,
+                    unfocusedContainerColor = if (readOnlyLogic || disableLogic) surfaceBrandDisabled else Color.White,
+                    disabledContainerColor = if (readOnlyLogic || disableLogic) surfaceBrandDisabled else Color.White
+                ),
+
+                trailingIcon = {
+
+                    Icon(
+                        painter = painterResource(MR.images.clock),
+                        "deleteAllSelected",
+                        Modifier.width(28.dp).height(28.dp).padding(end = 8.dp)
+                            .clickable {
+
+
+                                scope.launch {
+                                    if(!(disableLogic || readOnlyLogic)) {
+                                        isBottomSheetVisible = !isBottomSheetVisible
+                                        sheetState.expand()
+                                    }
+                                }
+                            },
+                        tint = textSecondary
+                    )
+
+                })
+            if (errorMessage.localized() != "") {
+                Text(
+                    text = errorMessage.localized(),
+                    color = Color.Red,
+                    style = TextStyle(fontSize = 12.sp),
+                    modifier = Modifier.padding(top = 4.dp)
                 )
-
-            })
-
-        BottomSheetTime(
-            isBottomSheetVisible = isBottomSheetVisible,
-            sheetState = sheetState,
-            onTimeSelected = {
-                title = it
-                onTimeSelected(it)
-
-            },
-            titleDatePiker = titleDatePiker,
-            onDismiss = {
-                scope.launch { sheetState.hide() }
-
-                isBottomSheetVisible = false
+            }
+            if (validateLogic) {
+                errorMessageValidateLogic?.let {
+                    Text(
+                        text = errorMessageValidateLogic.localized(),
+                        color = Color.Red,
+                        style = TextStyle(fontSize = 12.sp),
+                        modifier = Modifier.padding(top = 4.dp)
+                    )
+                }
             }
 
-        )
+            BottomSheetTime(
+                isBottomSheetVisible = isBottomSheetVisible,
+                sheetState = sheetState,
+                onTimeSelected = {
+                    title = it
+                    onTimeSelected(it)
+
+                },
+                titleDatePiker = titleDatePiker,
+                onDismiss = {
+                    scope.launch { sheetState.hide() }
+
+                    isBottomSheetVisible = false
+                }
+
+            )
+        }
     }
 }
-
-
-
-
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -162,17 +231,15 @@ fun ModalTimePicker(title:String,titleDatePiker:String, onTimeSelected: (selectI
 fun BottomSheetTime(
     isBottomSheetVisible: Boolean,
     sheetState: SheetState,
-    titleDatePiker:String,
+    titleDatePiker: String,
     onTimeSelected: (selectItem: String) -> Unit,
     onDismiss: () -> Unit
 ) {
 
 
-
-
     val datePickerState = rememberAdaptiveDatePickerState()
 
-    var initialSelection  by remember { mutableStateOf("") }
+    var initialSelection by remember { mutableStateOf("") }
 
     var startTime by remember { mutableStateOf("") }
 
@@ -186,12 +253,12 @@ fun BottomSheetTime(
         time
     ) {
 
-        if (initialSelection!=""){
+        if (initialSelection != "") {
             startTime = time
             onTimeSelected(time)
 
-        }else{
-            initialSelection =time
+        } else {
+            initialSelection = time
         }
 
     }
@@ -253,19 +320,19 @@ fun BottomSheetTime(
                     }
                     Spacer(modifier = Modifier.padding(top = spacing15X))
 
-                    CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr ) {
+                    CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
 
                         AdaptiveTimePicker(
                             state = startTimePickerState,
 
                             colors = TimePickerDefaults.colors(
-                                clockDialColor= subtleDefault,
-                                containerColor=Color.White,
-                                periodSelectorSelectedContainerColor= subtleDefault,
-                                timeSelectorSelectedContainerColor= subtleDefault,
-                                timeSelectorUnselectedContainerColor=strokeDefaultLight,
-                                timeSelectorSelectedContentColor= textSecondary,
-                                selectorColor=surfaceBrandDefault
+                                clockDialColor = subtleDefault,
+                                containerColor = Color.White,
+                                periodSelectorSelectedContainerColor = subtleDefault,
+                                timeSelectorSelectedContainerColor = subtleDefault,
+                                timeSelectorUnselectedContainerColor = strokeDefaultLight,
+                                timeSelectorSelectedContentColor = textSecondary,
+                                selectorColor = surfaceBrandDefault
 
                             )
 
@@ -275,7 +342,6 @@ fun BottomSheetTime(
                     }
 
 
-
                 }
 
             }
@@ -283,10 +349,7 @@ fun BottomSheetTime(
         }
 
 
-
     }
-
-
 
 
 }

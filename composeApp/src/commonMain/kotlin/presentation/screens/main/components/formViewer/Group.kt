@@ -20,6 +20,7 @@ import domain.models.PhotoDomain
 import domain.models.initialForm.ComponentDomain
 import domain.models.initialForm.ValueDomain
 import irancell.nwg.wfm.MR
+import kotlinx.coroutines.flow.MutableStateFlow
 import utils.initialize
 
 
@@ -29,6 +30,7 @@ fun groupComponent(
     modifier: Modifier,
     photoDomainList: MutableList<PhotoDomain>,
     onChanges: (list:List<ComponentDomain>, listValueDomain:List<ValueDomain>, indexParent: List<Int>, indexChild: Int) -> Unit,
+    onFixChanges: (text : MutableStateFlow<String>) -> Unit,
     onClickImage:(indexPhotoSelected:Int,componentId:String)->Unit,
     currentParentIndex: List<Int> = listOf(),
     item : ComponentDomain,
@@ -64,8 +66,12 @@ fun groupComponent(
         }
         item.components?.let {
             initialize(taskID,modifier.heightIn(0.dp, 1000.dp),photoDomainList,
+
+
                 it,
-                onChanges as (List<ComponentDomain>, List<ValueDomain>?, List<Int>, Int) -> Unit,onClickImage, currentParentIndex)
+                onChanges as (List<ComponentDomain>, List<ValueDomain>?, List<Int>, Int) -> Unit,
+                onFixChanges,
+                onClickImage, currentParentIndex)
         }
     }
 

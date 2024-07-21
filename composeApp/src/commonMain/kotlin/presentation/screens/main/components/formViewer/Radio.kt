@@ -1,5 +1,6 @@
 package presentation.screens.main.components.formViewer
 
+
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -18,56 +19,109 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.irancell.nwg.wfm.presentation.theme.spacing15X
+import dev.icerock.moko.resources.compose.localized
 import dev.icerock.moko.resources.compose.painterResource
+import dev.icerock.moko.resources.desc.ResourceFormattedStringDesc
+import domain.models.initialForm.ProcessLogicDomain
 import domain.models.initialForm.ValueDomain
 import irancell.nwg.wfm.MR
 import irancell.nwg.wfm.getSharedPref
 import presentation.theme.h4
 import presentation.theme.h5
+import presentation.theme.surfaceBrandDark
 import presentation.theme.surfaceBrandDefault
+import presentation.theme.surfaceBrandDisabled
+import presentation.theme.surfaceInputDefault
+import presentation.theme.textInverseDisabled
 import presentation.theme.textSecondary
-import utils.Language
 
 @Composable
-fun Radio( title:String, itemList: List<ValueDomain>, selectItem: String, onItemSelected: (selectItem: String) -> Unit) {
+fun Radio(processLogicDomain: ProcessLogicDomain, title:String, errorMessage: ResourceFormattedStringDesc, itemList: List<ValueDomain>, selectItem: String, onItemSelected: (selectItem: String) -> Unit) {
 
-   var select by remember { mutableStateOf(selectItem) }
- // var select =selectItem
+    var select by remember { mutableStateOf(selectItem) }
+    println("recomposeeee  radio ${processLogicDomain}")
+    val disableLogic = processLogicDomain.disabled
+    val readOnlyLogic = processLogicDomain.readOnly
+    val validateLogic = processLogicDomain.validate
+    val requiredLogic = processLogicDomain.required
 
-    println("recomposeeee ${"Radio"}")
+    val errorMessageValidateLogic = processLogicDomain.errorMessage // var select =selectItem
+    if (!processLogicDomain.shouldHide) {
 
 
-    Column(Modifier.padding(16.dp)) {
+        Column(Modifier.padding(16.dp)) {
 
-        Text(
-            text = title,
-            style = TextStyle(color = textSecondary, fontSize = 14.sp),
-            modifier = Modifier.fillMaxWidth().wrapContentHeight(),
+            val styledString = buildAnnotatedString {
+                withStyle(
+                    style = SpanStyle(
+                        color = if (disableLogic || readOnlyLogic) textInverseDisabled else textSecondary,
+                        fontSize = 14.sp
+                    )
+                ) {
+                    append(title)
+                }
+                if (requiredLogic) {
+                    withStyle(style = SpanStyle(color = Color.Red, fontSize = 18.sp)) {
+                        append(" *")
+                    }
+                }
+            }
 
+            Text(
+                text = styledString,
+                modifier = Modifier.fillMaxWidth().wrapContentHeight(),
             )
 
-        Spacer(modifier = Modifier.padding(top = spacing15X))
-        LazyColumn(modifier = Modifier.heightIn(0.dp, 500.dp)) {
-            items(itemList.size) { index ->
-                val item = itemList[index]
 
-                ItemRadioList(
-                    isSelected = select,
-                    item = item.label?:"",
-                    onItemSelected = {
-                        select = item.label?:""
-                        onItemSelected(it)
+            Spacer(modifier = Modifier.padding(top = spacing15X))
+            LazyColumn(modifier = Modifier.heightIn(0.dp, 500.dp)) {
+                items(itemList.size) { index ->
+                    val item = itemList[index]
 
-                    }
+                    ItemRadioList(
+                        disableLogic,
+                        readOnlyLogic,
+                        isSelected = select,
+                        item = item.label ?: "",
+                        onItemSelected = {
+                            select = item.label ?: ""
+                            onItemSelected(it)
 
-                )
 
+                        }
+
+                    )
+
+                }
             }
+            if ( errorMessage.localized() != "") {
+                Text(
+                    text = errorMessage.localized(),
+                    color = Color.Red,
+                    style = TextStyle(fontSize = 12.sp),
+                    modifier = Modifier.padding(top = 4.dp)
+                )
+            }
+            if (validateLogic) {
+                errorMessageValidateLogic?.let {
+                    Text(
+                        text = errorMessageValidateLogic.localized(),
+                        color = Color.Red,
+                        style = TextStyle(fontSize = 12.sp),
+                        modifier = Modifier.padding(top = 4.dp)
+                    )
+                }
+            }
+
         }
     }
 
@@ -75,9 +129,15 @@ fun Radio( title:String, itemList: List<ValueDomain>, selectItem: String, onItem
 
 
 @Composable
-fun ItemRadioList(isSelected:String,item:String,onItemSelected: (selectItem: String) -> Unit){
+fun ItemRadioList(
+    disable: Boolean,
+    readOnly: Boolean,
+    isSelected: String,
+    item: String,
+    onItemSelected: (selectItem: String) -> Unit
+) {
     var selectedText by remember { mutableStateOf(item) }
-    val isSelected = selectedText==isSelected
+    val isSelected = selectedText == isSelected
     Row(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
@@ -86,16 +146,20 @@ fun ItemRadioList(isSelected:String,item:String,onItemSelected: (selectItem: Str
         RadioButton(
             selected = isSelected,
             colors = RadioButtonDefaults.colors(
-                selectedColor = surfaceBrandDefault
+                selectedColor = if (disable || readOnly) surfaceBrandDisabled else surfaceBrandDefault,
+                disabledUnselectedColor = if (disable || readOnly) surfaceBrandDisabled else surfaceBrandDark,
+                unselectedColor = if (disable || readOnly) surfaceBrandDisabled else surfaceBrandDark
             ),
             onClick = {
-                selectedText = item
-                onItemSelected(item)
+                if (!(disable || readOnly)) {
+                    selectedText = item
+                    onItemSelected(item)
+                }
             }
         )
         Text(
             text = item,
-            style = TextStyle(color = textSecondary)
+            style = TextStyle(color = if (disable || readOnly) textInverseDisabled else textSecondary)
         )
     }
 

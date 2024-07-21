@@ -5,7 +5,7 @@ import irancell.nwg.wfm.db.SuspendTaskEntity
 
 fun SuspendTaskEntity.toSuspendTaskDomain() : SuspendTaskDomain{
    return SuspendTaskDomain(
-      taskId = this.taskId,
+      ticket_number = this.ticket_number,
       reason = this.reason,
       description =  this.description,
       attachmentsUri = this.attachmentsUri,
@@ -18,7 +18,7 @@ fun SuspendTaskEntity.toSuspendTaskDomain() : SuspendTaskDomain{
 
 fun SuspendTaskDomain.toSuspendTaskEntity() : SuspendTaskEntity{
     return SuspendTaskEntity(
-        taskId = this.taskId,
+        ticket_number = this.ticket_number,
         reason = this.reason,
         description =  this.description,
         attachmentsUri = this.attachmentsUri,

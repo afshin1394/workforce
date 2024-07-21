@@ -1,5 +1,7 @@
 package domain.models.initialForm
 
+import data.network.response.task.logic.LogicDomain
+import irancell.nwg.wfm.MR
 import kotlinx.serialization.Serializable
 
 
@@ -11,7 +13,7 @@ data class ComponentDomain(
     val label: String?= null,
     val layout: LayoutDomain?= null,
     val subType : String?= null,
-    val validate : ValidateDomain?= null,
+    var validate : ValidateDomain?= null,
     var values: List<ValueDomain>?= null,
     val conditional : ConditionalDomain?= null,
     var components : List<ComponentDomain>?= null,
@@ -20,13 +22,20 @@ data class ComponentDomain(
     val removable:Boolean=false,
     val isMulti:Boolean=false,
 
+    //in app properties
+    var processLogicDomain : ProcessLogicDomain=ProcessLogicDomain().copy(),
 
-){
-    override fun toString(): String {
-        return "ComponentDomain(id=$id, hide=$hide, type=$type, label=$label, layout=$layout, subType=$subType, validate=$validate, values=$values, conditional=$conditional, components=$components, logics=$logics)"
-    }
+
+    ){
+
 
     fun ComponentDomain.copy() : ComponentDomain{
               return ComponentDomain(this.id)
     }
+
+    override fun toString(): String {
+        return "ComponentDomain(id=$id, hide=$hide, type=$type, label=$label, layout=$layout, subType=$subType, validate=$validate, values=$values, conditional=$conditional, components=$components, logics=$logics, repeatable=$repeatable, removable=$removable, isMulti=$isMulti, processLogicDomain=$processLogicDomain)"
+    }
+
+
 }

@@ -53,10 +53,31 @@ object LogicType {
     const val Required = "Required"
     const val Disable = "Disable"
     const val ReadOnly = "ReadOnly"
+    const val Validate = "Validate"
     const val Calculate = "Calculate"
+    const val Bind = "Bind"
     const val Auto_fill = "Auto fill"
     const val Ticket_Auto_Fill = "Ticket auto fill"
 }
+
+object OperatorType {
+    const val IsFill = "Is fill"
+    const val IsBlank = "Is blank"
+    const val Equals = "Equals to"
+    const val NotEquals = "Not equals to"
+    const val Contains = "Contains"
+    const val StartWith = "Starts with"
+    const val GreaterThan = "Greater than"
+    const val GreaterThanOrEqualsTo = "Greater than or equals to"
+    const val LessThan = "Less than"
+    const val LessThanOrEqualsTo = "Less than or equals to"
+    const val Subtract = "Subtract"
+    const val Multiply = "Multiply"
+    const val Divide = "Divide"
+    const val Add = "Add"
+
+}
+
 object NotificationState{
     object All{
         const val title = "All"

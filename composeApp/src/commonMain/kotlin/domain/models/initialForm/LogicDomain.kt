@@ -1,5 +1,6 @@
 package domain.models.initialForm
 
+import domain.models.initialForm.logic.ExpressionDomain
 import kotlinx.serialization.Serializable
 
 @Serializable

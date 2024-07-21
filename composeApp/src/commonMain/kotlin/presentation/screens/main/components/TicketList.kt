@@ -20,7 +20,7 @@ import presentation.theme.backgroundBackground3
 import com.irancell.nwg.wfm.presentation.theme.spacing15X
 import com.irancell.nwg.wfm.presentation.theme.spacing2X
 import dev.icerock.moko.resources.compose.stringResource
-import domain.models.TaskDomain
+import domain.models.task.TaskDomain
 import io.github.aakira.napier.LogLevel
 import io.github.aakira.napier.Napier
 import irancell.nwg.wfm.MR
@@ -85,14 +85,15 @@ fun TicketListScreen(
            val filteredList =  tasks.filter {
 
 
-                        it.title.lowercase().contains(searchTextState.lowercase()) ||
-                        it.workId.toString().contains(searchTextState.lowercase()) ||
-                        it.status.lowercase().contains(searchTextState.lowercase()) ||
-                        it.instanceId.toString().contains(searchTextState.lowercase()) ||
-                        it.instanceNumber.lowercase().contains(searchTextState.lowercase()) ||
-                        it.instanceTitle.lowercase().contains(searchTextState.lowercase()
-                        )
-            }.filter {  it.instanceStateId.toString().contains(selectState.lowercase()) }
+                        it.basic_info.ticket_number?.lowercase()?.contains(searchTextState.lowercase()) ==  true ||
+                        it.basic_info.ticket_state?.lowercase()?.contains(searchTextState.lowercase()) ==  true ||
+                        it.basic_info.location?.lowercase()?.contains(searchTextState.lowercase()) ==  true ||
+                        it.basic_info.city?.lowercase()?.contains(searchTextState.lowercase()) ==  true  ||
+                        it.basic_info.province?.lowercase()?.contains(searchTextState.lowercase()) ==  true ||
+                        it.basic_info.site?.lowercase()?.contains(searchTextState.lowercase()) ==  true ||
+                        it.basic_info.region?.lowercase()?.contains(searchTextState.lowercase()) ==  true
+
+            }.filter {  it.basic_info.instanceStateId.toString().contains(selectState.lowercase()) }
             Napier.log(LogLevel.ASSERT,"selectState" , message =  selectState)
 
             itemsIndexed(items = filteredList) { index: Int, item: TaskDomain ->

@@ -1,6 +1,5 @@
-package domain.models.initialForm
+package domain.models.initialForm.logic
 
-import data.network.response.task.Condition
 import kotlinx.serialization.Serializable
 
 @Serializable

@@ -9,19 +9,23 @@ import domain.usecase.usecase.initialForm.GetInitialFormByTask
 import domain.usecase.usecase.photo.GetPhotoByComponentKeyUseCase
 import io.github.aakira.napier.LogLevel
 import io.github.aakira.napier.Napier
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import presentation.screens.main.events.TicketInfoEvent
 import utils.AsyncStatus
 import utils.BaseViewModel
 import utils.FormViewerTypes
+import utils.LogicCalculation
+
 import utils.ViewStates
 
 class TicketInfoVM(
-
-
     private val getInitialFormByTask: GetInitialFormByTask,
     private val getPhotoByComponentKeyUseCase: GetPhotoByComponentKeyUseCase,
 ) : BaseViewModel() {
@@ -31,22 +35,27 @@ class TicketInfoVM(
     var tempComponentList = mutableStateListOf<ComponentDomain>()
 
 
-
     var events = mutableStateOf<TicketInfoEvent>(TicketInfoEvent.Default)
 
-    private val _taskId = MutableStateFlow(0L)
-    val taskId = _taskId.asStateFlow()
+    private val _ticketNumber = MutableStateFlow("0")
+    val ticketNumber = _ticketNumber.asStateFlow()
 
 
-    fun updateTaskId(taskId: Long) {
-        _taskId.update { taskId }
+
+
+    fun updateTicketNumber(ticketNumber: String) {
+        _ticketNumber.update { ticketNumber }
     }
+
     private val _positionSelected = MutableStateFlow(0)
     val positionSelected = _positionSelected.asStateFlow()
 
-    fun getInitialForm(taskId: Long) {
+    val logicCalculation: LogicCalculation = LogicCalculation(tempComponentList)
+
+
+    fun getInitialForm(ticketNumber: String) {
         viewModelScope.launch {
-            getInitialFormByTask(taskId).collect {
+            getInitialFormByTask(ticketNumber).collect {
                 when (it.status) {
                     AsyncStatus.ERROR -> {
                         handleError(it.resultStatus)
@@ -63,6 +72,14 @@ class TicketInfoVM(
                         tempComponentList.clear()
                         tempComponentList.addAll(componentsList)
                         getPhotoByComponentKey()
+//                        checkLogicsForAll(tempComponentList)
+                        arrayListOf<ComponentDomain>().apply {
+                            this.addAll(tempComponentList)
+                            tempComponentList.clear()
+                            tempComponentList.addAll(this)
+                        }
+
+
                         updateState(ViewStates.Success())
                     }
 
@@ -73,29 +90,32 @@ class TicketInfoVM(
     }
 
 
-
-
-
-    fun addOrRemoveComponentDomainRepeatableToList(listComponent: List<ComponentDomain>,indexChild: Int) {
+    fun addOrRemoveComponentDomainRepeatableToList(
+        listComponent: List<ComponentDomain>,
+        indexChild: Int
+    ) {
         if (listComponent[0].type == FormViewerTypes.Group) {
             if (listComponent[0].removable) {
                 val newComponents = tempComponentList.apply {
                     add(indexChild + 1, listComponent[0])
                 }
-               tempComponentList = newComponents
+                tempComponentList = newComponents
             } else {
-                val newComponents =tempComponentList.apply {
+                val newComponents = tempComponentList.apply {
                     removeAt(indexChild)
                 }
-               tempComponentList = newComponents
+                tempComponentList = newComponents
 
             }
         }
     }
 
 
+    fun updateTempComponentList(newList: List<ComponentDomain>) {
+        tempComponentList.clear()
+        tempComponentList.addAll(newList)
 
-
+    }
 
 
 /////////////////////////////photo//////////////////////////////////////////////////////////
@@ -103,7 +123,7 @@ class TicketInfoVM(
 
     private val photoDomain = MutableStateFlow<PhotoDomain>(
         PhotoDomain(
-            taskId.value ?: 0,
+            ticketNumber.value ?: "0",
             "0",
             0,
             "",
@@ -114,23 +134,22 @@ class TicketInfoVM(
     var photoDomainList = mutableStateListOf<PhotoDomain>()
 
 
-    fun findPhotosByComponentId( id: String?) : MutableList<PhotoDomain> {
-        val list : MutableList<PhotoDomain> = arrayListOf()
+    fun findPhotosByComponentId(id: String?): MutableList<PhotoDomain> {
+        val list: MutableList<PhotoDomain> = arrayListOf()
         photoDomainList.forEach {
-            if (it.component_key==id){
+            if (it.component_key == id) {
                 list.add(it)
             }
         }
-        return  list
+        return list
     }
-
 
 
     private fun getPhotoByComponentKey() {
 
         viewModelScope.launch {
 
-            getPhotoByComponentKeyUseCase(taskId.value ?: 0).collect {
+            getPhotoByComponentKeyUseCase(ticketNumber.value).collect {
                 when (it.status) {
                     AsyncStatus.ERROR -> {
                         handleError(it.resultStatus)
@@ -151,7 +170,7 @@ class TicketInfoVM(
                             for (i in it1.indices) {
                                 photoDomain.value =
                                     PhotoDomain(
-                                        taskId.value ?: 0,
+                                        ticket_number = ticketNumber.value ,
                                         it1[i].component_key,
                                         i.toLong(),
                                         it1[i].origin_uri,
@@ -173,24 +192,17 @@ class TicketInfoVM(
 
     }
 
-     fun updatePhotoDomain(id : String,imgUri: String) {
+    fun updatePhotoDomain(id: String, imgUri: String) {
 
-        photoDomain.value =
-            PhotoDomain(
-                taskId.value ?: 0,
-                id,
-                (photoDomainList.size+1L),
-                imgUri,
-                "",
-                "0"
-            )
+        photoDomain.value = PhotoDomain(
+            ticket_number = ticketNumber.value, id, (photoDomainList.size + 1L), imgUri, "", "0"
+        )
         photoDomainList.add(photoDomain.value)
 
     }
 
 
-
-     fun findPhotoIndexByIdAndPosition(id: String, position: Int): Int? {
+    fun findPhotoIndexByIdAndPosition(id: String, position: Int): Int? {
 
         val filteredList = photoDomainList.filter { it.component_key == id }
 
@@ -204,7 +216,7 @@ class TicketInfoVM(
         return null
     }
 
-    fun updateImageUriForDeletePhoto( po: Int,id: String) {
+    fun updateImageUriForDeletePhoto(po: Int, id: String) {
         val itemIndex = findPhotoIndexByIdAndPosition(id, po)
         itemIndex?.let {
             photoDomainList.removeAt(it)
@@ -213,17 +225,15 @@ class TicketInfoVM(
     }
 
 
-    fun updateImageUriForEditPhoto(editUri : String, po: Int,id: String) {
+    fun updateImageUriForEditPhoto(editUri: String, po: Int, id: String) {
 
 
         val itemIndex = findPhotoIndexByIdAndPosition(id, po)
-        itemIndex?.let {index->
-
+        itemIndex?.let { index ->
 
 
             photoDomainList.getOrNull(index)?.let {
-                photoDomainList[index] =
-                    it.copy(edited_uri = editUri )
+                photoDomainList[index] = it.copy(edited_uri = editUri)
 
             }
             events.value = TicketInfoEvent.PhotoPreview
@@ -232,19 +242,25 @@ class TicketInfoVM(
         }
     }
 
-    fun updatePositionSelected(position:Int){
+    fun updatePositionSelected(position: Int) {
         _positionSelected.update { position }
     }
 
 
-
-    fun updateUriPhotoComponent(components: List<ComponentDomain>, indexParent: List<Int>, indexChild: Int,  newValue: List<ValueDomain>): List<ComponentDomain> {
+    fun updateUriPhotoComponent(
+        components: List<ComponentDomain>,
+        indexParent: List<Int>,
+        indexChild: Int,
+        newValue: List<ValueDomain>
+    ): List<ComponentDomain> {
         if (indexParent.isEmpty()) {
             val updatedComponents = components.mapIndexed { idx, component ->
                 if (idx == indexChild) {
-                    if (component.type== FormViewerTypes.ImageView){
-                        val imgUri = newValue.find { it.label == "${component.type}:${component.id}" }?.value ?: ""
-                        updatePhotoDomain(component.id!!,imgUri)
+                    if (component.type == FormViewerTypes.ImageView) {
+                        val imgUri =
+                            newValue.find { it.label == "${component.type}:${component.id}" }?.value
+                                ?: ""
+                        updatePhotoDomain(component.id!!, imgUri)
                     }
                     component.copy(values = newValue)
 
@@ -259,7 +275,11 @@ class TicketInfoVM(
             val remainingIndexes = indexParent.drop(1)
             val updatedComponents = components.mapIndexed { idx, component ->
                 if (idx == parentIndex && component.components != null) {
-                    component.copy(components = updateUriPhotoComponent(component.components!!, remainingIndexes, indexChild, newValue))
+                    component.copy(
+                        components = updateUriPhotoComponent(
+                            component.components!!, remainingIndexes, indexChild, newValue
+                        )
+                    )
                 } else {
                     component
                 }
@@ -268,7 +288,60 @@ class TicketInfoVM(
         }
     }
 
+     private fun checkLogicsForAll(components: List<ComponentDomain>) {
+
+        // Create a copy of the components list to iterate over
+        val componentsCopy = components.toMutableList()
+
+        for (cmp in componentsCopy) {
+            logicCalculation.extractLogics(componentsCopy, cmp)
+            cmp.components?.let { cmps ->
+                if (cmps.isNotEmpty()) {
+                    checkLogicsForAll(cmps)
+
+                }
+            }
+        }
 
 
+    }
+
+
+    fun handleLogics() {
+
+
+            viewModelScope.launch {
+                try {
+                    withContext(Dispatchers.IO) { checkLogicsForAll(tempComponentList) }
+
+                    withContext(Dispatchers.Main) {
+
+                        arrayListOf<ComponentDomain>().apply {
+                            this.addAll(tempComponentList)
+                            tempComponentList.clear()
+                            tempComponentList.addAll(this)
+                        }
+                    }
+                } catch (_: Exception) {
+
+                    async { checkLogicsForAll(tempComponentList) }.await()
+                    withContext(Dispatchers.Main) {
+                        arrayListOf<ComponentDomain>().apply {
+                            this.addAll(tempComponentList)
+                            tempComponentList.clear()
+                            tempComponentList.addAll(this)
+                        }
+                    }
+
+                }
+
+            }
+        }
 
 }
+
+
+
+
+
+

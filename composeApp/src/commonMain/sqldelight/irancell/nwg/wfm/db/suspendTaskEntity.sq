@@ -1,5 +1,5 @@
 CREATE TABLE SuspendTaskEntity (
-taskId  INTEGER PRIMARY KEY NOT NULL,
+ticket_number  TEXT PRIMARY KEY NOT NULL,
 reason TEXT NOT NULL,
 description TEXT NOT NULL,
 attachmentsUri TEXT NOT NULL,
@@ -11,7 +11,7 @@ longitude TEXT NOT NULL
 
 
 insert:
-INSERT INTO SuspendTaskEntity (taskId,reason,description,attachmentsUri,isSent,datetime,latitude,longitude)
+INSERT INTO SuspendTaskEntity (ticket_number,reason,description,attachmentsUri,isSent,datetime,latitude,longitude)
 VALUES (?, ?,?,?,?,?,?,?);
 
 
@@ -23,19 +23,19 @@ SET isSent = 1;
 updateAttachements:
 UPDATE  SuspendTaskEntity
 SET attachmentsUri = :attachements
-WHERE taskId = :taskId;
+WHERE ticket_number = :ticket_number;
 
 updateSuspendDetails:
 UPDATE  SuspendTaskEntity
 SET datetime = :dateTime , latitude = :latitude , longitude= :longitude
-WHERE taskId = :taskId;
+WHERE ticket_number = :ticket_number;
 
 
 deleteAllSent:
 DELETE FROM SuspendTaskEntity WHERE isSent = 1;
 
-deleteByTaskId:
-DELETE FROM SuspendTaskEntity WHERE taskId = :taskId;
+deleteByTicketNumber:
+DELETE FROM SuspendTaskEntity WHERE ticket_number = :ticket_number;
 
 removeSentItems:
 DELETE FROM SuspendTaskEntity WHERE isSent = 1;
@@ -50,5 +50,5 @@ selectAll:
 SELECT * FROM SuspendTaskEntity ORDER BY datetime ASC ;
 
 selectByTaskId:
-SELECT * FROM SuspendTaskEntity WHERE taskId = :taskId;
+SELECT * FROM SuspendTaskEntity WHERE ticket_number = :ticket_number;
 

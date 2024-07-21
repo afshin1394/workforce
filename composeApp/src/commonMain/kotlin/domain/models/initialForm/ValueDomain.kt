@@ -5,7 +5,7 @@ import kotlinx.serialization.Serializable
 
 
 data class ValueDomain(
-    val label : String?= null,var value : String?, var valueDate : ValueDate = ValueDate("",""),   var isSelected: Boolean = false
+    val label : String?= null,var value : String?=null, var valueDate : ValueDate = ValueDate("",""),   var isSelected: Boolean = false
 ){
     override fun toString(): String {
         return "ValueDomain(label=$label, value='$value')"

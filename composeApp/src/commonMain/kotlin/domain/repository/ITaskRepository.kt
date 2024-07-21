@@ -1,10 +1,10 @@
 package domain.repository
 
-import data.network.response.task.TasksNetworkResponse
+import data.network.response.task.task.TasksNetworkResponse
 import irancell.nwg.wfm.db.TaskEntity
 
 interface ITaskRepository {
-  suspend  fun fetchWorks() : List<TasksNetworkResponse>
+  suspend  fun fetchWorks() : TasksNetworkResponse
 
   suspend fun insertAll(tickets : List<TaskEntity>)
 

@@ -54,8 +54,8 @@ sealed class Screen() : ScreenProvider{
     }
 
     sealed class  TicketProcess() : Screen(){
-        data class TicketInfo(val taskId : Long) : TicketProcess()
-        data class TicketProcessScreen(val taskId : Long) : TicketProcess()
+        data class TicketInfo(val ticketNumber: String ) : TicketProcess()
+        data class TicketProcessScreen(val ticketNumber : String) : TicketProcess()
     }
 
 

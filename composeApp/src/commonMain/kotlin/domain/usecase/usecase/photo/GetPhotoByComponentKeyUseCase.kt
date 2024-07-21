@@ -6,10 +6,10 @@ import domain.repository.IPhotoRepository
 import domain.usecase.BaseUseCase
 
 class GetPhotoByComponentKeyUseCase  (private val iPhotoRepository: IPhotoRepository)
-    : BaseUseCase<List<PhotoDomain>, Long>() {
+    : BaseUseCase<List<PhotoDomain>, String>() {
 
-    override suspend fun run(params: Long): List<PhotoDomain> {
-        return iPhotoRepository.getPhotoListByComponentKey(params).toPhotoDomainList()
+    override suspend fun run(params: String): List<PhotoDomain> {
+        return iPhotoRepository.getPhotoListByKey(params).toPhotoDomainList()
     }
 
 

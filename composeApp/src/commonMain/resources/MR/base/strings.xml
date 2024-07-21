@@ -134,6 +134,31 @@
     <string name="save_change">SaveChange</string>
     <string name="unauthorized">Your request is no longer valid please login again!</string>
 
+    <string name="Equal">Number must not be equal to %s</string>
+    <string name="NotEqual">Number must be equal to %s</string>
+    <string name="GreaterThan">Number must not be greater than %s</string>
+    <string name="GreaterOrEqualTo">Number must  be greater than or equal to %s</string>
+    <string name="NotGreaterOrEqualTo">Number must be greater than or equal to %s</string>
+    <string name="NotGreaterThan">Number must  be greater than %s</string>
+    <string name="LessThan">Number must  be less than %s</string>
+    <string name="LessThanOrEqualTo">Number must  be less than or equal to %s</string>
 
+    <string name="i_ticket">iTicket</string>
+    <string name="field_required">This field is required.</string>
+    <string name="invalid_email_format">Invalid email format.</string>
+    <string name="domain_error_message_black">Emails from the domain(s) %1$s are not allowed.</string>
+    <string name="domain_error_message_White">Only from the domain(s) %1$s are  allowed.</string>
+    <string name="invalid_phone_format">Invalid phone format.</string>
+    <string name="invalid_number_format">Invalid number format.</string>
+    <string name="maximum_value">Exceeds maximum value of %1$s</string>
+    <string name="must_value">Must be at least %1$s</string>
+    <string name="maximum_length">Exceeds maximum length of %1$s</string>
+    <string name="must_length">Must be at least %1$s</string>
+    <string name="invalid_format">Invalid  format.</string>
+    <string name="file_total_size">Total file size should not exceed %1$s MB.</string>
+    <string name="file_total_count">You cannot upload more than %1$s files.</string>
+    <string name="file_type_black">Files with extensions %1$s are not allowed.</string>
+    <string name="file_type_white">Files with extensions other than %1$s are not allowed.</string>
+    <string name="empty_error_message" />
 
 </resources>

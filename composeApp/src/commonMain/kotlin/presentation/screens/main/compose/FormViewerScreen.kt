@@ -204,20 +204,8 @@ class FormViewerScreen() : Screen {
                         })*/
 
 
-                    ModalDatePicker(
-                        stringResource(MR.strings.selected_date),
-                        stringResource(MR.strings.date_picker),
-                        onDateSelected = {
-
-                        })
 
 
-                    ModalTimePicker(
-                        stringResource(MR.strings.selected_time),
-                        stringResource(MR.strings.time_picker),
-                        onTimeSelected = {
-
-                        })
 
 /*                    ModalDateTimePicker(
                         stringResource(MR.strings.selected_date_time),
@@ -245,9 +233,9 @@ class FormViewerScreen() : Screen {
 //
 //                        })
 
-                    Editable(TypeEditable.EMAIL, placeholder = "email", imeAction = ImeAction.Next, leadingIcon =null , trailingIcon =null, keyboardType = KeyboardType.Text, maxLines = 2, readOnly = false,onValueChange = {} )
+//                    Editable(TypeEditable.EMAIL, placeholder = "email", imeAction = ImeAction.Next, leadingIcon =null , trailingIcon =null, keyboardType = KeyboardType.Text, maxLines = 2, readOnly = false,onValueChange = {} )
 
-                    ImageRowComponent(emptyList(), modifier = Modifier.padding(16.dp).fillMaxWidth(), onCameraClick =  {
+                    ImageRowComponent(itemsList = emptyList(), modifier = Modifier.padding(16.dp).fillMaxWidth(), onCameraClick =  {
                        viewModel.openCamera()
                     }, onImageClick =  {
                        viewModel.openPreview(it)
@@ -264,6 +252,5 @@ class FormViewerScreen() : Screen {
     }
 
 }
-
 
 

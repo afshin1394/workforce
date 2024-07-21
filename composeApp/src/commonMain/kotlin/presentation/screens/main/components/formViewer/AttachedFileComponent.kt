@@ -22,18 +22,18 @@ import presentation.theme.surfaceDefault
 
 
 @Composable
-fun AttachedFileComponent(modifier: Modifier = Modifier, onAttachClick : () -> Unit = {}) {
+fun AttachedFileComponent(modifier: Modifier = Modifier,backgroundColor : Color, onAttachClick : () -> Unit = {}) {
     Card(modifier = modifier.size(98.dp)
         .clickable {
             onAttachClick()
         }
         .background(
-            color = surfaceDefault,
+            color = backgroundColor,
             shape = RoundedCornerShape(spacing15X)
         ),
-        border = BorderStroke(1.dp, strokeDefaultLight)) {
+        border = BorderStroke(1.dp, backgroundColor)) {
         Image(painter = painterResource(MR.images.attach_blue), contentDescription = "",modifier = modifier.padding(14.dp), colorFilter = ColorFilter.tint(
-            surfaceBrandDefault
+            backgroundColor
         ))
     }
 

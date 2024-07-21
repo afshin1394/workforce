@@ -1,10 +1,10 @@
 CREATE TABLE InitialFormEntity (
-wi_id  INTEGER PRIMARY KEY NOT NULL,
+ticket_number  TEXT PRIMARY KEY NOT NULL,
 structure TEXT NOT NULL
 );
 
 insert:
-INSERT INTO InitialFormEntity (wi_id,structure)
+INSERT INTO InitialFormEntity (ticket_number,structure)
 VALUES (?, ?);
 
 
@@ -14,11 +14,11 @@ DELETE FROM InitialFormEntity;
 selectAll:
 SELECT * FROM InitialFormEntity;
 
-selectByTaskId:
-SELECT * FROM InitialFormEntity WHERE wi_id = :taskId;
+selectByTicketNumber:
+SELECT * FROM InitialFormEntity WHERE ticket_number = :ticket_number;
 
 
 updateStructure:
 UPDATE  InitialFormEntity
 SET structure = :structure
-WHERE wi_id = :wi_id;
+WHERE ticket_number = :ticket_number;

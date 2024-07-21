@@ -1,5 +1,6 @@
 package data.network.response.task
 
+import data.network.response.task.logic.Logic
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -25,6 +26,6 @@ data class Component(
     val conditional : Conditional?= null,
     @SerialName("components")
     val components : List<Component>?= null,
-    @SerialName("logics")
-    val logics : List<Logic>?= null
+//    @SerialName("logics")
+//    val logics : List<Logic>?= null
 )

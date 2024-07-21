@@ -6,19 +6,32 @@ import data.network.response.task.Conditional
 import data.network.response.task.Expression
 import data.network.response.task.InitialForm
 import data.network.response.task.Layout
-import data.network.response.task.Logic
 import data.network.response.task.Operator
-import data.network.response.task.TasksNetworkResponse
+import data.network.response.task.task.TasksNetworkResponse
 import data.network.response.task.Validate
 import data.network.response.task.Value
+import data.network.response.task.logic.AutoFillLogic
+import data.network.response.task.logic.AutoFillLogicDomain
+import data.network.response.task.logic.BindLogic
+import data.network.response.task.logic.BindLogicDomian
+import data.network.response.task.logic.FieldOption
+import data.network.response.task.logic.FieldOptionDomain
+import data.network.response.task.logic.FilterOptionsLogic
+import data.network.response.task.logic.FilterOptionsLogicDomain
+import data.network.response.task.logic.Logic
+import data.network.response.task.logic.LogicCondition
+import data.network.response.task.logic.LogicConditionDomain
+import data.network.response.task.logic.LogicDomain
+import data.network.response.task.logic.TicketAutoFillLogic
+import data.network.response.task.logic.TicketAutoFillLogicDomain
+import data.network.response.task.task.Detail
 import domain.models.initialForm.ComponentDomain
-import domain.models.initialForm.ConditionDomain
+import domain.models.initialForm.logic.ConditionDomain
 import domain.models.initialForm.ConditionalDomain
-import domain.models.initialForm.ExpressionDomain
+import domain.models.initialForm.logic.ExpressionDomain
 import domain.models.initialForm.InitialFormDomain
 import domain.models.initialForm.InitialFormStructureDomain
 import domain.models.initialForm.LayoutDomain
-import domain.models.initialForm.LogicDomain
 import domain.models.initialForm.OperatorDomain
 import domain.models.initialForm.ValidateDomain
 import domain.models.initialForm.ValueDate
@@ -26,17 +39,17 @@ import domain.models.initialForm.ValueDomain
 import irancell.nwg.wfm.db.InitialFormEntity
 import kotlinx.serialization.json.Json
 
-fun TasksNetworkResponse.toInitialFormEntity(): InitialFormEntity {
+fun Detail.toInitialFormEntity(): InitialFormEntity {
     return   InitialFormEntity(
-        wi_id = this.wi_id,
+        ticket_number = this.basic_info.ticket_number?:"",
         structure = this.initial_form.toString()
     )
 }
 
-fun List<TasksNetworkResponse>.toInitialFormEntity(): List<InitialFormEntity> {
+fun List<Detail>.toInitialFormEntity(): List<InitialFormEntity> {
     return  map{
         InitialFormEntity(
-            wi_id = it.wi_id,
+            ticket_number = it.basic_info.ticket_number?:"",
             structure = it.initial_form.toString()
         )
     }
@@ -46,23 +59,23 @@ fun InitialFormEntity.toInitialFormDomain() : InitialFormDomain {
       val  initialForm = Json.decodeFromString<InitialForm>(this.structure);
 
 
-    return initialForm.toInitialFormDomain(this.wi_id)
+    return initialForm.toInitialFormDomain(this.ticket_number)
 }
 
 fun  List<InitialFormEntity>.toInitialFormDomain() : List<InitialFormDomain> {
     return map {
         InitialFormDomain(
-            wi_id = it.wi_id,
+            ticket_number = it.ticket_number,
             structure = Json.decodeFromString(it.structure)
         )
     }
 }
-fun  InitialForm.toInitialFormDomain(wi_id : Long) : InitialFormDomain {
-    return InitialFormDomain(wi_id , InitialFormStructureDomain(this.id,this.hide,this.type,this.components?.toComponentDomain() ,this.conditional?.toConditionalDomain(),this.schemaVersion)     )
+fun  InitialForm.toInitialFormDomain(ticketNumber : String) : InitialFormDomain {
+    return InitialFormDomain(ticketNumber , InitialFormStructureDomain(this.id,this.hide,this.type,this.components?.toComponentDomain() ,this.conditional?.toConditionalDomain(),this.schemaVersion)     )
 }
 
  fun  List<Component>.toComponentDomain() : List<ComponentDomain> {
-    return map {  ComponentDomain(it.id,it.hide,it.type,it.label,it.layout?.toLayoutDomain(),it.subType,it.validate?.toValidateDomain(),it.values?.toValueDomain(),it.conditional?.toConditionalDomain(),it.components?.toComponentDomain(),it.logics?.toLogicDomain())   }
+    return map {  ComponentDomain(it.id,it.hide,it.type,it.label,it.layout?.toLayoutDomain(),it.subType,it.validate?.toValidateDomain(),it.values?.toValueDomain(),it.conditional?.toConditionalDomain(),it.components?.toComponentDomain())   }
 }
  fun Layout.toLayoutDomain():LayoutDomain{
      return LayoutDomain(this.row,this.columns)
@@ -85,10 +98,37 @@ fun Conditional.toConditionalDomain(): ConditionalDomain{
 
  fun List<Logic>.toLogicDomain():List<LogicDomain>{
      return map{
-         LogicDomain(it.logicType,it.experssions?.toExpressionDomain())
+         LogicDomain(it.feild,it.logicType,it.experssions?.toExpressionDomain(),it.filterOptionsLogic?.toFilterOptionsDomain(), it.autoFillLogic?.toAutoFillLogicDomain(),it.bind_logic?.toBindLogicDomain(),it.ticketAutoFillLogic?.toTicketAutoFillLogicDomain())
      }
  }
 
+fun BindLogic.toBindLogicDomain() : BindLogicDomian{
+  return  BindLogicDomian(this.field_options.toBindLogicOptionsDomain())
+}
+
+fun List<FieldOption>.toBindLogicOptionsDomain() : List<FieldOptionDomain>{
+    return map{
+        FieldOptionDomain(it.field_key)
+    }
+}
+
+fun List<FilterOptionsLogic>.toFilterOptionsDomain() : List<FilterOptionsLogicDomain>{
+    return map{
+        FilterOptionsLogicDomain(it.conditions?.toLogicConditionDomain(),it.filteredOptions,it.multiSelectValues,it.selectedKeyValues)
+    }
+}
+fun List<LogicCondition>.toLogicConditionDomain() : List<LogicConditionDomain>{
+  return  map{
+        LogicConditionDomain(it.title,it.firstField,it.secondField,it.secondFieldKey,it.firstOperator,it.secondOperator,it.value,it.values,it.multiSelectValues,it.selectedKeyValues,it.filteredOptions,it.filterParameter,it.apiFilterOptionValue)
+    }
+}
+
+fun TicketAutoFillLogic.toTicketAutoFillLogicDomain() : TicketAutoFillLogicDomain{
+    return TicketAutoFillLogicDomain(this.phaseName,this.phase,this.property,this.condition_key,this.condition_field,this.condition_value)
+}
+fun AutoFillLogic.toAutoFillLogicDomain() :  AutoFillLogicDomain{
+   return AutoFillLogicDomain(this.api,this.apiName,this.filterField,this.filterFieldKey,this.filterParameter,this.property)
+}
 fun List<Expression>.toExpressionDomain():List<ExpressionDomain>{
     return map{
         ExpressionDomain(it.conditions?.toConditionDomain())
@@ -96,7 +136,7 @@ fun List<Expression>.toExpressionDomain():List<ExpressionDomain>{
 }
  fun List<Condition>.toConditionDomain():List<ConditionDomain>{
      return map{
-         ConditionDomain(it.firstFieldKey,it.secondOperator?.toOperatorDomain(),it.value)
+         ConditionDomain(it.firstFieldKey,it.secondFieldKey,it.firstOperator?.toOperatorDomain(),it.secondOperator?.toOperatorDomain(),it.value)
      }
  }
 

@@ -76,12 +76,15 @@ kotlin {
                 implementation(libs.ktor.client.logging)
                 implementation(libs.ktor.client.content.negotiation)
                 implementation(libs.kotlin.serialization)
+                implementation(libs.uuid)
                 api(libs.calf.ui)
                 implementation(libs.konnectivity)
                 implementation("com.github.skydoves:landscapist-coil3:2.3.2")
 
+
             }
         }
+
 
         commonTest.dependencies {
             implementation(kotlin("test"))

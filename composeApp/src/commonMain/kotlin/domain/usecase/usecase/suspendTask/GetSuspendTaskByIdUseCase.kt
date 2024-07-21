@@ -7,8 +7,8 @@ import domain.usecase.BaseUseCase
 
 class GetSuspendTaskByIdUseCase(
     private val iSuspendTaskRepository: ISuspendTaskRepository
-) : BaseUseCase<SuspendTaskDomain,Long>() {
-    override suspend fun run(params: Long): SuspendTaskDomain {
+) : BaseUseCase<SuspendTaskDomain,String>() {
+    override suspend fun run(params: String): SuspendTaskDomain {
        return iSuspendTaskRepository.selectByTaskId(params).toSuspendTaskDomain()
     }
 }

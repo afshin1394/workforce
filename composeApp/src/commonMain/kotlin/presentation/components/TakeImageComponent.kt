@@ -11,6 +11,8 @@ import androidx.compose.material.Card
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.unit.dp
 import com.irancell.nwg.wfm.presentation.theme.*
 import dev.icerock.moko.resources.compose.painterResource
@@ -19,17 +21,19 @@ import presentation.theme.strokeDefaultLight
 import presentation.theme.surfaceDefault
 
 @Composable
-fun TakeImageComponent(modifier: Modifier = Modifier,onCameraClick : () -> Unit = {}){
+fun TakeImageComponent(backgroundColor : Color = surfaceDefault, modifier: Modifier = Modifier, onCameraClick : () -> Unit = {}){
     Card(modifier = modifier.size(98.dp)
         .clickable {
             onCameraClick()
         }
         .background(
-            color = surfaceDefault,
+            color = backgroundColor,
             shape = RoundedCornerShape(spacing15X)
         ),
         border = BorderStroke(1.dp, strokeDefaultLight)) {
-            Image(painter = painterResource(MR.images.blue_camera), contentDescription = "",modifier = modifier.padding(29.dp))
+            Image(painter = painterResource(MR.images.blue_camera), contentDescription = "",modifier = modifier.padding(29.dp), colorFilter = ColorFilter.tint(
+                backgroundColor
+            ))
     }
 
 }
