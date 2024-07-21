@@ -1,8 +1,9 @@
 package presentation.screens.main.viewmodel
 
 import androidx.compose.runtime.mutableStateListOf
+import database.entity.GeneralLocationEntity
 import domain.usecase.usecase.location.GetGeneralLocationListUseCase
-import irancell.nwg.wfm.db.GeneralLocationEntity
+
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import utils.AsyncStatus

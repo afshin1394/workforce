@@ -1,9 +1,10 @@
 package domain.usecase.usecase.location
 
 import data.GeneralLocationRepositoryImpl
+import database.entity.GeneralLocationEntity
 import domain.repository.IGeneralLocationRepository
 import domain.usecase.BaseUseCase
-import irancell.nwg.wfm.db.GeneralLocationEntity
+
 
 class GetGeneralLocationListUseCase(
    private val iGeneralLocationRepository: IGeneralLocationRepository

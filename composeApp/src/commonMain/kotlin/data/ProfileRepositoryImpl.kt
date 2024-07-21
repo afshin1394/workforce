@@ -1,57 +1,52 @@
 package data
 
 import data.network.response.profile.ProfileNetworkResponse
+import database.AppDatabase
+import database.entity.ProfileEntity
+import database.entity.RoleEntity
 import domain.repository.IProfileRepository
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
-import irancell.nwg.wfm.db.ProfileEntity
-import irancell.nwg.wfm.db.RoleEntity
-import irancell.nwg.wfm.db.WFMDatabase
+
+
 
 class ProfileRepositoryImpl(
     private val httpClient: HttpClient,
-    private val wfmDatabase: WFMDatabase
+    private val db: AppDatabase
+
 ) : IProfileRepository {
     override suspend fun fetch(): ProfileNetworkResponse {
         return httpClient.get("profile/").body<ProfileNetworkResponse>()
     }
 
-    override suspend fun insertProfile(profileEntity: ProfileEntity) {
+    override suspend fun insertProfile(profileEntity:ProfileEntity ) {
 
-        wfmDatabase.profileEntityQueries.insert(
-            profileEntity.pk,
-            profileEntity.username,
-            profileEntity.email,
-            profileEntity.first_name,
-            profileEntity.last_name,
-            profileEntity.company,
-            profileEntity.organization,
-            profileEntity.national_id,
-            profileEntity.phone_number
-        )
+        db.profileDao().insert(profileEntity)
+
     }
 
     override suspend fun insertRoles(roleEntities: List<RoleEntity>) {
-        roleEntities.map {
-            wfmDatabase.roleEntityQueries.insert(it.pk, it.code, it.name)
-
-        }
+        db.roleDao().insert(roleEntities)
     }
 
     override suspend fun getRoles(): List<RoleEntity> {
-       return wfmDatabase.roleEntityQueries.selectAll().executeAsList()
+
+        return db.roleDao().getAllRoles()
     }
 
     override suspend fun getProfile(): ProfileEntity {
-       return wfmDatabase.profileEntityQueries.selectAll().executeAsOne()
+
+        return db.profileDao().getAllProfiles()
     }
 
     override suspend fun deleteAllRoles() {
-        wfmDatabase.roleEntityQueries.deleteAll()
+        db.roleDao().deleteAllRoles()
+
+
     }
 
     override suspend fun deleteAllProfile() {
-        wfmDatabase.profileEntityQueries.deleteAll()
+        db.profileDao().deleteAllProfiles()
     }
 }

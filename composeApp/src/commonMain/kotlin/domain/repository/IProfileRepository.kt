@@ -1,8 +1,9 @@
 package domain.repository
 
 import data.network.response.profile.ProfileNetworkResponse
-import irancell.nwg.wfm.db.ProfileEntity
-import irancell.nwg.wfm.db.RoleEntity
+import database.entity.ProfileEntity
+import database.entity.RoleEntity
+
 
 interface IProfileRepository {
     suspend fun fetch() : ProfileNetworkResponse

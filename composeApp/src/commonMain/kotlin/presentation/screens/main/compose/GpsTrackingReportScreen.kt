@@ -34,12 +34,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import com.irancell.nwg.wfm.presentation.components.ItemComponent
+import database.entity.GeneralLocationEntity
 import dev.icerock.moko.resources.StringResource
 import dev.icerock.moko.resources.compose.stringResource
 import io.github.aakira.napier.LogLevel
 import io.github.aakira.napier.Napier
 import irancell.nwg.wfm.MR
-import irancell.nwg.wfm.db.GeneralLocationEntity
+
 import irancell.nwg.wfm.mapView
 import kotlinx.coroutines.launch
 import presentation.model.ItemComponentModel

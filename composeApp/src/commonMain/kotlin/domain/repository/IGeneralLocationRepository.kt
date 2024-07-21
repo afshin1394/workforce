@@ -1,7 +1,8 @@
 package domain.repository
 
 import data.network.request.live_location.LiveLocationRequest
-import irancell.nwg.wfm.db.GeneralLocationEntity
+import database.entity.GeneralLocationEntity
+
 
 interface IGeneralLocationRepository {
    suspend fun insert(generalLocation: GeneralLocationEntity)

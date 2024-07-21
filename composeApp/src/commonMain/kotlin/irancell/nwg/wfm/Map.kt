@@ -1,7 +1,8 @@
 package irancell.nwg.wfm
 
 import androidx.compose.runtime.Composable
-import irancell.nwg.wfm.db.GeneralLocationEntity
+import database.entity.GeneralLocationEntity
+
 
 @Composable
 

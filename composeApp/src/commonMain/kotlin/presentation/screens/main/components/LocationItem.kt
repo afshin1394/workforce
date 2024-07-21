@@ -18,10 +18,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.irancell.nwg.wfm.presentation.theme.spacing05X
 import com.irancell.nwg.wfm.presentation.theme.spacing15X
+import database.entity.GeneralLocationEntity
 
 import dev.icerock.moko.resources.compose.painterResource
 import irancell.nwg.wfm.MR
-import irancell.nwg.wfm.db.GeneralLocationEntity
+
 import presentation.theme.body_small
 import presentation.theme.body_small_strong
 import presentation.theme.errorIcon

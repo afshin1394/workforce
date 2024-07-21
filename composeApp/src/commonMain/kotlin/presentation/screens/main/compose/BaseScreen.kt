@@ -45,6 +45,7 @@ fun <T : BaseViewModel> BaseScreen(
     viewModel: T,
     scaffoldState: BottomSheetScaffoldState,
     title: String,
+    drawerState : DrawerState = rememberDrawerState(initialValue = DrawerValue.Closed),
     hasDrawer: Boolean = false,
     content: @Composable (snackBarHost: SnackbarHostState) -> Unit = {},
     topBar: @Composable () -> Unit = {},
@@ -54,10 +55,10 @@ fun <T : BaseViewModel> BaseScreen(
     bottomSheetContent: @Composable (bottomSheetState: BottomSheetState) -> Unit = {},
     bottomBarBottomSheetContent: @Composable (bottomSheetState: BottomSheetState) -> Unit = {},
     onCloseBottomSheet: () -> Unit = {},
-    onBackPressed: () -> Unit={} ,
+    onBackPressed: () -> Unit={},
     hasSwipeDrawer:Boolean=true,
 
-) {
+    ) {
     val navigator = LocalNavigator.currentOrThrow
     val loginScreen = rememberScreen(presentation.nav.Screen.Auth.Login)
     val state by viewModel.state.collectAsState()
@@ -73,118 +74,122 @@ fun <T : BaseViewModel> BaseScreen(
     ) {
 
         if (hasDrawer) {
-            BottomSheetScaffold(modifier = Modifier.background(color = backgroundBackground3),
-                scaffoldState = scaffoldState,
-               drawerGesturesEnabled=hasSwipeDrawer,
+            ModalDrawer(modifier = Modifier.background(color = backgroundBackground3), gesturesEnabled = hasSwipeDrawer, drawerState = drawerState, drawerContent = {
+                drawerContent()
+
+            }) {
+                BottomSheetScaffold(
+                    scaffoldState = scaffoldState,
+                    topBar = {
+                        topBar()
+                    },
 
 
-                topBar = {
-                    topBar()
-                },
-
-                drawerContent = {
-                    drawerContent()
-                },
 
 
-                sheetPeekHeight = 0.dp,
-                sheetGesturesEnabled = false,
-                sheetShape = RoundedCornerShape(topEnd = radius, topStart = radius),
-                sheetContent = {
-                    CustomBottomSheet(
-                        scaffoldState.bottomSheetState,
-                        hasHeader = bottomSheetHasHeader,
-                        title = bottomSheetTitle,
-                        content = {
-                            bottomSheetContent(scaffoldState.bottomSheetState)
-                        },
-                        onClose = {
-                            onCloseBottomSheet()
-                        },
-                        bottomBar = {
-                            bottomBarBottomSheetContent(scaffoldState.bottomSheetState)
-                        })
-                }
-            ) {
-
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .fillMaxHeight()
-                        .background( backgroundBackground3)
-
-                ) {
-                    content(scaffoldState.snackbarHostState)
-                    BackButtonHandler.backPress( onBackPressed = {
-                        println("checkkkkvalueeee")
-                        onBackPressed()
-
-
-                    })
-                    when(gpsState){
-                        GpsState.Default -> {
-
-                        }
-                        GpsState.Disabled -> {
-                            GPS.enableGpsDialog(provideAppContext())
-                        }
-                        GpsState.Enabled -> {
-
-                        }
+                    sheetPeekHeight = 0.dp,
+                    sheetGesturesEnabled = false,
+                    sheetShape = RoundedCornerShape(topEnd = radius, topStart = radius),
+                    sheetContent = {
+                        CustomBottomSheet(
+                            scaffoldState.bottomSheetState,
+                            hasHeader = bottomSheetHasHeader,
+                            title = bottomSheetTitle,
+                            content = {
+                                bottomSheetContent(scaffoldState.bottomSheetState)
+                            },
+                            onClose = {
+                                onCloseBottomSheet()
+                            },
+                            bottomBar = {
+                                bottomBarBottomSheetContent(scaffoldState.bottomSheetState)
+                            })
                     }
-                    when (state) {
-                        ViewStates.Default -> {
+                ) {
 
-                        }
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .fillMaxHeight()
+                            .background(backgroundBackground3)
 
-                        is ViewStates.Error -> {
-                            val errorMessage = stringResource((state as ViewStates.Error).message)
+                    ) {
+                        content(scaffoldState.snackbarHostState)
+                        BackButtonHandler.backPress(onBackPressed = {
+                            println("checkkkkvalueeee")
+                            onBackPressed()
 
-                            Napier.log(LogLevel.INFO, tag = "fkpekfpw", message = errorMessage)
-                            LaunchedEffect(Unit) {
-                                scaffoldState.snackbarHostState.showSnackbar(message = errorMessage)
 
-                                viewModel.updateState(ViewStates.Default)
+                        })
+                        when (gpsState) {
+                            GpsState.Default -> {
+
+                            }
+
+                            GpsState.Disabled -> {
+                                GPS.enableGpsDialog(provideAppContext())
+                            }
+
+                            GpsState.Enabled -> {
 
                             }
                         }
+                        when (state) {
+                            ViewStates.Default -> {
 
-                        ViewStates.Loading -> {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .background(Color.Transparent)
-                                    .pointerInput(Unit) {
-                                        awaitPointerEventScope {
-                                            while (true) {
-                                                awaitPointerEvent()
+                            }
+
+                            is ViewStates.Error -> {
+                                val errorMessage =
+                                    stringResource((state as ViewStates.Error).message)
+
+                                Napier.log(LogLevel.INFO, tag = "fkpekfpw", message = errorMessage)
+                                LaunchedEffect(Unit) {
+                                    scaffoldState.snackbarHostState.showSnackbar(message = errorMessage)
+
+                                    viewModel.updateState(ViewStates.Default)
+
+                                }
+                            }
+
+                            ViewStates.Loading -> {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .background(Color.Transparent)
+                                        .pointerInput(Unit) {
+                                            awaitPointerEventScope {
+                                                while (true) {
+                                                    awaitPointerEvent()
+                                                }
                                             }
                                         }
-                                    }
-                            ){
-                                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                                ) {
+                                    CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                                }
                             }
-                        }
 
 
-                        is ViewStates.Success -> {
-                            viewModel.updateState(ViewStates.Default)
-                        }
+                            is ViewStates.Success -> {
+                                viewModel.updateState(ViewStates.Default)
+                            }
 
-                        ViewStates.Reload -> {
+                            ViewStates.Reload -> {
 
-                        }
+                            }
 
-                        is ViewStates.UnAuthorized -> {
-                            val message = stringResource((state as ViewStates.UnAuthorized).message)
+                            is ViewStates.UnAuthorized -> {
+                                val message =
+                                    stringResource((state as ViewStates.UnAuthorized).message)
 
-                            LaunchedEffect(Unit) {
-                                scaffoldState.snackbarHostState.showSnackbar(message = message)
+                                LaunchedEffect(Unit) {
+                                    scaffoldState.snackbarHostState.showSnackbar(message = message)
 
-                                delay(200)
-                                if (navigator.items[navigator.items.lastIndex].key != loginScreen.key) {
-                                    navigator.popAll()
-                                    navigator.push(loginScreen)
+                                    delay(200)
+                                    if (navigator.items[navigator.items.lastIndex].key != loginScreen.key) {
+                                        navigator.popAll()
+                                        navigator.push(loginScreen)
+                                    }
                                 }
                             }
                         }

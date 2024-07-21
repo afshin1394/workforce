@@ -16,17 +16,20 @@ import presentation.model.BottomSheetDoubleActionModel
 import presentation.screens.main.events.MainEvent
 import presentation.screens.main.viewmodel.MainScreenVM
 import com.irancell.nwg.wfm.presentation.theme.*
+import dev.icerock.moko.resources.StringResource
 import presentation.screens.main.components.TicketListScreen
 
 import dev.icerock.moko.resources.compose.stringResource
 import domain.models.task.TaskDomain
 import io.github.aakira.napier.LogLevel
 import io.github.aakira.napier.Napier
+import irancell.nwg.wfm.BackButtonHandler
 import irancell.nwg.wfm.Camera
 import irancell.nwg.wfm.DrawController
 import irancell.nwg.wfm.ExitApp
 import irancell.nwg.wfm.InternalStorage
 import irancell.nwg.wfm.MR
+import irancell.nwg.wfm.checkConnectivity
 import irancell.nwg.wfm.getSharedPref
 import irancell.nwg.wfm.provideAppContext
 import kotlinx.coroutines.launch
@@ -87,6 +90,8 @@ class MainScreen(
 
         val scope = rememberCoroutineScope()
         val scaffoldState = rememberBottomSheetScaffoldState();
+        val drawerState =
+            rememberDrawerState(initialValue = DrawerValue.Closed)
         val events by viewModel.events
 
         val suspendItems by lazy {
@@ -174,6 +179,7 @@ class MainScreen(
         BaseScreen(
             viewModel = viewModel,
             scaffoldState = scaffoldState,
+            drawerState = drawerState,
             hasDrawer = true,
             hasSwipeDrawer = viewModel.events.value != MainEvent.PhotoPreview &&  viewModel.events.value !=MainEvent.EditPhoto,
             topBar = {
@@ -182,10 +188,10 @@ class MainScreen(
                     stringResource(MR.strings.ticket_list),
                     onNavigationItemClick = {
                         scope.launch {
-                            if (scaffoldState.drawerState.isOpen)
-                                scaffoldState.drawerState.close()
+                            if (drawerState.isOpen)
+                                drawerState.close()
                             else
-                                scaffoldState.drawerState.open()
+                                drawerState.open()
                         }
                     },
                     onAvailabilityClick = {
@@ -198,10 +204,10 @@ class MainScreen(
             drawerContent = {
                 DrawerHeader(profileName) {
                     scope.launch {
-                        if (scaffoldState.drawerState.isOpen)
-                            scaffoldState.drawerState.close()
+                        if (drawerState.isOpen)
+                            drawerState.close()
                         else
-                            scaffoldState.drawerState.open()
+                            drawerState.open()
                     }
 
                     navigator.push(accountScreen)
@@ -210,10 +216,10 @@ class MainScreen(
                 DrawerBody(onItemClick = {
 
                     scope.launch {
-                        if (scaffoldState.drawerState.isOpen)
-                            scaffoldState.drawerState.close()
+                        if (drawerState.isOpen)
+                            drawerState.close()
                         else
-                            scaffoldState.drawerState.open()
+                            drawerState.open()
 
                         when (it) {
                             Menu.About -> {
@@ -242,7 +248,7 @@ class MainScreen(
 
                             }
                         }
-                        scaffoldState.drawerState.close()
+                        drawerState.close()
 
                     }
                 })
@@ -679,7 +685,7 @@ class MainScreen(
                 if (viewModel.events.value == MainEvent.PhotoPreview) {
 
                     scope.launch {
-                        scaffoldState.drawerState.close()
+                        drawerState.close()
                     }
 
                 }
@@ -757,8 +763,8 @@ class MainScreen(
             }, onBackPressed = {
                 if (viewModel.events.value == MainEvent.Default) {
                     scope.launch {
-                        if (scaffoldState.drawerState.isOpen)
-                            scaffoldState.drawerState.close()
+                        if (drawerState.isOpen)
+                            drawerState.close()
                         viewModel.events.value = MainEvent.Exit
                     }
 

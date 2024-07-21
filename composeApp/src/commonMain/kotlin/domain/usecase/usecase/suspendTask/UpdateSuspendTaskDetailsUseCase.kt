@@ -1,6 +1,5 @@
 package domain.usecase.usecase.suspendTask
 
-import domain.mappers.toSuspendTaskDomain
 import domain.repository.ISuspendTaskRepository
 import domain.usecase.BaseUseCase
 

@@ -1,10 +1,15 @@
 import org.jetbrains.compose.ExperimentalComposeLibrary
 
 plugins {
+
+
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsCompose)
     alias(libs.plugins.kotlinx.serialization)
+    alias(libs.plugins.ksp)
+    alias(libs.plugins.room)
+    alias(libs.plugins.compose.compiler)
 
     id("dev.icerock.mobile.multiplatform-resources")
     alias(libs.plugins.sqlDelight)
@@ -20,6 +25,10 @@ sentry {
 }
 
 kotlin {
+
+    sourceSets.commonMain {
+        kotlin.srcDir("build/generated/ksp/metadata")
+    }
     androidTarget {
         compilations.all {
             kotlinOptions {
@@ -79,7 +88,10 @@ kotlin {
                 implementation(libs.uuid)
                 api(libs.calf.ui)
                 implementation(libs.konnectivity)
+                implementation(libs.room.runtime)
+                implementation(libs.sqlite.bundled)
                 implementation("com.github.skydoves:landscapist-coil3:2.3.2")
+
 
 
             }
@@ -181,12 +193,26 @@ android {
 
 
 }
+
+room {
+    schemaDirectory("$projectDir/schemas")
+}
+
+
 dependencies {
     implementation(libs.androidx.appcompat)
     implementation(libs.androidx.material)
     implementation(libs.androidx.constraintlayout)
     debugImplementation(libs.compose.ui.tooling)
     commonMainApi(libs.bundles.moko.resources)
+    add("kspCommonMainMetadata", libs.room.compiler)
+
+}
+
+tasks.withType<org.jetbrains.kotlin.gradle.dsl.KotlinCompile<*>>().configureEach {
+    if (name != "kspCommonMainKotlinMetadata" ) {
+        dependsOn("kspCommonMainKotlinMetadata")
+    }
 }
 
 multiplatformResources {
@@ -201,5 +227,8 @@ sqldelight {
 }
 
 
+composeCompiler {
+    enableStrongSkippingMode = true
+}
 
 

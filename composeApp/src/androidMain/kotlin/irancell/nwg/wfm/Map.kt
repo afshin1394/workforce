@@ -4,8 +4,9 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
+import database.entity.GeneralLocationEntity
 import irancell.nwg.wfm.Android.App
-import irancell.nwg.wfm.db.GeneralLocationEntity
+
 
 
 @Composable

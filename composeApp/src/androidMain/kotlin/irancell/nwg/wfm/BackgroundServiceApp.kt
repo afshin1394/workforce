@@ -19,12 +19,13 @@ import android.util.Log
 import android.view.accessibility.AccessibilityEvent
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import database.entity.GeneralLocationEntity
 import domain.models.LiveLocationDomain
 import domain.usecase.usecase.location.SendLocationToServerUseCase
 import domain.usecase.usecase.location.StoreLocationDataUseCase
 import io.github.aakira.napier.LogLevel
 import io.github.aakira.napier.Napier
-import irancell.nwg.wfm.db.GeneralLocationEntity
+
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
@@ -140,10 +141,10 @@ actual class BackgroundServiceApp : Service() , KoinComponent {
 
               storeLocationDataUseCase(
                   GeneralLocationEntity(
-                      lat.toString(),
-                      lon.toString(),
-                      getCurrentDate(),
-                      0
+                     latitude =  lat.toString(),
+                     longitude =  lon.toString(),
+                    datetime =   getCurrentDate(),
+                    isSent =   0
                   )
               ).collect{
                   when(it.status){

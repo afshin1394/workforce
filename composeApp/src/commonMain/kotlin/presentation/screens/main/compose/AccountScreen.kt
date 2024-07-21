@@ -25,6 +25,7 @@ import org.koin.compose.koinInject
 import presentation.screens.main.viewmodel.AccountScreenVM
 
 import presentation.theme.body_large
+import presentation.theme.surfaceDefault
 import presentation.theme.surfaceInputReadOnly
 
 class AccountScreen() : Screen {
@@ -74,7 +75,7 @@ class AccountScreen() : Screen {
                         ProfileInfoComponent(
                             "${profileDomain.value.firstName}  ${profileDomain.value.lastName}" ,
                             MR.images.user_account,
-                            backgroundColor = surfaceInputReadOnly
+                            backgroundColor = surfaceDefault
                         )
                         Spacer(modifier = Modifier.padding(vertical = spacing1X))
 
@@ -84,7 +85,7 @@ class AccountScreen() : Screen {
                         ProfileInfoComponent(
                             roleDomain.value,
                             MR.images.expertise,
-                            backgroundColor = surfaceInputReadOnly
+                            backgroundColor = surfaceDefault
                         )
                         Spacer(modifier = Modifier.padding(vertical = spacing1X))
 
@@ -93,7 +94,7 @@ class AccountScreen() : Screen {
                         ProfileInfoComponent(
                             profileDomain.value.phoneNumber.toString(),
                             MR.images.phone,
-                            backgroundColor = surfaceInputReadOnly
+                            backgroundColor = surfaceDefault
                         )
                         Spacer(modifier = Modifier.padding(vertical = spacing1X))
 
@@ -102,7 +103,7 @@ class AccountScreen() : Screen {
                         ProfileInfoComponent(
                             profileDomain.value.user?.email ?: "",
                             MR.images.mail1,
-                            backgroundColor = surfaceInputReadOnly
+                            backgroundColor = surfaceDefault
                         )
                         Spacer(modifier = Modifier.padding(vertical = spacing1X))
                     }

@@ -3,11 +3,12 @@ package domain.mappers
 import data.network.response.profile.ProfileNetworkResponse
 import data.network.response.profile.Role
 import data.network.response.profile.User
+import database.entity.ProfileEntity
+import database.entity.RoleEntity
 import domain.models.ProfileDomain
 import domain.models.RoleDomain
 import domain.models.UserDomain
-import irancell.nwg.wfm.db.ProfileEntity
-import irancell.nwg.wfm.db.RoleEntity
+
 
 fun RoleEntity.toRoleDomain() : RoleDomain{
     return RoleDomain(
@@ -59,9 +60,9 @@ fun List<Role>.toRoleEntityList(pk : String) : List<RoleEntity> {
 
     return map {
         RoleEntity(
-            pk,
-            it.code?.toLong() ?: 0,
-            it.name.toString()
+            profilePk = pk,
+           code =  it.code?.toLong() ?: 0,
+           name =  it.name.toString()
         )
     }
 }

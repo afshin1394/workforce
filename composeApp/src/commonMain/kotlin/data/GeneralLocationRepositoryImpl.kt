@@ -1,41 +1,49 @@
 package data
 
 import data.network.request.live_location.LiveLocationRequest
+import database.AppDatabase
+import database.entity.GeneralLocationEntity
 import domain.repository.IGeneralLocationRepository
 import io.ktor.client.HttpClient
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
-import irancell.nwg.wfm.db.GeneralLocationEntity
-import irancell.nwg.wfm.db.WFMDatabase
+
 
 class GeneralLocationRepositoryImpl(
-    private val wfmDatabase: WFMDatabase,
-    private val httpClient: HttpClient
+    private val db: AppDatabase,
+    private val httpClient: HttpClient,
+
 ) :
     IGeneralLocationRepository {
     override suspend fun insert(generalLocation: GeneralLocationEntity) {
-        wfmDatabase.generalLocationEntityQueries.insert(
-            generalLocation.latitude,
-            generalLocation.longitude,
-            generalLocation.datetime,
-            generalLocation.isSent
-        )
+
+        db.generalLocationDao().insert(generalLocation)
+
     }
 
     override suspend fun selectAll(): List<GeneralLocationEntity> {
-        return wfmDatabase.generalLocationEntityQueries.selectAll().executeAsList()
+
+        return db.generalLocationDao().selectAll()
+
     }
 
     override suspend fun selectUnSend(): List<GeneralLocationEntity> {
-        return wfmDatabase.generalLocationEntityQueries.selectAllNotSentLocation().executeAsList()
+
+
+        return db.generalLocationDao().selectAllNotSentLocation()
+
     }
 
     override suspend fun updateUnSend() {
-        wfmDatabase.generalLocationEntityQueries.update()
+
+
+        db.generalLocationDao().updateAllAsSent()
     }
 
     override suspend fun deleteSent() {
-        wfmDatabase.generalLocationEntityQueries.deleteAllSent()
+
+        db.generalLocationDao().deleteAllSent()
+
     }
 
     override suspend fun sendLocationToServer(liveLocationRequest: List<LiveLocationRequest>) {

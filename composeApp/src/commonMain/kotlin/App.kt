@@ -8,6 +8,7 @@ import di.repositoryModule
 import di.useCaseModule
 import di.viewModelModule
 import irancell.nwg.wfm.MR
+import irancell.nwg.wfm.platformModule
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 
 import org.koin.core.context.startKoin
@@ -19,7 +20,7 @@ fun App() {
 
     startKoin {
         modules(  httpModule(),
-            repositoryModule(), useCaseModule(), viewModelModule())
+            repositoryModule(), useCaseModule(), viewModelModule(), platformModule)
     }
     Navigator(SplashScreen()){
         SlideTransition(it)
