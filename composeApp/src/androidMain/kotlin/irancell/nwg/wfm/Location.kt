@@ -15,10 +15,11 @@ import com.google.android.gms.location.LocationServices
 import com.google.android.gms.tasks.CancellationToken
 import com.google.android.gms.tasks.CancellationTokenSource
 import com.google.android.gms.tasks.OnTokenCanceledListener
+import database.entity.GeneralLocationEntity
 import io.github.aakira.napier.LogLevel
 import io.github.aakira.napier.Napier
 import irancell.nwg.wfm.Android.App
-import irancell.nwg.wfm.db.GeneralLocationEntity
+
 import kotlinx.datetime.Clock
 import utils.getCurrentDate
 
@@ -41,7 +42,7 @@ actual class Location actual constructor() {
         var _fusedLocationClient: FusedLocationProviderClient? = null
         val fusedLocationClient get() = _fusedLocationClient!!
 
-        var lastGeneralLocation : GeneralLocationEntity = GeneralLocationEntity("","",
+        var lastGeneralLocation : GeneralLocationEntity = GeneralLocationEntity(0,"","",
             getCurrentDate(),0)
 
 
@@ -56,10 +57,10 @@ actual class Location actual constructor() {
                         if (it.longitude.toString().length > 12)
                             it.longitude = it.longitude.toString().substring(0, 12).toDouble()
                         lastGeneralLocation =  GeneralLocationEntity(
-                            it.latitude.toString(),
-                            it.longitude.toString(),
-                            DateTime.getFormattedDate(Clock.System.now().toString()),
-                            0
+                           latitude  = it.latitude.toString(),
+                           longitude =  it.longitude.toString(),
+                          datetime =   DateTime.getFormattedDate(Clock.System.now().toString()),
+                          isSent =   0
                         )
 
                         update(
@@ -98,10 +99,10 @@ actual class Location actual constructor() {
                             if (it.longitude.toString().length > 12)
                                 it.longitude = it.longitude.toString().substring(0, 12).toDouble()
                             lastGeneralLocation =  GeneralLocationEntity(
-                                it.latitude.toString(),
-                                it.longitude.toString(),
-                                DateTime.getFormattedDate(Clock.System.now().toString()),
-                                0
+                               latitude =  it.latitude.toString(),
+                              longitude =   it.longitude.toString(),
+                               datetime =  DateTime.getFormattedDate(Clock.System.now().toString()),
+                               isSent =  0
                             )
                             update(
                                 lastGeneralLocation
@@ -176,10 +177,10 @@ actual class Location actual constructor() {
                                     it.longitude =
                                         it.longitude.toString().substring(0, 12).toDouble()
                                 lastGeneralLocation =  GeneralLocationEntity(
-                                    it.latitude.toString(),
-                                    it.longitude.toString(),
-                                    DateTime.getFormattedDate(Clock.System.now().toString()),
-                                    0
+                                   latitude =  it.latitude.toString(),
+                                   longitude =  it.longitude.toString(),
+                                  datetime =   DateTime.getFormattedDate(Clock.System.now().toString()),
+                                  isSent =   0
                                 )
                                 update(
                                    lastGeneralLocation
@@ -237,10 +238,10 @@ actual class Location actual constructor() {
                                     it.longitude =
                                         it.longitude.toString().substring(0, 12).toDouble()
                                 lastGeneralLocation =  GeneralLocationEntity(
-                                    it.latitude.toString(),
-                                    it.longitude.toString(),
-                                    DateTime.getFormattedDate(Clock.System.now().toString()),
-                                    0
+                                   latitude =  it.latitude.toString(),
+                                   longitude =  it.longitude.toString(),
+                                   datetime =  DateTime.getFormattedDate(Clock.System.now().toString()),
+                                   isSent =  0
                                 )
                                 update(
                                     lastGeneralLocation

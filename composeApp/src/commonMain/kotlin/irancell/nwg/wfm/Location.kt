@@ -1,6 +1,7 @@
 package irancell.nwg.wfm
 
-import irancell.nwg.wfm.db.GeneralLocationEntity
+import database.entity.GeneralLocationEntity
+
 
 expect class Location  (){
     companion object {

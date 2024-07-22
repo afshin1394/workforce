@@ -12,7 +12,7 @@ plugins {
     alias(libs.plugins.compose.compiler)
 
     id("dev.icerock.mobile.multiplatform-resources")
-    alias(libs.plugins.sqlDelight)
+
     id ("io.sentry.android.gradle") version "3.12.0"
 
 
@@ -109,7 +109,7 @@ kotlin {
                 implementation(libs.androidx.activity.compose)
                 implementation(libs.compose.ui.tooling)
                 implementation(libs.play.service.location)
-                implementation(libs.sqlDelight.driver.android)
+
                 implementation(libs.koin.android)
                 implementation(libs.ktor.client.okhttp)
                 implementation(libs.ktor.client.logging)
@@ -126,7 +126,6 @@ kotlin {
             dependsOn(commonMain)
 
             dependencies {
-                implementation(libs.sqlDelight.driver.native)
                 implementation(libs.ktor.client.darwin)
 
             }
@@ -135,7 +134,6 @@ kotlin {
             dependsOn(commonMain)
 
             dependencies {
-                implementation(libs.sqlDelight.driver.native)
                 implementation(libs.ktor.client.darwin)
 
             }
@@ -144,7 +142,7 @@ kotlin {
             dependsOn(commonMain)
 
             dependencies {
-                implementation(libs.sqlDelight.driver.native)
+
                 implementation(libs.ktor.client.darwin)
 
             }
@@ -153,7 +151,6 @@ kotlin {
             dependsOn(commonMain)
 
             dependencies {
-                implementation(libs.sqlDelight.driver.native)
                 implementation(libs.ktor.client.darwin)
 
             }
@@ -218,13 +215,7 @@ tasks.withType<org.jetbrains.kotlin.gradle.dsl.KotlinCompile<*>>().configureEach
 multiplatformResources {
     multiplatformResourcesPackage = "irancell.nwg.wfm"
 }
-sqldelight {
-    databases {
-        create("WFMDatabase") {
-            packageName.set("irancell.nwg.wfm.db")
-        }
-    }
-}
+
 
 
 composeCompiler {

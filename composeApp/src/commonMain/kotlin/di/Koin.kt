@@ -55,8 +55,6 @@ import io.ktor.http.ContentType
 
 import io.ktor.http.contentType
 import io.ktor.serialization.kotlinx.json.json
-import irancell.nwg.wfm.DatabaseDriverFactory
-import irancell.nwg.wfm.db.WFMDatabase
 import irancell.nwg.wfm.getSharedPref
 import irancell.nwg.wfm.viewModelDefinition
 import kotlinx.serialization.json.Json
@@ -76,7 +74,6 @@ import utils.Token
 
 fun repositoryModule() = module {
     //Repositories
-    single { WFMDatabase(DatabaseDriverFactory.createDriver()) }
     single<IGeneralLocationRepository> { GeneralLocationRepositoryImpl(get(), get(named("tokenized"))) }
     single<IAvailabilityRepository> { AvailabilityRepositoryImpl(get(named("tokenized"))) }
     single<ISuspendTaskRepository> { SuspendTaskRepositoryImpl(get(), get(named("tokenized"))) }

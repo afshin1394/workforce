@@ -2,9 +2,7 @@ package domain.mappers
 
 import database.entity.PhotoEntity
 import domain.models.PhotoDomain
-import domain.models.SuspendTaskDomain
 
-import irancell.nwg.wfm.db.SuspendTaskEntity
 
 fun PhotoDomain.toPhotoEntity() : PhotoEntity {
     return PhotoEntity(

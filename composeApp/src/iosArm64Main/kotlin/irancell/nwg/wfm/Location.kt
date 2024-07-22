@@ -1,6 +1,7 @@
 package irancell.nwg.wfm
 
-import irancell.nwg.wfm.db.GeneralLocationEntity
+
+import database.entity.GeneralLocationEntity
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.wasm.jsinterop.Object
