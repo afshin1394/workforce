@@ -1,6 +1,6 @@
 package domain.repository
 
-import irancell.nwg.wfm.db.PhotoEntity
+import database.entity.PhotoEntity
 
 
 interface IPhotoRepository {

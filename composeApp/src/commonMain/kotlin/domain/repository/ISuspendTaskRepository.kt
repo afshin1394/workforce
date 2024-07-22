@@ -1,6 +1,6 @@
 package domain.repository
 
-import irancell.nwg.wfm.db.SuspendTaskEntity
+import database.entity.SuspendTaskEntity
 
 
 interface ISuspendTaskRepository {

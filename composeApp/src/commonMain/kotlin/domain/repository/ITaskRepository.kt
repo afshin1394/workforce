@@ -1,7 +1,8 @@
 package domain.repository
 
 import data.network.response.task.task.TasksNetworkResponse
-import irancell.nwg.wfm.db.TaskEntity
+import database.entity.TaskEntity
+
 
 interface ITaskRepository {
   suspend  fun fetchWorks() : TasksNetworkResponse

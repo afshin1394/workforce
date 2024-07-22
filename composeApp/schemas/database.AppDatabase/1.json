@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "42ba4461a057149d1b8efdbf444d1349",
+    "identityHash": "d092928e88c56da771df295920c12888",
     "entities": [
       {
         "tableName": "ProfileEntity",
@@ -159,11 +159,215 @@
             "id"
           ]
         }
+      },
+      {
+        "tableName": "TaskEntity",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `ticket_number` TEXT NOT NULL, `ticket_state` TEXT NOT NULL, `level` INTEGER NOT NULL, `location` TEXT NOT NULL, `site` TEXT NOT NULL, `region` TEXT NOT NULL, `province` TEXT NOT NULL, `city` TEXT NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "pk",
+            "columnName": "pk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ticket_number",
+            "columnName": "ticket_number",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ticket_state",
+            "columnName": "ticket_state",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "level",
+            "columnName": "level",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "location",
+            "columnName": "location",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "site",
+            "columnName": "site",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "region",
+            "columnName": "region",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "province",
+            "columnName": "province",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "city",
+            "columnName": "city",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "pk"
+          ]
+        }
+      },
+      {
+        "tableName": "SuspendTaskEntity",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`ticket_number` TEXT NOT NULL, `reason` TEXT NOT NULL, `description` TEXT NOT NULL, `attachmentsUri` TEXT NOT NULL, `isSent` INTEGER NOT NULL, `datetime` TEXT NOT NULL, `latitude` TEXT NOT NULL, `longitude` TEXT NOT NULL, PRIMARY KEY(`ticket_number`))",
+        "fields": [
+          {
+            "fieldPath": "ticket_number",
+            "columnName": "ticket_number",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "reason",
+            "columnName": "reason",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "description",
+            "columnName": "description",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "attachmentsUri",
+            "columnName": "attachmentsUri",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "isSent",
+            "columnName": "isSent",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "datetime",
+            "columnName": "datetime",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "latitude",
+            "columnName": "latitude",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "longitude",
+            "columnName": "longitude",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "ticket_number"
+          ]
+        }
+      },
+      {
+        "tableName": "InitialFormEntity",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`ticket_number` TEXT NOT NULL, `structure` TEXT NOT NULL, PRIMARY KEY(`ticket_number`))",
+        "fields": [
+          {
+            "fieldPath": "ticket_number",
+            "columnName": "ticket_number",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "structure",
+            "columnName": "structure",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "ticket_number"
+          ]
+        }
+      },
+      {
+        "tableName": "PhotoEntity",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `ticket_number` TEXT NOT NULL, `component_key` TEXT NOT NULL, `index_row` INTEGER NOT NULL, `origin_uri` TEXT NOT NULL, `edited_uri` TEXT NOT NULL, `angle` TEXT NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "pk",
+            "columnName": "pk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ticket_number",
+            "columnName": "ticket_number",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "component_key",
+            "columnName": "component_key",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "index_row",
+            "columnName": "index_row",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "origin_uri",
+            "columnName": "origin_uri",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "edited_uri",
+            "columnName": "edited_uri",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "angle",
+            "columnName": "angle",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "pk"
+          ]
+        }
       }
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '42ba4461a057149d1b8efdbf444d1349')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'd092928e88c56da771df295920c12888')"
     ]
   }
 }

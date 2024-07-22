@@ -1,16 +1,17 @@
 package data
 
 import data.network.response.task.task.TasksNetworkResponse
+import database.AppDatabase
+import database.entity.TaskEntity
 import domain.repository.ITaskRepository
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
-import irancell.nwg.wfm.db.TaskEntity
-import irancell.nwg.wfm.db.WFMDatabase
+
 
 class TaskRepositoryImpl(
     private val httpClient: HttpClient,
-    private val wfmDatabase: WFMDatabase
+    private val db: AppDatabase
 ) : ITaskRepository {
     override suspend fun fetchWorks(): TasksNetworkResponse {
            return httpClient.get("workforce_management/user/my-tasks/")
@@ -18,29 +19,22 @@ class TaskRepositoryImpl(
     }
 
     override suspend fun insertAll(tickets: List<TaskEntity>) {
-        wfmDatabase.taskEntityQueries.transaction {
-            val insertStatement = wfmDatabase.taskEntityQueries::insert
-            tickets.forEach {
-                insertStatement.invoke(
-                    it.ticket_number,
-                    it.ticket_state,
-                    it.level,
-                    it.location,
-                    it.site,
-                    it.region,
-                    it.province,
-                    it.city,
-                )
-            }
-        }
+
+        db.taskDao().insertAll(tickets)
+
+
     }
 
     override suspend fun getAll(): List<TaskEntity> {
-       return wfmDatabase.taskEntityQueries.selectAll().executeAsList()
+
+        return db.taskDao().selectAll()
+
     }
 
     override suspend fun deleteAll() {
-        wfmDatabase.taskEntityQueries.deleteAll()
+
+        db.taskDao().deleteAll()
+
     }
 
 

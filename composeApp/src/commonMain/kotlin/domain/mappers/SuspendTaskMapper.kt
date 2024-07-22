@@ -1,7 +1,8 @@
 package domain.mappers
 
+import database.entity.SuspendTaskEntity
 import domain.models.SuspendTaskDomain
-import irancell.nwg.wfm.db.SuspendTaskEntity
+
 
 fun SuspendTaskEntity.toSuspendTaskDomain() : SuspendTaskDomain{
    return SuspendTaskDomain(

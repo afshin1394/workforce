@@ -73,6 +73,7 @@ fun SuspendTicketContentComponent(
 
             })
         Spacer(modifier = Modifier.padding(vertical = spacing1X))
+        suspendTaskDomain?.description
         CustomEditTextComponent(defaultText = suspendTaskDomain?.description ?: "", updateText = {
             if (it.text.isNotEmpty()) {
                 onDescription(it.text)

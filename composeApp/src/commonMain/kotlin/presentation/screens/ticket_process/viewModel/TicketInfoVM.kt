@@ -67,20 +67,25 @@ class TicketInfoVM(
 
                     AsyncStatus.SUCCESS -> {
                         val initialFormDomain = it.data
-                        componentsList.clear()
-                        componentsList.addAll(initialFormDomain!!.structure.components!!)
-                        tempComponentList.clear()
-                        tempComponentList.addAll(componentsList)
-                        getPhotoByComponentKey()
-//                        checkLogicsForAll(tempComponentList)
-                        arrayListOf<ComponentDomain>().apply {
-                            this.addAll(tempComponentList)
+
+                        if (initialFormDomain!!.structure.components!=null){
+                            componentsList.clear()
+                            componentsList.addAll(initialFormDomain.structure.components!!)
                             tempComponentList.clear()
-                            tempComponentList.addAll(this)
+                            tempComponentList.addAll(componentsList)
+                            getPhotoByComponentKey()
+//                        checkLogicsForAll(tempComponentList)
+                            arrayListOf<ComponentDomain>().apply {
+                                this.addAll(tempComponentList)
+                                tempComponentList.clear()
+                                tempComponentList.addAll(this)
+                            }
+
+
                         }
-
-
                         updateState(ViewStates.Success())
+
+
                     }
 
                 }

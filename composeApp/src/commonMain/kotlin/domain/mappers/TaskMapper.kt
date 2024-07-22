@@ -2,9 +2,10 @@ package domain.mappers
 
 import data.network.response.task.task.Detail
 import data.network.response.task.task.TasksNetworkResponse
+import database.entity.TaskEntity
 import domain.models.task.BasicInfoDomain
 import domain.models.task.TaskDomain
-import irancell.nwg.wfm.db.TaskEntity
+
 import utils.TaskState
 
 

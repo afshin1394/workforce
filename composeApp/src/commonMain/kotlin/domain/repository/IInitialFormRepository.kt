@@ -1,7 +1,7 @@
 package domain.repository
 
-import irancell.nwg.wfm.db.InitialFormEntity
-import irancell.nwg.wfm.db.TaskEntity
+import database.entity.InitialFormEntity
+
 
 interface IInitialFormRepository {
     suspend fun insertAll(tickets : List<InitialFormEntity>)

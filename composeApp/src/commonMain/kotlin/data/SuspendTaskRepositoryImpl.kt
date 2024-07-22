@@ -1,55 +1,62 @@
 package data
 
+import database.AppDatabase
+import database.entity.SuspendTaskEntity
 import domain.repository.ISuspendTaskRepository
 import io.ktor.client.HttpClient
-import irancell.nwg.wfm.db.SuspendTaskEntity
-import irancell.nwg.wfm.db.WFMDatabase
+
 
 class SuspendTaskRepositoryImpl(
-    private val wfmDatabase: WFMDatabase,
+    private val db: AppDatabase,
     private val httpClient: HttpClient
 ) : ISuspendTaskRepository {
     override suspend fun insert(suspendTask: SuspendTaskEntity) {
-        wfmDatabase.suspendTaskEntityQueries.insert(
-            suspendTask.ticket_number,
-            suspendTask.reason,
-            suspendTask.description,
-            suspendTask.attachmentsUri,
-            suspendTask.isSent,
-            suspendTask.datetime,
-            suspendTask.latitude,
-            suspendTask.longitude
-        )
+
+        db.suspendTaskDao().insert(suspendTask)
+
     }
 
     override suspend fun updateUnSend() {
-        wfmDatabase.suspendTaskEntityQueries.updateUnsend()
+
+        db.suspendTaskDao().updateUnsend()
+
 
     }
 
     override suspend fun updateAttachments(attachments : String,ticketNumber: String) {
-        wfmDatabase.suspendTaskEntityQueries.updateAttachements(attachments, ticket_number = ticketNumber)
+        db.suspendTaskDao().updateAttachments(attachments=attachments, ticketNumber = ticketNumber)
+
     }
 
     override suspend fun updateSuspendDetails(ticketNumber: String,dateTime : String,latitude : String,longitude : String) {
-        wfmDatabase.suspendTaskEntityQueries.updateSuspendDetails(dateTime,latitude,longitude, ticket_number = ticketNumber)
+
+        db.suspendTaskDao().updateSuspendDetails(ticketNumber=ticketNumber,dateTime=dateTime,latitude=latitude,longitude=longitude)
+
 
     }
 
     override suspend fun deleteSent() {
-       wfmDatabase.suspendTaskEntityQueries.deleteAllSent()
+
+        db.suspendTaskDao().deleteAllSent()
+
     }
 
     override suspend fun deleteByTaskId(ticketNumber: String) {
-        wfmDatabase.suspendTaskEntityQueries.deleteByTicketNumber(ticketNumber)
+        db.suspendTaskDao().deleteByTicketNumber(ticketNumber=ticketNumber)
+
     }
 
     override suspend fun selectUnSend(): List<SuspendTaskEntity> {
-     return  wfmDatabase.suspendTaskEntityQueries.selectAllNotSent().executeAsList()
+
+
+        return db.suspendTaskDao().selectAllNotSent()
+
     }
 
     override suspend fun selectByTaskId(ticketNumber: String): SuspendTaskEntity {
-        return wfmDatabase.suspendTaskEntityQueries.selectByTaskId(ticketNumber).executeAsOne()
+
+        return db.suspendTaskDao().selectByTaskId(ticketNumber=ticketNumber)
+
     }
 
     override suspend fun sendSuspendedTask(ticketNumber: String) {

@@ -1,6 +1,7 @@
 package domain.usecase.usecase.ticket
 
 import data.network.response.task.InitialForm
+import database.entity.InitialFormEntity
 import domain.mappers.toTaskDomainList
 import domain.mappers.toTaskEntityList
 import domain.models.task.TaskDomain
@@ -9,7 +10,7 @@ import domain.repository.ITaskRepository
 import domain.usecase.BaseUseCase
 import io.github.aakira.napier.LogLevel
 import io.github.aakira.napier.Napier
-import irancell.nwg.wfm.db.InitialFormEntity
+
 import kotlinx.serialization.json.Json
 
 class UpdateTasksUseCase(

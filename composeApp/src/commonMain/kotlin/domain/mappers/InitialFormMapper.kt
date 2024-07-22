@@ -25,6 +25,7 @@ import data.network.response.task.logic.LogicDomain
 import data.network.response.task.logic.TicketAutoFillLogic
 import data.network.response.task.logic.TicketAutoFillLogicDomain
 import data.network.response.task.task.Detail
+import database.entity.InitialFormEntity
 import domain.models.initialForm.ComponentDomain
 import domain.models.initialForm.logic.ConditionDomain
 import domain.models.initialForm.ConditionalDomain
@@ -36,7 +37,7 @@ import domain.models.initialForm.OperatorDomain
 import domain.models.initialForm.ValidateDomain
 import domain.models.initialForm.ValueDate
 import domain.models.initialForm.ValueDomain
-import irancell.nwg.wfm.db.InitialFormEntity
+
 import kotlinx.serialization.json.Json
 
 fun Detail.toInitialFormEntity(): InitialFormEntity {
