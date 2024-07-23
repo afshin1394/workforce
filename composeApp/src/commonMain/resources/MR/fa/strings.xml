@@ -155,5 +155,7 @@
     <string name="file_total_count">شما نمی توانید بیش از %1$s فایل آپلود کنید.</string>
     <string name="file_type_black">فایل‌های با پسوند %1$s مجاز نیستند.</string>
     <string name="file_type_white">فایل‌هایی با پسوندهای غیر از %1$s مجاز نیستند.</string>
+
+    <string name="redirect_error">خطای تغییر مسیر ادرس</string>
     <string name="empty_error_message" />
 </resources>

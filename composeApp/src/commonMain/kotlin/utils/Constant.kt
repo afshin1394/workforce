@@ -16,7 +16,10 @@ const val ModeApp = "modeApp"
 const val IsScrollDateTimePickerInList = "isScrollDateTimePickerInList"
 
 
-
+sealed interface ServiceState{
+    data object Normal : ServiceState
+    data object Faulty : ServiceState
+}
 
 
 object ErrorCode {

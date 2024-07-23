@@ -22,6 +22,30 @@ fun Detail.toTaskEntity(): TaskEntity {
     )
 }
 
+/*fun Detail.toTaskDomainDetail(): TaskDomain {
+    return   TaskDomain(
+        initial_form = null,
+        basic_info = BasicInfoDomain(
+        ticket_number = this.basic_info.ticket_number?:"",
+        ticket_state = this.basic_info.ticket_state?:"",
+        city = this.basic_info.city?:"",
+        site = this.basic_info.site?:"",
+        level = this.basic_info.level?.toInt()?:-1,
+        region = this.basic_info.region?:"",
+        location = this.basic_info.location?:"",
+        province = this.basic_info.province?:"",
+        instanceStateId =null
+    )
+    )
+}
+
+
+fun List<Detail>.toTaskDomainList(): List<TaskDomain> {
+    return map {
+        it.toTaskDomainDetail()
+    }
+}*/
+
 fun List<Detail>.toTaskEntityList(): List<TaskEntity> {
     return map {
        it.toTaskEntity()

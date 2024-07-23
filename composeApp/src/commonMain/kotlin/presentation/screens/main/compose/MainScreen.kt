@@ -75,7 +75,7 @@ class MainScreen(
         val positionSelectedPhotoForEdit by viewModel.positionSelected.collectAsState()
         var indexPhotoSelected by remember { mutableStateOf(0) }
 
-
+        val reloadState by viewModel.reload.collectAsState()
         val notificationScreen =
             rememberScreen(Notification)
         val accountScreen =
@@ -708,6 +708,13 @@ class MainScreen(
                     }
                 }
                 if (availability) {
+
+                    if (reloadState){
+                        viewModel.getTasks()
+                    }
+
+
+
                     TicketListScreen(
                         searchText = "",
                         onEvent = { mainEvent: MainEvent, task: TaskDomain? ->

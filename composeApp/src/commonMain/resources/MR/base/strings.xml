@@ -159,6 +159,7 @@
     <string name="file_total_count">You cannot upload more than %1$s files.</string>
     <string name="file_type_black">Files with extensions %1$s are not allowed.</string>
     <string name="file_type_white">Files with extensions other than %1$s are not allowed.</string>
+    <string name="redirect_error">Redirect Exception happened</string>
     <string name="empty_error_message" />
 
 </resources>

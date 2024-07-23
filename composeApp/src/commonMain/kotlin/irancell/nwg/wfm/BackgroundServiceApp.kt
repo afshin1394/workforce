@@ -1,8 +1,13 @@
 package irancell.nwg.wfm
 
+import kotlinx.coroutines.flow.MutableStateFlow
+import utils.ServiceState
+
 expect class BackgroundServiceApp {
+
     companion object {
-       // var isRunning:Boolean
+        val serviceState : MutableStateFlow<ServiceState>
+        fun updateServiceState(serviceState: ServiceState)
         fun startBackgroundService()
         fun stopBackgroundService()
     }

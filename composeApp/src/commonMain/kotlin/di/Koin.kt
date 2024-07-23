@@ -40,6 +40,7 @@ import domain.usecase.usecase.profile.StoreProfileUseCase
 import domain.usecase.usecase.suspendTask.DeleteByTaskIdUseCase
 import domain.usecase.usecase.suspendTask.GetSuspendTaskByIdUseCase
 import domain.usecase.usecase.suspendTask.StoreSuspendTaskUseCase
+import domain.usecase.usecase.ticket.FetchTaskUseCase
 import domain.usecase.usecase.ticket.UpdateTasksUseCase
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.HttpTimeout
@@ -96,6 +97,7 @@ fun useCaseModule() = module {
     single { GetAvailabilityObjectIdUseCase() }
     single { LoginUseCase(get()) }
     single { UpdateTasksUseCase(get(),get()) }
+    single { FetchTaskUseCase(get(),get()) }
     single { LoginUseCase(get()) }
     single { VerifyUseCase(get()) }
     single { ResendUseCase(get()) }

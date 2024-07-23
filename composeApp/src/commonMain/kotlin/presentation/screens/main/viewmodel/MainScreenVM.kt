@@ -29,6 +29,7 @@ import irancell.nwg.wfm.BackgroundServiceApp
 import irancell.nwg.wfm.Location
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -37,6 +38,7 @@ import utils.AsyncResult
 
 import utils.AsyncStatus
 import utils.BaseViewModel
+import utils.ServiceState
 import utils.ViewStates
 import utils.getCurrentDate
 
@@ -63,7 +65,8 @@ class MainScreenVM(
     private val _profileName = MutableStateFlow("")
     val profileName = _profileName.asStateFlow()
 
-
+    private val _reload = MutableStateFlow(false)
+    val reload = _reload.asStateFlow()
 
 
     private val _positionSelected = MutableStateFlow(0)
@@ -87,8 +90,15 @@ class MainScreenVM(
 
     init {
         getCurrentAvailability()
-        getTasks()
+
         getProfileName()
+
+       // if (_availability.value) {
+
+            getTasks()
+       // }
+
+
 
     }
 
@@ -142,6 +152,8 @@ class MainScreenVM(
 
                     AsyncStatus.SUCCESS -> {
                         updateState(ViewStates.Success())
+
+                        println("testtttttttavaliblity ${it.data}")
                         it.data?.let { available ->
                             _availability.update { available }
                         }
@@ -193,7 +205,11 @@ class MainScreenVM(
                                     )
                                     if (_availability.value) {
                                         BackgroundServiceApp.startBackgroundService()
+                                        BackgroundServiceApp.updateServiceState(ServiceState.Normal)
+                                        getTasks()
+
                                     } else {
+
                                         BackgroundServiceApp.stopBackgroundService()
                                     }
 
@@ -366,11 +382,12 @@ class MainScreenVM(
 
     fun getTasks() {
 
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch(Dispatchers.Main) {
+            delay(1000)
             updateTasksUseCase(Unit).collect {
                 when (it.status) {
                     AsyncStatus.ERROR -> {
-                        handleError(it.resultStatus)
+                        //handleError(it.resultStatus)
 
 
                         Napier.log(
@@ -383,7 +400,7 @@ class MainScreenVM(
 
                     AsyncStatus.LOADING -> {
                         Napier.log(LogLevel.ASSERT, "getAllWorksUseCase", message = "LOADING: ")
-                        updateState(ViewStates.Loading)
+                       // updateState(ViewStates.Loading)
 
                     }
 
@@ -397,7 +414,11 @@ class MainScreenVM(
                             "getAllWorksUseCase",
                             message = "SUCCESS: " + it.data
                         )
-                        it.data?.let { it1 -> tasks.addAll(it1) }
+                        it.data?.let {
+                            it1 -> tasks.addAll(it1)
+                            _reload.update { true }
+
+                        }
 
                         Napier.log(
                             LogLevel.ASSERT,

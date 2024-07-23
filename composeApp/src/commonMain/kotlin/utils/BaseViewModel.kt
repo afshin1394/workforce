@@ -5,6 +5,9 @@ import com.plusmobileapps.konnectivity.NetworkConnection
 import dev.icerock.moko.mvvm.viewmodel.ViewModel
 import dev.icerock.moko.resources.StringResource
 import domain.usecase.ResultStatus
+import io.github.aakira.napier.LogLevel
+import io.github.aakira.napier.Napier
+import irancell.nwg.wfm.BackgroundServiceApp
 import irancell.nwg.wfm.GPS
 import irancell.nwg.wfm.MR
 import irancell.nwg.wfm.getSharedPref
@@ -19,17 +22,18 @@ sealed class ViewStates() {
     data object Default : ViewStates()
     data object Loading : ViewStates()
     data class Error(val message: StringResource) : ViewStates()
-    data class Success(val message : StringResource? = MR.strings.success) : ViewStates()
+    data class Success(val message: StringResource? = MR.strings.success) : ViewStates()
     data object Reload : ViewStates()
 
     data class UnAuthorized(val message: StringResource) : ViewStates()
 }
 
-sealed interface GpsState{
+sealed interface GpsState {
     data object Default : GpsState
     data object Enabled : GpsState
     data object Disabled : GpsState
 }
+
 sealed class NetworkStates() {
     data object Default : NetworkStates()
     data object NetworkConnectionNONE : NetworkStates()
@@ -37,9 +41,6 @@ sealed class NetworkStates() {
     data object NetworkConnectionCELLULAR : NetworkStates()
 
 }
-
-
-
 
 
 open class BaseViewModel : ViewModel() {
@@ -57,12 +58,22 @@ open class BaseViewModel : ViewModel() {
 
     init {
 
-
         traceNetwork()
         traceLocation()
+        collectServiceState()
+    }
 
+    private fun collectServiceState() {
+        viewModelScope.launch {
+            BackgroundServiceApp.serviceState.collect {
+                if (it is ServiceState.Faulty) {
+                    _state.update {
+                        ViewStates.UnAuthorized(MR.strings.unauthorized)
+                    }
 
-
+                }
+            }
+        }
     }
 
     private fun traceLocation() {
@@ -72,12 +83,13 @@ open class BaseViewModel : ViewModel() {
             else
                 _gpsState.update { GpsState.Disabled }
         }
-        when (GPS.getLocationsState()){
-            true->{
+        when (GPS.getLocationsState()) {
+            true -> {
                 _gpsState.update { GpsState.Enabled }
 
             }
-            false->{
+
+            false -> {
                 _gpsState.update { GpsState.Disabled }
 
             }
@@ -121,20 +133,16 @@ open class BaseViewModel : ViewModel() {
 
     fun handleError(resultStatus: ResultStatus?) {
         when (resultStatus) {
-            is ResultStatus.CLIENT_EXCEPTION.FORBIDDEN ->{
-                getSharedPref().put(Availability, false)
-                getSharedPref().put(PhoneNumber, "")
-                getSharedPref().put(Token, "")
-                getSharedPref().put(SessionId,"")
+            is ResultStatus.CLIENT_EXCEPTION.FORBIDDEN -> {
+
                 _state.update { ViewStates.UnAuthorized(MR.strings.unauthorized) }
             }
-            is ResultStatus.CLIENT_EXCEPTION.UNATHORIZED->{
-                getSharedPref().put(Availability, false)
-                getSharedPref().put(PhoneNumber, "")
-                getSharedPref().put(Token, "")
-                getSharedPref().put(SessionId,"")
+
+            is ResultStatus.CLIENT_EXCEPTION.UNATHORIZED -> {
+
                 _state.update { ViewStates.UnAuthorized(MR.strings.unauthorized) }
             }
+
             is ResultStatus.CLIENT_EXCEPTION -> {
 
                 _state.update { ViewStates.Error(MR.strings.client_error) }
@@ -155,6 +163,7 @@ open class BaseViewModel : ViewModel() {
             }
 
             is ResultStatus.REDIRECT_EXCEPTION -> {
+                _state.update { ViewStates.Error(MR.strings.redirect_error) }
 
             }
 
