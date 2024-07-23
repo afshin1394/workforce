@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "d092928e88c56da771df295920c12888",
+    "identityHash": "9ce3367a8774086159debdf3cd94bcc5",
     "entities": [
       {
         "tableName": "ProfileEntity",
@@ -105,6 +105,17 @@
             "pk"
           ]
         },
+        "indices": [
+          {
+            "name": "index_RoleEntity_profilePk",
+            "unique": false,
+            "columnNames": [
+              "profilePk"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_RoleEntity_profilePk` ON `${TABLE_NAME}` (`profilePk`)"
+          }
+        ],
         "foreignKeys": [
           {
             "table": "ProfileEntity",
@@ -367,7 +378,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'd092928e88c56da771df295920c12888')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '9ce3367a8774086159debdf3cd94bcc5')"
     ]
   }
 }

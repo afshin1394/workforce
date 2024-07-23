@@ -2,6 +2,7 @@ package database.entity
 
 import androidx.room.Entity
 import androidx.room.ForeignKey
+import androidx.room.Index
 import androidx.room.PrimaryKey
 
 
@@ -13,6 +14,9 @@ import androidx.room.PrimaryKey
         childColumns = ["profilePk"],
         onDelete = ForeignKey.CASCADE
     )],
+    indices = [
+        Index(value = ["profilePk"])
+    ]
 )
 
 data class RoleEntity(
