@@ -1,9 +1,6 @@
-package domain.models.initialForm
+package domain.models.form_struct
 
 import data.network.response.task.logic.LogicDomain
-import irancell.nwg.wfm.MR
-import kotlinx.serialization.Serializable
-
 
 
 data class ComponentDomain(

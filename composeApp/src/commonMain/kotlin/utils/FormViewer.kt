@@ -18,31 +18,19 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.benasher44.uuid.uuid4
-import dev.icerock.moko.resources.compose.localized
-import dev.icerock.moko.resources.desc.Raw
 import dev.icerock.moko.resources.desc.ResourceFormattedStringDesc
 
-import dev.icerock.moko.resources.desc.StringDesc
 import domain.models.PhotoDomain
 
-import domain.models.initialForm.ComponentDomain
-import domain.models.initialForm.ProcessLogicDomain
-import domain.models.initialForm.ValidateDomain
+import domain.models.form_struct.ComponentDomain
+import domain.models.form_struct.ProcessLogicDomain
+import domain.models.form_struct.ValidateDomain
 
-import domain.models.initialForm.ValueDomain
-import io.github.aakira.napier.LogLevel
-import io.github.aakira.napier.Napier
+import domain.models.form_struct.ValueDomain
 import irancell.nwg.wfm.MR
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.debounce
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.flow.updateAndGet
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 import presentation.screens.main.components.formViewer.CheckList
 import presentation.screens.main.components.formViewer.DropDownMultiChoice

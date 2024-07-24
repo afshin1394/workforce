@@ -1,6 +1,5 @@
 package presentation.screens.main.components.formViewer
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -8,12 +7,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -23,20 +19,17 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import dev.icerock.moko.resources.compose.localized
 import dev.icerock.moko.resources.desc.ResourceFormattedStringDesc
 import domain.models.PhotoDomain
-import domain.models.initialForm.ProcessLogicDomain
+import domain.models.form_struct.ProcessLogicDomain
 import irancell.nwg.wfm.Camera
 import irancell.nwg.wfm.InternalStorage
 import irancell.nwg.wfm.provideAppContext
 import presentation.components.ImageRowComponent
-import presentation.theme.h4
-import presentation.theme.strokeDefaultLight
 import presentation.theme.surfaceBrandDefault
 import presentation.theme.surfaceBrandDisabled
 import presentation.theme.textInverseDisabled

@@ -57,14 +57,9 @@ import com.mohamedrejeb.calf.ui.timepicker.rememberAdaptiveTimePickerState
 import dev.icerock.moko.resources.compose.localized
 import dev.icerock.moko.resources.compose.painterResource
 import dev.icerock.moko.resources.desc.ResourceFormattedStringDesc
-import domain.models.initialForm.ProcessLogicDomain
+import domain.models.form_struct.ProcessLogicDomain
 import irancell.nwg.wfm.DatePickerFormat.format
-import irancell.nwg.wfm.IntentHandler
 import irancell.nwg.wfm.MR
-import irancell.nwg.wfm.getSharedPref
-import irancell.nwg.wfm.provideAppContext
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 import kotlinx.datetime.LocalDateTime
@@ -76,10 +71,7 @@ import presentation.theme.surfaceBrandDefault
 import presentation.theme.surfaceBrandDisabled
 import presentation.theme.textInverseDisabled
 import presentation.theme.textSecondary
-import utils.Language
-import utils.SelectLanguage
 import utils.getLocalDateTimeFromLong
-import utils.isRunningGPS
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

@@ -1,4 +1,4 @@
-package domain.models.initialForm
+package domain.models.form_struct
 
 import kotlinx.serialization.Serializable
 

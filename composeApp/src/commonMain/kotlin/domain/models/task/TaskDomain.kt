@@ -1,6 +1,6 @@
 package domain.models.task
 
-import domain.models.initialForm.InitialFormDomain
+import domain.models.form_struct.InitialFormDomain
 
 data class TaskDomain(
     val basic_info: BasicInfoDomain,

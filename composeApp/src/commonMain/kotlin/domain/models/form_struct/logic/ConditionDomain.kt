@@ -1,6 +1,6 @@
-package domain.models.initialForm.logic
+package domain.models.form_struct.logic
 
-import domain.models.initialForm.OperatorDomain
+import domain.models.form_struct.OperatorDomain
 import kotlinx.serialization.Serializable
 
 @Serializable

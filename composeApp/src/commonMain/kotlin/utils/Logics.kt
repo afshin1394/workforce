@@ -4,9 +4,9 @@ import data.network.response.task.logic.LogicDomain
 import dev.icerock.moko.resources.desc.ResourceFormatted
 import dev.icerock.moko.resources.desc.ResourceFormattedStringDesc
 import dev.icerock.moko.resources.desc.StringDesc
-import domain.models.initialForm.ComponentDomain
-import domain.models.initialForm.ValueDomain
-import domain.models.initialForm.logic.ConditionDomain
+import domain.models.form_struct.ComponentDomain
+import domain.models.form_struct.ValueDomain
+import domain.models.form_struct.logic.ConditionDomain
 import io.github.aakira.napier.LogLevel
 import io.github.aakira.napier.Napier
 import irancell.nwg.wfm.MR

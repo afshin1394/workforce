@@ -51,8 +51,8 @@ import dev.icerock.moko.resources.compose.localized
 import dev.icerock.moko.resources.compose.painterResource
 import dev.icerock.moko.resources.compose.stringResource
 import dev.icerock.moko.resources.desc.ResourceFormattedStringDesc
-import domain.models.initialForm.ProcessLogicDomain
-import domain.models.initialForm.ValueDomain
+import domain.models.form_struct.ProcessLogicDomain
+import domain.models.form_struct.ValueDomain
 import irancell.nwg.wfm.MR
 import presentation.theme.strokeDefaultDark
 import presentation.theme.strokeDefaultLight

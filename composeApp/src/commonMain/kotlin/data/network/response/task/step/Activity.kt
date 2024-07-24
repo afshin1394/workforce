@@ -8,15 +8,15 @@ data class Activity(
     @SerialName("id")
     val id : Int,
     @SerialName("title")
-    val title : Int,
+    val title : String,
     @SerialName("process_id")
     val process_id : Int,
     @SerialName("task")
     val task : Int,
     @SerialName("kind")
-    val kind : Int,
-   // @SerialName("form")
-   // val form : Form,
+    val kind : String,
+    @SerialName("form")
+    val form : Form,
     @SerialName("tag")
     val tag : Int,
     @SerialName("form_id")

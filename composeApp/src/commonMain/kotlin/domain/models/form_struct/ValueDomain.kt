@@ -1,7 +1,4 @@
-package domain.models.initialForm
-
-import irancell.nwg.wfm.MR
-import kotlinx.serialization.Serializable
+package domain.models.form_struct
 
 
 data class ValueDomain(

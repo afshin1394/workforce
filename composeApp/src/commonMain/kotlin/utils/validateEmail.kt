@@ -1,14 +1,10 @@
 package utils
 
-import dev.icerock.moko.resources.StringResource
-import dev.icerock.moko.resources.compose.localized
-import dev.icerock.moko.resources.compose.stringResource
-import dev.icerock.moko.resources.desc.Resource
 import dev.icerock.moko.resources.desc.ResourceFormatted
 import dev.icerock.moko.resources.desc.ResourceFormattedStringDesc
 import dev.icerock.moko.resources.desc.StringDesc
-import domain.models.initialForm.ComponentDomain
-import domain.models.initialForm.ValidateDomain
+import domain.models.form_struct.ComponentDomain
+import domain.models.form_struct.ValidateDomain
 import irancell.nwg.wfm.MR
 
 

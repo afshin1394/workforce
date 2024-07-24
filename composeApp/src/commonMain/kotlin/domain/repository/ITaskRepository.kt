@@ -11,6 +11,7 @@ interface ITaskRepository {
 
   suspend fun getAll() : List<TaskEntity>
 
+
   suspend fun deleteAll()
 
 }

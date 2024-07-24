@@ -17,8 +17,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import dev.icerock.moko.resources.compose.painterResource
 import domain.models.PhotoDomain
-import domain.models.initialForm.ComponentDomain
-import domain.models.initialForm.ValueDomain
+import domain.models.form_struct.ComponentDomain
+import domain.models.form_struct.ValueDomain
 import irancell.nwg.wfm.MR
 import kotlinx.coroutines.flow.MutableStateFlow
 import utils.initialize

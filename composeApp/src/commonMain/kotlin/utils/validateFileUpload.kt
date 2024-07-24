@@ -3,9 +3,9 @@ package utils
 import dev.icerock.moko.resources.desc.ResourceFormatted
 import dev.icerock.moko.resources.desc.ResourceFormattedStringDesc
 import dev.icerock.moko.resources.desc.StringDesc
-import domain.models.initialForm.ComponentDomain
-import domain.models.initialForm.ValidateDomain
-import domain.models.initialForm.ValueDomain
+import domain.models.form_struct.ComponentDomain
+import domain.models.form_struct.ValidateDomain
+import domain.models.form_struct.ValueDomain
 import irancell.nwg.wfm.File
 import irancell.nwg.wfm.MR
 

@@ -4,10 +4,9 @@ import data.network.response.task.Component
 import data.network.response.task.Condition
 import data.network.response.task.Conditional
 import data.network.response.task.Expression
-import data.network.response.task.InitialForm
+import data.network.response.task.FormStruct
 import data.network.response.task.Layout
 import data.network.response.task.Operator
-import data.network.response.task.task.TasksNetworkResponse
 import data.network.response.task.Validate
 import data.network.response.task.Value
 import data.network.response.task.logic.AutoFillLogic
@@ -26,17 +25,17 @@ import data.network.response.task.logic.TicketAutoFillLogic
 import data.network.response.task.logic.TicketAutoFillLogicDomain
 import data.network.response.task.task.Detail
 import database.entity.InitialFormEntity
-import domain.models.initialForm.ComponentDomain
-import domain.models.initialForm.logic.ConditionDomain
-import domain.models.initialForm.ConditionalDomain
-import domain.models.initialForm.logic.ExpressionDomain
-import domain.models.initialForm.InitialFormDomain
-import domain.models.initialForm.InitialFormStructureDomain
-import domain.models.initialForm.LayoutDomain
-import domain.models.initialForm.OperatorDomain
-import domain.models.initialForm.ValidateDomain
-import domain.models.initialForm.ValueDate
-import domain.models.initialForm.ValueDomain
+import domain.models.form_struct.ComponentDomain
+import domain.models.form_struct.logic.ConditionDomain
+import domain.models.form_struct.ConditionalDomain
+import domain.models.form_struct.logic.ExpressionDomain
+import domain.models.form_struct.InitialFormDomain
+import domain.models.form_struct.FormStructDomain
+import domain.models.form_struct.LayoutDomain
+import domain.models.form_struct.OperatorDomain
+import domain.models.form_struct.ValidateDomain
+import domain.models.form_struct.ValueDate
+import domain.models.form_struct.ValueDomain
 
 import kotlinx.serialization.json.Json
 
@@ -57,10 +56,10 @@ fun List<Detail>.toInitialFormEntity(): List<InitialFormEntity> {
 }
 
 fun InitialFormEntity.toInitialFormDomain() : InitialFormDomain {
-      val  initialForm = Json.decodeFromString<InitialForm>(this.structure);
+      val  formStruct = Json.decodeFromString<FormStruct>(this.structure);
 
 
-    return initialForm.toInitialFormDomain(this.ticket_number)
+    return formStruct.toInitialFormDomain(this.ticket_number)
 }
 
 fun  List<InitialFormEntity>.toInitialFormDomain() : List<InitialFormDomain> {
@@ -71,8 +70,9 @@ fun  List<InitialFormEntity>.toInitialFormDomain() : List<InitialFormDomain> {
         )
     }
 }
-fun  InitialForm.toInitialFormDomain(ticketNumber : String) : InitialFormDomain {
-    return InitialFormDomain(ticketNumber , InitialFormStructureDomain(this.id,this.hide,this.type,this.components?.toComponentDomain() ,this.conditional?.toConditionalDomain(),this.schemaVersion)     )
+
+fun  FormStruct.toInitialFormDomain(ticketNumber : String) : InitialFormDomain {
+    return InitialFormDomain(ticketNumber , FormStructDomain(this.id,this.hide,this.type,this.components?.toComponentDomain() ,this.conditional?.toConditionalDomain(),this.schemaVersion)     )
 }
 
  fun  List<Component>.toComponentDomain() : List<ComponentDomain> {

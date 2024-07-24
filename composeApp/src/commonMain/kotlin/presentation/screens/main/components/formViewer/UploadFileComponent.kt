@@ -29,7 +29,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -38,18 +37,14 @@ import dev.icerock.moko.resources.ImageResource
 import dev.icerock.moko.resources.compose.localized
 import dev.icerock.moko.resources.compose.painterResource
 import dev.icerock.moko.resources.desc.ResourceFormattedStringDesc
-import domain.models.initialForm.ProcessLogicDomain
-import domain.models.initialForm.ValueDomain
+import domain.models.form_struct.ProcessLogicDomain
+import domain.models.form_struct.ValueDomain
 import irancell.nwg.wfm.FilePicker
 import irancell.nwg.wfm.MR
 import irancell.nwg.wfm.provideAppContext
-import presentation.model.UploadFileModel
 import presentation.theme.body_small
-import presentation.theme.strokeDefaultLight
-import presentation.theme.surfaceBrandDark
 import presentation.theme.surfaceBrandDefault
 import presentation.theme.surfaceBrandDisabled
-import presentation.theme.surfaceDefault
 import presentation.theme.textInverseDisabled
 import presentation.theme.textSecondary
 

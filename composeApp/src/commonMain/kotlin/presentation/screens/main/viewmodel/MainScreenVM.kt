@@ -19,6 +19,7 @@ import domain.usecase.usecase.photo.DeleteByComponentKeyUseCase
 import domain.usecase.usecase.photo.GetPhotoByComponentKeyUseCase
 import domain.usecase.usecase.photo.InsertPhotoUseCase
 import domain.usecase.usecase.profile.GetProfileUseCase
+import domain.usecase.usecase.steps.UpdateStepsUseCase
 import domain.usecase.usecase.suspendTask.DeleteByTaskIdUseCase
 import domain.usecase.usecase.suspendTask.GetSuspendTaskByIdUseCase
 import domain.usecase.usecase.suspendTask.StoreSuspendTaskUseCase
@@ -53,7 +54,8 @@ class MainScreenVM(
     private val deleteByTaskIdUseCase: DeleteByTaskIdUseCase,
     private val insertPhotoUseCase: InsertPhotoUseCase,
     private val getPhotoByComponentKeyUseCase: GetPhotoByComponentKeyUseCase,
-    private val deleteByComponentKeyUseCase: DeleteByComponentKeyUseCase
+    private val deleteByComponentKeyUseCase: DeleteByComponentKeyUseCase,
+    private val updateStepsUseCase: UpdateStepsUseCase
 ) : BaseViewModel() {
     private val _availability = MutableStateFlow(false)
     val availability = _availability.asStateFlow()
@@ -388,8 +390,7 @@ class MainScreenVM(
                 when (it.status) {
                     AsyncStatus.ERROR -> {
                         //handleError(it.resultStatus)
-
-
+                        handleError(it.resultStatus)
                         Napier.log(
                             LogLevel.ASSERT,
                             "getAllWorksUseCase",
@@ -407,7 +408,6 @@ class MainScreenVM(
                     AsyncStatus.SUCCESS -> {
                         tasks.clear()
 
-                        updateState(ViewStates.Success())
 
                         Napier.log(
                             LogLevel.ASSERT,
@@ -420,6 +420,7 @@ class MainScreenVM(
 
                         }
 
+//                        updateSteps()
                         Napier.log(
                             LogLevel.ASSERT,
                             "getAllWorksUseCase",
@@ -432,6 +433,47 @@ class MainScreenVM(
                 }
             }
         }
+
+    }
+
+  suspend  private fun updateSteps() {
+            updateStepsUseCase(Unit).collect{
+                when (it.status) {
+                    AsyncStatus.ERROR -> {
+                        handleError(it.resultStatus)
+
+
+                        Napier.log(
+                            LogLevel.ASSERT,
+                            "updateSteps",
+                            message = "ERROR: " + it.message
+                        )
+
+                    }
+
+                    AsyncStatus.LOADING -> {
+                        Napier.log(LogLevel.ASSERT, "updateSteps", message = "LOADING: ")
+                        updateState(ViewStates.Loading)
+
+                    }
+
+                    AsyncStatus.SUCCESS -> {
+
+                        updateState(ViewStates.Success())
+
+                        Napier.log(
+                            LogLevel.ASSERT,
+                            "updateSteps",
+                            message = "SUCCESS: " + it.data
+                        )
+
+
+                    }
+
+
+                }
+            }
+
 
     }
 

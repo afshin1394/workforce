@@ -65,7 +65,7 @@ import dev.icerock.moko.resources.compose.localized
 import dev.icerock.moko.resources.compose.painterResource
 import dev.icerock.moko.resources.compose.stringResource
 import dev.icerock.moko.resources.desc.ResourceFormattedStringDesc
-import domain.models.initialForm.ProcessLogicDomain
+import domain.models.form_struct.ProcessLogicDomain
 import irancell.nwg.wfm.ConvertStringToTimeStamp
 import irancell.nwg.wfm.DatePickerFormat.format
 import irancell.nwg.wfm.MR

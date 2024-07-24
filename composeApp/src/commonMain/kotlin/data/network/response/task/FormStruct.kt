@@ -4,7 +4,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class InitialForm(
+data class FormStruct(
     @SerialName("id")
     val id: String? = null,
     @SerialName("hide")

@@ -1,6 +1,5 @@
-package domain.models.initialForm
+package domain.models.form_struct
 
-import dev.icerock.moko.resources.StringResource
 import dev.icerock.moko.resources.desc.ResourceFormattedStringDesc
 
 data class ProcessLogicDomain(var shouldHide : Boolean = false,var required : Boolean= false,var disabled : Boolean= false,var readOnly : Boolean= false,var calculatedValue : String? = null,var validate : Boolean = false,var errorMessage : ResourceFormattedStringDesc? = null)

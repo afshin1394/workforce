@@ -2,8 +2,8 @@ package utils
 
 import dev.icerock.moko.resources.desc.ResourceFormattedStringDesc
 import dev.icerock.moko.resources.desc.StringDesc
-import domain.models.initialForm.ComponentDomain
-import domain.models.initialForm.ValidateDomain
+import domain.models.form_struct.ComponentDomain
+import domain.models.form_struct.ValidateDomain
 
 
 fun validateComponents(

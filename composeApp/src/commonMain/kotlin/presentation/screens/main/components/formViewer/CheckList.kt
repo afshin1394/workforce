@@ -13,7 +13,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.toMutableStateList
@@ -28,10 +27,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import dev.icerock.moko.resources.compose.localized
 import dev.icerock.moko.resources.desc.ResourceFormattedStringDesc
-import domain.models.initialForm.ProcessLogicDomain
-import domain.models.initialForm.ValueDomain
-import io.github.aakira.napier.LogLevel
-import io.github.aakira.napier.Napier
+import domain.models.form_struct.ProcessLogicDomain
+import domain.models.form_struct.ValueDomain
 import presentation.theme.strokeDefaultLight
 import presentation.theme.surfaceBrandDefault
 import presentation.theme.surfaceBrandDisabled

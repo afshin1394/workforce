@@ -9,6 +9,7 @@ import data.GeneralLocationRepositoryImpl
 import data.InitialFormRepositoryImpl
 import data.PhotoRepositoryImpl
 import data.ProfileRepositoryImpl
+import data.StepsRepositoryImpl
 import data.SuspendTaskRepositoryImpl
 import data.TaskRepositoryImpl
 import domain.repository.IAuthRepository
@@ -17,6 +18,7 @@ import domain.repository.IGeneralLocationRepository
 import domain.repository.IInitialFormRepository
 import domain.repository.IPhotoRepository
 import domain.repository.IProfileRepository
+import domain.repository.IStepsRepository
 import domain.repository.ISuspendTaskRepository
 import domain.repository.ITaskRepository
 import domain.usecase.usecase.auth.LoginUseCase
@@ -37,6 +39,7 @@ import domain.usecase.usecase.photo.InsertPhotoUseCase
 
 import domain.usecase.usecase.profile.GetProfileUseCase
 import domain.usecase.usecase.profile.StoreProfileUseCase
+import domain.usecase.usecase.steps.UpdateStepsUseCase
 import domain.usecase.usecase.suspendTask.DeleteByTaskIdUseCase
 import domain.usecase.usecase.suspendTask.GetSuspendTaskByIdUseCase
 import domain.usecase.usecase.suspendTask.StoreSuspendTaskUseCase
@@ -83,6 +86,7 @@ fun repositoryModule() = module {
     single<IProfileRepository>{ ProfileRepositoryImpl(get(named("tokenized")),get()) }
     single<IInitialFormRepository>{ InitialFormRepositoryImpl(get()) }
     single<IPhotoRepository>{ PhotoRepositoryImpl(get()) }
+    single<IStepsRepository>{ StepsRepositoryImpl(get(named("tokenized"))) }
 
 }
 
@@ -111,6 +115,7 @@ fun useCaseModule() = module {
     single { InsertPhotoUseCase(get()) }
     single { GetPhotoByComponentKeyUseCase(get()) }
     single { DeleteByComponentKeyUseCase(get()) }
+    single { UpdateStepsUseCase(get(),get()) }
 }
 
 fun httpModule() = module {
@@ -141,7 +146,7 @@ fun httpModule() = module {
             }
 
             install(HttpTimeout) {
-                requestTimeoutMillis = 10000
+                requestTimeoutMillis = 15000
                 connectTimeoutMillis = 5000
                 socketTimeoutMillis = 15000
             }
@@ -176,7 +181,7 @@ fun httpModule() = module {
             }
 
             install(HttpTimeout) {
-                requestTimeoutMillis = 10000
+                requestTimeoutMillis = 15000
                 connectTimeoutMillis = 5000
                 socketTimeoutMillis = 15000
             }
@@ -193,7 +198,7 @@ fun httpModule() = module {
 
 fun viewModelModule() = module {
     viewModelDefinition { AboutScreenVM() }
-    viewModelDefinition { MainScreenVM(get(), get(),get(),get(),get(),get(),get(),get(),get(),get(),get()) }
+    viewModelDefinition { MainScreenVM(get(), get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get()) }
     viewModelDefinition { SettingScreenVM() }
     viewModelDefinition { GpsTrackingReportScreenVM(get()) }
     viewModelDefinition { LoginScreenVM(get()) }

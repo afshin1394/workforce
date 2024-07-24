@@ -1,6 +1,6 @@
 package data.network.response.task.logic
 
-import domain.models.initialForm.logic.ExpressionDomain
+import domain.models.form_struct.logic.ExpressionDomain
 
 data class LogicDomain(
     val feild: String?=null,

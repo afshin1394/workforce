@@ -1,9 +1,7 @@
-package domain.models.initialForm
+package domain.models.form_struct
 
 import data.network.response.task.Layout
 import dev.icerock.moko.resources.desc.ResourceFormattedStringDesc
-import dev.icerock.moko.resources.desc.StringDesc
-import kotlinx.serialization.Serializable
 
 
 data class ValidateDomain(

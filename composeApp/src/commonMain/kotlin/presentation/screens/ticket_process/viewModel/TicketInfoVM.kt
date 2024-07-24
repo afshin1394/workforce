@@ -3,8 +3,8 @@ package presentation.screens.ticket_process.viewModel
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import domain.models.PhotoDomain
-import domain.models.initialForm.ComponentDomain
-import domain.models.initialForm.ValueDomain
+import domain.models.form_struct.ComponentDomain
+import domain.models.form_struct.ValueDomain
 import domain.usecase.usecase.initialForm.GetInitialFormByTask
 import domain.usecase.usecase.photo.GetPhotoByComponentKeyUseCase
 import io.github.aakira.napier.LogLevel
