@@ -1,4 +1,8 @@
 package com.irancell.nwg.wfm.presentation.model
 
+import domain.models.form_struct.FormStructDomain
 
-data class ProcessLevel(val uuid: String ,val level : Int,val levelName : String,var isActive : Boolean = false)
+
+data class ProcessLevel(val activityID : Int,val activityTitle : String,var isActive : Boolean = false,
+
+)

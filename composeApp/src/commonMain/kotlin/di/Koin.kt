@@ -33,6 +33,7 @@ import domain.usecase.usecase.location.SendLocationToServerUseCase
 import domain.usecase.usecase.availability.StoreAvailabilityUseCase
 import domain.usecase.usecase.initialForm.GetInitialFormByTask
 import domain.usecase.usecase.location.StoreLocationDataUseCase
+import domain.usecase.usecase.mokSteps.GetMokStepFormUseCase
 import domain.usecase.usecase.photo.DeleteByComponentKeyUseCase
 import domain.usecase.usecase.photo.GetPhotoByComponentKeyUseCase
 import domain.usecase.usecase.photo.InsertPhotoUseCase
@@ -116,6 +117,7 @@ fun useCaseModule() = module {
     single { GetPhotoByComponentKeyUseCase(get()) }
     single { DeleteByComponentKeyUseCase(get()) }
     single { UpdateStepsUseCase(get(),get()) }
+    single { GetMokStepFormUseCase() }
 }
 
 fun httpModule() = module {
@@ -204,7 +206,7 @@ fun viewModelModule() = module {
     viewModelDefinition { LoginScreenVM(get()) }
     viewModelDefinition { VerifyScreenVM(get(),get(),get()) }
     viewModelDefinition { TicketInfoVM(get(),get()) }
-    viewModelDefinition { TicketProcessVM() }
+    viewModelDefinition { TicketProcessVM(get(),get()) }
     viewModelDefinition { FormViewerScreenVM() }
     viewModelDefinition { MapVM() }
     viewModelDefinition { AccountScreenVM(get()) }
