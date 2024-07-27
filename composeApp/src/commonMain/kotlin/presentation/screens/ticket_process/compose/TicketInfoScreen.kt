@@ -169,10 +169,12 @@ class TicketInfoScreen(
                                     viewModel.updateTempComponentList(it)
                                 }
 
-                                if (errors.isEmpty()) {
+                              /*  if (errors.isEmpty()) {
                                     navigator.push(ticketProcessScreen)
-                                }
+                                }*/
 
+
+                                navigator.push(TicketProcessScreen(viewModel.ticketNumber.toString()))
                             })
 
                         scope.launch {

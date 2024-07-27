@@ -30,6 +30,7 @@ import androidx.compose.ui.unit.dp
 import com.irancell.nwg.wfm.presentation.model.ProcessLevel
 
 import com.irancell.nwg.wfm.presentation.theme.spacing05X
+import presentation.model.StepModel
 import presentation.theme.body_large
 import presentation.theme.strokeDefaultLight
 import presentation.theme.surfaceBrandDefault
@@ -115,7 +116,7 @@ fun ProcessStepSelected(
 }
 
 @Composable
-fun processBar(list: List<ProcessLevel>,currentLevelStep : Int ) {
+fun processBar(list: List<StepModel>,currentLevelStep : Int ) {
 
     Row(
         modifier = Modifier
@@ -128,13 +129,13 @@ fun processBar(list: List<ProcessLevel>,currentLevelStep : Int ) {
                 ProcessStepSelected(
                     Modifier
                         .weight(1f)
-                    , process.level, process.levelName
+                    , process.activityID, process.activityTitle
                 )
             }else{
             ProcessStep(
                 Modifier
                     .weight(1f)
-                    , process.level, process.levelName
+                    , process.activityID, process.activityTitle
             )
             }
             if (list.size - 1 != index)
