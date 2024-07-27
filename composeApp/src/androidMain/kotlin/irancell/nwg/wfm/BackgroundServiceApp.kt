@@ -23,14 +23,16 @@ import domain.usecase.ResultStatus
 
 import domain.usecase.usecase.location.SendLocationToServerUseCase
 import domain.usecase.usecase.location.StoreLocationDataUseCase
-import domain.usecase.usecase.ticket.FetchTaskUseCase
+import domain.usecase.usecase.steps.UpdateStepsUseCase
+import domain.usecase.usecase.ticket.UpdateTaskUseCase
+import io.github.aakira.napier.LogLevel
+import io.github.aakira.napier.Napier
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -42,11 +44,12 @@ import utils.getCurrentDate
 import java.util.concurrent.TimeUnit
 
 
-actual class BackgroundServiceApp : Service() , KoinComponent {
+internal actual class BackgroundServiceApp : Service() , KoinComponent {
 
     val storeLocationDataUseCase : StoreLocationDataUseCase by inject()
     val sendLocationToServerUseCase : SendLocationToServerUseCase by inject()
-    val fetchTask : FetchTaskUseCase by inject()
+    val updateTaskUseCase : UpdateTaskUseCase by inject()
+    val updateStepsUseCase : UpdateStepsUseCase by inject()
 
     lateinit var pendingIntent: PendingIntent
     private var lat: Double = 0.0
@@ -179,7 +182,8 @@ actual class BackgroundServiceApp : Service() , KoinComponent {
                 ).collect{
                     when(it.status){
                         AsyncStatus.ERROR -> {
-                            val errorMessage = it.message!!
+                            if( it.resultStatus is ResultStatus.CLIENT_EXCEPTION.UNATHORIZED || it.resultStatus is ResultStatus.CLIENT_EXCEPTION.FORBIDDEN)
+                                _serviceState.update { ServiceState.Faulty }
 
                         }
                         AsyncStatus.LOADING -> {
@@ -190,25 +194,7 @@ actual class BackgroundServiceApp : Service() , KoinComponent {
                     }
                 }
 
-
-                fetchTask(Unit)
-                    .collect{
-                        when(it.status){
-                            AsyncStatus.ERROR -> {
-                                if( it.resultStatus is ResultStatus.CLIENT_EXCEPTION.UNATHORIZED || it.resultStatus is ResultStatus.CLIENT_EXCEPTION.FORBIDDEN)
-                                    _serviceState.update { ServiceState.Faulty }
-                                println("TaskCallApi${"ERROR"}")
-                            }
-                            AsyncStatus.LOADING -> {
-                            }
-                            AsyncStatus.SUCCESS -> {
-                                _serviceState.update { ServiceState.Normal }
-                                println("TaskCallApi${"SUCCESS"}")
-
-                                Log.i("getAllTask", "onStartCommand: CallApi"+it.data)
-                            }
-                        }
-                    }
+                updateTask()
                 startAlarm()
                 scope.cancel()
             }
@@ -220,6 +206,67 @@ actual class BackgroundServiceApp : Service() , KoinComponent {
 
         return START_STICKY
     }
+    private suspend fun updateTask(){
+        updateTaskUseCase(Unit)
+            .collect{
+                when(it.status){
+                    AsyncStatus.ERROR -> {
+                        if( it.resultStatus is ResultStatus.CLIENT_EXCEPTION.UNATHORIZED || it.resultStatus is ResultStatus.CLIENT_EXCEPTION.FORBIDDEN)
+                            _serviceState.update { ServiceState.Faulty }
+                        println("TaskCallApi${"ERROR"}")
+                    }
+                    AsyncStatus.LOADING -> {
+                    }
+                    AsyncStatus.SUCCESS -> {
+                        updateSteps()
+                        println("TaskCallApi${"SUCCESS"}")
+                        Log.i("getAllTask", "onStartCommand: CallApi"+it.data)
+                    }
+                }
+            }
+    }
+    private suspend fun updateSteps() {
+        updateStepsUseCase(Unit).collect {
+            when (it.status) {
+                AsyncStatus.ERROR -> {
+                    if( it.resultStatus is ResultStatus.CLIENT_EXCEPTION.UNATHORIZED || it.resultStatus is ResultStatus.CLIENT_EXCEPTION.FORBIDDEN)
+                        _serviceState.update { ServiceState.Faulty }
+
+                    Napier.log(
+                        LogLevel.ASSERT,
+                        "updateSteps",
+                        message = "ERROR: " + it.message
+                    )
+
+                }
+
+                AsyncStatus.LOADING -> {
+                    Napier.log(LogLevel.ASSERT, "updateSteps", message = "LOADING: ")
+
+                }
+
+                AsyncStatus.SUCCESS -> {
+                    _serviceState.update { ServiceState.Normal }
+
+
+                    Napier.log(
+                        LogLevel.ASSERT,
+                        "" +
+                                "",
+                        message = "SUCCESS: " + it.data
+                    )
+
+
+                }
+
+
+            }
+        }
+
+
+    }
+
+
 
 
 

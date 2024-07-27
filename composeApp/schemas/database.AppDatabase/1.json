@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "9ce3367a8774086159debdf3cd94bcc5",
+    "identityHash": "732d3b11b9e2691ac911919838f1995a",
     "entities": [
       {
         "tableName": "ProfileEntity",
@@ -374,11 +374,89 @@
             "pk"
           ]
         }
+      },
+      {
+        "tableName": "StepsEntity",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `ticketNumber` TEXT NOT NULL, `wi` INTEGER NOT NULL, `activityId` INTEGER NOT NULL, `formStructure` TEXT NOT NULL, `edited` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "pk",
+            "columnName": "pk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ticketNumber",
+            "columnName": "ticketNumber",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "wi",
+            "columnName": "wi",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "activityId",
+            "columnName": "activityId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "formStructure",
+            "columnName": "formStructure",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "edited",
+            "columnName": "edited",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "pk"
+          ]
+        }
+      },
+      {
+        "tableName": "StepPointerEntity",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`ticketNumber` TEXT NOT NULL, `activeActivity` INTEGER NOT NULL, `edited` INTEGER NOT NULL, PRIMARY KEY(`ticketNumber`))",
+        "fields": [
+          {
+            "fieldPath": "ticketNumber",
+            "columnName": "ticketNumber",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "activeActivity",
+            "columnName": "activeActivity",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "edited",
+            "columnName": "edited",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "ticketNumber"
+          ]
+        }
       }
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '9ce3367a8774086159debdf3cd94bcc5')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '732d3b11b9e2691ac911919838f1995a')"
     ]
   }
 }

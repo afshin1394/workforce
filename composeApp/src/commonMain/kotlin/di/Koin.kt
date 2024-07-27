@@ -9,6 +9,7 @@ import data.GeneralLocationRepositoryImpl
 import data.InitialFormRepositoryImpl
 import data.PhotoRepositoryImpl
 import data.ProfileRepositoryImpl
+import data.StepPointerRepositoryImpl
 import data.StepsRepositoryImpl
 import data.SuspendTaskRepositoryImpl
 import data.TaskRepositoryImpl
@@ -18,6 +19,7 @@ import domain.repository.IGeneralLocationRepository
 import domain.repository.IInitialFormRepository
 import domain.repository.IPhotoRepository
 import domain.repository.IProfileRepository
+import domain.repository.IStepPointerRepository
 import domain.repository.IStepsRepository
 import domain.repository.ISuspendTaskRepository
 import domain.repository.ITaskRepository
@@ -43,8 +45,8 @@ import domain.usecase.usecase.steps.UpdateStepsUseCase
 import domain.usecase.usecase.suspendTask.DeleteByTaskIdUseCase
 import domain.usecase.usecase.suspendTask.GetSuspendTaskByIdUseCase
 import domain.usecase.usecase.suspendTask.StoreSuspendTaskUseCase
-import domain.usecase.usecase.ticket.FetchTaskUseCase
-import domain.usecase.usecase.ticket.UpdateTasksUseCase
+import domain.usecase.usecase.ticket.UpdateTaskUseCase
+import domain.usecase.usecase.ticket.GetTasksUseCase
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.addDefaultResponseValidation
@@ -86,8 +88,8 @@ fun repositoryModule() = module {
     single<IProfileRepository>{ ProfileRepositoryImpl(get(named("tokenized")),get()) }
     single<IInitialFormRepository>{ InitialFormRepositoryImpl(get()) }
     single<IPhotoRepository>{ PhotoRepositoryImpl(get()) }
-    single<IStepsRepository>{ StepsRepositoryImpl(get(named("tokenized"))) }
-
+    single<IStepsRepository>{ StepsRepositoryImpl(get(named("tokenized")),get()) }
+    single<IStepPointerRepository>{ StepPointerRepositoryImpl(get()) }
 }
 
 fun useCaseModule() = module {
@@ -100,8 +102,8 @@ fun useCaseModule() = module {
     single { ChangeServerAvailabilityUseCase(get()) }
     single { GetAvailabilityObjectIdUseCase() }
     single { LoginUseCase(get()) }
-    single { UpdateTasksUseCase(get(),get()) }
-    single { FetchTaskUseCase(get(),get()) }
+    single { GetTasksUseCase(get(),get()) }
+    single { UpdateTaskUseCase(get(),get()) }
     single { LoginUseCase(get()) }
     single { VerifyUseCase(get()) }
     single { ResendUseCase(get()) }
@@ -110,12 +112,12 @@ fun useCaseModule() = module {
     single { StoreProfileUseCase(get()) }
     single { GetProfileUseCase(get()) }
     single { DeleteByTaskIdUseCase(get()) }
-    single{ GetInitialFormByTask(get())}
+    single { GetInitialFormByTask(get())}
     single { LogoutUseCase(get()) }
     single { InsertPhotoUseCase(get()) }
     single { GetPhotoByComponentKeyUseCase(get()) }
     single { DeleteByComponentKeyUseCase(get()) }
-    single { UpdateStepsUseCase(get(),get()) }
+    single { UpdateStepsUseCase(get(),get(),get()) }
 }
 
 fun httpModule() = module {
@@ -198,7 +200,7 @@ fun httpModule() = module {
 
 fun viewModelModule() = module {
     viewModelDefinition { AboutScreenVM() }
-    viewModelDefinition { MainScreenVM(get(), get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get()) }
+    viewModelDefinition { MainScreenVM(get(), get(),get(),get(),get(),get(),get(),get(),get(),get(),get()) }
     viewModelDefinition { SettingScreenVM() }
     viewModelDefinition { GpsTrackingReportScreenVM(get()) }
     viewModelDefinition { LoginScreenVM(get()) }

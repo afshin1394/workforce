@@ -313,8 +313,6 @@ class TicketInfoVM(
 
 
     fun handleLogics() {
-
-
             viewModelScope.launch {
                 try {
                     withContext(Dispatchers.IO) { checkLogicsForAll(tempComponentList) }
@@ -342,6 +340,10 @@ class TicketInfoVM(
 
             }
         }
+
+    fun updateActiveActivity() {
+
+    }
 
 }
 

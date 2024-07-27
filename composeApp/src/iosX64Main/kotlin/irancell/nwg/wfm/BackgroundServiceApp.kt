@@ -1,6 +1,6 @@
 package irancell.nwg.wfm
 
-actual class BackgroundServiceApp {
+internal actual class BackgroundServiceApp {
     actual companion object {
 
         actual fun startBackgroundService() {

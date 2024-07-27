@@ -3,7 +3,7 @@ package irancell.nwg.wfm
 import kotlinx.coroutines.flow.MutableStateFlow
 import utils.ServiceState
 
-expect class BackgroundServiceApp {
+internal expect class BackgroundServiceApp {
 
     companion object {
         val serviceState : MutableStateFlow<ServiceState>

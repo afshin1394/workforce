@@ -19,22 +19,19 @@ class TaskRepositoryImpl(
     }
 
     override suspend fun insertAll(tickets: List<TaskEntity>) {
-
         db.taskDao().insertAll(tickets)
-
-
     }
 
     override suspend fun getAll(): List<TaskEntity> {
-
         return db.taskDao().selectAll()
-
     }
 
     override suspend fun deleteAll() {
-
         db.taskDao().deleteAll()
+    }
 
+    override suspend fun resetEntitySequence() {
+        db.taskDao().resetSequence()
     }
 
 

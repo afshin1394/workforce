@@ -26,4 +26,8 @@ class InitialFormRepositoryImpl(
         db.initialFormDao().deleteAll()
     }
 
+    override suspend fun resetEntitySequence() {
+        db.initialFormDao().resetSequence()
+    }
+
 }

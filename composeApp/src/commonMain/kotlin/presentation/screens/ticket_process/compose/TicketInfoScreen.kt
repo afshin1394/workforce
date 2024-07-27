@@ -74,6 +74,8 @@ class TicketInfoScreen(
         LaunchedEffect(Unit) {
             viewModel.getInitialForm(ticket_number)
             viewModel.updateTicketNumber(ticket_number)
+            viewModel.updateActiveActivity()
+
         }
 
 

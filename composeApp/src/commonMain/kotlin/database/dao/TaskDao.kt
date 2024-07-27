@@ -8,6 +8,8 @@ import database.entity.TaskEntity
 
 @Dao
 interface TaskDao {
+    @Query("UPDATE sqlite_sequence SET seq = 0 WHERE name = 'TaskEntity'")
+    suspend fun resetSequence()
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAll(task: List<TaskEntity>)

@@ -34,6 +34,8 @@ import irancell.nwg.wfm.getSharedPref
 import irancell.nwg.wfm.provideAppContext
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
+import presentation.components.CustomDialog
+import presentation.components.CustomDialogDoubleAction
 import presentation.components.CustomTopAppBar
 import presentation.components.DrawerBody
 import presentation.components.DrawerHeader
@@ -74,6 +76,7 @@ class MainScreen(
         val profileName by viewModel.profileName.collectAsState()
         val positionSelectedPhotoForEdit by viewModel.positionSelected.collectAsState()
         var indexPhotoSelected by remember { mutableStateOf(0) }
+        val showAcceptDialog  by viewModel.showAcceptDialog.collectAsState()
 
         val reloadState by viewModel.reload.collectAsState()
         val notificationScreen =
@@ -724,14 +727,33 @@ class MainScreen(
                             viewModel.resetSuspendTask()
                         },
                         tasks = ArrayList(viewModel.tasks.toList()), onAccept = {
+                           viewModel.events.value = MainEvent.AcceptTicket
                             viewModel.selectedTask.value = it
                             viewModel.resetSuspendTask()
-                            viewModel.selectedTask.value?.let {
-                                navigator.push(TicketInfoScreen(it.basic_info.ticket_number?:"0"))
-                            }
+                            viewModel.updateShowAcceptDialog(true)
 
                         }
                     )
+
+                    if(viewModel.events.value == MainEvent.AcceptTicket) {
+                        CustomDialogDoubleAction(
+                            showDialog = showAcceptDialog,
+                            message = MR.strings.continue_flow_message,
+                            title = MR.strings.continue_flow_title,
+                            titleButton = MR.strings.aaccept,
+                            onDismiss = {
+                              viewModel.updateShowAcceptDialog(false)
+                            },
+                            onConfirm = {
+                                viewModel.selectedTask.value?.let {
+                                    navigator.push(
+                                        TicketInfoScreen(
+                                            it.basic_info.ticket_number ?: "0"
+                                        )
+                                    )
+                                }
+                            })
+                    }
                 }
 
 

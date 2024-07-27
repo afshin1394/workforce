@@ -4,7 +4,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 data class ActivityDomain(
-    val id : Int,
+    val id : Long,
     val title : String,
     val process_id : Int,
     val task : Int,

@@ -158,4 +158,7 @@
 
     <string name="redirect_error">خطای تغییر مسیر ادرس</string>
     <string name="empty_error_message" />
+
+    <string name="continue_flow_title" >شروع اجرای مراحل تیکت</string>
+    <string name="continue_flow_message" >در صورت ادامه تغییرات تیکت را دریافت نخواهید کرد آیا مطمئن هستید؟</string>
 </resources>

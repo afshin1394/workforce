@@ -7,6 +7,8 @@ import database.dao.InitialFormDao
 import database.dao.PhotoDao
 import database.dao.ProfileDao
 import database.dao.RoleDao
+import database.dao.StepPointerDao
+import database.dao.StepsDao
 import database.dao.SuspendTaskDao
 import database.dao.TaskDao
 import database.entity.GeneralLocationEntity
@@ -15,31 +17,40 @@ import database.entity.PhotoEntity
 
 import database.entity.ProfileEntity
 import database.entity.RoleEntity
+import database.entity.StepPointerEntity
+import database.entity.StepsEntity
 import database.entity.SuspendTaskEntity
 import database.entity.TaskEntity
 
 
-@Database(entities = [ProfileEntity::class,RoleEntity::class,GeneralLocationEntity::class,TaskEntity::class,SuspendTaskEntity::class,InitialFormEntity::class,PhotoEntity::class], version = 1)
-abstract class AppDatabase : RoomDatabase() ,DB {
+@Database(
+    entities = [ProfileEntity::class, RoleEntity::class, GeneralLocationEntity::class, TaskEntity::class, SuspendTaskEntity::class, InitialFormEntity::class, PhotoEntity::class, StepsEntity::class,StepPointerEntity::class],
+    version = 1
+)
+abstract class AppDatabase : RoomDatabase(), DB {
 
 
     abstract fun profileDao(): ProfileDao
-    abstract fun roleDao():RoleDao
-    abstract fun generalLocationDao():GeneralLocationDao
+    abstract fun roleDao(): RoleDao
+    abstract fun generalLocationDao(): GeneralLocationDao
 
-    abstract fun taskDao():TaskDao
+    abstract fun taskDao(): TaskDao
 
-    abstract fun suspendTaskDao():SuspendTaskDao
+    abstract fun suspendTaskDao(): SuspendTaskDao
 
-    abstract fun initialFormDao():InitialFormDao
+    abstract fun initialFormDao(): InitialFormDao
 
-    abstract fun photoDao():PhotoDao
+    abstract fun photoDao(): PhotoDao
+
+    abstract fun stepDao(): StepsDao
+    abstract fun stepPointerDao(): StepPointerDao
 
     override fun clearAllTables() {
         super.clearAllTables()
     }
 
 }
+
 interface DB {
     fun clearAllTables() {}
 }
