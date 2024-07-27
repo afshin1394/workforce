@@ -74,7 +74,7 @@ class TicketProcessScreen(
         val positionSelectedPhotoForEdit by viewModel.positionSelected.collectAsState()
         var isBottomSheetOpen by remember { mutableStateOf(true) }
         val events by viewModel.events
-
+        var changeState = MutableStateFlow(0)
 
 
         LaunchedEffect(Unit) {
@@ -344,10 +344,16 @@ class TicketProcessScreen(
 
                         },
                         onFixChange = { text ->
-
+                            changeState.update { Random.nextInt() }
 
                         },
                         onChanges = { listComponent, listValueDomain, listIndexParent, indexChild ->
+
+                            viewModel.handleLogics()
+                            viewModel.addOrRemoveComponentDomainRepeatableToList(
+                                listComponent,
+                                indexChild
+                            )
 
                             listValueDomain?.let { it1 ->
                                 viewModel.updateUriPhotoComponent(

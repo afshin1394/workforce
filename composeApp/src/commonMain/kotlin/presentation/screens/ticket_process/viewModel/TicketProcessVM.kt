@@ -10,17 +10,22 @@ import domain.usecase.usecase.mokSteps.GetMokStepFormUseCase
 import domain.usecase.usecase.photo.GetPhotoByComponentKeyUseCase
 import io.github.aakira.napier.LogLevel
 import io.github.aakira.napier.Napier
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
+import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import presentation.model.StepModel
 import presentation.screens.main.events.TicketInfoEvent
 import presentation.screens.main.events.TicketProcessEvent
 import utils.AsyncStatus
 import utils.BaseViewModel
 import utils.FormViewerTypes
+import utils.LogicCalculation
 import utils.ViewStates
 
 class TicketProcessVM(
@@ -44,6 +49,8 @@ class TicketProcessVM(
     private val _ticketNumber = MutableStateFlow("0")
     val ticketNumber = _ticketNumber.asStateFlow()
 
+
+    val logicCalculation: LogicCalculation = LogicCalculation(tempComponentList)
     init {
         getMokStepsForm()
     }
@@ -90,7 +97,7 @@ class TicketProcessVM(
     private fun filterComponentsByActiveStep() {
         viewModelScope.launch {
             tempComponentList.clear()
-            delay(500)
+            delay(1000)
 
 
             val activeStep = tempStepsList.getOrNull(_currentLevel.value) ?: return@launch
@@ -109,6 +116,77 @@ class TicketProcessVM(
         tempComponentList.clear()
         tempComponentList.addAll(newList)
 
+    }
+
+
+    private fun checkLogicsForAll(components: List<ComponentDomain>) {
+
+        // Create a copy of the components list to iterate over
+        val componentsCopy = components.toMutableList()
+
+        for (cmp in componentsCopy) {
+            logicCalculation.extractLogics(componentsCopy, cmp)
+            cmp.components?.let { cmps ->
+                if (cmps.isNotEmpty()) {
+                    checkLogicsForAll(cmps)
+
+                }
+            }
+        }
+
+
+    }
+
+
+    fun handleLogics() {
+
+
+        viewModelScope.launch {
+            try {
+                withContext(Dispatchers.IO) { checkLogicsForAll(tempComponentList) }
+
+                withContext(Dispatchers.Main) {
+
+                    arrayListOf<ComponentDomain>().apply {
+                        this.addAll(tempComponentList)
+                        tempComponentList.clear()
+                        tempComponentList.addAll(this)
+                    }
+                }
+            } catch (_: Exception) {
+
+                async { checkLogicsForAll(tempComponentList) }.await()
+                withContext(Dispatchers.Main) {
+                    arrayListOf<ComponentDomain>().apply {
+                        this.addAll(tempComponentList)
+                        tempComponentList.clear()
+                        tempComponentList.addAll(this)
+                    }
+                }
+
+            }
+
+        }
+    }
+
+    fun addOrRemoveComponentDomainRepeatableToList(
+        listComponent: List<ComponentDomain>,
+        indexChild: Int
+    ) {
+        if (listComponent[0].type == FormViewerTypes.Group) {
+            if (listComponent[0].removable) {
+                val newComponents = tempComponentList.apply {
+                    add(indexChild + 1, listComponent[0])
+                }
+                tempComponentList = newComponents
+            } else {
+                val newComponents = tempComponentList.apply {
+                    removeAt(indexChild)
+                }
+                tempComponentList = newComponents
+
+            }
+        }
     }
 
     /////////////////////////////photo//////////////////////////////////////////////////////////
