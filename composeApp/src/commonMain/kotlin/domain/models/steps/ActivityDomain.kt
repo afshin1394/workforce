@@ -10,6 +10,6 @@ data class ActivityDomain(
     val task : Int,
     val kind : String,
     val form : FormDomain,
-    val tag : Int,
+    val tag : Long,
     val form_id : Int,
     )

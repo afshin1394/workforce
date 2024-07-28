@@ -18,7 +18,7 @@ data class Activity(
     @SerialName("form")
     val form : Form,
     @SerialName("tag")
-    val tag : Int,
+    val tag : Long,
     @SerialName("form_id")
     val form_id : Int,
     )

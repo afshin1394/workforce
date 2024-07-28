@@ -53,6 +53,7 @@ import presentation.theme.surfaceBrandDefault
 import presentation.theme.surfaceDefault
 import presentation.theme.textInverse
 import presentation.theme.textPrimary
+import utils.PROCEED
 import utils.initialize
 import utils.validateComponents
 import kotlin.random.Random
@@ -68,13 +69,14 @@ class TicketProcessScreen(
         val scaffoldState = rememberBottomSheetScaffoldState()
         val navigator = LocalNavigator.currentOrThrow
         val viewModel: TicketProcessVM = koinInject()
-        val currentLevelState = viewModel.currentLevel.collectAsState()
+        val currentLevelState by viewModel.currentLevel.collectAsState()
         var indexPhotoSelected by remember { mutableStateOf(0) }
         var componentId by remember { mutableStateOf("0") }
         val positionSelectedPhotoForEdit by viewModel.positionSelected.collectAsState()
         var isBottomSheetOpen by remember { mutableStateOf(true) }
         val events by viewModel.events
         var changeState = MutableStateFlow(0)
+        val stepDetails by viewModel.stepDetails.collectAsState()
 
 
         LaunchedEffect(Unit) {
@@ -112,17 +114,8 @@ class TicketProcessScreen(
 
                 scope.launch {
 
-                    delay(1000)
-                    if (currentLevelState.value > 0 && currentLevelState.value <= viewModel.tempStepsList.size - 1) {
-                        viewModel.updateLevel(currentLevelState.value - 1)
+                    viewModel.updateLevel(PROCEED.PREVIOUS)
 
-                        viewModel.tempStepsList.forEach {
-                            it.isActive = true
-                        }
-                        viewModel.tempStepsList[currentLevelState.value - 1].isActive = false
-                    } else {
-                        navigator.pop()
-                    }
                 }
             } else {
                 when (viewModel.events.value) {
@@ -211,35 +204,8 @@ class TicketProcessScreen(
                                 textInverse
                             ), onClick = {
                                 scope.launch {
-
-                                    delay(1000)
-
-                                    val errors = validateComponents(viewModel.tempComponentList) {
-                                        viewModel.updateTempComponentList(it)
-                                    }
-
-                                    if (errors.isEmpty()) {
-                                        if (currentLevelState.value < viewModel.tempStepsList.size - 1) {
-                                            viewModel.updateLevel(currentLevelState.value + 1)
-
-                                            viewModel.tempStepsList.map {
-                                                it.isActive = false
-                                            }
-                                            viewModel.tempStepsList[currentLevelState.value].isActive = true
-                                        }
-
-                                    }
-
+                                    viewModel.updateLevel(PROCEED.NEXT)
                                 }
-
-
-
-
-
-
-
-
-
 
 
                             })
@@ -329,7 +295,7 @@ class TicketProcessScreen(
             content = {
 
                 Column() {
-                    processBar(viewModel.tempStepsList, currentLevelState.value)
+                    processBar(stepDetails, currentLevelState)
 
 
                     initialize(
@@ -364,7 +330,7 @@ class TicketProcessScreen(
                         },
                     )
                 }
-            } ,           onCloseBottomSheet = {
+            }, onCloseBottomSheet = {
                 when (viewModel.events.value) {
                     TicketProcessEvent.PhotoPreview -> {
                         viewModel.events.value = TicketProcessEvent.Default
@@ -393,7 +359,6 @@ class TicketProcessScreen(
 
 
     }
-
 
 
 }

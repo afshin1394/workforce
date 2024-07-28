@@ -182,8 +182,8 @@ internal actual class BackgroundServiceApp : Service() , KoinComponent {
                 ).collect{
                     when(it.status){
                         AsyncStatus.ERROR -> {
-                            if( it.resultStatus is ResultStatus.CLIENT_EXCEPTION.UNATHORIZED || it.resultStatus is ResultStatus.CLIENT_EXCEPTION.FORBIDDEN)
-                                _serviceState.update { ServiceState.Faulty }
+//                            if( it.resultStatus is ResultStatus.CLIENT_EXCEPTION.UNATHORIZED || it.resultStatus is ResultStatus.CLIENT_EXCEPTION.FORBIDDEN)
+//                                _serviceState.update { ServiceState.Faulty }
 
                         }
                         AsyncStatus.LOADING -> {
@@ -211,8 +211,8 @@ internal actual class BackgroundServiceApp : Service() , KoinComponent {
             .collect{
                 when(it.status){
                     AsyncStatus.ERROR -> {
-                        if( it.resultStatus is ResultStatus.CLIENT_EXCEPTION.UNATHORIZED || it.resultStatus is ResultStatus.CLIENT_EXCEPTION.FORBIDDEN)
-                            _serviceState.update { ServiceState.Faulty }
+//                        if( it.resultStatus is ResultStatus.CLIENT_EXCEPTION.UNATHORIZED || it.resultStatus is ResultStatus.CLIENT_EXCEPTION.FORBIDDEN)
+//                            _serviceState.update { ServiceState.Faulty }
                         println("TaskCallApi${"ERROR"}")
                     }
                     AsyncStatus.LOADING -> {
@@ -229,8 +229,8 @@ internal actual class BackgroundServiceApp : Service() , KoinComponent {
         updateStepsUseCase(Unit).collect {
             when (it.status) {
                 AsyncStatus.ERROR -> {
-                    if( it.resultStatus is ResultStatus.CLIENT_EXCEPTION.UNATHORIZED || it.resultStatus is ResultStatus.CLIENT_EXCEPTION.FORBIDDEN)
-                        _serviceState.update { ServiceState.Faulty }
+//                    if( it.resultStatus is ResultStatus.CLIENT_EXCEPTION.UNATHORIZED || it.resultStatus is ResultStatus.CLIENT_EXCEPTION.FORBIDDEN)
+//                        _serviceState.update { ServiceState.Faulty }
 
                     Napier.log(
                         LogLevel.ASSERT,
@@ -331,7 +331,11 @@ internal actual class BackgroundServiceApp : Service() , KoinComponent {
         }
     }
 
-
+    override fun onDestroy() {
+        super.onDestroy()
+        cancelAlarm()
+        stopSelf()
+    }
 
 }
 

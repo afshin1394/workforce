@@ -1,6 +1,7 @@
 package domain.usecase
 
 
+import io.github.aakira.napier.LogLevel
 import io.github.aakira.napier.Napier
 import io.ktor.client.network.sockets.ConnectTimeoutException
 import io.ktor.client.network.sockets.SocketTimeoutException
@@ -38,6 +39,7 @@ abstract class BaseUseCase<out Type, in Params> {
         } catch (exception: Exception) {
             exception.message?.let {
                 val resultStatus = exception.handleError()
+                Napier.log(LogLevel.ASSERT,"BaseUseCaseResultStatus", message = resultStatus.toString())
                 emit(AsyncResult.Error(it, resultStatus))
                 SentryLog(exception.stackTraceToString())
             } ?: run {

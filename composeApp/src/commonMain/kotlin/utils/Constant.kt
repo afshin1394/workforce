@@ -133,6 +133,12 @@ object TaskState {
 
 }
 
+object PROCEED {
+     const val INITIAL = "INITIAL"
+     const val NEXT = "NEXT"
+     const val PREVIOUS = "PREVIOUS"
+}
+
 
 
 

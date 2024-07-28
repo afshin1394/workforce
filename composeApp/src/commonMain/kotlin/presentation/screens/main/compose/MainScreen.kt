@@ -727,7 +727,7 @@ class MainScreen(
                             viewModel.resetSuspendTask()
                         },
                         tasks = ArrayList(viewModel.tasks.toList()), onAccept = {
-                           viewModel.events.value = MainEvent.AcceptTicket
+//                           viewModel.events.value = MainEvent.AcceptTicket
                             viewModel.selectedTask.value = it
                             viewModel.resetSuspendTask()
                             viewModel.updateShowAcceptDialog(true)
@@ -735,7 +735,7 @@ class MainScreen(
                         }
                     )
 
-                    if(viewModel.events.value == MainEvent.AcceptTicket) {
+                    if(viewModel.showAcceptDialog.value) {
                         CustomDialogDoubleAction(
                             showDialog = showAcceptDialog,
                             message = MR.strings.continue_flow_message,

@@ -17,6 +17,7 @@ class UpdateTaskUseCase (
 ) : BaseUseCase<Unit, Unit>() {
     override suspend fun run(params: Unit) {
         val tasks = iTaskRepository.fetchWorks()
+        Napier.log(LogLevel.ASSERT,tag="UpdateTaskUseCase", message = tasks.toString())
         val initialTasks = arrayListOf<InitialFormEntity>()
         tasks.details.forEach {
             it.initial_form?.let {initialForm->
@@ -24,13 +25,31 @@ class UpdateTaskUseCase (
                 initialTasks.add(InitialFormEntity(it.basic_info.ticket_number?:"",jsonString))
             }
         }
+        Napier.log(LogLevel.ASSERT,tag="UpdateTaskUseCase", message = initialTasks.toString())
+
         iInitialFormRepository.deleteAll()
+        Napier.log(LogLevel.ASSERT,tag="UpdateTaskUseCase", message = "deleteAll")
+
         iInitialFormRepository.resetEntitySequence()
+        Napier.log(LogLevel.ASSERT,tag="UpdateTaskUseCase", message = "resetEntitySequence")
+
         iInitialFormRepository.insertAll(initialTasks)
+
+        Napier.log(LogLevel.ASSERT,tag="UpdateTaskUseCase", message = "insertAll")
+
         iTaskRepository.deleteAll()
+        Napier.log(LogLevel.ASSERT,tag="UpdateTaskUseCase", message = "deleteAll")
+
+
         iTaskRepository.resetEntitySequence()
+        Napier.log(LogLevel.ASSERT,tag="UpdateTaskUseCase", message = "resetEntitySequence")
+
         iTaskRepository.insertAll(tasks.details.toTaskEntityList())
+        Napier.log(LogLevel.ASSERT,tag="UpdateTaskUseCase", message = "insertAll")
+
         val domainList = iTaskRepository.getAll().toTaskDomainList()
+        Napier.log(LogLevel.ASSERT,tag="UpdateTaskUseCase", message = "domainList")
+
         Napier.log(LogLevel.ASSERT,tag = "domainList", message =  domainList.toString())
 
     }

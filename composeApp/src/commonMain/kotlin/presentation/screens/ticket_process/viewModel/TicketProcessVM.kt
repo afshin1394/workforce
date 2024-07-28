@@ -7,6 +7,7 @@ import domain.models.PhotoDomain
 import domain.models.form_struct.ComponentDomain
 import domain.models.form_struct.ValueDomain
 import domain.usecase.usecase.mokSteps.GetMokStepFormUseCase
+import domain.usecase.usecase.mokSteps.StepDetail
 import domain.usecase.usecase.photo.GetPhotoByComponentKeyUseCase
 import io.github.aakira.napier.LogLevel
 import io.github.aakira.napier.Napier
@@ -26,6 +27,7 @@ import utils.AsyncStatus
 import utils.BaseViewModel
 import utils.FormViewerTypes
 import utils.LogicCalculation
+import utils.PROCEED
 import utils.ViewStates
 
 class TicketProcessVM(
@@ -35,8 +37,13 @@ class TicketProcessVM(
     private val _currentLevel = MutableStateFlow(0)
     val currentLevel = _currentLevel.asStateFlow()
 
-    private var stepsList = ArrayList<StepModel>()
-    var tempStepsList = mutableStateListOf<StepModel>()
+    private val _currentLevelName = MutableStateFlow("")
+    val currentLevelName = _currentLevelName.asStateFlow()
+
+    private val _stepDetails = MutableStateFlow(emptyList<StepDetail>())
+    val stepDetails = _stepDetails.asStateFlow()
+
+
 
     var tempComponentList = mutableStateListOf<ComponentDomain>()
     var photoDomainList = mutableStateListOf<PhotoDomain>()
@@ -52,11 +59,11 @@ class TicketProcessVM(
 
     val logicCalculation: LogicCalculation = LogicCalculation(tempComponentList)
     init {
-        getMokStepsForm()
+        getMokStepsForm(PROCEED.INITIAL)
     }
-    fun getMokStepsForm() {
+  private  fun getMokStepsForm(proceed : String) {
         viewModelScope.launch {
-            getMokStepFormUseCase(Unit).collect {
+            getMokStepFormUseCase(Pair(ticketNumber.value,proceed)).collect {
                 when (it.status) {
                     AsyncStatus.ERROR -> {
                         handleError(it.resultStatus)
@@ -66,17 +73,14 @@ class TicketProcessVM(
                     }
                     AsyncStatus.SUCCESS -> {
 
-                        it.data?.let { it1 ->
-                            stepsList.clear()
-                            stepsList.addAll(it1)
-                            tempStepsList.clear()
-                            tempStepsList.addAll(stepsList)
-                            val initialActiveStep = tempStepsList.find { it.isActive }
-                            initialActiveStep?.let { step ->
-                                _currentLevel.value = tempStepsList.indexOf(step)
-                                filterComponentsByActiveStep()
-
+                        it.data?.let { data ->
+                            data.activityDomain.form.form_structure.components?.let {
+                                tempComponentList.clear()
+                                tempComponentList.addAll(it.toList())
                             }
+                            _currentLevel.update { data.stepCounter }
+                            _currentLevelName.update { data.stepTitle }
+
                             getPhotoByComponentKey()
 
 
@@ -90,21 +94,10 @@ class TicketProcessVM(
         }
     }
 
-    fun updateLevel(newLevel: Int) {
-        _currentLevel.value = newLevel
-        filterComponentsByActiveStep()
+    fun updateLevel(proceed : String) {
+        getMokStepsForm(proceed)
     }
-    private fun filterComponentsByActiveStep() {
-        viewModelScope.launch {
-            tempComponentList.clear()
-            delay(1000)
 
-
-            val activeStep = tempStepsList.getOrNull(_currentLevel.value) ?: return@launch
-            val activeStepComponents = activeStep.form_structure.components ?: emptyList()
-            tempComponentList.addAll(activeStepComponents)
-        }
-    }
 
 
     fun updateTicketNumber(ticketNumber: String) {

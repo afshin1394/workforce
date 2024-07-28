@@ -5,7 +5,6 @@ import data.network.response.task.step.TaskStepResponse
 import database.entity.StepsEntity
 import domain.mappers.toComponentDomain
 import domain.mappers.toConditionalDomain
-import domain.mappers.toInitialFormDomain
 import domain.models.form_struct.FormStructDomain
 import domain.models.steps.ActivityDomain
 import domain.models.steps.FormDomain
@@ -51,6 +50,8 @@ fun FormStruct.toFormStructDomain() = FormStructDomain(
 
 //
 
+
+
 fun TaskStepResponse.toStepDetailsEntity(ticketNumber: String): List<StepsEntity> {
 
     return if (this.stepDetails.isNotEmpty()) {
@@ -58,6 +59,8 @@ fun TaskStepResponse.toStepDetailsEntity(ticketNumber: String): List<StepsEntity
             stepDetail.acitivities.map { activity ->
                 StepsEntity(
                     pk = 0,
+                    title = activity.title,
+                    tag = activity.tag,
                     ticketNumber = ticketNumber,
                     wi = stepDetail.init_wi,
                     activityId = activity.id,
@@ -74,4 +77,14 @@ fun TaskStepResponse.toStepDetailsEntity(ticketNumber: String): List<StepsEntity
     }
 
 
+}
+
+fun StepsEntity.toActivityDomain() : ActivityDomain{
+    return ActivityDomain(id = this.activityId, title = this.title, process_id = this.activityId.toInt(), task = 0,kind="", form =  Json.decodeFromString(this.formStructure) , form_id = this.pk.toInt(), tag = this.tag)
+}
+
+fun List<StepsEntity>.toActivityDomainList(): List<ActivityDomain>{
+    return  this.map {
+        ActivityDomain(id = it.activityId, title = it.title, process_id = it.activityId.toInt(), task = 0,kind="", form =  Json.decodeFromString(it.formStructure) , form_id = it.pk.toInt(), tag = it.tag)
+    }
 }

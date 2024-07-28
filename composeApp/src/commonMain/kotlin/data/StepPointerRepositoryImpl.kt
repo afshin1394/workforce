@@ -2,6 +2,8 @@ package data
 
 import database.AppDatabase
 import database.entity.StepPointerEntity
+import domain.mappers.toStepPointerDomain
+import domain.models.steps.StepPointerDomain
 import domain.repository.IStepPointerRepository
 
 class StepPointerRepositoryImpl(private val db : AppDatabase) : IStepPointerRepository {
@@ -13,16 +15,16 @@ class StepPointerRepositoryImpl(private val db : AppDatabase) : IStepPointerRepo
         db.stepPointerDao().deleteAll()
     }
 
-    override suspend fun getActiveActivityByTicketNumber(ticketNumber: String) {
-        db.stepPointerDao().selectActiveActivityByTicketNumber(ticketNumber)
+    override suspend fun getActiveActivityByTicketNumber(ticketNumber: String) : StepPointerDomain {
+       return db.stepPointerDao().selectActiveActivityByTicketNumber(ticketNumber).toStepPointerDomain()
     }
 
     override suspend fun resetEntitySequence() {
         db.stepPointerDao().resetSequence()
     }
 
-    override suspend fun updateActiveActivity(ticketNumber: String) {
-        db.stepPointerDao().updateActiveActivity(ticketNumber,1)
+    override suspend fun updateActiveActivity(ticketNumber: String,activeActivity : Long) {
+        db.stepPointerDao().updateActiveActivity(ticketNumber,activeActivity)
     }
 
 }

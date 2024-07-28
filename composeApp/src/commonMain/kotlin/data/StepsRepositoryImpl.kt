@@ -5,6 +5,8 @@ import database.AppDatabase
 import database.dao.StepsDao
 import database.entity.StepsEntity
 import database.entity.TaskEntity
+import domain.models.steps.ActivityDomain
+import domain.models.steps.StepDetailDomain
 import domain.repository.IStepsRepository
 import io.github.aakira.napier.LogLevel
 import io.github.aakira.napier.Napier
@@ -13,6 +15,7 @@ import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.client.request.parameter
 import io.ktor.http.HttpStatusCode
+import toActivityDomainList
 
 class StepsRepositoryImpl(
     private val httpClient: HttpClient,
@@ -42,8 +45,12 @@ class StepsRepositoryImpl(
         db.stepDao().deleteAll(ticketNumbers)
     }
 
-    override suspend fun getStepsByTicketNumber(ticketNumber: String) {
-        db.stepDao().selectStepsByTicketNumber(ticketNumber)
+    override suspend fun getStepsByTicketNumber(ticketNumber: String) : List<StepsEntity> {
+       return db.stepDao().selectStepsByTicketNumber(ticketNumber)
+    }
+
+    override suspend fun getDataByTicketNumberAndStep(ticketNumber: String, activityId: Long) : StepsEntity {
+       return db.stepDao().selectStepsByTicketNumberAndActivityId(ticketNumber = ticketNumber, activityId = activityId)
     }
 
     override suspend fun getEditedTickets() : List<String>{

@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "732d3b11b9e2691ac911919838f1995a",
+    "identityHash": "e2df2297df9f4fabff40d728197118fa",
     "entities": [
       {
         "tableName": "ProfileEntity",
@@ -377,7 +377,7 @@
       },
       {
         "tableName": "StepsEntity",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `ticketNumber` TEXT NOT NULL, `wi` INTEGER NOT NULL, `activityId` INTEGER NOT NULL, `formStructure` TEXT NOT NULL, `edited` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `ticketNumber` TEXT NOT NULL, `wi` INTEGER NOT NULL, `title` TEXT NOT NULL, `tag` INTEGER NOT NULL, `activityId` INTEGER NOT NULL, `formStructure` TEXT NOT NULL, `edited` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "pk",
@@ -394,6 +394,18 @@
           {
             "fieldPath": "wi",
             "columnName": "wi",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "title",
+            "columnName": "title",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "tag",
+            "columnName": "tag",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -456,7 +468,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '732d3b11b9e2691ac911919838f1995a')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'e2df2297df9f4fabff40d728197118fa')"
     ]
   }
 }

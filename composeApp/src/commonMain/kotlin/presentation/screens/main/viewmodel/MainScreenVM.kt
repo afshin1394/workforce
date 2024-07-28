@@ -202,7 +202,7 @@ class MainScreenVM(
                                     events.value = MainEvent.Default
                                     Napier.log(
                                         LogLevel.ASSERT,
-                                        "storeAvailabilityUseCase",
+                                        "storeAvailabilityUseCase start back",
                                         message = _availability.value.toString()
                                     )
                                     if (_availability.value) {
@@ -211,7 +211,11 @@ class MainScreenVM(
                                         getTasks()
 
                                     } else {
-
+                                        Napier.log(
+                                            LogLevel.ASSERT,
+                                            "storeAvailabilityUseCase stop back",
+                                            message = _availability.value.toString()
+                                        )
                                         BackgroundServiceApp.stopBackgroundService()
                                     }
 
