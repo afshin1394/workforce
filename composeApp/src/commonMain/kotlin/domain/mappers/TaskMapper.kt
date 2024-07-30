@@ -15,7 +15,7 @@ fun Detail.toTaskEntity(): TaskEntity {
         ticket_state = this.basic_info.ticket_state?:"",
         city = this.basic_info.city?:"",
         site = this.basic_info.site?:"",
-        level = this.basic_info.level?.toLong()?:-1,
+        level = this.basic_info.level?:"",
         region = this.basic_info.region?:"",
         location = this.basic_info.location?:"",
         province = this.basic_info.province?:""
@@ -58,7 +58,7 @@ fun TaskEntity.toTaskDomain(): TaskDomain {
          basic_info = BasicInfoDomain(
              ticket_number =this.ticket_number,
              ticket_state = this.ticket_state,
-             level = this.level.toInt(),
+             level = this.level,
              location= this.location,
              site = this.site,
              region = this.region,

@@ -61,4 +61,14 @@ class StepsRepositoryImpl(
     override suspend fun resetEntitySequence() {
         db.stepDao().resetSequence()
     }
+
+    override suspend fun updateFormStructure(
+        ticketNumber: String,
+        activityId: Long,
+        formStructure: String
+    ) {
+        db.stepDao().updateFormStructure(ticketNumber,activityId, formStructure)
+    }
+
+
 }

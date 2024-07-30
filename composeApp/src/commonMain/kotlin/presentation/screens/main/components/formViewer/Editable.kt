@@ -50,6 +50,7 @@ fun Editable(
     errorMessage: ResourceFormattedStringDesc,
     onValueChange: (value: String) -> Unit
 ) {
+    Napier.log(LogLevel.ASSERT,tag= "Editablevalue", message = value)
     var valueChange by remember { mutableStateOf(value) }
     processLogicDomain.calculatedValue?.let{
         if(it.isNotEmpty())

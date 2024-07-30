@@ -6,19 +6,19 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class Activity(
     @SerialName("id")
-    val id : Long,
+    val id : Long?,
     @SerialName("title")
-    val title : String,
+    val title : String?,
     @SerialName("process_id")
-    val process_id : Int,
+    val process_id : Int?,
     @SerialName("task")
-    val task : Int,
+    val task : Int?,
     @SerialName("kind")
-    val kind : String,
+    val kind : String?,
     @SerialName("form")
-    val form : Form,
+    val form : Form?,
     @SerialName("tag")
-    val tag : Long,
+    val tag : Long?,
     @SerialName("form_id")
-    val form_id : Int,
+    val form_id : Int?,
     )

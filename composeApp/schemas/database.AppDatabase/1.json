@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "e2df2297df9f4fabff40d728197118fa",
+    "identityHash": "c528ebd53483678f26e5903c15a4fd39",
     "entities": [
       {
         "tableName": "ProfileEntity",
@@ -173,7 +173,7 @@
       },
       {
         "tableName": "TaskEntity",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `ticket_number` TEXT NOT NULL, `ticket_state` TEXT NOT NULL, `level` INTEGER NOT NULL, `location` TEXT NOT NULL, `site` TEXT NOT NULL, `region` TEXT NOT NULL, `province` TEXT NOT NULL, `city` TEXT NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `ticket_number` TEXT NOT NULL, `ticket_state` TEXT NOT NULL, `level` TEXT NOT NULL, `location` TEXT NOT NULL, `site` TEXT NOT NULL, `region` TEXT NOT NULL, `province` TEXT NOT NULL, `city` TEXT NOT NULL)",
         "fields": [
           {
             "fieldPath": "pk",
@@ -196,7 +196,7 @@
           {
             "fieldPath": "level",
             "columnName": "level",
-            "affinity": "INTEGER",
+            "affinity": "TEXT",
             "notNull": true
           },
           {
@@ -468,7 +468,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'e2df2297df9f4fabff40d728197118fa')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'c528ebd53483678f26e5903c15a4fd39')"
     ]
   }
 }

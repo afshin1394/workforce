@@ -11,12 +11,16 @@ class StepPointerRepositoryImpl(private val db : AppDatabase) : IStepPointerRepo
         db.stepPointerDao().insertAll(pointers)
     }
 
-    override suspend fun deleteAll() {
-        db.stepPointerDao().deleteAll()
+    override suspend fun deleteAll(editedAvailableTickets : List<String>) {
+        db.stepPointerDao().deleteAll(editedAvailableTickets)
     }
 
     override suspend fun getActiveActivityByTicketNumber(ticketNumber: String) : StepPointerDomain {
        return db.stepPointerDao().selectActiveActivityByTicketNumber(ticketNumber).toStepPointerDomain()
+    }
+
+    override suspend fun checkIfTicketIsEdited(ticketNumber: String) : Boolean {
+        return db.stepPointerDao().selectActiveActivityByTicketNumber(ticketNumber).toStepPointerDomain().edited
     }
 
     override suspend fun resetEntitySequence() {

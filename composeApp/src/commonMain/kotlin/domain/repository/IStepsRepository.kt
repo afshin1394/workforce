@@ -14,4 +14,5 @@ interface IStepsRepository {
     suspend fun getDataByTicketNumberAndStep(ticketNumber : String,activityId : Long) : StepsEntity
     suspend fun getEditedTickets(): List<String>
     suspend fun resetEntitySequence()
+    suspend fun updateFormStructure(ticketNumber: String,activityId: Long,formStructure : String)
 }

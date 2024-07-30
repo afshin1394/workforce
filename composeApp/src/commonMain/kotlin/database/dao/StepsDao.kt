@@ -15,7 +15,7 @@ interface StepsDao {
     @Query("UPDATE sqlite_sequence SET seq = 0 WHERE name = 'StepsEntity'")
     suspend fun resetSequence()
 
-    @Query("DELETE FROM StepsEntity WHERE edited = false AND ticketNumber NOT IN (:ticketNumbers)")
+    @Query("DELETE FROM StepsEntity WHERE  ticketNumber NOT IN (:ticketNumbers)")
     suspend fun deleteAll(ticketNumbers : List<String>)
 
     @Query("SELECT * FROM StepsEntity")
@@ -27,10 +27,12 @@ interface StepsDao {
     @Query("SELECT ticketNumber FROM StepsEntity WHERE edited = true")
     suspend fun selectEditedTickets() : List<String>
 
-    @Query("UPDATE StepsEntity SET formStructure = :formStructure WHERE ticketNumber = :ticketNumber AND activityId = :activityId")
+    @Query("UPDATE StepsEntity SET formStructure = :formStructure , edited = true WHERE ticketNumber = :ticketNumber AND activityId = :activityId")
     suspend fun updateFormStructure(ticketNumber: String,activityId : Long, formStructure: String)
 
 
     @Query("SELECT * FROM StepsEntity WHERE ticketNumber = :ticketNumber AND  activityId = :activityId LIMIT 1")
     suspend fun selectStepsByTicketNumberAndActivityId(ticketNumber: String,activityId : Long) : StepsEntity
+
+
 }

@@ -5,5 +5,5 @@ import kotlinx.serialization.Serializable
 
 data class StepDetailDomain(
     val init_wi : Long,
-    val acitivities : List<ActivityDomain>
+    val acitivities : List<ActivityDomain?>
 )

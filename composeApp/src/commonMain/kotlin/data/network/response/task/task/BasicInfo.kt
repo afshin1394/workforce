@@ -10,7 +10,7 @@ data class BasicInfo(
     @SerialName("ticket_state")
     val ticket_state : String?,
     @SerialName("level")
-    val level : Int?,
+    val level : String?,
     @SerialName("location")
     val location : String?,
     @SerialName("site")

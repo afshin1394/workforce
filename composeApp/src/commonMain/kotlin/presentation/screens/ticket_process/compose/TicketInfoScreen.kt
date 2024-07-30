@@ -174,7 +174,7 @@ class TicketInfoScreen(
                                 }*/
 
 
-                                navigator.push(TicketProcessScreen(viewModel.ticketNumber.toString()))
+                                navigator.push(TicketProcessScreen(viewModel.ticketNumber.value))
                             })
 
                         scope.launch {
@@ -264,7 +264,7 @@ class TicketInfoScreen(
 
 
                 initialize(
-                    taskID = taskIDValue.toString(),
+                    taskID = taskIDValue,
                     modifier = Modifier,
                     photoDomainList = viewModel.photoDomainList,
                     components = viewModel.tempComponentList,

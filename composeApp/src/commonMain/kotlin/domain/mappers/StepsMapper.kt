@@ -20,19 +20,22 @@ fun TaskStepResponse.toStepDetailsDomain(): List<StepDetailDomain> =
     }
 
 
-fun List<Activity>.toActivityDomains() =
-    this.map {
-        ActivityDomain(
-            it.id,
-            it.title,
-            it.process_id,
-            it.task,
-            it.kind,
-            it.form.toFormDomain(),
-            it.tag,
-            it.form_id
-        )
+fun List<Activity>.toActivityDomains():List<ActivityDomain?> {
+   return this.map {
+       it.form?.toFormDomain()?.let { it1 ->
+           ActivityDomain(
+               it.id ?: -1,
+               it.title ?: "",
+               it.process_id ?: -1,
+               it.task ?: 1,
+               it.kind ?: "",
+               it1,
+               it.tag ?: 1,
+               it.form_id ?: 1
+           )
+       }
     }
+}
 
 
 fun Form.toFormDomain() = FormDomain(this.form_structure.toFormStructDomain())
@@ -59,14 +62,14 @@ fun TaskStepResponse.toStepDetailsEntity(ticketNumber: String): List<StepsEntity
             stepDetail.acitivities.map { activity ->
                 StepsEntity(
                     pk = 0,
-                    title = activity.title,
-                    tag = activity.tag,
+                    title = activity.title?:"",
+                    tag = activity.tag?:-1,
                     ticketNumber = ticketNumber,
                     wi = stepDetail.init_wi,
-                    activityId = activity.id,
+                    activityId = activity.id?:-1,
                     formStructure = Json.encodeToString(
                         FormStruct.serializer(),
-                        activity.form.form_structure
+                        activity.form!!.form_structure
                     ),
                     edited = false
                 )
@@ -80,11 +83,11 @@ fun TaskStepResponse.toStepDetailsEntity(ticketNumber: String): List<StepsEntity
 }
 
 fun StepsEntity.toActivityDomain() : ActivityDomain{
-    return ActivityDomain(id = this.activityId, title = this.title, process_id = this.activityId.toInt(), task = 0,kind="", form =  Json.decodeFromString(this.formStructure) , form_id = this.pk.toInt(), tag = this.tag)
+    return ActivityDomain(id = this.activityId, title = this.title, process_id = this.activityId.toInt(), task = 0,kind="", form = FormDomain(form_structure = Json.decodeFromString<FormStruct>(this.formStructure).toFormStructDomain())  , form_id = this.pk.toInt(), tag = this.tag)
 }
 
 fun List<StepsEntity>.toActivityDomainList(): List<ActivityDomain>{
     return  this.map {
-        ActivityDomain(id = it.activityId, title = it.title, process_id = it.activityId.toInt(), task = 0,kind="", form =  Json.decodeFromString(it.formStructure) , form_id = it.pk.toInt(), tag = it.tag)
+        ActivityDomain(id = it.activityId, title = it.title, process_id = it.activityId.toInt(), task = 0,kind="", form = FormDomain(form_structure = Json.decodeFromString<FormStruct>(it.formStructure).toFormStructDomain())  , form_id = it.pk.toInt(), tag = it.tag)
     }
 }

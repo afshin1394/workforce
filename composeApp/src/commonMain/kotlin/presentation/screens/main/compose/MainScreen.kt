@@ -77,6 +77,8 @@ class MainScreen(
         val positionSelectedPhotoForEdit by viewModel.positionSelected.collectAsState()
         var indexPhotoSelected by remember { mutableStateOf(0) }
         val showAcceptDialog  by viewModel.showAcceptDialog.collectAsState()
+        val isTicketEditedState by viewModel.ticketIsEdited.collectAsState()
+
 
         val reloadState by viewModel.reload.collectAsState()
         val notificationScreen =
@@ -727,24 +729,16 @@ class MainScreen(
                             viewModel.resetSuspendTask()
                         },
                         tasks = ArrayList(viewModel.tasks.toList()), onAccept = {
-//                           viewModel.events.value = MainEvent.AcceptTicket
+                            viewModel.checkIfTicketIsEdited()
                             viewModel.selectedTask.value = it
                             viewModel.resetSuspendTask()
                             viewModel.updateShowAcceptDialog(true)
 
                         }
                     )
-
                     if(viewModel.showAcceptDialog.value) {
-                        CustomDialogDoubleAction(
-                            showDialog = showAcceptDialog,
-                            message = MR.strings.continue_flow_message,
-                            title = MR.strings.continue_flow_title,
-                            titleButton = MR.strings.aaccept,
-                            onDismiss = {
-                              viewModel.updateShowAcceptDialog(false)
-                            },
-                            onConfirm = {
+                        isTicketEditedState?.let { isEditedState ->
+                            if (isEditedState) {
                                 viewModel.selectedTask.value?.let {
                                     navigator.push(
                                         TicketInfoScreen(
@@ -752,8 +746,31 @@ class MainScreen(
                                         )
                                     )
                                 }
-                            })
+                            } else {
+                                CustomDialogDoubleAction(
+                                    showDialog = showAcceptDialog,
+                                    message = MR.strings.continue_flow_message,
+                                    title = MR.strings.continue_flow_title,
+                                    titleButton = MR.strings.aaccept,
+                                    onDismiss = {
+                                        viewModel.updateShowAcceptDialog(false)
+                                    },
+                                    onConfirm = {
+                                        viewModel.selectedTask.value?.let {
+                                            navigator.push(
+                                                TicketInfoScreen(
+                                                    it.basic_info.ticket_number ?: "0"
+                                                )
+                                            )
+                                        }
+                                    })
+                            }
+                        }
                     }
+
+
+
+
                 }
 
 

@@ -12,10 +12,10 @@ import presentation.model.StateFilter
 import presentation.screens.main.events.MainEvent
 import domain.models.SuspendTaskDomain
 import domain.models.task.TaskDomain
-import domain.usecase.ResultStatus
 import domain.usecase.usecase.availability.ChangeServerAvailabilityUseCase
 import domain.usecase.usecase.availability.GetAvailabilityUseCase
 import domain.usecase.usecase.availability.StoreAvailabilityUseCase
+import domain.usecase.usecase.mokSteps.CheckForEditedTicketUseCase
 import domain.usecase.usecase.photo.DeleteByComponentKeyUseCase
 import domain.usecase.usecase.photo.GetPhotoByComponentKeyUseCase
 import domain.usecase.usecase.photo.InsertPhotoUseCase
@@ -55,6 +55,7 @@ class MainScreenVM(
     private val insertPhotoUseCase: InsertPhotoUseCase,
     private val getPhotoByComponentKeyUseCase: GetPhotoByComponentKeyUseCase,
     private val deleteByComponentKeyUseCase: DeleteByComponentKeyUseCase,
+    private val checkForEditedTicketUseCase: CheckForEditedTicketUseCase
     ) : BaseViewModel() {
     private val _availability = MutableStateFlow(false)
     val availability = _availability.asStateFlow()
@@ -72,6 +73,10 @@ class MainScreenVM(
 
     private val _positionSelected = MutableStateFlow(0)
     val positionSelected = _positionSelected.asStateFlow()
+
+
+    private val _ticketIsEdited = MutableStateFlow<Boolean?>(null)
+    var ticketIsEdited = _ticketIsEdited.asStateFlow()
 
 
     var selectedTask: MutableState<TaskDomain?> = mutableStateOf(null)
@@ -767,6 +772,35 @@ class MainScreenVM(
 //            events.value = MainEvent.PhotoPreview
 //
 //        }
+    }
+
+     fun checkIfTicketIsEdited(){
+        viewModelScope.launch {
+            checkForEditedTicketUseCase(selectedTask.value?.basic_info?.ticket_number?:"").collect{
+                when (it.status) {
+                    AsyncStatus.ERROR -> {
+                        handleError(it.resultStatus)
+
+                    }
+
+                    AsyncStatus.LOADING -> {
+                        Napier.log(LogLevel.ASSERT, "saveSuspendTask", message = "LOADING: ")
+                        updateState(ViewStates.Loading)
+
+                    }
+
+                    AsyncStatus.SUCCESS -> {
+                        it.data?.let { isEdited ->
+                            _ticketIsEdited.update { isEdited }
+                        }
+                        updateState(ViewStates.Success())
+
+                    }
+
+                }
+
+            }
+        }
     }
 
     private fun saveAndDeletePhotoByComponentKey() {

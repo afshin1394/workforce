@@ -1,10 +1,19 @@
 package domain.usecase.usecase.mokSteps
 
 
+import data.network.response.task.FormStruct
+import domain.mappers.toComponent
+import domain.models.form_struct.ComponentDomain
+import domain.models.form_struct.FormStructDomain
 import domain.models.steps.ActivityDomain
+import domain.models.steps.FormDomain
 import domain.repository.IStepPointerRepository
 import domain.repository.IStepsRepository
 import domain.usecase.BaseUseCase
+import io.github.aakira.napier.LogLevel
+import io.github.aakira.napier.Napier
+import kotlinx.serialization.json.Json
+import presentation.screens.ticket_process.events.StepEvent
 import toActivityDomain
 import toActivityDomainList
 import utils.PROCEED
@@ -13,55 +22,67 @@ data class StructureActivity(
     val stepCounter: Int,
     val stepTitle: String,
     val activityDomain: ActivityDomain,
-    val stepDetails: List<StepDetail>
+    val stepDetails: List<StepDetail>,
 )
 
 data class StepDetail(val id: Int, val name: String)
-class GetMokStepFormUseCase(
+class UpdateStepFormUseCase(
     private val iStepsRepository: IStepsRepository,
     private val iStepPointerRepository: IStepPointerRepository
-) : BaseUseCase<StructureActivity, Pair<String, String>>() {
+) : BaseUseCase<StructureActivity, Triple<String, String,List<ComponentDomain>>>() {
 
-    override suspend fun run(params: Pair<String, String>): StructureActivity {
-
+    override suspend fun run(params: Triple<String, String,List<ComponentDomain>>): StructureActivity {
         val stepList: List<ActivityDomain> =
             iStepsRepository.getStepsByTicketNumber(params.first).toActivityDomainList()
+
         val stepListSorted = stepList.sortedBy { it.id }
         val stepPointerDomain = iStepPointerRepository.getActiveActivityByTicketNumber(params.first)
-        val index = stepListSorted.indexOfFirst { it.id == stepPointerDomain.activeActivity }
+
+        if(params.second != PROCEED.INITIAL)
+        iStepsRepository.updateFormStructure(params.first,stepPointerDomain.activeActivity, Json.encodeToString(FormStruct.serializer(), FormStruct(components =  (params.third.toComponent()))) )
+
         val stepDetails = stepListSorted.mapIndexed { int, step ->
             StepDetail(int, step.title)
         }
+        var index =  stepListSorted.indexOfFirst { it.id == stepPointerDomain.activeActivity }
+        if(index == -1) index = 0
+
         val nextIndex =
             if (params.second == PROCEED.INITIAL) {
                 index
             } else if (params.second == PROCEED.NEXT) {
-                if (index <= stepListSorted.size)
+                if (index <= stepListSorted.size) {
                     index + 1
-                else
+                }
+                else {
                     index
+                }
             } else if (params.second == PROCEED.PREVIOUS) {
-                if (index > 0)
+                if (index > 0) {
+
                     index - 1
-                else
+                }else {
                     index
+                }
             } else {
                 index
             }
+        Napier.log(LogLevel.ASSERT,tag="nextIndex", message = nextIndex.toString())
+
         iStepPointerRepository.updateActiveActivity(
             ticketNumber = stepPointerDomain.ticketNumber,
-            activeActivity = stepListSorted.get(nextIndex).id
+            activeActivity = stepListSorted[nextIndex].id
         )
 
 
         return StructureActivity(
             nextIndex,
-            stepListSorted.get(index).title,
+            stepListSorted.get(nextIndex).title,
             iStepsRepository.getDataByTicketNumberAndStep(
                 stepPointerDomain.ticketNumber,
                 stepListSorted.get(nextIndex).id
             ).toActivityDomain(),
-            stepDetails
+            stepDetails,
         )
 
 //        val stepForm=  listOf(

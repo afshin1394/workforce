@@ -78,6 +78,10 @@ fun  FormStruct.toInitialFormDomain(ticketNumber : String) : InitialFormDomain {
  fun  List<Component>.toComponentDomain() : List<ComponentDomain> {
     return map {  ComponentDomain(it.id,it.hide,it.type,it.label,it.layout?.toLayoutDomain(),it.subType,it.validate?.toValidateDomain(),it.values?.toValueDomain(),it.conditional?.toConditionalDomain(),it.components?.toComponentDomain())   }
 }
+
+
+
+
  fun Layout.toLayoutDomain():LayoutDomain{
      return LayoutDomain(this.row,this.columns)
  }
@@ -145,6 +149,80 @@ fun Operator.toOperatorDomain():OperatorDomain{
     return OperatorDomain(this.title,this.symbol)
 }
 
+
+fun  List<ComponentDomain>.toComponent() : List<Component> {
+    return map {  Component(it.id,it.hide,it.type,it.label,it.layout?.toLayout(),it.subType,it.validate?.toValidate(),it.values?.toValue(),it.conditional?.toConditional(),it.components?.toComponent())   }
+}
+
+
+
+
+fun LayoutDomain.toLayout():Layout{
+    return Layout(this.row,this.columns)
+}
+
+fun ValidateDomain.toValidate():Validate{
+    return Validate(this.id,this.key,this.id,this.layout,this.subtype,this.required)
+
+}
+
+fun List<ValueDomain> .toValue():List<Value>{
+    return map{
+        Value(it.label,it.value.toString())
+    }
+}
+
+fun ConditionalDomain.toConditional(): Conditional{
+    return Conditional(this.string)
+}
+
+fun List<LogicDomain>.toLogic():List<Logic>{
+    return map{
+        Logic(it.feild,it.logicType,it.experssions?.toExpression(),it.filterOptionsLogic?.toFilterOptions(), it.autoFillLogicDomain?.toAutoFillLogic(),it.bind_logic?.toBindLogic(),it.ticketAutoFillLogicDomain?.toTicketAutoFillLogic())
+    }
+}
+
+fun BindLogicDomian.toBindLogic() : BindLogic{
+    return  BindLogic(this.field_options.toBindLogicOptions())
+}
+
+fun List<FieldOptionDomain>.toBindLogicOptions() : List<FieldOption>{
+    return map{
+        FieldOption(it.field_key)
+    }
+}
+
+fun List<FilterOptionsLogicDomain>.toFilterOptions() : List<FilterOptionsLogic>{
+    return map{
+        FilterOptionsLogic(it.conditions?.toLogicCondition(),it.filteredOptions,it.multiSelectValues,it.selectedKeyValues)
+    }
+}
+fun List<LogicConditionDomain>.toLogicCondition() : List<LogicCondition>{
+    return  map{
+        LogicCondition(it.title,it.firstField,it.secondField,it.secondFieldKey,it.firstOperator,it.secondOperator,it.value,it.values,it.multiSelectValues,it.selectedKeyValues,it.filteredOptions,it.filterParameter,it.apiFilterOptionValue)
+    }
+}
+
+fun TicketAutoFillLogicDomain.toTicketAutoFillLogic() : TicketAutoFillLogic{
+    return TicketAutoFillLogic(this.phaseName,this.phase,this.property,this.condition_key,this.condition_field,this.condition_value)
+}
+fun AutoFillLogicDomain.toAutoFillLogic() :  AutoFillLogic{
+    return AutoFillLogic(this.api,this.apiName,this.filterField,this.filterFieldKey,this.filterParameter,this.property)
+}
+fun List<ExpressionDomain>.toExpression():List<Expression>{
+    return map{
+        Expression(it.conditions?.toCondition())
+    }
+}
+fun List<ConditionDomain>.toCondition():List<Condition>{
+    return map{
+        Condition(it.firstFieldKey,it.secondFieldKey,it.firstOperator?.toOperator(),it.secondOperator?.toOperator(),it.value)
+    }
+}
+
+fun OperatorDomain.toOperator():Operator{
+    return Operator(this.title,this.symbol?:"")
+}
 
 
 

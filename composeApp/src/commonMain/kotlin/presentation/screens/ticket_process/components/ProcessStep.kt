@@ -130,13 +130,13 @@ fun processBar(list: List<StepDetail>,currentLevelStep : Int ) {
                 ProcessStepSelected(
                     Modifier
                         .weight(1f)
-                    , process.id, process.name
+                    , process.id + 1, process.name
                 )
             }else{
             ProcessStep(
                 Modifier
                     .weight(1f)
-                    , process.id, process.name
+                    , process.id + 1, process.name
             )
             }
             if (list.size - 1 != index)

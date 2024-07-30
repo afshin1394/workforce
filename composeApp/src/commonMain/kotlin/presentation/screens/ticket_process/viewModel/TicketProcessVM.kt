@@ -3,26 +3,26 @@ package presentation.screens.ticket_process.viewModel
 
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
+import data.network.response.task.Component
 import domain.models.PhotoDomain
 import domain.models.form_struct.ComponentDomain
 import domain.models.form_struct.ValueDomain
-import domain.usecase.usecase.mokSteps.GetMokStepFormUseCase
+import domain.usecase.usecase.mokSteps.UpdateStepFormUseCase
 import domain.usecase.usecase.mokSteps.StepDetail
+import domain.usecase.usecase.mokSteps.StoreStepFormUseCase
 import domain.usecase.usecase.photo.GetPhotoByComponentKeyUseCase
 import io.github.aakira.napier.LogLevel
 import io.github.aakira.napier.Napier
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.async
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import presentation.model.StepModel
-import presentation.screens.main.events.TicketInfoEvent
 import presentation.screens.main.events.TicketProcessEvent
+import presentation.screens.ticket_process.events.StepEvent
 import utils.AsyncStatus
 import utils.BaseViewModel
 import utils.FormViewerTypes
@@ -31,11 +31,15 @@ import utils.PROCEED
 import utils.ViewStates
 
 class TicketProcessVM(
-    private val getMokStepFormUseCase: GetMokStepFormUseCase,
+    private val updateStepFormUseCase: UpdateStepFormUseCase,
     private val getPhotoByComponentKeyUseCase: GetPhotoByComponentKeyUseCase,
+    private val storeStepFormUseCase: StoreStepFormUseCase
 ) : BaseViewModel() {
     private val _currentLevel = MutableStateFlow(0)
     val currentLevel = _currentLevel.asStateFlow()
+
+    private val _reloadState = MutableStateFlow(false)
+    var reloadState = _reloadState.asStateFlow()
 
     private val _currentLevelName = MutableStateFlow("")
     val currentLevelName = _currentLevelName.asStateFlow()
@@ -43,6 +47,8 @@ class TicketProcessVM(
     private val _stepDetails = MutableStateFlow(emptyList<StepDetail>())
     val stepDetails = _stepDetails.asStateFlow()
 
+    private val _stepEvent = MutableStateFlow<StepEvent>(StepEvent.INITIAL)
+    var stepEvent = _stepEvent.asStateFlow()
 
 
     var tempComponentList = mutableStateListOf<ComponentDomain>()
@@ -58,12 +64,10 @@ class TicketProcessVM(
 
 
     val logicCalculation: LogicCalculation = LogicCalculation(tempComponentList)
-    init {
-        getMokStepsForm(PROCEED.INITIAL)
-    }
-  private  fun getMokStepsForm(proceed : String) {
+
+    fun getMokStepsForm(proceed : String) {
         viewModelScope.launch {
-            getMokStepFormUseCase(Pair(ticketNumber.value,proceed)).collect {
+            updateStepFormUseCase(Triple(_ticketNumber.value,proceed,tempComponentList.toList())).collect {
                 when (it.status) {
                     AsyncStatus.ERROR -> {
                         handleError(it.resultStatus)
@@ -75,29 +79,66 @@ class TicketProcessVM(
 
                         it.data?.let { data ->
                             data.activityDomain.form.form_structure.components?.let {
+                                Napier.log(LogLevel.ASSERT,"form_structure.components", message = it.toString())
+
                                 tempComponentList.clear()
                                 tempComponentList.addAll(it.toList())
                             }
+                            Napier.log(LogLevel.ASSERT,"data.stepCounter", message = data.stepCounter.toString())
+                            Napier.log(LogLevel.ASSERT,"data.stepCounter", message = data.stepTitle)
+
                             _currentLevel.update { data.stepCounter }
                             _currentLevelName.update { data.stepTitle }
+                            _stepDetails.update { data.stepDetails }
+                            _reloadState.update { true }
+                            _stepEvent.update { StepEvent.IN_PROCESS }
 
+                            updateState(ViewStates.Success())
                             getPhotoByComponentKey()
 
 
-                            updateState(ViewStates.Success())
                         }
-
                     }
-
                 }
             }
         }
     }
 
+
+
     fun updateLevel(proceed : String) {
-        getMokStepsForm(proceed)
+        Napier.log(LogLevel.ASSERT,tag="updateLevelupdateLevel", message = _stepEvent.value.toString())
+        if(!(proceed == PROCEED.PREVIOUS && _currentLevel.value == 0)) {
+            _reloadState.update { false }
+            getMokStepsForm(proceed)
+
+        }else{
+            storeStepForm()
+        }
+
+
     }
 
+    private fun storeStepForm() {
+        viewModelScope.launch {
+            storeStepFormUseCase(Pair(_ticketNumber.value,tempComponentList.toList())).collect{
+                when (it.status) {
+                    AsyncStatus.ERROR -> {
+                        handleError(it.resultStatus)
+                    }
+                    AsyncStatus.LOADING -> {
+                        updateState(ViewStates.Loading)
+                    }
+                    AsyncStatus.SUCCESS -> {
+
+                        updateState(ViewStates.Success())
+                        _stepEvent.update { StepEvent.START }
+
+                    }
+                }
+            }
+        }
+    }
 
 
     fun updateTicketNumber(ticketNumber: String) {

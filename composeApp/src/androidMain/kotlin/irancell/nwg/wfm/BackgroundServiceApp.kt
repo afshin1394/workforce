@@ -306,10 +306,7 @@ internal actual class BackgroundServiceApp : Service() , KoinComponent {
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
         val notification = builder.build()
         with(NotificationManagerCompat.from(this)) {
-
             notify(Notification_ID, notification)
-
-
         }
 
         return notification

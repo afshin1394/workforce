@@ -27,6 +27,8 @@ import domain.models.form_struct.ProcessLogicDomain
 import domain.models.form_struct.ValidateDomain
 
 import domain.models.form_struct.ValueDomain
+import io.github.aakira.napier.LogLevel
+import io.github.aakira.napier.Napier
 import irancell.nwg.wfm.MR
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -62,7 +64,7 @@ fun initialize(
 
     val listState = rememberLazyListState()
     val scope = rememberCoroutineScope()
-
+    Napier.log(LogLevel.ASSERT,tag="initialize",message= "reinititt${components.toList()}")
     LazyColumn(
         state = listState,
         modifier = modifier,

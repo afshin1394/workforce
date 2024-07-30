@@ -10,7 +10,7 @@ import androidx.room.PrimaryKey
     @PrimaryKey(autoGenerate = true) val pk :Int=0,
      val ticket_number: String,
      val ticket_state: String,
-     val level: Long,
+     val level: String,
      val location: String,
      val site: String,
      val region: String,
