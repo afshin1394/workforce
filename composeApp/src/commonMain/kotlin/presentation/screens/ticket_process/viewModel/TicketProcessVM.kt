@@ -3,14 +3,14 @@ package presentation.screens.ticket_process.viewModel
 
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
-import data.network.response.task.Component
 import domain.models.PhotoDomain
 import domain.models.form_struct.ComponentDomain
 import domain.models.form_struct.ValueDomain
-import domain.usecase.usecase.mokSteps.UpdateStepFormUseCase
-import domain.usecase.usecase.mokSteps.StepDetail
-import domain.usecase.usecase.mokSteps.StoreStepFormUseCase
+import domain.usecase.usecase.steps.UpdateStepFormUseCase
+import domain.usecase.usecase.steps.StepDetail
+import domain.usecase.usecase.steps.StoreStepFormUseCase
 import domain.usecase.usecase.photo.GetPhotoByComponentKeyUseCase
+import domain.usecase.usecase.steps.StoreKeyValueUseCase
 import io.github.aakira.napier.LogLevel
 import io.github.aakira.napier.Napier
 import kotlinx.coroutines.Dispatchers
@@ -33,7 +33,8 @@ import utils.ViewStates
 class TicketProcessVM(
     private val updateStepFormUseCase: UpdateStepFormUseCase,
     private val getPhotoByComponentKeyUseCase: GetPhotoByComponentKeyUseCase,
-    private val storeStepFormUseCase: StoreStepFormUseCase
+    private val storeStepFormUseCase: StoreStepFormUseCase,
+    private val storeKeyValueUseCase: StoreKeyValueUseCase
 ) : BaseViewModel() {
     private val _currentLevel = MutableStateFlow(0)
     val currentLevel = _currentLevel.asStateFlow()
@@ -76,7 +77,19 @@ class TicketProcessVM(
                         updateState(ViewStates.Loading)
                     }
                     AsyncStatus.SUCCESS -> {
+                        storeKeyValueUseCase(ticketNumber.value).collect{
+                            when (it.status) {
+                                AsyncStatus.ERROR -> {
+                                }
 
+                                AsyncStatus.LOADING -> {
+                                }
+
+                                AsyncStatus.SUCCESS -> {
+
+                                }
+                            }
+                        }
                         it.data?.let { data ->
                             data.activityDomain.form.form_structure.components?.let {
                                 Napier.log(LogLevel.ASSERT,"form_structure.components", message = it.toString())
@@ -114,6 +127,7 @@ class TicketProcessVM(
 
         }else{
             storeStepForm()
+
         }
 
 
@@ -130,7 +144,19 @@ class TicketProcessVM(
                         updateState(ViewStates.Loading)
                     }
                     AsyncStatus.SUCCESS -> {
+                        storeKeyValueUseCase(ticketNumber.value).collect{
+                            when (it.status) {
+                                AsyncStatus.ERROR -> {
+                                }
 
+                                AsyncStatus.LOADING -> {
+                                }
+
+                                AsyncStatus.SUCCESS -> {
+
+                                }
+                            }
+                        }
                         updateState(ViewStates.Success())
                         _stepEvent.update { StepEvent.START }
 

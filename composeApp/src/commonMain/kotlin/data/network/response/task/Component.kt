@@ -26,6 +26,9 @@ data class Component(
     val conditional : Conditional?= null,
     @SerialName("components")
     val components : List<Component>?= null,
+    @SerialName("readonly")
+    val readOnly : Boolean? = null
+
 //    @SerialName("logics")
 //    val logics : List<Logic>?= null
 )

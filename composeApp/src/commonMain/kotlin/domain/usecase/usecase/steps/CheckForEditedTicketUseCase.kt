@@ -1,4 +1,4 @@
-package domain.usecase.usecase.mokSteps
+package domain.usecase.usecase.steps
 
 import domain.repository.IStepPointerRepository
 import domain.usecase.BaseUseCase

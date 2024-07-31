@@ -9,6 +9,7 @@ import data.GeneralLocationRepositoryImpl
 import data.InitialFormRepositoryImpl
 import data.PhotoRepositoryImpl
 import data.ProfileRepositoryImpl
+import data.SendStepRepositoryImpl
 import data.StepPointerRepositoryImpl
 import data.StepsRepositoryImpl
 import data.SuspendTaskRepositoryImpl
@@ -19,6 +20,7 @@ import domain.repository.IGeneralLocationRepository
 import domain.repository.IInitialFormRepository
 import domain.repository.IPhotoRepository
 import domain.repository.IProfileRepository
+import domain.repository.ISendStepsRepository
 import domain.repository.IStepPointerRepository
 import domain.repository.IStepsRepository
 import domain.repository.ISuspendTaskRepository
@@ -35,15 +37,16 @@ import domain.usecase.usecase.location.SendLocationToServerUseCase
 import domain.usecase.usecase.availability.StoreAvailabilityUseCase
 import domain.usecase.usecase.initialForm.GetInitialFormByTask
 import domain.usecase.usecase.location.StoreLocationDataUseCase
-import domain.usecase.usecase.mokSteps.CheckForEditedTicketUseCase
-import domain.usecase.usecase.mokSteps.StoreStepFormUseCase
-import domain.usecase.usecase.mokSteps.UpdateStepFormUseCase
+import domain.usecase.usecase.steps.CheckForEditedTicketUseCase
+import domain.usecase.usecase.steps.StoreStepFormUseCase
+import domain.usecase.usecase.steps.UpdateStepFormUseCase
 import domain.usecase.usecase.photo.DeleteByComponentKeyUseCase
 import domain.usecase.usecase.photo.GetPhotoByComponentKeyUseCase
 import domain.usecase.usecase.photo.InsertPhotoUseCase
 
 import domain.usecase.usecase.profile.GetProfileUseCase
 import domain.usecase.usecase.profile.StoreProfileUseCase
+import domain.usecase.usecase.steps.StoreKeyValueUseCase
 import domain.usecase.usecase.steps.UpdateStepsUseCase
 import domain.usecase.usecase.suspendTask.DeleteByTaskIdUseCase
 import domain.usecase.usecase.suspendTask.GetSuspendTaskByIdUseCase
@@ -93,6 +96,7 @@ fun repositoryModule() = module {
     single<IPhotoRepository>{ PhotoRepositoryImpl(get()) }
     single<IStepsRepository>{ StepsRepositoryImpl(get(named("tokenized")),get()) }
     single<IStepPointerRepository>{ StepPointerRepositoryImpl(get()) }
+    single<ISendStepsRepository>{ SendStepRepositoryImpl(get()) }
 }
 
 fun useCaseModule() = module {
@@ -124,6 +128,7 @@ fun useCaseModule() = module {
     single { UpdateStepFormUseCase(get(),get()) }
     single { StoreStepFormUseCase(get(),get()) }
     single { CheckForEditedTicketUseCase(get()) }
+    single { StoreKeyValueUseCase(get(),get(),get()) }
 }
 
 fun httpModule() = module {
@@ -212,7 +217,7 @@ fun viewModelModule() = module {
     viewModelDefinition { LoginScreenVM(get()) }
     viewModelDefinition { VerifyScreenVM(get(),get(),get()) }
     viewModelDefinition { TicketInfoVM(get(),get()) }
-    viewModelDefinition { TicketProcessVM(get(),get(),get()) }
+    viewModelDefinition { TicketProcessVM(get(),get(),get(),get()) }
     viewModelDefinition { FormViewerScreenVM() }
     viewModelDefinition { MapVM() }
     viewModelDefinition { AccountScreenVM(get()) }

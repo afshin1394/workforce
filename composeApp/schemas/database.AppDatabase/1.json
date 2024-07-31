@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "c528ebd53483678f26e5903c15a4fd39",
+    "identityHash": "7f4bdfd983f901c54098b39584aa671c",
     "entities": [
       {
         "tableName": "ProfileEntity",
@@ -464,11 +464,71 @@
             "ticketNumber"
           ]
         }
+      },
+      {
+        "tableName": "SendStepsEntity",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `ticketNumber` TEXT NOT NULL, `wi` INTEGER NOT NULL, `title` TEXT NOT NULL, `tag` INTEGER NOT NULL, `activityId` INTEGER NOT NULL, `key_value_structure` TEXT NOT NULL, `edited` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "pk",
+            "columnName": "pk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ticketNumber",
+            "columnName": "ticketNumber",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "wi",
+            "columnName": "wi",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "title",
+            "columnName": "title",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "tag",
+            "columnName": "tag",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "activityId",
+            "columnName": "activityId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "key_value_structure",
+            "columnName": "key_value_structure",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "edited",
+            "columnName": "edited",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "pk"
+          ]
+        }
       }
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'c528ebd53483678f26e5903c15a4fd39')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '7f4bdfd983f901c54098b39584aa671c')"
     ]
   }
 }

@@ -1,19 +1,16 @@
-package domain.usecase.usecase.mokSteps
+package domain.usecase.usecase.steps
 
 
 import data.network.response.task.FormStruct
 import domain.mappers.toComponent
 import domain.models.form_struct.ComponentDomain
-import domain.models.form_struct.FormStructDomain
 import domain.models.steps.ActivityDomain
-import domain.models.steps.FormDomain
 import domain.repository.IStepPointerRepository
 import domain.repository.IStepsRepository
 import domain.usecase.BaseUseCase
 import io.github.aakira.napier.LogLevel
 import io.github.aakira.napier.Napier
 import kotlinx.serialization.json.Json
-import presentation.screens.ticket_process.events.StepEvent
 import toActivityDomain
 import toActivityDomainList
 import utils.PROCEED

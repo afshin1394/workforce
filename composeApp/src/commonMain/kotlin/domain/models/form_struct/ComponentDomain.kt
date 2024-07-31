@@ -18,6 +18,7 @@ data class ComponentDomain(
     val repeatable:Boolean=false,
     val removable:Boolean=false,
     val isMulti:Boolean=false,
+    val readOnly : Boolean = false,
 
     //in app properties
     var processLogicDomain : ProcessLogicDomain=ProcessLogicDomain().copy(),

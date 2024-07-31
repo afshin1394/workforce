@@ -1,4 +1,4 @@
-package domain.usecase.usecase.mokSteps
+package domain.usecase.usecase.steps
 
 import data.network.response.task.FormStruct
 import domain.mappers.toComponent

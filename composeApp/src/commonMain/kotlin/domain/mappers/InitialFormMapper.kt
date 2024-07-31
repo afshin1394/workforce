@@ -76,7 +76,7 @@ fun  FormStruct.toInitialFormDomain(ticketNumber : String) : InitialFormDomain {
 }
 
  fun  List<Component>.toComponentDomain() : List<ComponentDomain> {
-    return map {  ComponentDomain(it.id,it.hide,it.type,it.label,it.layout?.toLayoutDomain(),it.subType,it.validate?.toValidateDomain(),it.values?.toValueDomain(),it.conditional?.toConditionalDomain(),it.components?.toComponentDomain())   }
+    return map {  ComponentDomain(it.id,it.hide,it.type,it.label,it.layout?.toLayoutDomain(),it.subType,it.validate?.toValidateDomain(),it.values?.toValueDomain(),it.conditional?.toConditionalDomain(),it.components?.toComponentDomain(), readOnly = it.readOnly?:false)   }
 }
 
 
