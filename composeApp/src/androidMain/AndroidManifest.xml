@@ -35,6 +35,7 @@
         android:hardwareAccelerated="true"
         android:roundIcon="@mipmap/ic_launcher_iticket_round"
         android:supportsRtl="true"
+        android:largeHeap="true"
         android:theme="@android:style/Theme.Material.Light.NoActionBar"
         android:dataExtractionRules="@xml/data_extraction_file"
         >
