@@ -13,4 +13,6 @@ actual fun provideLifeCycleOwner() : Any{
 
 }
 
+actual fun nullIfAllPropertiesNull(){
 
+}

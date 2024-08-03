@@ -93,7 +93,6 @@ kotlin {
                 implementation("com.github.skydoves:landscapist-coil3:2.3.2")
 
 
-
             }
         }
 
@@ -117,6 +116,7 @@ kotlin {
                 implementation (libs.android.database.sqlcipher)
 
                 implementation("org.osmdroid:osmdroid-android:6.1.6")
+                implementation(libs.kotlin.reflect)
 
             }
         }

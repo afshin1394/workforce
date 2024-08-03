@@ -25,5 +25,4 @@ data class ValidateDomain(
     val domainList:String?=null,
     val validationType:String?=null,
     val messageError: ResourceFormattedStringDesc? = null
-
 )
