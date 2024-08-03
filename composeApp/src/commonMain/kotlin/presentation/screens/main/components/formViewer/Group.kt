@@ -30,6 +30,8 @@ fun groupComponent(
     modifier: Modifier,
     photoDomainList: MutableList<PhotoDomain>,
     onChanges: (list:List<ComponentDomain>, listValueDomain:List<ValueDomain>, indexParent: List<Int>, indexChild: Int) -> Unit,
+    onAddItem: (list:List<ComponentDomain>, listValueDomain:List<ValueDomain>, indexParent: List<Int>, indexChild: Int) -> Unit,
+    onRemoveItem: (list:List<ComponentDomain>, listValueDomain:List<ValueDomain>, indexParent: List<Int>, indexChild: Int) -> Unit,
     onFixChanges: (text : MutableStateFlow<String>) -> Unit,
     onClickImage:(indexPhotoSelected:Int,componentId:String)->Unit,
     currentParentIndex: List<Int> = listOf(),
@@ -70,6 +72,8 @@ fun groupComponent(
 
                 it,
                 onChanges as (List<ComponentDomain>, List<ValueDomain>?, List<Int>, Int) -> Unit,
+                onAddItem  as (List<ComponentDomain>, List<ValueDomain>?, List<Int>, Int) -> Unit,
+                onRemoveItem  as (List<ComponentDomain>, List<ValueDomain>?, List<Int>, Int) -> Unit,
                 onFixChanges,
                 onClickImage, currentParentIndex)
         }

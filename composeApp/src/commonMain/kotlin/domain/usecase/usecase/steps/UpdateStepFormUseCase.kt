@@ -1,15 +1,20 @@
 package domain.usecase.usecase.steps
 
 
+import arrow.core.Tuple4
 import data.network.response.task.FormStruct
 import domain.mappers.toComponent
+import domain.mappers.toPhotoEntityList
+import domain.models.PhotoDomain
 import domain.models.form_struct.ComponentDomain
 import domain.models.steps.ActivityDomain
+import domain.repository.IPhotoRepository
 import domain.repository.IStepPointerRepository
 import domain.repository.IStepsRepository
 import domain.usecase.BaseUseCase
 import io.github.aakira.napier.LogLevel
 import io.github.aakira.napier.Napier
+import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import toActivityDomain
 import toActivityDomainList
@@ -25,18 +30,32 @@ data class StructureActivity(
 data class StepDetail(val id: Int, val name: String)
 class UpdateStepFormUseCase(
     private val iStepsRepository: IStepsRepository,
-    private val iStepPointerRepository: IStepPointerRepository
-) : BaseUseCase<StructureActivity, Triple<String, String,List<ComponentDomain>>>() {
+    private val iStepPointerRepository: IStepPointerRepository,
+    private val iPhotoRepository: IPhotoRepository,
+) : BaseUseCase<StructureActivity, Tuple4<String, String, List<ComponentDomain>, List<PhotoDomain>>>() {
 
-    override suspend fun run(params: Triple<String, String,List<ComponentDomain>>): StructureActivity {
+    override suspend fun run(params: Tuple4<String, String,List<ComponentDomain>,List<PhotoDomain>>): StructureActivity {
         val stepList: List<ActivityDomain> =
             iStepsRepository.getStepsByTicketNumber(params.first).toActivityDomainList()
 
         val stepListSorted = stepList.sortedBy { it.id }
         val stepPointerDomain = iStepPointerRepository.getActiveActivityByTicketNumber(params.first)
 
-        if(params.second != PROCEED.INITIAL)
-        iStepsRepository.updateFormStructure(params.first,stepPointerDomain.activeActivity, Json.encodeToString(FormStruct.serializer(), FormStruct(components =  (params.third.toComponent()))) )
+        if(params.second != PROCEED.INITIAL) {
+            iStepsRepository.updateFormStructure(
+                params.first,
+                stepPointerDomain.activeActivity,
+                formStructure = Json.encodeToString(
+                    FormStruct.serializer(),
+                    FormStruct(components = (params.third.toComponent()))
+                ),
+                photoList = Json.encodeToString(params.fourth)
+            )
+//            params.fourth.forEach {
+//                iPhotoRepository.deleteByKey(it.component_key)
+//            }
+//            iPhotoRepository.insertAll(params.fourth.toPhotoEntityList())
+        }
 
         val stepDetails = stepListSorted.mapIndexed { int, step ->
             StepDetail(int, step.title)
@@ -70,17 +89,18 @@ class UpdateStepFormUseCase(
             ticketNumber = stepPointerDomain.ticketNumber,
             activeActivity = stepListSorted[nextIndex].id
         )
-
-
+       val data =iStepsRepository.getDataByTicketNumberAndStep(
+                stepPointerDomain.ticketNumber,
+        stepListSorted.get(nextIndex).id
+        ).toActivityDomain()
+         Napier.log(LogLevel.ASSERT,tag="dataaaaaaa", message = data.toString())
         return StructureActivity(
             nextIndex,
             stepListSorted.get(nextIndex).title,
-            iStepsRepository.getDataByTicketNumberAndStep(
-                stepPointerDomain.ticketNumber,
-                stepListSorted.get(nextIndex).id
-            ).toActivityDomain(),
+            data,
             stepDetails,
         )
+
 
 //        val stepForm=  listOf(
 //            StepModel(

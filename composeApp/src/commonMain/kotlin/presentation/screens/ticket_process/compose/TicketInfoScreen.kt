@@ -21,9 +21,11 @@ import presentation.screens.main.compose.BaseScreen
 import presentation.theme.surfaceBrandDefault
 import presentation.theme.textInverse
 import dev.icerock.moko.resources.compose.stringResource
+import domain.models.PhotoDomain
 import irancell.nwg.wfm.DrawController
 import irancell.nwg.wfm.MR
 import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -39,6 +41,8 @@ import presentation.screens.ticket_process.viewModel.TicketInfoVM
 import presentation.theme.body_large
 import presentation.theme.surfaceDefault
 import presentation.theme.textPrimary
+import utils.AsyncStatus
+import utils.ViewStates
 
 
 import utils.initialize
@@ -68,13 +72,13 @@ class TicketInfoScreen(
         var changeState = MutableStateFlow(0)
 
         val events by viewModel.events
+        val viewState by viewModel.state.collectAsState()
 
 
 
         LaunchedEffect(Unit) {
             viewModel.getInitialForm(ticket_number)
             viewModel.updateTicketNumber(ticket_number)
-            viewModel.updateActiveActivity()
 
         }
 
@@ -165,16 +169,19 @@ class TicketInfoScreen(
                                 textInverse
                             ), onClick = {
 
+
                                 val errors = validateComponents(viewModel.tempComponentList) {
                                     viewModel.updateTempComponentList(it)
                                 }
 
-                              /*  if (errors.isEmpty()) {
-                                    navigator.push(ticketProcessScreen)
-                                }*/
+                                scope.launch {
+//                                if (errors.isEmpty()) {
+                                   async { viewModel.saveAndDeletePhotoByComponentKey() }.await()
+                                    if (viewState is ViewStates.Success)
+                                        navigator.push(TicketProcessScreen(viewModel.ticketNumber.value))
+//                                }
+                                }
 
-
-                                navigator.push(TicketProcessScreen(viewModel.ticketNumber.value))
                             })
 
                         scope.launch {
@@ -278,13 +285,22 @@ class TicketInfoScreen(
                         changeState.update { Random.nextInt() }
 
                     },
-                    onChanges = { listComponent, listValueDomain, listIndexParent, indexChild ->
-
-                        viewModel.handleLogics()
+                    onAddItem = {listComponent, listValueDomain, listIndexParent, indexChild ->
                         viewModel.addOrRemoveComponentDomainRepeatableToList(
                             listComponent,
                             indexChild
                         )
+                    },
+                    onRemoveItem = {listComponent, listValueDomain, listIndexParent, indexChild ->
+                        viewModel.addOrRemoveComponentDomainRepeatableToList(
+                            listComponent,
+                            indexChild
+                        )
+                    },
+                    onChanges = { listComponent, listValueDomain, listIndexParent, indexChild ->
+
+                        viewModel.handleLogics()
+
                         listValueDomain?.let { it1 ->
                             viewModel.updateUriPhotoComponent(
                                 viewModel.tempComponentList, listIndexParent, indexChild,

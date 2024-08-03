@@ -12,5 +12,7 @@ data class StepsEntity(
     val tag : Long,
     val activityId: Long,
     val formStructure: String,
-    val edited : Boolean
+    val photoList : String,
+    val edited : Boolean,
+    val isSent : Boolean,
 )

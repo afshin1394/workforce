@@ -125,8 +125,8 @@ fun useCaseModule() = module {
     single { GetPhotoByComponentKeyUseCase(get()) }
     single { DeleteByComponentKeyUseCase(get()) }
     single { UpdateStepsUseCase(get(),get(),get()) }
-    single { UpdateStepFormUseCase(get(),get()) }
-    single { StoreStepFormUseCase(get(),get()) }
+    single { UpdateStepFormUseCase(get(),get(),get()) }
+    single { StoreStepFormUseCase(get(),get(),get()) }
     single { CheckForEditedTicketUseCase(get()) }
     single { StoreKeyValueUseCase(get(),get(),get()) }
 }
@@ -216,8 +216,8 @@ fun viewModelModule() = module {
     viewModelDefinition { GpsTrackingReportScreenVM(get()) }
     viewModelDefinition { LoginScreenVM(get()) }
     viewModelDefinition { VerifyScreenVM(get(),get(),get()) }
-    viewModelDefinition { TicketInfoVM(get(),get()) }
-    viewModelDefinition { TicketProcessVM(get(),get(),get(),get()) }
+    viewModelDefinition { TicketInfoVM(get(),get(),get(),get()) }
+    viewModelDefinition { TicketProcessVM(get(),get(),get(),get(),get(),get()) }
     viewModelDefinition { FormViewerScreenVM() }
     viewModelDefinition { MapVM() }
     viewModelDefinition { AccountScreenVM(get()) }

@@ -56,15 +56,17 @@ fun initialize(
     photoDomainList: MutableList<PhotoDomain>,
     components: List<ComponentDomain>,
     onChanges: (list: List<ComponentDomain>, listValueDomain: List<ValueDomain>?, indexParent: List<Int>, indexChild: Int) -> Unit,
+    onAddItem: (list: List<ComponentDomain>, listValueDomain: List<ValueDomain>?, indexParent: List<Int>, indexChild: Int) -> Unit,
+    onRemoveItem: (list: List<ComponentDomain>, listValueDomain: List<ValueDomain>?, indexParent: List<Int>, indexChild: Int) -> Unit,
     onFixChange: (text: MutableStateFlow<String>) -> Unit,
-    onClickImage: (indexPhotoSelected: Int, componentId: String) -> Unit,
+    onClickImage: (indexPhotoSelected: Int, componentKey: String) -> Unit,
     currentParentIndex: List<Int> = listOf()
 ) {
 
 
     val listState = rememberLazyListState()
     val scope = rememberCoroutineScope()
-    Napier.log(LogLevel.ASSERT,tag="initialize",message= "reinititt${components.toList()}")
+    Napier.log(LogLevel.ASSERT, tag = "initialize", message = "reinititt${components.toList()}")
     LazyColumn(
         state = listState,
         modifier = modifier,
@@ -86,6 +88,8 @@ fun initialize(
                             modifier.heightIn(0.dp, 1000.dp),
                             photoDomainList,
                             onChanges,
+                            onAddItem,
+                            onRemoveItem,
                             onFixChange,
                             onClickImage,
                             updatedParentIndex,
@@ -95,7 +99,7 @@ fun initialize(
 
                                 val newComponents =
                                     listOf(copyComponentWithValues(item, uuid4().toString()))
-                                onChanges(newComponents, null, currentParentIndex, index)
+                                onAddItem(newComponents, null, currentParentIndex, index)
                                 scope.launch {
                                     listState.scrollToItem(index + 1)
                                 }
@@ -105,8 +109,8 @@ fun initialize(
                             onDeleteClick = {
 
                                 val newComponents =
-                                    item.id?.let { it1 -> removeComponentById(components, it1) }
-                                onChanges(newComponents!!, null, currentParentIndex, index)
+                                    item.key?.let { it1 -> removeComponentById(components, it1) }
+                                onRemoveItem(newComponents!!, null, currentParentIndex, index)
 
                                 scope.launch {
                                     listState.animateScrollToItem(index - 1)
@@ -138,7 +142,7 @@ fun initialize(
                             imeAction = ImeAction.None,
                             errorMessage = if (errorMessageState.value == initialMessageError) errorMessageState.value else initialMessageError,
                             keyboardType = KeyboardType.Number,
-                            readOnly = false,
+                            readOnly = item.readOnly,
                             maxLines = 1,
                             onValueChange = { newValue ->
 
@@ -183,7 +187,7 @@ fun initialize(
                             imeAction = ImeAction.None,
                             errorMessage = if (errorMessageState.value == initialMessageError) errorMessageState.value else initialMessageError,
                             keyboardType = KeyboardType.Text,
-                            readOnly = false,
+                            readOnly = item.readOnly,
                             maxLines = 1,
                             onValueChange = { newValue ->
                                 val updatedValueDomain = updateValueDomain(
@@ -223,7 +227,7 @@ fun initialize(
                             imeAction = ImeAction.None,
                             errorMessage = if (errorMessageState.value == initialMessageError) errorMessageState.value else initialMessageError,
                             keyboardType = KeyboardType.Text,
-                            readOnly = false,
+                            readOnly = item.readOnly,
                             maxLines = 1,
                             onValueChange = { newValue ->
 
@@ -267,7 +271,7 @@ fun initialize(
                             imeAction = ImeAction.None,
                             errorMessage = if (errorMessageState.value == initialMessageError) errorMessageState.value else initialMessageError,
                             keyboardType = KeyboardType.Number,
-                            readOnly = false,
+                            readOnly = item.readOnly,
                             maxLines = 1,
                             onValueChange = { newValue ->
 
@@ -310,7 +314,7 @@ fun initialize(
                             imeAction = ImeAction.None,
                             errorMessage = if (errorMessageState.value == initialMessageError) errorMessageState.value else initialMessageError,
                             keyboardType = KeyboardType.Number,
-                            readOnly = false,
+                            readOnly = item.readOnly,
                             maxLines = 1,
                             onValueChange = { newValue ->
 
@@ -351,7 +355,7 @@ fun initialize(
                             placeholder = item.label.toString(),
                             imeAction = ImeAction.None,
                             keyboardType = KeyboardType.Email,
-                            readOnly = false,
+                            readOnly = item.readOnly,
                             maxLines = 1,
                             errorMessage = if (errorMessageState.value == initialMessageError) errorMessageState.value else initialMessageError,
                             onValueChange = { newValue ->
@@ -397,6 +401,7 @@ fun initialize(
                         }
 
                         ModalDateTimePicker(
+                            readOnly = item.readOnly,
                             processLogicDomain = item.processLogicDomain,
                             selectedDateState.value,
                             item.label.toString(),
@@ -409,7 +414,7 @@ fun initialize(
 
                             updateDateTimeValidationError(item, errorMessageState)
 
-                            onChanges(components, newValues, currentParentIndex, index)
+                            onChanges( components, newValues, currentParentIndex, index)
                         }
                     }
 
@@ -429,6 +434,7 @@ fun initialize(
                         }
 
                         ModalDatePicker(
+                            item.readOnly,
                             item.processLogicDomain,
                             selectedDateState.value,
                             item.label.toString(),
@@ -440,7 +446,7 @@ fun initialize(
 
                             updateDateTimeValidationError(item, errorMessageState)
 
-                            onChanges(components, newValues, currentParentIndex, index)
+                            onChanges( components, newValues, currentParentIndex, index)
 
 
                         }
@@ -464,6 +470,7 @@ fun initialize(
                         }
 
                         ModalTimePicker(
+                            item.readOnly,
                             item.processLogicDomain,
                             selectedDateState.value,
                             item.label.toString(),
@@ -476,7 +483,7 @@ fun initialize(
 
                             updateDateTimeValidationError(item, errorMessageState)
 
-                            onChanges(components, newValues, currentParentIndex, index)
+                            onChanges( components, newValues, currentParentIndex, index)
 
 
                         }
@@ -496,6 +503,7 @@ fun initialize(
                         val errorMessage = remember { mutableStateOf(initialMessageError) }
 
                         UploadFileComponent(
+                            readOnly = item.readOnly,
                             processLogicDomain = item.processLogicDomain,
                             titlePicker = item.label.toString(),
                             errorMessage = if (errorMessage.value == initialMessageError) errorMessage.value else initialMessageError,
@@ -511,7 +519,7 @@ fun initialize(
                                 uploadDomainList.value = newList
                                 item.values = newList
 
-                                onChanges(components, newValues, currentParentIndex, index)
+                                onChanges( components, newValues, currentParentIndex, index)
 
 
                             }
@@ -527,25 +535,26 @@ fun initialize(
 
                         val errorMessageState = remember { mutableStateOf(initialMessageError) }
                         ImagePicker(
+                            item.readOnly,
                             item.processLogicDomain,
                             item.label.toString(),
                             taskID,
                             if (errorMessageState.value == initialMessageError) errorMessageState.value else initialMessageError,
-                            findPhotosByComponentId(photoDomainList, item.id),
+                            findPhotosByComponentId(photoDomainList, item.key),
                             onTakePhoto = {
 
                                 val newValues =
-                                    listOf(ValueDomain("${item.type}:${item.id}", "${it}"))
+                                    listOf(ValueDomain("${item.type}:${item.key}", "${it}"))
                                 item.values = newValues
 
                                 updateImageViewValidationError(item, errorMessageState)
 
-                                onChanges(components, newValues, currentParentIndex, index)
+                                onChanges( components, newValues, currentParentIndex, index)
 
                             },
                             onImageClick = {
 
-                                onClickImage(it, item.id ?: "")
+                                onClickImage(it, item.key ?: "")
                             })
                     }
 
@@ -560,10 +569,11 @@ fun initialize(
                         val errorMessageState = remember { mutableStateOf(initialMessageError) }
                         val componentLabel = item.label
                         val valuesState = remember {
-                            mutableStateListOf( *item.values?.toTypedArray() ?: arrayOf())
+                            mutableStateListOf(*item.values?.toTypedArray() ?: arrayOf())
                         }
 
                         Radio(
+                            item.readOnly,
                             item.processLogicDomain ?: ProcessLogicDomain().copy(),
                             componentLabel.toString(),
                             if (errorMessageState.value == initialMessageError) errorMessageState.value else initialMessageError,
@@ -584,7 +594,7 @@ fun initialize(
 
 
 
-                            onChanges(components, valuesState, currentParentIndex, index)
+                            onChanges( components, valuesState, currentParentIndex, index)
                         }
                     }
 
@@ -603,6 +613,7 @@ fun initialize(
                         val componentLabel = item.label
                         item.values?.let { values ->
                             CheckList(
+                                item.readOnly,
                                 item.processLogicDomain,
                                 componentLabel.toString(),
                                 if (errorMessageState.value == initialMessageError) errorMessageState.value else initialMessageError,
@@ -616,6 +627,11 @@ fun initialize(
 
 
                                     valuesState.value = valueDomain.value ?: ""
+                                    Napier.log(
+                                        LogLevel.ASSERT,
+                                        tag = "valueStateee",
+                                        message = valuesState.value
+                                    )
                                     onChanges(
                                         components,
                                         listOf(valueDomain),
@@ -642,6 +658,7 @@ fun initialize(
                         item.values?.let { values ->
                             if (item.isMulti) {
                                 DropDownMultiChoice(
+                                    item.readOnly,
                                     item.processLogicDomain,
                                     componentLabel.toString(),
                                     if (errorMessageState.value == initialMessageError) errorMessageState.value else initialMessageError,
@@ -690,6 +707,7 @@ fun initialize(
                         }
 
                         DropDownSingleChoice(
+                            item.readOnly,
                             item.processLogicDomain,
                             componentLabel.toString(),
                             if (errorMessageState.value == initialMessageError) errorMessageState.value else initialMessageError,
@@ -708,7 +726,7 @@ fun initialize(
 
                                 updateSelectedComponentValidationError(item, errorMessageState)
 
-                                onChanges(components, valuesState, currentParentIndex, index)
+                                onChanges( components, valuesState, currentParentIndex, index)
                             },
                             {}
                         )
@@ -757,7 +775,7 @@ fun copyComponentWithValues(
     }?.toMutableList()
 
     return component.copy(
-        id = "${component.id}copy$uuid",
+        id = "${component.key}copy$uuid",
         components = copiedComponents,
         values = values?.toMutableList(),
         removable = true,
@@ -766,12 +784,12 @@ fun copyComponentWithValues(
 }
 
 
-fun removeComponentById(components: List<ComponentDomain>, id: String): List<ComponentDomain> {
+fun removeComponentById(components: List<ComponentDomain>, key: String): List<ComponentDomain> {
     val mutableComponents = components.toMutableList()
     val iterator = mutableComponents.iterator()
     while (iterator.hasNext()) {
         val component = iterator.next()
-        if (component.id == id) {
+        if (component.key == key) {
             iterator.remove()
             break
         }
@@ -780,10 +798,10 @@ fun removeComponentById(components: List<ComponentDomain>, id: String): List<Com
 }
 
 
-fun findPhotosByComponentId(components: List<PhotoDomain>, id: String?): MutableList<PhotoDomain> {
+fun findPhotosByComponentId(components: List<PhotoDomain>, key: String?): MutableList<PhotoDomain> {
     val list: MutableList<PhotoDomain> = arrayListOf()
     components.forEach {
-        if (it.component_key == id) {
+        if (it.component_key == key) {
             list.add(it)
         }
     }

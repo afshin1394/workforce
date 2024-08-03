@@ -1,5 +1,6 @@
 package domain.models.steps
 
+import domain.models.PhotoDomain
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -10,6 +11,7 @@ data class ActivityDomain(
     val task : Int,
     val kind : String,
     val form : FormDomain,
+    val photoDomainList : List<PhotoDomain>,
     val tag : Long,
     val form_id : Int,
     )

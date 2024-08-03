@@ -39,6 +39,7 @@ import presentation.theme.textSecondary
 
 @Composable
 fun CheckList(
+    readOnly : Boolean,
     processLogicDomain: ProcessLogicDomain,
     title: String,
     errorMessage: ResourceFormattedStringDesc,
@@ -48,7 +49,7 @@ fun CheckList(
 ) {
     val disableLogic = processLogicDomain.disabled
     val hideLogic = processLogicDomain.shouldHide
-    val readOnlyLogic = processLogicDomain.readOnly
+    val readOnlyLogic = processLogicDomain.readOnly|| readOnly
     val requiredLogic = processLogicDomain.required
     val validateLogic = processLogicDomain.validate
     val errorMessageValidateLogic = processLogicDomain.errorMessage

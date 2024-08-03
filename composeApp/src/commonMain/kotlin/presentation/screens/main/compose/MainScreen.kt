@@ -16,10 +16,11 @@ import presentation.model.BottomSheetDoubleActionModel
 import presentation.screens.main.events.MainEvent
 import presentation.screens.main.viewmodel.MainScreenVM
 import com.irancell.nwg.wfm.presentation.theme.*
-import dev.icerock.moko.resources.StringResource
 import presentation.screens.main.components.TicketListScreen
 
 import dev.icerock.moko.resources.compose.stringResource
+import domain.models.PhotoDomain
+import domain.models.form_struct.ComponentDomain
 import domain.models.task.TaskDomain
 import io.github.aakira.napier.LogLevel
 import io.github.aakira.napier.Napier
@@ -33,6 +34,8 @@ import irancell.nwg.wfm.checkConnectivity
 import irancell.nwg.wfm.getSharedPref
 import irancell.nwg.wfm.provideAppContext
 import kotlinx.coroutines.launch
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.json.Json
 import org.koin.compose.koinInject
 import presentation.components.CustomDialog
 import presentation.components.CustomDialogDoubleAction
@@ -740,6 +743,7 @@ class MainScreen(
                         isTicketEditedState?.let { isEditedState ->
                             if (isEditedState) {
                                 viewModel.selectedTask.value?.let {
+                                    viewModel.updateShowAcceptDialog(false)
                                     navigator.push(
                                         TicketInfoScreen(
                                             it.basic_info.ticket_number ?: "0"

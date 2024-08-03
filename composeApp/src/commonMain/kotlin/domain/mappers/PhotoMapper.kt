@@ -16,6 +16,9 @@ fun PhotoDomain.toPhotoEntity() : PhotoEntity {
 
     )
 }
+fun List<PhotoDomain>.toPhotoEntityList():List<PhotoEntity>{
+    return map { it.toPhotoEntity() }
+}
 
 fun List<PhotoEntity>.toPhotoDomainList():List<PhotoDomain>{
     return map { it.toPhotoDomain() }

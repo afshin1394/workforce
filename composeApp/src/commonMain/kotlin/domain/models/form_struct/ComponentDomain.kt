@@ -5,6 +5,7 @@ import data.network.response.task.logic.LogicDomain
 
 data class ComponentDomain(
     val id: String?= null,
+    val key: String?=null,
     val hide: String?= null,
     val type: String?= null,
     val label: String?= null,
@@ -32,7 +33,7 @@ data class ComponentDomain(
     }
 
     override fun toString(): String {
-        return "ComponentDomain(id=$id, hide=$hide, type=$type, label=$label, layout=$layout, subType=$subType, validate=$validate, values=$values, conditional=$conditional, components=$components, logics=$logics, repeatable=$repeatable, removable=$removable, isMulti=$isMulti, processLogicDomain=$processLogicDomain)"
+        return "ComponentDomain(id=$id, key=$key, hide=$hide, type=$type, label=$label, layout=$layout, subType=$subType, validate=$validate, values=$values, conditional=$conditional, components=$components, logics=$logics, repeatable=$repeatable, removable=$removable, isMulti=$isMulti, readOnly=$readOnly, processLogicDomain=$processLogicDomain)"
     }
 
 

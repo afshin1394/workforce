@@ -4,6 +4,9 @@ import dev.icerock.moko.resources.desc.ResourceFormattedStringDesc
 import dev.icerock.moko.resources.desc.StringDesc
 import domain.models.form_struct.ComponentDomain
 import domain.models.form_struct.ValidateDomain
+import io.github.aakira.napier.LogLevel
+import io.github.aakira.napier.Napier
+import kotlin.math.tan
 
 
 fun validateComponents(
@@ -11,187 +14,233 @@ fun validateComponents(
     clearTempComponentListCallback: (List<ComponentDomain>) -> Unit
 ): Map<String, List<StringDesc>> {
     val errors = mutableMapOf<String, List<ResourceFormattedStringDesc>>()
+    Napier.log(LogLevel.ASSERT, tag= "validateComponent", message = components.toList().toString())
 
     fun updateComponentsRecursively(component: ComponentDomain): ComponentDomain {
         return when (component.type) {
             FormViewerTypes.TextField -> {
-                val validationErrors =
-                    validateShortText(component, component.validate ?: ValidateDomain())
-                val listMessageError: ArrayList<ResourceFormattedStringDesc> = arrayListOf()
-                if (validationErrors!=null){
-                    listMessageError.add(validationErrors)
+                component.validate?.let { validate ->
 
-                    errors[component.id.toString()] = listMessageError
-                }
-                component.copy(
-                    validate = component.validate?.copy(
-                        messageError = validationErrors
-                    ) ?: ValidateDomain(
-                        messageError = validationErrors
+                    val validationErrors =
+                        validateShortText(component, validate)
+                    val listMessageError: ArrayList<ResourceFormattedStringDesc> = arrayListOf()
+                    if (validationErrors != null) {
+                        listMessageError.add(validationErrors)
+
+                        errors[component.id.toString()] = listMessageError
+                    }
+                    component.copy(
+                        validate = component.validate?.copy(
+                            messageError = validationErrors
+                        ) ?: ValidateDomain(
+                            messageError = validationErrors
+                        )
                     )
-                )
+                } ?: run {
+                    return component
+                }
             }
 
 
             FormViewerTypes.TextAREA -> {
-                val validationErrors =
-                    validateTextarea(component, component.validate ?: ValidateDomain(),true)
-                val listMessageError: ArrayList<ResourceFormattedStringDesc> = arrayListOf()
-                if (validationErrors!=null){
-                    listMessageError.add(validationErrors)
+                component.validate?.let { validate ->
 
-                    errors[component.id.toString()] = listMessageError
-                }
-                component.copy(
-                    validate = component.validate?.copy(
-                        messageError = validationErrors
-                    ) ?: ValidateDomain(
-                        messageError = validationErrors
+                    val validationErrors =
+                        validateTextarea(component, validate, true)
+                    val listMessageError: ArrayList<ResourceFormattedStringDesc> = arrayListOf()
+                    if (validationErrors != null) {
+                        listMessageError.add(validationErrors)
+
+                        errors[component.id.toString()] = listMessageError
+                    }
+                    component.copy(
+                        validate = component.validate?.copy(
+                            messageError = validationErrors
+                        ) ?: ValidateDomain(
+                            messageError = validationErrors
+                        )
                     )
-                )
+                } ?: run {
+                    return component
+                }
             }
 
 
             FormViewerTypes.Number -> {
-                val validationErrors =
-                    validateNumber(component, component.validate ?: ValidateDomain(),true)
-                val listMessageError: ArrayList<ResourceFormattedStringDesc> = arrayListOf()
-                if (validationErrors!=null){
-                    listMessageError.add(validationErrors)
+                component.validate?.let { validate ->
 
-                    errors[component.id.toString()] = listMessageError
-                }
+                    val validationErrors =
+                        validateNumber(component, validate, true)
+                    val listMessageError: ArrayList<ResourceFormattedStringDesc> = arrayListOf()
+                    if (validationErrors != null) {
+                        listMessageError.add(validationErrors)
 
-                component.copy(
-                    validate = component.validate?.copy(
-                        messageError = validationErrors
-                    ) ?: ValidateDomain(
-                        messageError = validationErrors
+                        errors[component.id.toString()] = listMessageError
+                    }
+
+                    component.copy(
+                        validate = component.validate?.copy(
+                            messageError = validationErrors
+                        ) ?: ValidateDomain(
+                            messageError = validationErrors
+                        )
                     )
-                )
+                } ?: run {
+                    return component
+                }
             }
 
             FormViewerTypes.LatLong -> {
-                val validationErrors =
-                    validateLatLong(component, component.validate ?: ValidateDomain())
-                val listMessageError: ArrayList<ResourceFormattedStringDesc> = arrayListOf()
-                if (validationErrors!=null){
-                    listMessageError.add(validationErrors)
 
-                    errors[component.id.toString()] = listMessageError
-                }
-                component.copy(
-                    validate = component.validate?.copy(
-                        messageError = validationErrors
-                    ) ?: ValidateDomain(
-                        messageError = validationErrors
+                component.validate?.let { validate ->
+                    val validationErrors =
+                        validateLatLong(component, validate)
+                    val listMessageError: ArrayList<ResourceFormattedStringDesc> = arrayListOf()
+                    if (validationErrors != null) {
+                        listMessageError.add(validationErrors)
+
+                        errors[component.id.toString()] = listMessageError
+                    }
+                    return component.copy(
+                        validate = component.validate?.copy(
+                            messageError = validationErrors
+                        ) ?: ValidateDomain(
+                            messageError = validationErrors
+                        )
                     )
-                )
+                } ?: run {
+                    return component
+                }
             }
+
 
             FormViewerTypes.Phone -> {
-                val validationErrors =
-                    validatePhone(component, component.validate ?: ValidateDomain(),true)
+                component.validate?.let { validate ->
 
-                val listMessageError: ArrayList<ResourceFormattedStringDesc> = arrayListOf()
-                if (validationErrors!=null){
-                    listMessageError.add(validationErrors)
-                    errors[component.id.toString()] = listMessageError
+                    val validationErrors =
+                        validatePhone(component, validate, true)
 
+                    val listMessageError: ArrayList<ResourceFormattedStringDesc> = arrayListOf()
+                    if (validationErrors != null) {
+                        listMessageError.add(validationErrors)
+                        errors[component.id.toString()] = listMessageError
+
+                    }
+
+                    component.copy(
+                        validate = component.validate?.copy(
+                            messageError = validationErrors
+                        ) ?: ValidateDomain(
+                            messageError = validationErrors
+                        )
+                    )
+                } ?: run {
+                    return component
                 }
-
-                component.copy(
-                    validate = component.validate?.copy(
-                        messageError = validationErrors
-                    ) ?: ValidateDomain(
-                        messageError = validationErrors
-                    )
-                )
             }
 
-         FormViewerTypes.Email -> {
+            FormViewerTypes.Email -> {
 
+                component.validate?.let { validate ->
 
-             val validationErrors =
-                    validateEmail(component, component.validate ?: ValidateDomain(),true)
+                    val validationErrors =
+                        validateEmail(component, validate, true)
 
-             val listMessageError: ArrayList<ResourceFormattedStringDesc> = arrayListOf()
-             if (validationErrors!=null){
-                 listMessageError.add(validationErrors)
-                 errors[component.id.toString()] = listMessageError
+                    val listMessageError: ArrayList<ResourceFormattedStringDesc> = arrayListOf()
+                    if (validationErrors != null) {
+                        listMessageError.add(validationErrors)
+                        errors[component.id.toString()] = listMessageError
 
-             }
+                    }
 
-                component.copy(
-                    validate = component.validate?.copy(
-                        messageError = validationErrors
-                    ) ?: ValidateDomain(
-                        messageError = validationErrors
+                    component.copy(
+                        validate = component.validate?.copy(
+                            messageError = validationErrors
+                        ) ?: ValidateDomain(
+                            messageError = validationErrors
+                        )
                     )
-                )
+                } ?: run {
+                    return component
+                }
             }
 
-           FormViewerTypes.Checklist,
+            FormViewerTypes.Checklist,
             FormViewerTypes.Select,
             FormViewerTypes.Multi,
-            FormViewerTypes.Radio ->{
-                val validationErrors = validateSelected(component, component.validate ?: ValidateDomain())
-               val listMessageError: ArrayList<ResourceFormattedStringDesc> = arrayListOf()
-               if (validationErrors!=null){
-                   listMessageError.add(validationErrors)
-                   errors[component.id.toString()] = listMessageError
+            FormViewerTypes.Radio -> {
+                component.validate?.let { validate ->
 
-               }
-                component.copy(validate = component.validate?.copy(
-                    messageError = validationErrors
-                ) ?: ValidateDomain(
-                    messageError = validationErrors
-                )
-                )
-            }
+                    val validationErrors =
+                        validateSelected(component, validate)
+                    val listMessageError: ArrayList<ResourceFormattedStringDesc> = arrayListOf()
+                    if (validationErrors != null) {
+                        listMessageError.add(validationErrors)
+                        errors[component.id.toString()] = listMessageError
 
-
-           FormViewerTypes.FileUpload -> {
-                val validationErrors = validateFileUpload(
-                    component,
-                    component.validate ?: ValidateDomain(),
-                    null,
-                    true
-                )
-               val listMessageError: ArrayList<ResourceFormattedStringDesc> = arrayListOf()
-               if (validationErrors!=null){
-                   listMessageError.add(validationErrors)
-                   errors[component.id.toString()] = listMessageError
-
-               }
-                component.copy(
-                    validate = component.validate?.copy(
-                        messageError = validationErrors
-                    ) ?: ValidateDomain(
-                        messageError = validationErrors
+                    }
+                    component.copy(
+                        validate = component.validate?.copy(
+                            messageError = validationErrors
+                        ) ?: ValidateDomain(
+                            messageError = validationErrors
+                        )
                     )
-                )
+                } ?: run { return component }
             }
 
+
+            FormViewerTypes.FileUpload -> {
+                component.validate?.let { validate ->
+                    val validationErrors = validateFileUpload(
+                        component,
+                        validate,
+                        null,
+                        true
+                    )
+                    val listMessageError: ArrayList<ResourceFormattedStringDesc> = arrayListOf()
+                    if (validationErrors != null) {
+                        listMessageError.add(validationErrors)
+                        errors[component.id.toString()] = listMessageError
+
+                    }
+                    component.copy(
+                        validate = component.validate?.copy(
+                            messageError = validationErrors
+                        ) ?: ValidateDomain(
+                            messageError = validationErrors
+                        )
+                    )
+                }?:run{
+                    return component
+                }
+            }
 
 
             FormViewerTypes.Datetime,
             FormViewerTypes.Date,
             FormViewerTypes.Time,
             FormViewerTypes.ImageView -> {
-                val validationErrors = validateRequired(component, component.validate ?: ValidateDomain())
-                val listMessageError: ArrayList<ResourceFormattedStringDesc> = arrayListOf()
-                if (validationErrors!=null){
-                    listMessageError.add(validationErrors)
-                    errors[component.id.toString()] = listMessageError
+                component.validate?.let { validate ->
 
+                    val validationErrors =
+                        validateRequired(component, validate)
+                    val listMessageError: ArrayList<ResourceFormattedStringDesc> = arrayListOf()
+                    if (validationErrors != null) {
+                        listMessageError.add(validationErrors)
+                        errors[component.id.toString()] = listMessageError
+
+                    }
+                    component.copy(
+                        validate = component.validate?.copy(
+                            messageError = validationErrors
+                        ) ?: ValidateDomain(
+                            messageError = validationErrors
+                        )
+                    )
+                }?:run{
+                    return component
                 }
-                component.copy(validate = component.validate?.copy(
-                    messageError = validationErrors
-                ) ?: ValidateDomain(
-                    messageError = validationErrors
-                )
-                )
             }
 
             FormViewerTypes.Group -> {

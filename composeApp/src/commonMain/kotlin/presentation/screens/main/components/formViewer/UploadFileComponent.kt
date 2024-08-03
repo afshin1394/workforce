@@ -51,6 +51,7 @@ import presentation.theme.textSecondary
 
 @Composable
 fun UploadFileComponent(
+    readOnly : Boolean,
     processLogicDomain: ProcessLogicDomain,
     titlePicker: String,
     errorMessage: ResourceFormattedStringDesc,
@@ -61,7 +62,7 @@ fun UploadFileComponent(
 
     val disableLogic = processLogicDomain.disabled
     val hideLogic = processLogicDomain.shouldHide
-    val readOnlyLogic = processLogicDomain.readOnly
+    val readOnlyLogic = processLogicDomain.readOnly || readOnly
     val requiredLogic = processLogicDomain.required
     val validateLogic = processLogicDomain.validate
     val errorMessageValidateLogic = processLogicDomain.errorMessage

@@ -5,6 +5,7 @@ import data.network.response.task.step.TaskStepResponse
 import database.entity.StepsEntity
 import domain.mappers.toComponentDomain
 import domain.mappers.toConditionalDomain
+import domain.models.PhotoDomain
 import domain.models.form_struct.FormStructDomain
 import domain.models.steps.ActivityDomain
 import domain.models.steps.FormDomain
@@ -30,6 +31,7 @@ fun List<Activity>.toActivityDomains():List<ActivityDomain?> {
                it.task ?: 1,
                it.kind ?: "",
                it1,
+               arrayListOf(),
                it.tag ?: 1,
                it.form_id ?: 1
            )
@@ -55,7 +57,7 @@ fun FormStruct.toFormStructDomain() = FormStructDomain(
 
 
 
-fun TaskStepResponse.toStepDetailsEntity(ticketNumber: String): List<StepsEntity> {
+fun TaskStepResponse.toStepDetailsEntity(ticketNumber: String,photoList : String): List<StepsEntity> {
 
     return if (this.stepDetails.isNotEmpty()) {
         this.stepDetails[0].let { stepDetail ->
@@ -71,7 +73,9 @@ fun TaskStepResponse.toStepDetailsEntity(ticketNumber: String): List<StepsEntity
                         FormStruct.serializer(),
                         activity.form!!.form_structure
                     ),
-                    edited = false
+                    edited = false,
+                    photoList = photoList,
+                    isSent = false
                 )
             }
         }
@@ -83,11 +87,17 @@ fun TaskStepResponse.toStepDetailsEntity(ticketNumber: String): List<StepsEntity
 }
 
 fun StepsEntity.toActivityDomain() : ActivityDomain{
-    return ActivityDomain(id = this.activityId, title = this.title, process_id = this.activityId.toInt(), task = 0,kind="", form = FormDomain(form_structure = Json.decodeFromString<FormStruct>(this.formStructure).toFormStructDomain())  , form_id = this.pk.toInt(), tag = this.tag)
+    val photoDomainList = try{
+        Json.decodeFromString<List<PhotoDomain>>(this.photoList)
+
+    }catch (exception:Exception){
+        arrayListOf()
+    }
+    return ActivityDomain(id = this.activityId, title = this.title, process_id = this.activityId.toInt(), task = 0,kind="", form = FormDomain(form_structure = Json.decodeFromString<FormStruct>(this.formStructure).toFormStructDomain())  , form_id = this.pk.toInt(), photoDomainList = photoDomainList, tag = this.tag)
 }
 
 fun List<StepsEntity>.toActivityDomainList(): List<ActivityDomain>{
     return  this.map {
-        ActivityDomain(id = it.activityId, title = it.title, process_id = it.activityId.toInt(), task = 0,kind="", form = FormDomain(form_structure = Json.decodeFromString<FormStruct>(it.formStructure).toFormStructDomain())  , form_id = it.pk.toInt(), tag = it.tag)
+        it.toActivityDomain()
     }
 }

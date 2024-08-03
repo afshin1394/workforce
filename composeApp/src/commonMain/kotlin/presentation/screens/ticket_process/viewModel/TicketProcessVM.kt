@@ -3,16 +3,20 @@ package presentation.screens.ticket_process.viewModel
 
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
+import arrow.core.Tuple4
 import domain.models.PhotoDomain
 import domain.models.form_struct.ComponentDomain
 import domain.models.form_struct.ValueDomain
+import domain.usecase.usecase.photo.DeleteByComponentKeyUseCase
 import domain.usecase.usecase.steps.UpdateStepFormUseCase
 import domain.usecase.usecase.steps.StepDetail
 import domain.usecase.usecase.steps.StoreStepFormUseCase
 import domain.usecase.usecase.photo.GetPhotoByComponentKeyUseCase
+import domain.usecase.usecase.photo.InsertPhotoUseCase
 import domain.usecase.usecase.steps.StoreKeyValueUseCase
 import io.github.aakira.napier.LogLevel
 import io.github.aakira.napier.Napier
+import irancell.nwg.wfm.Location
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.async
@@ -34,7 +38,9 @@ class TicketProcessVM(
     private val updateStepFormUseCase: UpdateStepFormUseCase,
     private val getPhotoByComponentKeyUseCase: GetPhotoByComponentKeyUseCase,
     private val storeStepFormUseCase: StoreStepFormUseCase,
-    private val storeKeyValueUseCase: StoreKeyValueUseCase
+    private val storeKeyValueUseCase: StoreKeyValueUseCase,
+    private val deleteByComponentKeyUseCase: DeleteByComponentKeyUseCase,
+    private val insertPhotoUseCase: InsertPhotoUseCase
 ) : BaseViewModel() {
     private val _currentLevel = MutableStateFlow(0)
     val currentLevel = _currentLevel.asStateFlow()
@@ -66,23 +72,34 @@ class TicketProcessVM(
 
     val logicCalculation: LogicCalculation = LogicCalculation(tempComponentList)
 
-    fun getMokStepsForm(proceed : String) {
+    fun getMokStepsForm(proceed: String) {
         viewModelScope.launch {
-            updateStepFormUseCase(Triple(_ticketNumber.value,proceed,tempComponentList.toList())).collect {
+            updateStepFormUseCase(
+                Tuple4(
+                    _ticketNumber.value,
+                    proceed,
+                    tempComponentList.toList(),
+                    photoDomainList.toList()
+                )
+            ).collect {
                 when (it.status) {
                     AsyncStatus.ERROR -> {
                         handleError(it.resultStatus)
                     }
+
                     AsyncStatus.LOADING -> {
                         updateState(ViewStates.Loading)
                     }
+
                     AsyncStatus.SUCCESS -> {
-                        storeKeyValueUseCase(ticketNumber.value).collect{
+                        storeKeyValueUseCase(ticketNumber.value).collect {
                             when (it.status) {
                                 AsyncStatus.ERROR -> {
+
                                 }
 
                                 AsyncStatus.LOADING -> {
+
                                 }
 
                                 AsyncStatus.SUCCESS -> {
@@ -91,14 +108,36 @@ class TicketProcessVM(
                             }
                         }
                         it.data?.let { data ->
-                            data.activityDomain.form.form_structure.components?.let {
-                                Napier.log(LogLevel.ASSERT,"form_structure.components", message = it.toString())
 
+                            data.activityDomain.form.form_structure.components?.let {
+                                Napier.log(
+                                    LogLevel.ASSERT,
+                                    "form_structure.components",
+                                    message = it.toString()
+                                )
                                 tempComponentList.clear()
                                 tempComponentList.addAll(it.toList())
+
                             }
-                            Napier.log(LogLevel.ASSERT,"data.stepCounter", message = data.stepCounter.toString())
-                            Napier.log(LogLevel.ASSERT,"data.stepCounter", message = data.stepTitle)
+                            Napier.log(
+                                LogLevel.ASSERT,
+                                "data.stepCounter",
+                                message = it.data.activityDomain.photoDomainList.toString()
+                            )
+
+                            photoDomainList.clear()
+                            photoDomainList.addAll(data.activityDomain.photoDomainList)
+
+                            Napier.log(
+                                LogLevel.ASSERT,
+                                "data.stepCounter",
+                                message = data.stepCounter.toString()
+                            )
+                            Napier.log(
+                                LogLevel.ASSERT,
+                                "data.stepCounter",
+                                message = data.stepTitle
+                            )
 
                             _currentLevel.update { data.stepCounter }
                             _currentLevelName.update { data.stepTitle }
@@ -108,8 +147,6 @@ class TicketProcessVM(
 
                             updateState(ViewStates.Success())
                             getPhotoByComponentKey()
-
-
                         }
                     }
                 }
@@ -118,14 +155,17 @@ class TicketProcessVM(
     }
 
 
-
-    fun updateLevel(proceed : String) {
-        Napier.log(LogLevel.ASSERT,tag="updateLevelupdateLevel", message = _stepEvent.value.toString())
-        if(!(proceed == PROCEED.PREVIOUS && _currentLevel.value == 0)) {
+    fun updateLevel(proceed: String) {
+        Napier.log(
+            LogLevel.ASSERT,
+            tag = "updateLevelupdateLevel",
+            message = _stepEvent.value.toString()
+        )
+        if (!(proceed == PROCEED.PREVIOUS && _currentLevel.value == 0)) {
             _reloadState.update { false }
             getMokStepsForm(proceed)
 
-        }else{
+        } else {
             storeStepForm()
 
         }
@@ -135,16 +175,24 @@ class TicketProcessVM(
 
     private fun storeStepForm() {
         viewModelScope.launch {
-            storeStepFormUseCase(Pair(_ticketNumber.value,tempComponentList.toList())).collect{
+            storeStepFormUseCase(
+                Triple(
+                    _ticketNumber.value,
+                    tempComponentList.toList(),
+                    photoDomainList.toList()
+                )
+            ).collect {
                 when (it.status) {
                     AsyncStatus.ERROR -> {
                         handleError(it.resultStatus)
                     }
+
                     AsyncStatus.LOADING -> {
                         updateState(ViewStates.Loading)
                     }
+
                     AsyncStatus.SUCCESS -> {
-                        storeKeyValueUseCase(ticketNumber.value).collect{
+                        storeKeyValueUseCase(ticketNumber.value).collect {
                             when (it.status) {
                                 AsyncStatus.ERROR -> {
                                 }
@@ -300,7 +348,7 @@ class TicketProcessVM(
                             for (i in it1.indices) {
                                 photoDomain.value =
                                     PhotoDomain(
-                                        ticket_number = ticketNumber.value ,
+                                        ticket_number = ticketNumber.value,
                                         it1[i].component_key,
                                         i.toLong(),
                                         it1[i].origin_uri,
@@ -322,19 +370,19 @@ class TicketProcessVM(
 
     }
 
-    fun updatePhotoDomain(id: String, imgUri: String) {
+    fun updatePhotoDomain(key: String, imgUri: String) {
 
         photoDomain.value = PhotoDomain(
-            ticket_number = ticketNumber.value, id, (photoDomainList.size + 1L), imgUri, "", "0"
+            ticket_number = ticketNumber.value, key, (photoDomainList.size + 1L), imgUri, "", "0"
         )
         photoDomainList.add(photoDomain.value)
 
     }
 
 
-    fun findPhotoIndexByIdAndPosition(id: String, position: Int): Int? {
+    fun findPhotoIndexByIdAndPosition(key: String, position: Int): Int? {
 
-        val filteredList = photoDomainList.filter { it.component_key == id }
+        val filteredList = photoDomainList.filter { it.component_key == key }
 
 
         if (filteredList.isNotEmpty()) {
@@ -355,10 +403,10 @@ class TicketProcessVM(
     }
 
 
-    fun updateImageUriForEditPhoto(editUri: String, po: Int, id: String) {
+    fun updateImageUriForEditPhoto(editUri: String, po: Int, key: String) {
 
 
-        val itemIndex = findPhotoIndexByIdAndPosition(id, po)
+        val itemIndex = findPhotoIndexByIdAndPosition(key, po)
         itemIndex?.let { index ->
 
 
@@ -388,9 +436,14 @@ class TicketProcessVM(
                 if (idx == indexChild) {
                     if (component.type == FormViewerTypes.ImageView) {
                         val imgUri =
-                            newValue.find { it.label == "${component.type}:${component.id}" }?.value
+                            newValue.find { it.label == "${component.type}:${component.key}" }?.value
                                 ?: ""
-                        updatePhotoDomain(component.id!!, imgUri)
+                        Napier.log(
+                            LogLevel.ASSERT,
+                            tag = "componettttt",
+                            message = component.toString()
+                        )
+                        updatePhotoDomain(component.key ?: "", imgUri)
                     }
                     component.copy(values = newValue)
 
@@ -418,6 +471,76 @@ class TicketProcessVM(
         }
     }
 
+
+    suspend fun saveAndDeletePhotoByComponentKey() {
+        if (photoDomainList.isNotEmpty()) {
+            _ticketNumber.value.let {
+                deleteByComponentKeyUseCase(it).collect {
+                    when (it.status) {
+                        AsyncStatus.ERROR -> {
+                            handleError(it.resultStatus)
+                            Location.stop()
+
+                        }
+
+                        AsyncStatus.LOADING -> {
+                            Napier.log(LogLevel.ASSERT, "saveSuspendTask", message = "LOADING: ")
+                            updateState(ViewStates.Loading)
+
+                        }
+
+                        AsyncStatus.SUCCESS -> {
+                            insertNewPhoto()
+                        }
+
+                    }
+                }
+            }
+        }else{
+            updateState(ViewStates.Success())
+        }
+    }
+
+
+    private suspend fun insertNewPhoto() {
+
+
+        for (i in photoDomainList.indices) {
+            insertPhotoUseCase(
+                PhotoDomain(
+                    ticketNumber.value,
+                    photoDomainList[i].component_key,
+                    photoDomainList[i].index_row,
+                    photoDomainList[i].origin_uri,
+                    photoDomainList[i].edited_uri,
+                    photoDomainList[i].angle
+                )
+
+            ).collect {
+                when (it.status) {
+                    AsyncStatus.ERROR -> {
+                        handleError(it.resultStatus)
+
+                    }
+
+                    AsyncStatus.LOADING -> {
+                        updateState(ViewStates.Loading)
+
+                    }
+
+                    AsyncStatus.SUCCESS -> {
+                        updateState(ViewStates.Success())
+
+
+                    }
+
+                }
+            }
+
+
+        }
+
+    }
 
 
 }

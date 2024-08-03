@@ -8,10 +8,12 @@ import kotlinx.serialization.Serializable
 data class Component(
     @SerialName("id")
     val id: String?= null,
+    @SerialName("key")
+    val key: String?=null,
     @SerialName("hide")
     val hide: String?= null,
     @SerialName("type")
-    val type: String?= null,
+    val type: String= "default",
     @SerialName("label")
     val label: String?= null,
     @SerialName("layout")
