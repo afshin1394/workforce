@@ -68,6 +68,7 @@ import presentation.theme.surfaceBrandDefault
 import presentation.theme.surfaceDefault
 import presentation.theme.textInverse
 import presentation.theme.textPrimary
+import utils.convertToZip
 
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -190,8 +191,9 @@ class FormViewerScreen() : Screen {
                         onClick = {
 
 
+                                  viewModel.getPhotoByComponentKey()
 
-                            println("checkArry      ${ viewModel.getFileList()}")
+                          //  println("checkArry      ${ viewModel.getFileList()}")
 
                         },
                         shape = RoundedCornerShape(20),
@@ -215,7 +217,7 @@ class FormViewerScreen() : Screen {
 
 
 
-                           viewModel.convertToZip()
+                          viewModel.callApiUpload(convertToZip(viewModel.uriList,"testtt","--workorder_13-20240731-00002"))
 
                         },
                         shape = RoundedCornerShape(20),

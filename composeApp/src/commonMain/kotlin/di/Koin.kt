@@ -9,20 +9,24 @@ import data.GeneralLocationRepositoryImpl
 import data.InitialFormRepositoryImpl
 import data.PhotoRepositoryImpl
 import data.ProfileRepositoryImpl
+import data.SendStepRepositoryImpl
 import data.StepPointerRepositoryImpl
 import data.StepsRepositoryImpl
 import data.SuspendTaskRepositoryImpl
 import data.TaskRepositoryImpl
+import data.UploadRepositoryImpl
 import domain.repository.IAuthRepository
 import domain.repository.IAvailabilityRepository
 import domain.repository.IGeneralLocationRepository
 import domain.repository.IInitialFormRepository
 import domain.repository.IPhotoRepository
 import domain.repository.IProfileRepository
+import domain.repository.ISendStepsRepository
 import domain.repository.IStepPointerRepository
 import domain.repository.IStepsRepository
 import domain.repository.ISuspendTaskRepository
 import domain.repository.ITaskRepository
+import domain.repository.IUploadRepository
 import domain.usecase.usecase.auth.LoginUseCase
 import domain.usecase.usecase.auth.LogoutUseCase
 import domain.usecase.usecase.auth.ResendUseCase
@@ -35,21 +39,23 @@ import domain.usecase.usecase.location.SendLocationToServerUseCase
 import domain.usecase.usecase.availability.StoreAvailabilityUseCase
 import domain.usecase.usecase.initialForm.GetInitialFormByTask
 import domain.usecase.usecase.location.StoreLocationDataUseCase
-import domain.usecase.usecase.mokSteps.CheckForEditedTicketUseCase
-import domain.usecase.usecase.mokSteps.StoreStepFormUseCase
-import domain.usecase.usecase.mokSteps.UpdateStepFormUseCase
+import domain.usecase.usecase.steps.CheckForEditedTicketUseCase
+import domain.usecase.usecase.steps.StoreStepFormUseCase
+import domain.usecase.usecase.steps.UpdateStepFormUseCase
 import domain.usecase.usecase.photo.DeleteByComponentKeyUseCase
 import domain.usecase.usecase.photo.GetPhotoByComponentKeyUseCase
 import domain.usecase.usecase.photo.InsertPhotoUseCase
 
 import domain.usecase.usecase.profile.GetProfileUseCase
 import domain.usecase.usecase.profile.StoreProfileUseCase
+import domain.usecase.usecase.steps.StoreKeyValueUseCase
 import domain.usecase.usecase.steps.UpdateStepsUseCase
 import domain.usecase.usecase.suspendTask.DeleteByTaskIdUseCase
 import domain.usecase.usecase.suspendTask.GetSuspendTaskByIdUseCase
 import domain.usecase.usecase.suspendTask.StoreSuspendTaskUseCase
 import domain.usecase.usecase.ticket.UpdateTaskUseCase
 import domain.usecase.usecase.ticket.GetTasksUseCase
+import domain.usecase.usecase.upload.SendFileToServerUseCase
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.addDefaultResponseValidation
@@ -93,6 +99,8 @@ fun repositoryModule() = module {
     single<IPhotoRepository>{ PhotoRepositoryImpl(get()) }
     single<IStepsRepository>{ StepsRepositoryImpl(get(named("tokenized")),get()) }
     single<IStepPointerRepository>{ StepPointerRepositoryImpl(get()) }
+    single<ISendStepsRepository>{ SendStepRepositoryImpl(get()) }
+    single<IUploadRepository>{ UploadRepositoryImpl(get(named("tokenized"))) }
 }
 
 fun useCaseModule() = module {
@@ -121,9 +129,11 @@ fun useCaseModule() = module {
     single { GetPhotoByComponentKeyUseCase(get()) }
     single { DeleteByComponentKeyUseCase(get()) }
     single { UpdateStepsUseCase(get(),get(),get()) }
-    single { UpdateStepFormUseCase(get(),get()) }
-    single { StoreStepFormUseCase(get(),get()) }
+    single { UpdateStepFormUseCase(get(),get(),get()) }
+    single { StoreStepFormUseCase(get(),get(),get()) }
     single { CheckForEditedTicketUseCase(get()) }
+    single { StoreKeyValueUseCase(get(),get(),get()) }
+    single { SendFileToServerUseCase(get()) }
 }
 
 fun httpModule() = module {
@@ -211,9 +221,9 @@ fun viewModelModule() = module {
     viewModelDefinition { GpsTrackingReportScreenVM(get()) }
     viewModelDefinition { LoginScreenVM(get()) }
     viewModelDefinition { VerifyScreenVM(get(),get(),get()) }
-    viewModelDefinition { TicketInfoVM(get(),get()) }
-    viewModelDefinition { TicketProcessVM(get(),get(),get()) }
-    viewModelDefinition { FormViewerScreenVM() }
+    viewModelDefinition { TicketInfoVM(get(),get(),get(),get()) }
+    viewModelDefinition { TicketProcessVM(get(),get(),get(),get(),get(),get()) }
+    viewModelDefinition { FormViewerScreenVM(get(),get()) }
     viewModelDefinition { MapVM() }
     viewModelDefinition { AccountScreenVM(get()) }
     viewModelDefinition { NotificationScreenVM() }

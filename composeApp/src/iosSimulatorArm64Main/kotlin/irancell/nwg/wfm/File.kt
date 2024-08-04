@@ -7,6 +7,11 @@ actual class File actual constructor(private val path: String) {
         return 0
     }
 
+    actual fun readBytes(): ByteArray {
+        return  ByteArray(0)
+
+    }
+
     actual fun extension(): String {
 
         return ""

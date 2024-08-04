@@ -2,75 +2,134 @@ package presentation.screens.main.viewmodel
 
 import androidx.compose.runtime.mutableStateListOf
 import data.network.request.upload.UploadRequest
-import irancell.nwg.wfm.FileData
-import irancell.nwg.wfm.InternalStorage
-import irancell.nwg.wfm.UriToFile
-import irancell.nwg.wfm.ZipFiles
-import irancell.nwg.wfm.provideAppContext
+import domain.models.PhotoDomain
+import domain.usecase.usecase.photo.GetPhotoByComponentKeyUseCase
+import domain.usecase.usecase.upload.SendFileToServerUseCase
+import io.github.aakira.napier.LogLevel
+import io.github.aakira.napier.Napier
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
-import presentation.model.UploadFileModel
+import kotlinx.coroutines.launch
 import presentation.screens.ticket_process.events.ImageEvent
+import utils.AsyncStatus
 import utils.BaseViewModel
+import utils.ViewStates
 
-class FormViewerScreenVM : BaseViewModel() {
+class FormViewerScreenVM(
+    private val getPhotoByComponentKeyUseCase: GetPhotoByComponentKeyUseCase,
+    private val sendFileToServerUseCase: SendFileToServerUseCase
+) : BaseViewModel() {
 
 
     private val _imageEvent = MutableStateFlow<ImageEvent>(ImageEvent.Default)
     val imageEvent = _imageEvent.asStateFlow()
+    val uriList = mutableListOf<String>()
 
-    val attachmentsUri = MutableStateFlow("")
-
-    fun saveFileFromUri(uri: String): FileData? {
-        return UriToFile(uri)
+    init {
+        uriList.add("content://irancell.nwg.wfm.provider/wfmImages/Suspend/Original/--workorder_13-20240803-00005/cd893caa-3920-4300-8d64-6d4dc5615c77%40Suspend.jpg")
     }
-    fun getFileList():List<FileData> {
-        val uris = listOf(
-            "content://irancell.nwg.wfm.provider/wfmImages/Suspend/Original/--workorder_11-20240730-00003/38f217eb-4818-4118-aa87-af98da3c634f.jpg",
-            "content://irancell.nwg.wfm.provider/wfmImages/Suspend/Original/--workorder_11-20240730-00003/e1fef636-047c-4335-b000-45ce51f69dcf.jpg"
 
-            )
 
-        val fileDataArray = mutableListOf<FileData>()
 
-        for (uri in uris) {
-            val fileData = saveFileFromUri(uri)
-            if (fileData != null) {
-                fileDataArray.add(fileData)
+
+    private val photoDomain = MutableStateFlow<PhotoDomain>(
+        PhotoDomain(
+            "--workorder_13-20240731-00002",
+            "0",
+            0,
+            "",
+            "",
+            "0"
+        )
+    )
+    var photoDomainList = mutableStateListOf<PhotoDomain>()
+
+
+    fun getPhotoByComponentKey() {
+        viewModelScope.launch {
+            getPhotoByComponentKeyUseCase(
+                "--workorder_13-20240731-00002"
+            ).collect {
+                when (it.status) {
+                    AsyncStatus.ERROR -> {
+                        handleError(it.resultStatus)
+                    }
+
+                    AsyncStatus.LOADING -> {
+                        Napier.log(LogLevel.ASSERT, "getAllPhotoUseCase", message = "LOADING: ")
+                        updateState(ViewStates.Loading)
+                    }
+
+                    AsyncStatus.SUCCESS -> {
+                        photoDomainList.clear()
+                        updateState(ViewStates.Success())
+
+                        it.data?.let { it1 ->
+                            for (i in it1.indices) {
+                                photoDomain.value = PhotoDomain(
+                                    "--workorder_13-20240731-00002",
+                                    "0",
+                                    i.toLong(),
+                                    it1[i].origin_uri,
+                                    it1[i].edited_uri,
+                                    it1[i].angle
+                                )
+                                photoDomainList.add(photoDomain.value)
+                            }
+                        }
+
+
+
+
+                       photoDomainList.forEach { photoDomain ->
+                            uriList.add(photoDomain.origin_uri)
+                            uriList.add(photoDomain.edited_uri)
+                        }
+
+
+                        uriList.forEach {
+                            println("URI: $it")
+                        }
+                    }
+                }
             }
         }
-
-
-
-        return fileDataArray
     }
 
-    fun convertToZip() {
-
-        val fileList = getFileList()
-
-        val zipFileData = ZipFiles(fileList,InternalStorage.getProcessRouteOriginal(provideAppContext()) + "files.zip")
-
-
-
-        if (zipFileData != null) {
-            println("Zip file created: ${zipFileData.path}")
-
-            val uploadRequest = UploadRequest(
-                extraInfo = "Some extra info",
-                totalPart = 1,
-                currentPart = 1,
-                name = "Sample Name",
-                customId = "12345",
-                file = zipFileData
-            )
+/*    fun createJsonWithTicketNumber(ticketNumber: String): ExtraInfo {
+        return ExtraInfo(ticket_num = ticketNumber)
+    }*/
 
 
 
 
-        } else {
-            println(" Zip file created:     ${"Failed to create zip file"}")
+
+
+     fun callApiUpload(uploadRequest: UploadRequest) {
+        viewModelScope.launch(Dispatchers.Main) {
+
+
+            sendFileToServerUseCase(uploadRequest).collect {
+                when (it.status) {
+                    AsyncStatus.ERROR -> {
+                        handleError(it.resultStatus)
+                        println("apiUpload  ${"Error"}")
+                    }
+
+                    AsyncStatus.LOADING -> {
+                        updateState(ViewStates.Loading)
+                        println("apiUpload  ${"Loading"}")
+                    }
+
+                    AsyncStatus.SUCCESS -> {
+                        updateState(ViewStates.Success())
+                        println("apiUpload  ${it.data?.get(0)?.value}")
+                    }
+
+                }
+            }
         }
     }
+
 }

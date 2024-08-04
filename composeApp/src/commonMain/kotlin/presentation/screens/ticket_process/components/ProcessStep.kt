@@ -1,7 +1,5 @@
 package presentation.screens.ticket_process.components
 
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.SpringSpec
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -17,21 +15,14 @@ import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.*
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 
-import com.irancell.nwg.wfm.presentation.model.ProcessLevel
-
 import com.irancell.nwg.wfm.presentation.theme.spacing05X
-import domain.usecase.usecase.mokSteps.StepDetail
-import presentation.model.StepModel
+import domain.usecase.usecase.steps.StepDetail
 import presentation.theme.body_large
 import presentation.theme.strokeDefaultLight
 import presentation.theme.surfaceBrandDefault
@@ -39,7 +30,6 @@ import presentation.theme.surfaceDefault
 import presentation.theme.surfaceSuccessStrong
 import presentation.theme.textInverse
 import presentation.theme.body_small
-import presentation.theme.body_small_strong
 import presentation.theme.caption
 
 
@@ -117,7 +107,7 @@ fun ProcessStepSelected(
 }
 
 @Composable
-fun processBar(list: List<StepDetail>,currentLevelStep : Int ) {
+fun processBar(list: List<StepDetail>, currentLevelStep : Int ) {
 
     Row(
         modifier = Modifier

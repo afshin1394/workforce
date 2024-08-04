@@ -21,7 +21,7 @@ class UpdateStepsUseCase(
         tasks.forEach { task ->
             task.basic_info.ticket_number?.let { ticketNumber ->
                 val stepList = iStepsRepository.fetch(task.basic_info.ticket_number)
-                stepEntities.addAll(stepList.toStepDetailsEntity(ticketNumber))
+                stepEntities.addAll(stepList.toStepDetailsEntity(ticketNumber,""))
                 stepPointerEntities.add(StepPointerEntity(ticketNumber, 0, false))
             }
         }

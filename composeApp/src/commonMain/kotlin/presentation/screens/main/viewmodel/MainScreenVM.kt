@@ -15,7 +15,7 @@ import domain.models.task.TaskDomain
 import domain.usecase.usecase.availability.ChangeServerAvailabilityUseCase
 import domain.usecase.usecase.availability.GetAvailabilityUseCase
 import domain.usecase.usecase.availability.StoreAvailabilityUseCase
-import domain.usecase.usecase.mokSteps.CheckForEditedTicketUseCase
+import domain.usecase.usecase.steps.CheckForEditedTicketUseCase
 import domain.usecase.usecase.photo.DeleteByComponentKeyUseCase
 import domain.usecase.usecase.photo.GetPhotoByComponentKeyUseCase
 import domain.usecase.usecase.photo.InsertPhotoUseCase

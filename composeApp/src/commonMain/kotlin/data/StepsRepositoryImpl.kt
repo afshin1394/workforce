@@ -65,10 +65,10 @@ class StepsRepositoryImpl(
     override suspend fun updateFormStructure(
         ticketNumber: String,
         activityId: Long,
-        formStructure: String
+        formStructure: String,
+        photoList : String
     ) {
-        db.stepDao().updateFormStructure(ticketNumber,activityId, formStructure)
+        db.stepDao().updateFormStructure(ticketNumber,activityId, formStructure,photoList)
     }
-
 
 }

@@ -7,6 +7,8 @@ interface IPhotoRepository {
 
     suspend fun insert(photoEntity: PhotoEntity)
 
+    suspend fun insertAll(photoEntities : List<PhotoEntity>)
+
     suspend fun getPhotoListByKey(key: String): List<PhotoEntity>
 
     suspend fun deleteByKey(key:String)

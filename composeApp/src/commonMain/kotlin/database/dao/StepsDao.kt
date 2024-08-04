@@ -27,8 +27,8 @@ interface StepsDao {
     @Query("SELECT ticketNumber FROM StepsEntity WHERE edited = true")
     suspend fun selectEditedTickets() : List<String>
 
-    @Query("UPDATE StepsEntity SET formStructure = :formStructure , edited = true WHERE ticketNumber = :ticketNumber AND activityId = :activityId")
-    suspend fun updateFormStructure(ticketNumber: String,activityId : Long, formStructure: String)
+    @Query("UPDATE StepsEntity SET formStructure = :formStructure,photoList =:photoList,isSent = 0 , edited = true WHERE ticketNumber = :ticketNumber AND activityId = :activityId")
+    suspend fun updateFormStructure(ticketNumber: String,activityId : Long, formStructure: String,photoList : String)
 
 
     @Query("SELECT * FROM StepsEntity WHERE ticketNumber = :ticketNumber AND  activityId = :activityId LIMIT 1")

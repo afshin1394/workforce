@@ -5,45 +5,60 @@ import data.network.response.task.UploadNetworkResponse
 import domain.repository.IUploadRepository
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
+import io.ktor.client.request.forms.MultiPartFormDataContent
 import io.ktor.client.request.forms.formData
-import io.ktor.client.request.forms.submitFormWithBinaryData
+import io.ktor.client.request.post
+import io.ktor.client.request.setBody
+import io.ktor.client.statement.HttpResponse
 import io.ktor.http.Headers
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
-import irancell.nwg.wfm.GetFile
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
+
+
 
 class UploadRepositoryImpl(
     private val httpClient: HttpClient,
 ): IUploadRepository {
 
     override suspend fun fetchUpload(uploadRequest:UploadRequest) : List<UploadNetworkResponse> {
-        val request  = httpClient.submitFormWithBinaryData(
-            url = "workforce_management/user/upload/",
-            formData = formData {
-                append("extra_info", uploadRequest.extraInfo, Headers.build {
-                    append(HttpHeaders.ContentType, "application/json")
-                })
-                append("total_part", uploadRequest.totalPart.toString())
-                append("current_part", uploadRequest.currentPart.toString())
-                append("name", uploadRequest.name)
-                append("custom_id", uploadRequest.customId)
+        val jsonExtraInfo = Json.encodeToString(uploadRequest.extraInfo)
 
-                val platformFile = GetFile(uploadRequest.file.path)
-                if (platformFile != null) {
-                    append("file", platformFile.readBytes(), Headers.build {
-                        append(
-                            HttpHeaders.ContentDisposition,
-                            "filename=${uploadRequest.file.name}"
-                        )
-                        append(HttpHeaders.ContentType, "application/zip")
-                    })
-                }
-            })
+        val response: HttpResponse = httpClient.post("workforce_management/user/upload/") {
+            setBody(
+                MultiPartFormDataContent(
+                    formData {
+                        append("extra_info", jsonExtraInfo, Headers.build {
+                            append(HttpHeaders.ContentType, "text/plain")
+                        })
+                        append("total_part", uploadRequest.totalPart.toString(), Headers.build {
+                            append(HttpHeaders.ContentType, "text/plain")
+                        })
+                        append("current_part", uploadRequest.currentPart.toString(), Headers.build {
+                            append(HttpHeaders.ContentType, "text/plain")
+                        })
+                        append("name", uploadRequest.name, Headers.build {
+                            append(HttpHeaders.ContentType, "text/plain")
+                        })
+                        append("custom_id", uploadRequest.customId, Headers.build {
+                            append(HttpHeaders.ContentType, "text/plain")
+                        })
 
-        if (request.status == HttpStatusCode.OK) {
+                        // Adding file part
+                        append("file", uploadRequest.file, Headers.build {
+                            append(HttpHeaders.ContentDisposition, "form-data; name=file; filename=\"file.zip\"")
+                            append(HttpHeaders.ContentType, "application/zip")
+                        })
+                    }
+                )
+            )
+        }
+
+        if (response.status == HttpStatusCode.OK) {
             return try {
 
-                request.body<List<UploadNetworkResponse>>()
+                response.body<List<UploadNetworkResponse>>()
 
             } catch (exception: Exception) {
                 emptyList()
@@ -52,3 +67,4 @@ class UploadRepositoryImpl(
         throw Exception()
     }
 }
+

@@ -9,7 +9,7 @@ actual class Camera {
 
         }
         @Composable
-        actual fun launchCamera(savePath: String){
+        actual fun launchCamera(savePath: String,key:String){
 
         }
     }

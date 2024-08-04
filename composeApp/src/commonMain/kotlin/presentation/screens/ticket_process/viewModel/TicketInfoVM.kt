@@ -6,9 +6,12 @@ import domain.models.PhotoDomain
 import domain.models.form_struct.ComponentDomain
 import domain.models.form_struct.ValueDomain
 import domain.usecase.usecase.initialForm.GetInitialFormByTask
+import domain.usecase.usecase.photo.DeleteByComponentKeyUseCase
 import domain.usecase.usecase.photo.GetPhotoByComponentKeyUseCase
+import domain.usecase.usecase.photo.InsertPhotoUseCase
 import io.github.aakira.napier.LogLevel
 import io.github.aakira.napier.Napier
+import irancell.nwg.wfm.Location
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.async
@@ -28,6 +31,8 @@ import utils.ViewStates
 class TicketInfoVM(
     private val getInitialFormByTask: GetInitialFormByTask,
     private val getPhotoByComponentKeyUseCase: GetPhotoByComponentKeyUseCase,
+    private val insertPhotoUseCase: InsertPhotoUseCase,
+    private val deleteByComponentKeyUseCase: DeleteByComponentKeyUseCase
 ) : BaseViewModel() {
 
 
@@ -39,8 +44,6 @@ class TicketInfoVM(
 
     private val _ticketNumber = MutableStateFlow("0")
     val ticketNumber = _ticketNumber.asStateFlow()
-
-
 
 
     fun updateTicketNumber(ticketNumber: String) {
@@ -68,7 +71,7 @@ class TicketInfoVM(
                     AsyncStatus.SUCCESS -> {
                         val initialFormDomain = it.data
 
-                        if (initialFormDomain!!.structure.components!=null){
+                        if (initialFormDomain!!.structure.components != null) {
                             componentsList.clear()
                             componentsList.addAll(initialFormDomain.structure.components!!)
                             tempComponentList.clear()
@@ -175,7 +178,7 @@ class TicketInfoVM(
                             for (i in it1.indices) {
                                 photoDomain.value =
                                     PhotoDomain(
-                                        ticket_number = ticketNumber.value ,
+                                        ticket_number = ticketNumber.value,
                                         it1[i].component_key,
                                         i.toLong(),
                                         it1[i].origin_uri,
@@ -300,7 +303,10 @@ class TicketInfoVM(
 
 
 
-     private fun checkLogicsForAll(components: List<ComponentDomain>) {
+
+
+    private fun checkLogicsForAll(components: List<ComponentDomain>) {
+
 
         // Create a copy of the components list to iterate over
         val componentsCopy = components.toMutableList()
@@ -320,38 +326,105 @@ class TicketInfoVM(
 
 
     fun handleLogics() {
-            viewModelScope.launch {
-                try {
-                    withContext(Dispatchers.IO) { checkLogicsForAll(tempComponentList) }
+        viewModelScope.launch {
+            try {
+                withContext(Dispatchers.IO) { checkLogicsForAll(tempComponentList) }
 
-                    withContext(Dispatchers.Main) {
+                withContext(Dispatchers.Main) {
 
-                        arrayListOf<ComponentDomain>().apply {
-                            this.addAll(tempComponentList)
-                            tempComponentList.clear()
-                            tempComponentList.addAll(this)
-                        }
+                    arrayListOf<ComponentDomain>().apply {
+                        this.addAll(tempComponentList)
+                        tempComponentList.clear()
+                        tempComponentList.addAll(this)
                     }
-                } catch (_: Exception) {
+                }
+            } catch (_: Exception) {
 
-                    async { checkLogicsForAll(tempComponentList) }.await()
-                    withContext(Dispatchers.Main) {
-                        arrayListOf<ComponentDomain>().apply {
-                            this.addAll(tempComponentList)
-                            tempComponentList.clear()
-                            tempComponentList.addAll(this)
-                        }
+                async { checkLogicsForAll(tempComponentList) }.await()
+                withContext(Dispatchers.Main) {
+                    arrayListOf<ComponentDomain>().apply {
+                        this.addAll(tempComponentList)
+                        tempComponentList.clear()
+                        tempComponentList.addAll(this)
                     }
-
                 }
 
             }
+
         }
-
-    fun updateActiveActivity() {
-
     }
 
+    suspend fun saveAndDeletePhotoByComponentKey() {
+        if (photoDomainList.isNotEmpty()) {
+
+            _ticketNumber.value.let {
+                deleteByComponentKeyUseCase(it).collect {
+                    when (it.status) {
+                        AsyncStatus.ERROR -> {
+                            handleError(it.resultStatus)
+                            Location.stop()
+
+                        }
+
+                        AsyncStatus.LOADING -> {
+                            Napier.log(
+                                LogLevel.ASSERT,
+                                "saveSuspendTask",
+                                message = "LOADING: "
+                            )
+                            updateState(ViewStates.Loading)
+
+                        }
+
+                        AsyncStatus.SUCCESS -> {
+                            insertNewPhoto()
+                        }
+
+                    }
+                }
+            }
+        } else {
+            updateState(ViewStates.Success())
+        }
+    }
+
+    private suspend fun insertNewPhoto() {
+
+        for (i in photoDomainList.indices) {
+            insertPhotoUseCase(
+                PhotoDomain(
+                    ticketNumber.value,
+                    photoDomainList[i].component_key,
+                    photoDomainList[i].index_row,
+                    photoDomainList[i].origin_uri,
+                    photoDomainList[i].edited_uri,
+                    photoDomainList[i].angle
+                )
+
+            ).collect {
+                when (it.status) {
+                    AsyncStatus.ERROR -> {
+                        handleError(it.resultStatus)
+
+                    }
+
+                    AsyncStatus.LOADING -> {
+                        updateState(ViewStates.Loading)
+
+                    }
+
+                    AsyncStatus.SUCCESS -> {
+                        updateState(ViewStates.Success())
+
+
+                    }
+
+                }
+            }
+
+        }
+
+    }
 }
 
 

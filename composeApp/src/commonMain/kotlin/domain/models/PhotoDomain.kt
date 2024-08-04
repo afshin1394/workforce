@@ -3,6 +3,7 @@ package domain.models
 import kotlinx.serialization.Serializable
 
 
+@Serializable
 data class PhotoDomain(
     val pk:Long = 0,
     val ticket_number: String,

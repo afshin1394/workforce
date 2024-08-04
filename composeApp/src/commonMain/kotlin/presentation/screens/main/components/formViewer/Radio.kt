@@ -38,12 +38,20 @@ import presentation.theme.textInverseDisabled
 import presentation.theme.textSecondary
 
 @Composable
-fun Radio(processLogicDomain: ProcessLogicDomain, title:String, errorMessage: ResourceFormattedStringDesc, itemList: List<ValueDomain>, selectItem: String, onItemSelected: (selectItem: String) -> Unit) {
+fun Radio(
+    readOnly: Boolean,
+    processLogicDomain: ProcessLogicDomain,
+    title: String,
+    errorMessage: ResourceFormattedStringDesc,
+    itemList: List<ValueDomain>,
+    selectItem: String,
+    onItemSelected: (selectItem: String) -> Unit
+) {
 
     var select by remember { mutableStateOf(selectItem) }
     println("recomposeeee  radio ${processLogicDomain}")
     val disableLogic = processLogicDomain.disabled
-    val readOnlyLogic = processLogicDomain.readOnly
+    val readOnlyLogic = processLogicDomain.readOnly || readOnly
     val validateLogic = processLogicDomain.validate
     val requiredLogic = processLogicDomain.required
 
@@ -96,7 +104,7 @@ fun Radio(processLogicDomain: ProcessLogicDomain, title:String, errorMessage: Re
 
                 }
             }
-            if ( errorMessage.localized() != "") {
+            if (errorMessage.localized() != "") {
                 Text(
                     text = errorMessage.localized(),
                     color = Color.Red,

@@ -37,6 +37,8 @@ import presentation.theme.textSecondary
 
 @Composable
 fun ImagePicker(
+    key:String,
+    readOnly : Boolean,
     processLogicDomain : ProcessLogicDomain,
     titlePicker:String,
     componentId: String,
@@ -49,7 +51,7 @@ fun ImagePicker(
 
     val disableLogic = processLogicDomain.disabled
     val hideLogic = processLogicDomain.shouldHide
-    val readOnlyLogic = processLogicDomain.readOnly
+    val readOnlyLogic = processLogicDomain.readOnly || readOnly
     val requiredLogic = processLogicDomain.required
     val validateLogic = processLogicDomain.validate
     val errorMessageValidateLogic = processLogicDomain.errorMessage
@@ -76,10 +78,7 @@ fun ImagePicker(
             componentId
         )
 
-        Camera.launchCamera(
-            InternalStorage.getProcessRouteOriginal(
-                provideAppContext()
-            ) + componentId
+        Camera.launchCamera(InternalStorage.getProcessRouteOriginal(provideAppContext()) + componentId,key
         )
 
         openCamera = false

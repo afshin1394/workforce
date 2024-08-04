@@ -89,7 +89,7 @@
 
 
     <string name="client_error">An error has been occurred please contact support</string>
-    <string name="server_error">Server is not available right no, please try later</string>
+    <string name="server_error">Server is not available right now, please try later</string>
     <string name="timeout_error">Please check your network connection</string>
     <string name="general_error">An error has been occurred please contact support</string>
 

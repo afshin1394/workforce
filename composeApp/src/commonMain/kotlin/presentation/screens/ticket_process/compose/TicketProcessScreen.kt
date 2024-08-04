@@ -26,6 +26,7 @@ import presentation.screens.ticket_process.components.processBar
 import dev.icerock.moko.resources.compose.stringResource
 import irancell.nwg.wfm.DrawController
 import irancell.nwg.wfm.MR
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -44,7 +45,9 @@ import presentation.theme.surfaceDefault
 import presentation.theme.textInverse
 import presentation.theme.textPrimary
 import utils.PROCEED
+import utils.ViewStates
 import utils.initialize
+import utils.validateComponents
 import kotlin.random.Random
 
 
@@ -60,7 +63,7 @@ class TicketProcessScreen(
         val viewModel: TicketProcessVM = koinInject()
         val currentLevelState by viewModel.currentLevel.collectAsState()
         var indexPhotoSelected by remember { mutableStateOf(0) }
-        var componentId by remember { mutableStateOf("0") }
+        var componentKey by remember { mutableStateOf("0") }
         val positionSelectedPhotoForEdit by viewModel.positionSelected.collectAsState()
         var isBottomSheetOpen by remember { mutableStateOf(true) }
         val events by viewModel.events
@@ -68,6 +71,7 @@ class TicketProcessScreen(
         val stepDetails by viewModel.stepDetails.collectAsState()
         val stepEvent by viewModel.stepEvent.collectAsState()
         val reloadState by viewModel.reloadState.collectAsState()
+        val state by viewModel.state.collectAsState()
 
 
         LaunchedEffect(Unit) {
@@ -190,7 +194,7 @@ class TicketProcessScreen(
                             }, onSecondButtonClick = {
                                 viewModel.updateImageUriForDeletePhoto(
                                     positionSelectedPhotoForEdit,
-                                    componentId
+                                    componentKey
                                 )
 
 
@@ -211,7 +215,16 @@ class TicketProcessScreen(
                                 textInverse
                             ), onClick = {
                                 scope.launch {
-                                    viewModel.updateLevel(PROCEED.NEXT)
+                                    val errors = validateComponents(viewModel.tempComponentList) {
+                                        viewModel.updateTempComponentList(it)
+                                    }
+
+                                    if (errors.isEmpty()) {
+                                        async {   viewModel.saveAndDeletePhotoByComponentKey() }.await()
+                                        if(state is ViewStates.Success) {
+                                            viewModel.updateLevel(PROCEED.NEXT)
+                                        }
+                                    }
                                 }
 
 
@@ -231,7 +244,7 @@ class TicketProcessScreen(
                 when (events) {
 
                     TicketProcessEvent.PhotoPreview -> {
-                        PhotoPreviewComponent(viewModel.findPhotosByComponentId(componentId),
+                        PhotoPreviewComponent(viewModel.findPhotosByComponentId(componentKey),
                             indexPhotoSelected,
                             onEditPhotoClick = { position ->
                                 indexPhotoSelected = position
@@ -265,14 +278,14 @@ class TicketProcessScreen(
                             angle = 0.0F,
 
                             photoDomain = viewModel.photoDomainList[viewModel.findPhotoIndexByIdAndPosition(
-                                componentId,
+                                componentKey,
                                 positionSelectedPhotoForEdit
                             ) ?: 0],
                             onEditUri = { editUri, originUri ->
                                 viewModel.updateImageUriForEditPhoto(
                                     editUri,
                                     positionSelectedPhotoForEdit,
-                                    componentId
+                                    componentKey
                                 )
 
                             })
@@ -309,7 +322,7 @@ class TicketProcessScreen(
                             photoDomainList = viewModel.photoDomainList,
                             components = viewModel.tempComponentList,
                             onClickImage = { index, id ->
-                                componentId = id
+                                componentKey = id
                                 indexPhotoSelected = index
                                 viewModel.events.value = TicketProcessEvent.PhotoPreview
 
@@ -318,13 +331,11 @@ class TicketProcessScreen(
                                 changeState.update { Random.nextInt() }
 
                             },
+
                             onChanges = { listComponent, listValueDomain, listIndexParent, indexChild ->
 
                                 viewModel.handleLogics()
-                                viewModel.addOrRemoveComponentDomainRepeatableToList(
-                                    listComponent,
-                                    indexChild
-                                )
+
 
                                 listValueDomain?.let { it1 ->
                                     viewModel.updateUriPhotoComponent(
@@ -332,6 +343,18 @@ class TicketProcessScreen(
                                         it1
                                     )
                                 }
+                            },
+                            onAddItem = {listComponent, listValueDomain, listIndexParent, indexChild ->
+                                viewModel.addOrRemoveComponentDomainRepeatableToList(
+                                    listComponent,
+                                    indexChild
+                                )
+                            },
+                            onRemoveItem = {listComponent, listValueDomain, listIndexParent, indexChild ->
+                                viewModel.addOrRemoveComponentDomainRepeatableToList(
+                                    listComponent,
+                                    indexChild
+                                )
                             },
                         )
                     }

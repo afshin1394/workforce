@@ -11,10 +11,11 @@ class PhotoRepositoryImpl(private val db: AppDatabase) : IPhotoRepository {
     override suspend fun insert(photoEntity: PhotoEntity) {
 
         db.photoDao().insert(photoEntity)
-
-
     }
 
+    override suspend fun insertAll(photoEntities: List<PhotoEntity>) {
+        db.photoDao().insertAll(photoEntities)
+    }
 
 
     override suspend fun getPhotoListByKey(ticketNumber: String): List<PhotoEntity>  {
