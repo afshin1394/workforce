@@ -47,6 +47,7 @@ import presentation.screens.main.components.formViewer.TypeEditable
 import presentation.screens.main.components.formViewer.UploadFileComponent
 import presentation.screens.main.components.formViewer.groupComponent
 
+
 @OptIn(FlowPreview::class)
 @Composable
 fun initialize(
@@ -564,14 +565,14 @@ fun initialize(
                                 Napier.log(LogLevel.ASSERT,tag = "componentDomainForImage indexCamera",message =indexFile.value.toString())
                                 Napier.log(LogLevel.ASSERT,tag = "componentDomainForImage index",message =index.toString())
                                 selectedComponent.value?.let {
-                                    Napier.log(LogLevel.ASSERT,tag = "componentDomainForImage",message =it.toString())
-                                    val newValues =
-                                        listOf(ValueDomain("${it.type}:${it.key}", "${resultTakePhoto}"))
+                                Napier.log(LogLevel.ASSERT,tag = "componentDomainForImage",message =it.toString())
+                                val newValues =
+                                    listOf(ValueDomain("${it.type}:${it.key}", "${resultTakePhoto}"))
                                     it.values = newValues
 
-                                    updateImageViewValidationError(it, errorMessageState)
+                                updateImageViewValidationError(it, errorMessageState)
 
-                                    onChanges( components, newValues, currentParentIndex, indexFile.value)
+                                onChanges( components, newValues, currentParentIndex, indexFile.value)
                                 }
 
                             },

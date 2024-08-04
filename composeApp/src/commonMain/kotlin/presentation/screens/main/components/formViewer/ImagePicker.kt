@@ -11,7 +11,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -27,8 +27,8 @@ import dev.icerock.moko.resources.desc.ResourceFormattedStringDesc
 import domain.models.PhotoDomain
 import domain.models.form_struct.ComponentDomain
 import domain.models.form_struct.ProcessLogicDomain
+import io.github.aakira.napier.LogLevel
 import io.github.aakira.napier.Napier
-import io.ktor.client.plugins.logging.LogLevel
 import irancell.nwg.wfm.Camera
 import irancell.nwg.wfm.InternalStorage
 import irancell.nwg.wfm.provideAppContext
@@ -37,6 +37,7 @@ import presentation.theme.surfaceBrandDefault
 import presentation.theme.surfaceBrandDisabled
 import presentation.theme.textInverseDisabled
 import presentation.theme.textSecondary
+
 @Composable
 fun ImagePicker(
     item : ComponentDomain,
@@ -120,7 +121,7 @@ fun ImagePicker(
 
             Spacer(modifier = Modifier.height(12.dp))
             ImageRowComponent(backgroundColor,photoDomainList, onCameraClick = {
-
+                Napier.log(LogLevel.ASSERT,tag = "componentDomainForImage",message =item.toString())
 
                 if(!(disableLogic || readOnlyLogic)) {
                     openCamera = true

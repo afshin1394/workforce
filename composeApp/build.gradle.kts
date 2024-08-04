@@ -92,10 +92,6 @@ kotlin {
                 implementation(libs.sqlite.bundled)
                 implementation("com.github.skydoves:landscapist-coil3:2.3.2")
 
-       
-                implementation("io.ktor:ktor-client-cio:2.3.2")
-                implementation("io.ktor:ktor-client-content-negotiation:2.3.2")
-                implementation("io.ktor:ktor-http:2.3.2")
 
             }
         }
