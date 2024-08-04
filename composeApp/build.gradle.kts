@@ -97,7 +97,6 @@ kotlin {
                 implementation("io.ktor:ktor-client-content-negotiation:2.3.2")
                 implementation("io.ktor:ktor-http:2.3.2")
 
-
             }
         }
 
@@ -121,6 +120,7 @@ kotlin {
                 implementation (libs.android.database.sqlcipher)
 
                 implementation("org.osmdroid:osmdroid-android:6.1.6")
+                implementation(libs.kotlin.reflect)
 
             }
         }

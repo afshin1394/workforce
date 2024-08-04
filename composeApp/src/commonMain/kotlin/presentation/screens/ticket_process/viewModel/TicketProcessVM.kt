@@ -444,6 +444,12 @@ class TicketProcessVM(
                             message = component.toString()
                         )
                         updatePhotoDomain(component.key ?: "", imgUri)
+
+                        Napier.log(
+                            LogLevel.ASSERT,
+                            tag = "componettttt",
+                            message = component.toString()
+                        )
                     }
                     component.copy(values = newValue)
 

@@ -1,7 +1,6 @@
 package irancell.nwg.wfm
 
-import com.linecorp.abc.location.ABCLocation
-import com.linecorp.abc.location.ABCLocationCompanion
+
 
 actual fun openAppSettings(){
 
@@ -15,6 +14,8 @@ actual fun provideLifeCycleOwner() : Any{
 
 }
 
+actual fun nullIfAllPropertiesNull(){
 
+}
 
 

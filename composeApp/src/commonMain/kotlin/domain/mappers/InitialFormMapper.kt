@@ -36,6 +36,7 @@ import domain.models.form_struct.OperatorDomain
 import domain.models.form_struct.ValidateDomain
 import domain.models.form_struct.ValueDate
 import domain.models.form_struct.ValueDomain
+import irancell.nwg.wfm.nullIfAllPropertiesNull
 
 import kotlinx.serialization.json.Json
 
@@ -75,7 +76,7 @@ fun  FormStruct.toInitialFormDomain(ticketNumber : String) : InitialFormDomain {
     return InitialFormDomain(ticketNumber , FormStructDomain(this.id,this.hide,this.type,this.components?.toComponentDomain() ,this.conditional?.toConditionalDomain(),this.schemaVersion)     )
 }
 
- fun  List<Component>.toComponentDomain() : List<ComponentDomain> {
+fun  List<Component>.toComponentDomain() : List<ComponentDomain> {
     return map {  ComponentDomain(id= it.id,it.key,hide= it.hide,type= it.type,label= it.label, readOnly =  it.readOnly?:false, layout =  it.layout?.toLayoutDomain(), subType =  it.subType, validate =  it.validate?.toValidateDomain(), values =  it.values?.toValueDomain(), conditional =  it.conditional?.toConditionalDomain(), components =  it.components?.toComponentDomain())   }
 }
 
@@ -86,9 +87,20 @@ fun  FormStruct.toInitialFormDomain(ticketNumber : String) : InitialFormDomain {
      return LayoutDomain(this.row,this.columns)
  }
 
-fun Validate.toValidateDomain(): ValidateDomain {
+fun Validate.toValidateDomain(): ValidateDomain? {
+    return if(this.nullIfAllPropertiesNull() == null){
+        null
+    }else {
+        ValidateDomain(
+            this.id,
+            this.key,
+            this.id,
+            this.layout,
+            this.subtype,
+            this.required
+        )
+    }
 
-        return ValidateDomain(this.id, this.key, this.id, this.layout, this.subtype, this.required)
 
 
 }

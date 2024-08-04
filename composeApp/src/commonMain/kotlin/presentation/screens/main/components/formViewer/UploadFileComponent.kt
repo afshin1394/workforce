@@ -37,6 +37,7 @@ import dev.icerock.moko.resources.ImageResource
 import dev.icerock.moko.resources.compose.localized
 import dev.icerock.moko.resources.compose.painterResource
 import dev.icerock.moko.resources.desc.ResourceFormattedStringDesc
+import domain.models.form_struct.ComponentDomain
 import domain.models.form_struct.ProcessLogicDomain
 import domain.models.form_struct.ValueDomain
 import irancell.nwg.wfm.FilePicker
@@ -51,21 +52,21 @@ import presentation.theme.textSecondary
 
 @Composable
 fun UploadFileComponent(
-    readOnly : Boolean,
-    processLogicDomain: ProcessLogicDomain,
-    titlePicker: String,
+    item : ComponentDomain,
+    label : String,
     errorMessage: ResourceFormattedStringDesc,
     modifier: Modifier,
     uploadList: List<ValueDomain>,
+    onClickUpload : (item : ComponentDomain) -> Unit,
     onSelected: (MutableList<ValueDomain>) -> Unit
 ) {
 
-    val disableLogic = processLogicDomain.disabled
-    val hideLogic = processLogicDomain.shouldHide
-    val readOnlyLogic = processLogicDomain.readOnly || readOnly
-    val requiredLogic = processLogicDomain.required
-    val validateLogic = processLogicDomain.validate
-    val errorMessageValidateLogic = processLogicDomain.errorMessage
+    val disableLogic = item.processLogicDomain.disabled
+    val hideLogic = item.processLogicDomain.shouldHide
+    val readOnlyLogic = item.processLogicDomain.readOnly || item.readOnly
+    val requiredLogic = item.processLogicDomain.required
+    val validateLogic = item.processLogicDomain.validate
+    val errorMessageValidateLogic = item.processLogicDomain.errorMessage
 
     val backgroundColor = if (errorMessage.localized() != "" || validateLogic) {
         Color.Red
@@ -78,8 +79,8 @@ fun UploadFileComponent(
     var openFilePic by remember { mutableStateOf(false) }
 
 
-    val uploadDomain = remember { mutableStateOf(ValueDomain(label = "", value = "")) }
-    val uploadDomainListForSend = remember { mutableStateListOf<ValueDomain>() }
+    var uploadDomain = ValueDomain(label = "", value = "")
+    val uploadDomainListForSend = arrayListOf<ValueDomain>()
 
     val fileExtensions = listOf("pdf", "docx", "png", "jpg")
     val fileIcons = listOf(MR.images.pdf, MR.images.docx, MR.images.icon_png, MR.images.icon_jpg)
@@ -97,10 +98,10 @@ fun UploadFileComponent(
         files.forEach { pair ->
             val fileName = pair.first
             val destinationFile = pair.second
-            uploadDomain.value =
+            uploadDomain =
                 ValueDomain(label = fileName.toString(), value = destinationFile.toString())
 
-            uploadDomainListForSend.add(uploadDomain.value)
+            uploadDomainListForSend.add(uploadDomain)
         }
 
         onSelected(uploadDomainListForSend)
@@ -122,7 +123,7 @@ fun UploadFileComponent(
                 fontSize = 14.sp
             )
         ) {
-            append(titlePicker)
+            append(label)
         }
         if (requiredLogic) {
             withStyle(style = SpanStyle(color = Color.Red, fontSize = 18.sp)) {
@@ -157,6 +158,7 @@ fun UploadFileComponent(
                 onAttachClick = {
                     if (!(disableLogic || readOnlyLogic)) {
                         openFilePic = true
+                        onClickUpload(item)
                     }
 
                 })

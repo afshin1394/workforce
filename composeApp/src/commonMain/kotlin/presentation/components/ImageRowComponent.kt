@@ -12,6 +12,7 @@ import androidx.compose.ui.graphics.Color
 import com.irancell.nwg.wfm.presentation.theme.spacing1X
 import com.irancell.nwg.wfm.presentation.theme.spacing2X
 import domain.models.PhotoDomain
+import domain.models.form_struct.ComponentDomain
 import io.github.aakira.napier.LogLevel
 import io.github.aakira.napier.Napier
 import presentation.theme.surfaceBrandDefault

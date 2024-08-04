@@ -25,7 +25,10 @@ import androidx.compose.ui.unit.sp
 import dev.icerock.moko.resources.compose.localized
 import dev.icerock.moko.resources.desc.ResourceFormattedStringDesc
 import domain.models.PhotoDomain
+import domain.models.form_struct.ComponentDomain
 import domain.models.form_struct.ProcessLogicDomain
+import io.github.aakira.napier.Napier
+import io.ktor.client.plugins.logging.LogLevel
 import irancell.nwg.wfm.Camera
 import irancell.nwg.wfm.InternalStorage
 import irancell.nwg.wfm.provideAppContext
@@ -34,27 +37,24 @@ import presentation.theme.surfaceBrandDefault
 import presentation.theme.surfaceBrandDisabled
 import presentation.theme.textInverseDisabled
 import presentation.theme.textSecondary
-
 @Composable
 fun ImagePicker(
-    key:String,
-    readOnly : Boolean,
-    processLogicDomain : ProcessLogicDomain,
-    titlePicker:String,
+    item : ComponentDomain,
     componentId: String,
     errorMessage: ResourceFormattedStringDesc,
     photoDomainList: List<PhotoDomain>,
-    onTakePhoto: (resultTakePhoto: String) -> Unit = {},
+    onTakePhoto: (resultTakePhoto: String) -> Unit,
+    onCameraClick : (item : ComponentDomain) -> Unit,
     onImageClick: (index: Int) -> Unit
 ) {
 
 
-    val disableLogic = processLogicDomain.disabled
-    val hideLogic = processLogicDomain.shouldHide
-    val readOnlyLogic = processLogicDomain.readOnly || readOnly
-    val requiredLogic = processLogicDomain.required
-    val validateLogic = processLogicDomain.validate
-    val errorMessageValidateLogic = processLogicDomain.errorMessage
+    val disableLogic = item.processLogicDomain.disabled
+    val hideLogic = item.processLogicDomain.shouldHide
+    val readOnlyLogic = item.processLogicDomain.readOnly || item.readOnly
+    val requiredLogic = item.processLogicDomain.required
+    val validateLogic = item.processLogicDomain.validate
+    val errorMessageValidateLogic =item.processLogicDomain.errorMessage
 
     val backgroundColor = if (errorMessage.localized() != "" || validateLogic) {
         Color.Red
@@ -78,7 +78,10 @@ fun ImagePicker(
             componentId
         )
 
-        Camera.launchCamera(InternalStorage.getProcessRouteOriginal(provideAppContext()) + componentId,key
+        Camera.launchCamera(
+            InternalStorage.getProcessRouteOriginal(
+                provideAppContext()
+            ) + componentId,item.key!!
         )
 
         openCamera = false
@@ -100,7 +103,7 @@ fun ImagePicker(
                         fontSize = 14.sp
                     )
                 ) {
-                    append(titlePicker)
+                    append(item.label?:"")
                 }
                 if (requiredLogic) {
                     withStyle(style = SpanStyle(color = Color.Red, fontSize = 18.sp)) {
@@ -117,8 +120,12 @@ fun ImagePicker(
 
             Spacer(modifier = Modifier.height(12.dp))
             ImageRowComponent(backgroundColor,photoDomainList, onCameraClick = {
-                if(!(disableLogic || readOnlyLogic))
+
+
+                if(!(disableLogic || readOnlyLogic)) {
                     openCamera = true
+                    onCameraClick(item)
+                }
 
             }) {
                 onImageClick(it)

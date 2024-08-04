@@ -9,6 +9,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import irancell.nwg.wfm.Android.App
+import kotlin.reflect.full.memberProperties
+import kotlin.reflect.jvm.isAccessible
 
 actual fun openAppSettings(){
     val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
@@ -27,3 +29,13 @@ actual fun provideLifeCycleOwner() : Any{
     return LocalLifecycleOwner
 }
 
+actual fun <T : Any> T.nullIfAllPropertiesNull(): T? {
+    val properties = this::class.memberProperties
+    for (property in properties) {
+        property.isAccessible = true
+        if (property.getter.call(this) != null) {
+            return this
+        }
+    }
+    return null
+}

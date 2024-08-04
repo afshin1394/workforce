@@ -12,3 +12,6 @@ expect fun provideAppContext(): Any
 
 expect fun provideLifeCycleOwner(): Any
 
+
+expect fun <T : Any> T.nullIfAllPropertiesNull(): T?
+
