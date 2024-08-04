@@ -63,6 +63,10 @@ fun initialize(
     currentParentIndex: List<Int> = listOf()
 ) {
 
+    val selectedComponent = remember { mutableStateOf<ComponentDomain?>(null) }
+    val indexFile = remember { mutableStateOf<Int>(0) }
+
+
 
     val listState = rememberLazyListState()
     val scope = rememberCoroutineScope()
@@ -72,7 +76,7 @@ fun initialize(
         modifier = modifier,
         contentPadding = PaddingValues(bottom = 100.dp)
     ) {
-        itemsIndexed(components) { index, item ->
+        itemsIndexed(components,key = { index, _ -> index }) { index, item ->
 
             val updatedParentIndex = currentParentIndex + index
 
@@ -492,8 +496,8 @@ fun initialize(
 
 
                     FormViewerTypes.FileUpload -> {
-                        val uploadDomainList =
-                            remember { mutableStateOf(item.values ?: emptyList()) }
+                        var uploadDomainList =
+                            selectedComponent.value?.values ?: emptyList()
                         val initialMessageError: ResourceFormattedStringDesc =
                             item.validate?.messageError ?: ResourceFormattedStringDesc(
                                 MR.strings.empty_error_message,
@@ -503,24 +507,41 @@ fun initialize(
                         val errorMessage = remember { mutableStateOf(initialMessageError) }
 
                         UploadFileComponent(
-                            readOnly = item.readOnly,
-                            processLogicDomain = item.processLogicDomain,
-                            titlePicker = item.label.toString(),
+                            item = item,
+                            label = item.key?:"",
                             errorMessage = if (errorMessage.value == initialMessageError) errorMessage.value else initialMessageError,
                             modifier = Modifier,
-                            uploadList = uploadDomainList.value,
+                            uploadList = uploadDomainList,
                             onSelected = { list ->
-                                val oldList = uploadDomainList.value
-                                val newValues = mutableListOf<ValueDomain>()
+                                selectedComponent.value?.let {
+                                    val oldList = uploadDomainList
+                                    val newValues = mutableListOf<ValueDomain>()
 
-                                updateFileUploadValidationError(item, list, errorMessage, newValues)
+                                    updateFileUploadValidationError(
+                                        it,
+                                        list,
+                                        errorMessage,
+                                        newValues
+                                    )
 
-                                val newList = (oldList + newValues).distinct()
-                                uploadDomainList.value = newList
-                                item.values = newList
+                                    val newList = (oldList + newValues).distinct()
+                                    uploadDomainList = newList
+                                    it.values = newList
 
-                                onChanges( components, newValues, currentParentIndex, index)
+                                    onChanges(
+                                        components,
+                                        newValues,
+                                        currentParentIndex,
+                                        indexFile.value
+                                    )
+                                }
 
+                            },
+                            onClickUpload = {
+
+                                selectedComponent.value = it
+                                indexFile.value = index
+                                Napier.log(LogLevel.ASSERT,tag = "UploadFileComponent",message =index.toString())
 
                             }
                         )
@@ -535,26 +556,33 @@ fun initialize(
 
                         val errorMessageState = remember { mutableStateOf(initialMessageError) }
                         ImagePicker(
-                            item.readOnly,
-                            item.processLogicDomain,
-                            item.label.toString(),
+                            item,
                             taskID,
                             if (errorMessageState.value == initialMessageError) errorMessageState.value else initialMessageError,
                             findPhotosByComponentId(photoDomainList, item.key),
-                            onTakePhoto = {
-
+                            onTakePhoto = { resultTakePhoto ->
+                                Napier.log(LogLevel.ASSERT,tag = "componentDomainForImage",message =selectedComponent.value.toString())
+                                Napier.log(LogLevel.ASSERT,tag = "componentDomainForImage indexCamera",message =indexFile.value.toString())
+                                Napier.log(LogLevel.ASSERT,tag = "componentDomainForImage index",message =index.toString())
+                                selectedComponent.value?.let {
+                                Napier.log(LogLevel.ASSERT,tag = "componentDomainForImage",message =it.toString())
                                 val newValues =
-                                    listOf(ValueDomain("${item.type}:${item.key}", "${it}"))
-                                item.values = newValues
+                                    listOf(ValueDomain("${it.type}:${it.key}", "${resultTakePhoto}"))
+                                    it.values = newValues
 
-                                updateImageViewValidationError(item, errorMessageState)
+                                updateImageViewValidationError(it, errorMessageState)
 
-                                onChanges( components, newValues, currentParentIndex, index)
+                                onChanges( components, newValues, currentParentIndex, indexFile.value)
+                                }
 
                             },
                             onImageClick = {
-
                                 onClickImage(it, item.key ?: "")
+                            }, onCameraClick = { item ->
+
+                                Napier.log(LogLevel.ASSERT,tag = "componentDomainForImage",message =item.toString())
+                                selectedComponent.value = item
+                                indexFile.value = index
                             })
                     }
 
