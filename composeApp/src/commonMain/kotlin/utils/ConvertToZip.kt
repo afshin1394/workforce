@@ -13,6 +13,8 @@ fun convertToZip(list: List<String>,name:String,ticketNumber:String): UploadRequ
     val fileList = convertToFileList(list)
 
 
+
+
     val zipFileData = ZipFiles(fileList, InternalStorage.getWFMRoute(provideAppContext()) + "files.zip")
 
     uploadRequest = UploadRequest(
