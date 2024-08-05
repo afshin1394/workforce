@@ -71,8 +71,8 @@ import presentation.theme.textSecondary
 
 @Composable
 fun DropDownMultiChoice(
-    readOnly:Boolean,
-    processLogicDomain : ProcessLogicDomain,
+    readOnly: Boolean,
+    processLogicDomain: ProcessLogicDomain,
     titleDropDown: String,
     errorMessage: ResourceFormattedStringDesc,
     searchText: String,
@@ -84,15 +84,15 @@ fun DropDownMultiChoice(
 
     val disableLogic = processLogicDomain.disabled
     val hideLogic = processLogicDomain.shouldHide
-    val readOnlyLogic = processLogicDomain.readOnly|| readOnly
+    val readOnlyLogic = processLogicDomain.readOnly || readOnly
     val requiredLogic = processLogicDomain.required
     val validateLogic = processLogicDomain.validate
     val errorMessageValidateLogic = processLogicDomain.errorMessage
-    val backgroundColor = if (errorMessage.localized() != "" || validateLogic){
+    val backgroundColor = if (errorMessage.localized() != "" || validateLogic) {
         Color.Red
-    }else if(readOnlyLogic || disableLogic){
+    } else if (readOnlyLogic || disableLogic) {
         surfaceBrandDisabled
-    }else{
+    } else {
         surfaceBrandDark
     }
 
@@ -108,7 +108,7 @@ fun DropDownMultiChoice(
         selectedItems.clear()
         selectedItems.addAll(itemList.filter { it.isSelected })
     }
-    if(!hideLogic) {
+    if (!hideLogic) {
         Column(Modifier.padding(16.dp)) {
 
             val styledString = buildAnnotatedString {
@@ -177,7 +177,7 @@ fun DropDownMultiChoice(
                                         Text(
                                             text = selectedItem.label!!,
                                             modifier = Modifier.padding(all = 8.dp),
-                                            style = TextStyle(color = if(disableLogic || readOnlyLogic) textInverseDisabled else textSecondary)
+                                            style = TextStyle(color = if (disableLogic || readOnlyLogic) textInverseDisabled else textSecondary)
                                         )
                                     }
                                 }
@@ -187,18 +187,18 @@ fun DropDownMultiChoice(
                 } else {
                     TextField(
                         value = " ",
-                        textStyle = TextStyle(color = if(disableLogic || readOnlyLogic) textInverseDisabled else textSecondary ),
+                        textStyle = TextStyle(color = if (disableLogic || readOnlyLogic) textInverseDisabled else textSecondary),
                         shape = RoundedCornerShape(15.dp),
                         onValueChange = { },
                         readOnly = true,
                         modifier = Modifier.weight(1f),
                         colors = TextFieldDefaults.colors(
-                            focusedIndicatorColor =  Color.Transparent,
+                            focusedIndicatorColor = Color.Transparent,
                             disabledIndicatorColor = Color.Transparent,
-                            unfocusedIndicatorColor =  Color.Transparent,
+                            unfocusedIndicatorColor = Color.Transparent,
                             focusedContainerColor = Color.White,
                             unfocusedContainerColor = Color.White,
-                            disabledContainerColor =  Color.White
+                            disabledContainerColor = Color.White
                         )
                     )
                 }
@@ -226,7 +226,7 @@ fun DropDownMultiChoice(
                     contentDescription = "contentDescription",
                     modifier = Modifier.width(34.dp).height(34.dp).padding(end = 10.dp)
                         .clickable {
-                            if(!(disableLogic || readOnlyLogic)) {
+                            if (!(disableLogic || readOnlyLogic)) {
                                 expanded = !expanded
                                 searchedText = ""
                             }
@@ -379,7 +379,6 @@ fun DropDownMultiChoice(
                                         style = TextStyle(color = textSecondary)
                                     )
                                 }
-
                             }
                     )
                 }

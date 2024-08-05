@@ -101,7 +101,7 @@ class VerifyScreen(private val phoneNumber: String = "") : Screen {
                                 }
                                 is ViewStates.Success -> {
                                     viewModel.disableSMSListener()
-                                    navigator.popUntil { it == SplashScreen() }
+                                    navigator.popAll()
                                     navigator.push(mainScreen)
                                 }
 

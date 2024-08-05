@@ -1,5 +1,6 @@
 package presentation.screens.main.compose
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
@@ -33,6 +34,7 @@ import irancell.nwg.wfm.MR
 import irancell.nwg.wfm.checkConnectivity
 import irancell.nwg.wfm.getSharedPref
 import irancell.nwg.wfm.provideAppContext
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
@@ -52,6 +54,7 @@ import presentation.screens.main.components.PhotoPreviewComponent
 import presentation.screens.main.components.SuspendTicketBottomBarComponent
 import presentation.screens.main.components.SuspendTicketContentComponent
 import presentation.screens.ticket_process.compose.TicketInfoScreen
+import presentation.theme.backgroundBackground3
 import presentation.theme.body_large
 import presentation.theme.surfaceBrandDefault
 import presentation.theme.surfaceDefault
@@ -101,6 +104,9 @@ class MainScreen(
         val drawerState =
             rememberDrawerState(initialValue = DrawerValue.Closed)
         val events by viewModel.events
+
+        var hasDrawer by mutableStateOf(true)
+
 
         val suspendItems by lazy {
             viewModel.suspendItems
@@ -188,7 +194,7 @@ class MainScreen(
             viewModel = viewModel,
             scaffoldState = scaffoldState,
             drawerState = drawerState,
-            hasDrawer = true,
+            hasDrawer = hasDrawer,
             hasSwipeDrawer = viewModel.events.value != MainEvent.PhotoPreview &&  viewModel.events.value !=MainEvent.EditPhoto,
             topBar = {
                 CustomTopAppBar(
@@ -196,6 +202,8 @@ class MainScreen(
                     stringResource(MR.strings.ticket_list),
                     onNavigationItemClick = {
                         scope.launch {
+                            Napier.log(LogLevel.ASSERT, tag = "drawerState",message = drawerState.isOpen.toString())
+
                             if (drawerState.isOpen)
                                 drawerState.close()
                             else
@@ -212,6 +220,8 @@ class MainScreen(
             drawerContent = {
                 DrawerHeader(profileName) {
                     scope.launch {
+                        Napier.log(LogLevel.ASSERT, tag = "drawerState",message = drawerState.isOpen.toString())
+
                         if (drawerState.isOpen)
                             drawerState.close()
                         else
@@ -224,6 +234,8 @@ class MainScreen(
                 DrawerBody(onItemClick = {
 
                     scope.launch {
+                        Napier.log(LogLevel.ASSERT, tag = "drawerState",message = drawerState.isOpen.toString())
+
                         if (drawerState.isOpen)
                             drawerState.close()
                         else
@@ -256,7 +268,6 @@ class MainScreen(
 
                             }
                         }
-                        drawerState.close()
 
                     }
                 })
@@ -691,8 +702,10 @@ class MainScreen(
             content = {
 
                 if (viewModel.events.value == MainEvent.PhotoPreview) {
+                    Napier.log(LogLevel.ASSERT, tag = "drawerState",message = drawerState.isOpen.toString())
 
                     scope.launch {
+
                         drawerState.close()
                     }
 
@@ -813,6 +826,7 @@ class MainScreen(
             }, onBackPressed = {
                 if (viewModel.events.value == MainEvent.Default) {
                     scope.launch {
+                        Napier.log(LogLevel.ASSERT, tag = "drawerState",message = drawerState.isOpen.toString())
                         if (drawerState.isOpen)
                             drawerState.close()
                         viewModel.events.value = MainEvent.Exit

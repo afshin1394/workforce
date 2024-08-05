@@ -2,6 +2,7 @@ import data.network.response.task.FormStruct
 import data.network.response.task.step.Activity
 import data.network.response.task.step.Form
 import data.network.response.task.step.TaskStepResponse
+import database.entity.SendStepsEntity
 import database.entity.StepsEntity
 import domain.mappers.toComponentDomain
 import domain.mappers.toConditionalDomain
@@ -10,6 +11,7 @@ import domain.models.form_struct.FormStructDomain
 import domain.models.steps.ActivityDomain
 import domain.models.steps.FormDomain
 import domain.models.steps.StepDetailDomain
+import io.ktor.client.plugins.api.Send
 import kotlinx.serialization.json.Json
 
 fun TaskStepResponse.toStepDetailsDomain(): List<StepDetailDomain> =
@@ -52,8 +54,15 @@ fun FormStruct.toFormStructDomain() = FormStructDomain(
     this.schemaVersion
 )
 
-
+fun StepsEntity.toSendStepEntity() : SendStepsEntity{
+    return SendStepsEntity(this.pk,this.ticketNumber,this.wi,this.title,this.tag,this.activityId,"",this.edited)
+}
 //
+fun List<StepsEntity>.toSendStepEntity() : List<SendStepsEntity>{
+    return map{
+        it.toSendStepEntity()
+    }
+}
 
 
 

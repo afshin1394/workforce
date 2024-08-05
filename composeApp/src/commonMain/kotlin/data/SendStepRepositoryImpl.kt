@@ -1,10 +1,20 @@
 package data
 
+import data.network.request.step.SubmitAllRequest
 import database.AppDatabase
 import database.entity.SendStepsEntity
 import domain.repository.ISendStepsRepository
+import io.ktor.client.HttpClient
+import io.ktor.client.request.post
+import io.ktor.client.request.setBody
 
-class SendStepRepositoryImpl(private val db : AppDatabase) : ISendStepsRepository  {
+class SendStepRepositoryImpl(private val db : AppDatabase,private val httpClient: HttpClient) : ISendStepsRepository  {
+    override suspend fun sendData(json: String) {
+        httpClient.post("workforce_management/user/v1/submit-all/"){
+            setBody(json)
+        }
+    }
+
     override suspend fun insertAll(tasks: List<SendStepsEntity>) {
         db.sendStepsDao().insertAll(tasks)
 
