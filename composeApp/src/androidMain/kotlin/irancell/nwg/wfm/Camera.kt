@@ -50,9 +50,9 @@ actual class Camera {
             )
         }
         @Composable
-        actual fun launchCamera(savePath: String){
+        actual fun launchCamera(savePath: String,key:String){
             val context = LocalContext.current
-            val file = createImageFile(savePath)
+            val file = createImageFile(savePath,key)
             Log.i("ImagePicker", "file.path: ${file.path}")
 
             uri = InternalStorage.getUriForFile(context, file)
@@ -60,9 +60,9 @@ actual class Camera {
         }
 
 
-        private fun createImageFile(path: String): File {
+        private fun createImageFile(path: String,key:String): File {
             val uuid = UUID.randomUUID().toString()
-            val imageFileName = "${uuid}.jpg"
+            val imageFileName = "${uuid}${"@"}${key}${"*"}${irancell.nwg.wfm.File(path).sizeInMB()}${"*"}.jpg"
 
             return File(path, imageFileName)
         }

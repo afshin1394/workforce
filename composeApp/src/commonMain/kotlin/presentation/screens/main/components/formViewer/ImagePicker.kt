@@ -82,7 +82,7 @@ fun ImagePicker(
         Camera.launchCamera(
             InternalStorage.getProcessRouteOriginal(
                 provideAppContext()
-            ) + componentId
+            ) + componentId,item.key!!
         )
 
         openCamera = false

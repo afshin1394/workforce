@@ -10,18 +10,24 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.sizeIn
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.BottomSheetScaffoldState
 import androidx.compose.material.ExperimentalMaterialApi
 
 
 import androidx.compose.material.rememberBottomSheetScaffoldState
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -37,6 +43,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
@@ -57,9 +64,11 @@ import presentation.screens.main.components.formViewer.UploadFileComponent
 import presentation.screens.main.viewmodel.FormViewerScreenVM
 import presentation.screens.ticket_process.events.ImageEvent
 import presentation.theme.body_small
+import presentation.theme.surfaceBrandDefault
 import presentation.theme.surfaceDefault
 import presentation.theme.textInverse
 import presentation.theme.textPrimary
+import utils.convertToZip
 
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -178,6 +187,55 @@ class FormViewerScreen() : Screen {
                 ) {
 
 
+                    Button(
+                        onClick = {
+
+
+                                  viewModel.getPhotoByComponentKey()
+
+                          //  println("checkArry      ${ viewModel.getFileList()}")
+
+                        },
+                        shape = RoundedCornerShape(20),
+                        colors = ButtonDefaults.buttonColors(containerColor = surfaceBrandDefault),
+                        modifier = Modifier.fillMaxHeight().padding( 32.dp).height(48.dp).width(100.dp)
+
+                    ) {
+                        Text(
+                            text = "convert to uri",
+                            color = Color.White,
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontSize = 14.sp
+                        )
+                    }
+
+
+
+
+                    Button(
+                        onClick = {
+
+
+
+                          viewModel.callApiUpload(convertToZip(viewModel.uriList,"testtt","--workorder_13-20240731-00002"))
+
+                        },
+                        shape = RoundedCornerShape(20),
+                        colors = ButtonDefaults.buttonColors(containerColor = surfaceBrandDefault),
+                        modifier = Modifier.fillMaxHeight().padding( 32.dp).height(48.dp).width(100.dp)
+
+                    ) {
+                        Text(
+                            text = "convert to zip",
+                            color = Color.White,
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontSize = 14.sp
+                        )
+                    }
+
+
+
+
 //                    DropDownSingleChoice(
 //                        titleDropDown = stringResource(MR.strings.select_an_item),
 //                        itemList = items,
@@ -235,11 +293,7 @@ class FormViewerScreen() : Screen {
 
 //                    Editable(TypeEditable.EMAIL, placeholder = "email", imeAction = ImeAction.Next, leadingIcon =null , trailingIcon =null, keyboardType = KeyboardType.Text, maxLines = 2, readOnly = false,onValueChange = {} )
 
-                    ImageRowComponent(itemsList = emptyList(), modifier = Modifier.padding(16.dp).fillMaxWidth(), onCameraClick =  {
-                       viewModel.openCamera()
-                    }, onImageClick =  {
-                       viewModel.openPreview(it)
-                    })
+
                 }
 
             }, onBackPressed = {

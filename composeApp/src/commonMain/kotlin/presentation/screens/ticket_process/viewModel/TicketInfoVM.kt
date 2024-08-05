@@ -296,7 +296,17 @@ class TicketInfoVM(
         }
     }
 
+
+
+
+
+
+
+
+
+
     private fun checkLogicsForAll(components: List<ComponentDomain>) {
+
 
         // Create a copy of the components list to iterate over
         val componentsCopy = components.toMutableList()

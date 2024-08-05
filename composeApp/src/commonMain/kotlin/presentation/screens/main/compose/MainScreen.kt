@@ -722,7 +722,8 @@ class MainScreen(
                         Camera.launchCamera(
                             InternalStorage.getSuspendRouteOriginal(
                                 provideAppContext()
-                            ) + "${it.basic_info.ticket_number}"
+                            ) + "${it.basic_info.ticket_number}",
+                            "Suspend"
                         )
 
                         viewModel.updateCameraStatus(false)

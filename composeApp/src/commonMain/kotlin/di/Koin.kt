@@ -14,6 +14,7 @@ import data.StepPointerRepositoryImpl
 import data.StepsRepositoryImpl
 import data.SuspendTaskRepositoryImpl
 import data.TaskRepositoryImpl
+import data.UploadRepositoryImpl
 import domain.repository.IAuthRepository
 import domain.repository.IAvailabilityRepository
 import domain.repository.IGeneralLocationRepository
@@ -25,6 +26,7 @@ import domain.repository.IStepPointerRepository
 import domain.repository.IStepsRepository
 import domain.repository.ISuspendTaskRepository
 import domain.repository.ITaskRepository
+import domain.repository.IUploadRepository
 import domain.usecase.usecase.auth.LoginUseCase
 import domain.usecase.usecase.auth.LogoutUseCase
 import domain.usecase.usecase.auth.ResendUseCase
@@ -53,6 +55,7 @@ import domain.usecase.usecase.suspendTask.GetSuspendTaskByIdUseCase
 import domain.usecase.usecase.suspendTask.StoreSuspendTaskUseCase
 import domain.usecase.usecase.ticket.UpdateTaskUseCase
 import domain.usecase.usecase.ticket.GetTasksUseCase
+import domain.usecase.usecase.upload.SendFileToServerUseCase
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.addDefaultResponseValidation
@@ -128,6 +131,8 @@ fun useCaseModule() = module {
     single { UpdateStepFormUseCase(get(),get(),get()) }
     single { StoreStepFormUseCase(get(),get(),get()) }
     single { CheckForEditedTicketUseCase(get()) }
+    single { StoreKeyValueUseCase(get(),get(),get()) }
+    single { SendFileToServerUseCase(get()) }
     single { SendStepOfTicketToServer(get()) }
 }
 
@@ -218,7 +223,7 @@ fun viewModelModule() = module {
     viewModelDefinition { VerifyScreenVM(get(),get(),get()) }
     viewModelDefinition { TicketInfoVM(get(),get(),get(),get()) }
     viewModelDefinition { TicketProcessVM(get(),get(),get(),get(),get(),get()) }
-    viewModelDefinition { FormViewerScreenVM() }
+    viewModelDefinition { FormViewerScreenVM(get(),get()) }
     viewModelDefinition { MapVM() }
     viewModelDefinition { AccountScreenVM(get()) }
     viewModelDefinition { NotificationScreenVM() }

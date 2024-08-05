@@ -10,7 +10,7 @@ expect class Camera{
 
 
           @Composable
-          fun launchCamera(savePath: String)
+          fun launchCamera(savePath: String,key:String)
 
 
      }

@@ -6,7 +6,7 @@ expect class FilePicker {
 
     companion object {
         @Composable
-         fun onResult(onSuccess:  (List<Pair<Any, Any>>) -> Unit)
+         fun onResult( key:String,onSuccess:  (List<Pair<Any, Any>>) -> Unit)
 
 
         @Composable
