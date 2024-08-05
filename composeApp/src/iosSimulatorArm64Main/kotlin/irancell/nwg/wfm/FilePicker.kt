@@ -6,7 +6,7 @@ actual class FilePicker {
 
     actual companion object {
         @Composable
-        actual fun onResult(onSuccess: (List<Pair<Any, Any>>) -> Unit) {
+        actual fun onResult( key:String,onSuccess: (List<Pair<Any, Any>>) -> Unit) {
 
         }
         @Composable

@@ -7,13 +7,13 @@ import java.io.FileOutputStream
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
 
-actual fun ZipFiles(fileDataList: List<FileData>, zipFilePath: String): FileData? {
+actual fun ZipFiles(fileDataList: List<String>, zipFilePath: String): FileData? {
     return try {
         val zipFile = File(zipFilePath)
         val zipOut = ZipOutputStream(FileOutputStream(zipFile))
 
         fileDataList.forEach { fileData ->
-            val fileToZip = File(fileData.path)
+            val fileToZip = File(fileData)
             if (fileToZip.exists()) {
                 FileInputStream(fileToZip).use { fis ->
                     val zipEntry = ZipEntry(fileToZip.name)
@@ -22,7 +22,7 @@ actual fun ZipFiles(fileDataList: List<FileData>, zipFilePath: String): FileData
                     zipOut.closeEntry()
                 }
             } else {
-                println("File not found: ${fileData.path}")
+                println("File not found: ${fileData}")
             }
         }
 

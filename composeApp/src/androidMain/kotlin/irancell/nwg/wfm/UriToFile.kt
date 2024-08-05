@@ -6,7 +6,7 @@ import java.io.File
 import java.io.FileOutputStream
 
 
-actual fun UriToFile(uri: String): FileData? {
+actual fun UriToFile(uri: String): String? {
     val context = provideAppContext()
     try {
         val uriParsed = Uri.parse(uri)
@@ -17,7 +17,8 @@ actual fun UriToFile(uri: String): FileData? {
                 inputStream.copyTo(outputStream)
             }
         }
-        return FileData(fileName, destinationFile.absolutePath, destinationFile.length())
+       // return FileData(fileName, destinationFile.absolutePath, destinationFile.length())
+        return destinationFile.absolutePath
     } catch (e: Exception) {
         e.printStackTrace()
         return null

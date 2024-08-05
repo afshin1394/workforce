@@ -582,6 +582,56 @@ class GetInitialFormByTask(
                                     )
                                 ),
                             ),
+
+                            ComponentDomain(
+                                id = "Field_2123",
+                                hide = null,
+                                type = "select",
+                                label = "Operation Mode 2",
+                                layout = LayoutDomain(row = "Row_1fi2zro", columns = null),
+                                subType = null,
+                                validate = ValidateDomain(
+                                    id = "Field_1yizgdx",
+                                    key = "operation_mode",
+                                    hide = "Field_1yizgdx",
+                                    layout = Layout(row = "Row_1fi2zro", columns = null),
+                                    subtype = null,
+                                    required = true
+                                ),
+                                values = listOf(
+                                    ValueDomain(label = "Dispatch", value = "dispatch"),
+                                    ValueDomain(
+                                        label = "Submit to Approve",
+                                        value = "submit_to_approve"
+                                    )
+                                ),
+
+                                conditional = ConditionalDomain(string = null),
+                                components = null,
+                                logics = listOf(
+                                    LogicDomain(
+                                        logicType = LogicType.Disable,
+                                        experssions = listOf(
+                                            ExpressionDomain(
+                                                listOf(
+                                                    ConditionDomain(
+                                                        firstFieldKey = "47",
+                                                        secondOperator = OperatorDomain(
+                                                            OperatorType.Equals,
+                                                            OperatorType.Equals
+                                                        ),
+
+                                                        value = "2"
+                                                    ),
+
+                                                    )
+                                            ),
+
+
+                                            )
+                                    )
+                                ),
+                            ),
                             ComponentDomain(
                                 id = "Field_1ytertret",
                                 hide = null,
@@ -766,14 +816,7 @@ class GetInitialFormByTask(
                                 label = "Attachment  with disable logic",
                                 layout = LayoutDomain(row = "Row_021wo56", columns = null),
                                 subType = null,
-                                validate = ValidateDomain(
-                                    id = "Field_0d9qry754",
-                                    required = true,
-                                    maxTotalSize = 1,
-                                    maxFileNumber = 1,
-                                    blacklistAttachment = "pdf,json",
-                                    attachedValidationType = "Blacklist"
-                                ),
+                                validate = null,
                                 values = null,
                                 conditional = ConditionalDomain(string = null),
                                 components = null,

@@ -94,7 +94,7 @@ fun UploadFileComponent(
         return if (index != -1) fileIcons[index] else MR.images.about
     }
 
-    FilePicker.onResult { files ->
+    FilePicker.onResult(item.key!!) { files ->
         files.forEach { pair ->
             val fileName = pair.first
             val destinationFile = pair.second

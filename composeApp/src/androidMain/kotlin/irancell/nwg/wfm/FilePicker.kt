@@ -21,11 +21,12 @@ import java.io.IOException
 actual class FilePicker {
 
 
+
     actual companion object {
         lateinit var filePickerLauncher: ManagedActivityResultLauncher<Intent, ActivityResult>
 
         @Composable
-        actual fun onResult(onSuccess: (List<Pair<Any, Any>>) -> Unit) {
+        actual fun onResult( key:String,onSuccess: (List<Pair<Any, Any>>) -> Unit) {
             val context = LocalContext.current
             filePickerLauncher = rememberLauncherForActivityResult(
                 contract = ActivityResultContracts.StartActivityForResult(),
@@ -58,8 +59,9 @@ actual class FilePicker {
                             val fileName = getFileName(uri, contentResolver)
                             val fileExtension = MimeTypeMap.getSingleton().getExtensionFromMimeType(contentResolver.getType(uri))
                             val destinationFile = File(directory, "$fileName")
-                            saveFileToInternalStorage(uri, contentResolver, destinationFile)
-                            files.add(fileName!! to destinationFile)
+                            val destinationFile2 = File(directory, "${"@"}${key}${"*"}${destinationFile.length()}${"*"}${fileName}")
+                            saveFileToInternalStorage(uri, contentResolver, destinationFile2)
+                            files.add("${"*"}${destinationFile.length()}${"*"}${fileName}"!! to destinationFile2)
                         }
                         onSuccess(files)
                     }

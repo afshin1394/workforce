@@ -1,6 +1,6 @@
 package irancell.nwg.wfm
 
-actual fun ZipFiles(fileDataList: List<FileData>, zipFilePath: String): FileData? {
+actual fun ZipFiles(fileDataList: List<String>, zipFilePath: String): FileData? {
     return try {
         val tempDir = NSTemporaryDirectory()
         val zipFilePath = tempDir + zipFileName

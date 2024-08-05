@@ -5,7 +5,7 @@ import platform.posix.*
 import kotlinx.cinterop.addressOf
 import kotlinx.cinterop.usePinned
 
-actual fun UriToFile(uri: String): FileData? {
+actual fun UriToFile(uri: String): String? {
     return try {
         val url = NSURL.URLWithString(uri) ?: return null
         val data = NSData.dataWithContentsOfURL(url) ?: return null

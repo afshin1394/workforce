@@ -62,7 +62,7 @@ actual class Camera {
 
         private fun createImageFile(path: String,key:String): File {
             val uuid = UUID.randomUUID().toString()
-            val imageFileName = "${uuid}${"@"}${key}.jpg"
+            val imageFileName = "${uuid}${"@"}${key}${"*"}${irancell.nwg.wfm.File(path).sizeInMB()}${"*"}.jpg"
 
             return File(path, imageFileName)
         }
