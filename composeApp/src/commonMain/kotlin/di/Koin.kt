@@ -48,7 +48,7 @@ import domain.usecase.usecase.photo.InsertPhotoUseCase
 
 import domain.usecase.usecase.profile.GetProfileUseCase
 import domain.usecase.usecase.profile.StoreProfileUseCase
-import domain.usecase.usecase.steps.SendStepOfTicketToServer
+import domain.usecase.usecase.steps.StoreKeyValueUseCase
 import domain.usecase.usecase.steps.UpdateStepsUseCase
 import domain.usecase.usecase.suspendTask.DeleteByTaskIdUseCase
 import domain.usecase.usecase.suspendTask.GetSuspendTaskByIdUseCase
@@ -100,6 +100,7 @@ fun repositoryModule() = module {
     single<IStepsRepository>{ StepsRepositoryImpl(get(named("tokenized")),get()) }
     single<IStepPointerRepository>{ StepPointerRepositoryImpl(get()) }
     single<ISendStepsRepository>{ SendStepRepositoryImpl(get(),get(named("tokenized"))) }
+    single<IUploadRepository>{ UploadRepositoryImpl(get(named("tokenized"))) }
 }
 
 fun useCaseModule() = module {
@@ -127,13 +128,13 @@ fun useCaseModule() = module {
     single { InsertPhotoUseCase(get()) }
     single { GetPhotoByComponentKeyUseCase(get()) }
     single { DeleteByComponentKeyUseCase(get()) }
-    single { UpdateStepsUseCase(get(),get(),get(),get()) }
+    single { UpdateStepsUseCase(get(),get(),get()) }
     single { UpdateStepFormUseCase(get(),get(),get()) }
     single { StoreStepFormUseCase(get(),get(),get()) }
     single { CheckForEditedTicketUseCase(get()) }
     single { StoreKeyValueUseCase(get(),get(),get()) }
     single { SendFileToServerUseCase(get()) }
-    single { SendStepOfTicketToServer(get()) }
+    single { StoreKeyValueUseCase(get(),get(),get()) }
 }
 
 fun httpModule() = module {

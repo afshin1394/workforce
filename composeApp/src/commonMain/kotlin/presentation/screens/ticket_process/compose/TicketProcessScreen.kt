@@ -15,9 +15,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import cafe.adriel.voyager.core.registry.rememberScreen
 import cafe.adriel.voyager.core.screen.Screen
-import cafe.adriel.voyager.core.stack.popUntil
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.irancell.nwg.wfm.presentation.components.bottomSheetDoubleActionBottomBar
@@ -38,7 +36,6 @@ import presentation.model.SingleButtonActionModel
 import presentation.screens.main.components.EditPhotoComponent
 import presentation.screens.main.components.PhotoPreviewComponent
 import presentation.screens.main.compose.BaseScreen
-import presentation.screens.main.compose.MainScreen
 import presentation.screens.main.events.TicketProcessEvent
 import presentation.screens.ticket_process.components.bottomSingleActionComponent
 import presentation.screens.ticket_process.events.StepEvent
@@ -74,10 +71,8 @@ class TicketProcessScreen(
         val stepDetails by viewModel.stepDetails.collectAsState()
         val stepEvent by viewModel.stepEvent.collectAsState()
         val reloadState by viewModel.reloadState.collectAsState()
-        val completedState by viewModel.completed.collectAsState()
         val state by viewModel.state.collectAsState()
 
-        val mainScreen = rememberScreen(presentation.nav.Screen.Main.Menu.MyTickets)
 
         LaunchedEffect(Unit) {
             viewModel.updateTicketNumber(ticketNumber)
@@ -320,10 +315,6 @@ class TicketProcessScreen(
             content = {
                 Column {
                     processBar(stepDetails, currentLevelState)
-                    if(completedState){
-                        navigator.popAll()
-                        navigator.push(mainScreen)
-                    }
                     if(reloadState) {
                         initialize(
                             taskID = currentLevelState.toString(),

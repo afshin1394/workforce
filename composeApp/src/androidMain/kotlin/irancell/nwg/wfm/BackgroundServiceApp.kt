@@ -229,8 +229,8 @@ internal actual class BackgroundServiceApp : Service() , KoinComponent {
         updateStepsUseCase(Unit).collect {
             when (it.status) {
                 AsyncStatus.ERROR -> {
-                    if( it.resultStatus is ResultStatus.CLIENT_EXCEPTION.UNATHORIZED || it.resultStatus is ResultStatus.CLIENT_EXCEPTION.FORBIDDEN)
-                        _serviceState.update { ServiceState.Faulty }
+//                    if( it.resultStatus is ResultStatus.CLIENT_EXCEPTION.UNATHORIZED || it.resultStatus is ResultStatus.CLIENT_EXCEPTION.FORBIDDEN)
+//                        _serviceState.update { ServiceState.Faulty }
 
                     Napier.log(
                         LogLevel.ASSERT,

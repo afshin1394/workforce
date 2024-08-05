@@ -93,19 +93,20 @@ fun UploadFileComponent(
         val index = fileExtensions.indexOf(fileExtension.toLowerCase())
         return if (index != -1) fileIcons[index] else MR.images.about
     }
+    item.key?.let {
+        FilePicker.onResult(it) { files ->
+            files.forEach { pair ->
+                val fileName = pair.first
+                val destinationFile = pair.second
+                uploadDomain =
+                    ValueDomain(label = fileName.toString(), value = destinationFile.toString())
 
-    FilePicker.onResult(item.key!!) { files ->
-        files.forEach { pair ->
-            val fileName = pair.first
-            val destinationFile = pair.second
-            uploadDomain =
-                ValueDomain(label = fileName.toString(), value = destinationFile.toString())
+                uploadDomainListForSend.add(uploadDomain)
+            }
 
-            uploadDomainListForSend.add(uploadDomain)
+            onSelected(uploadDomainListForSend)
+
         }
-
-        onSelected(uploadDomainListForSend)
-
     }
 
 

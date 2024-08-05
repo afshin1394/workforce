@@ -4,7 +4,6 @@ package presentation.screens.ticket_process.viewModel
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import arrow.core.Tuple4
-import arrow.core.Tuple5
 import domain.models.PhotoDomain
 import domain.models.form_struct.ComponentDomain
 import domain.models.form_struct.ValueDomain
@@ -14,7 +13,7 @@ import domain.usecase.usecase.steps.StepDetail
 import domain.usecase.usecase.steps.StoreStepFormUseCase
 import domain.usecase.usecase.photo.GetPhotoByComponentKeyUseCase
 import domain.usecase.usecase.photo.InsertPhotoUseCase
-import domain.usecase.usecase.steps.SendStepOfTicketToServer
+import domain.usecase.usecase.steps.StoreKeyValueUseCase
 import io.github.aakira.napier.LogLevel
 import io.github.aakira.napier.Napier
 import irancell.nwg.wfm.Location
@@ -39,15 +38,12 @@ class TicketProcessVM(
     private val updateStepFormUseCase: UpdateStepFormUseCase,
     private val getPhotoByComponentKeyUseCase: GetPhotoByComponentKeyUseCase,
     private val storeStepFormUseCase: StoreStepFormUseCase,
+    private val storeKeyValueUseCase: StoreKeyValueUseCase,
     private val deleteByComponentKeyUseCase: DeleteByComponentKeyUseCase,
-    private val insertPhotoUseCase: InsertPhotoUseCase,
-    private val sendStepOfTicketToServer: SendStepOfTicketToServer
+    private val insertPhotoUseCase: InsertPhotoUseCase
 ) : BaseViewModel() {
     private val _currentLevel = MutableStateFlow(0)
     val currentLevel = _currentLevel.asStateFlow()
-
-    private val _completed = MutableStateFlow(false)
-    val completed = _completed.asStateFlow()
 
     private val _reloadState = MutableStateFlow(false)
     var reloadState = _reloadState.asStateFlow()
@@ -77,14 +73,13 @@ class TicketProcessVM(
     val logicCalculation: LogicCalculation = LogicCalculation(tempComponentList)
 
     fun getMokStepsForm(proceed: String) {
-        viewModelScope.launch(Dispatchers.Main) {
+        viewModelScope.launch {
             updateStepFormUseCase(
-                Tuple5(
+                Tuple4(
                     _ticketNumber.value,
                     proceed,
                     tempComponentList.toList(),
-                    photoDomainList.toList(),
-                    _currentLevel.value
+                    photoDomainList.toList()
                 )
             ).collect {
                 when (it.status) {
@@ -97,7 +92,21 @@ class TicketProcessVM(
                     }
 
                     AsyncStatus.SUCCESS -> {
+                        storeKeyValueUseCase(ticketNumber.value).collect {
+                            when (it.status) {
+                                AsyncStatus.ERROR -> {
 
+                                }
+
+                                AsyncStatus.LOADING -> {
+
+                                }
+
+                                AsyncStatus.SUCCESS -> {
+
+                                }
+                            }
+                        }
                         it.data?.let { data ->
 
                             data.activityDomain.form.form_structure.components?.let {
@@ -142,7 +151,6 @@ class TicketProcessVM(
                     }
                 }
             }
-
         }
     }
 
@@ -153,71 +161,20 @@ class TicketProcessVM(
             tag = "updateLevelupdateLevel",
             message = _stepEvent.value.toString()
         )
-        if (_currentLevel.value == _stepDetails.value.size - 1 && proceed != PROCEED.PREVIOUS) {
-            storeLastStep()
+        if (!(proceed == PROCEED.PREVIOUS && _currentLevel.value == 0)) {
+            _reloadState.update { false }
+            getMokStepsForm(proceed)
+
         } else {
-            if (!(proceed == PROCEED.PREVIOUS && _currentLevel.value == 0)) {
-                _reloadState.update { false }
-                getMokStepsForm(proceed)
+            storeStepForm()
 
-            } else {
-                storeStepForm()
-            }
         }
 
 
-    }
-
-    private fun sendToServer() {
-        viewModelScope.launch {
-            sendStepOfTicketToServer(_ticketNumber.value).collect {
-                when (it.status) {
-                    AsyncStatus.ERROR -> {
-                        handleError(it.resultStatus)
-                    }
-
-                    AsyncStatus.LOADING -> {
-                        updateState(ViewStates.Loading)
-                    }
-
-                    AsyncStatus.SUCCESS -> {
-                        _completed.update { true }
-                        updateState(ViewStates.Success())
-                    }
-                }
-            }
-        }
-    }
-
-    private fun storeLastStep() {
-        viewModelScope.launch(Dispatchers.Main) {
-            storeStepFormUseCase(
-                Triple(
-                    _ticketNumber.value,
-                    tempComponentList.toList(),
-                    photoDomainList.toList()
-                )
-            ).collect {
-                when (it.status) {
-                    AsyncStatus.ERROR -> {
-                        handleError(it.resultStatus)
-                    }
-
-                    AsyncStatus.LOADING -> {
-                        updateState(ViewStates.Loading)
-                    }
-
-                    AsyncStatus.SUCCESS -> {
-                        sendToServer()
-
-                    }
-                }
-            }
-        }
     }
 
     private fun storeStepForm() {
-        viewModelScope.launch(Dispatchers.Main) {
+        viewModelScope.launch {
             storeStepFormUseCase(
                 Triple(
                     _ticketNumber.value,
@@ -235,7 +192,19 @@ class TicketProcessVM(
                     }
 
                     AsyncStatus.SUCCESS -> {
+                        storeKeyValueUseCase(ticketNumber.value).collect {
+                            when (it.status) {
+                                AsyncStatus.ERROR -> {
+                                }
 
+                                AsyncStatus.LOADING -> {
+                                }
+
+                                AsyncStatus.SUCCESS -> {
+
+                                }
+                            }
+                        }
                         updateState(ViewStates.Success())
                         _stepEvent.update { StepEvent.START }
 
@@ -533,7 +502,7 @@ class TicketProcessVM(
                     }
                 }
             }
-        } else {
+        }else{
             updateState(ViewStates.Success())
         }
     }

@@ -1,22 +1,18 @@
 package domain.usecase.usecase.steps
 
-import database.entity.SendStepsEntity
 import database.entity.StepPointerEntity
 import database.entity.StepsEntity
 import domain.mappers.toTaskDomainList
-import domain.repository.ISendStepsRepository
 import domain.repository.IStepPointerRepository
 import domain.repository.IStepsRepository
 import domain.repository.ITaskRepository
 import domain.usecase.BaseUseCase
-import toSendStepEntity
 import toStepDetailsEntity
 
 class UpdateStepsUseCase(
     private val iStepsRepository: IStepsRepository,
     private val iTaskRepository: ITaskRepository,
-    private val iStepPointerRepository: IStepPointerRepository,
-    private val iSendStepsRepository: ISendStepsRepository
+    private val iStepPointerRepository: IStepPointerRepository
 ) : BaseUseCase<Unit, Unit>() {
     override suspend fun run(params: Unit) {
         val stepEntities = arrayListOf<StepsEntity>()
@@ -37,10 +33,7 @@ class UpdateStepsUseCase(
             .toHashSet().toList()
         iStepsRepository.deleteAll(editedAvailableTickets)
         iStepsRepository.resetEntitySequence()
-
         iStepsRepository.insertAll(getInsertingValues(editedTickets, stepEntities.sortedBy { it.activityId  }))
-        iSendStepsRepository.deleteAll(editedAvailableTickets)
-        iSendStepsRepository.insertAll(getInsertingValuesSendStep(editedTickets, stepEntities.sortedBy { it.activityId  }.toSendStepEntity()))
         iStepPointerRepository.deleteAll(editedAvailableTickets)
         iStepPointerRepository.insertAll(stepPointerEntities)
 
@@ -51,8 +44,5 @@ class UpdateStepsUseCase(
         stepEntities: List<StepsEntity>
     ): List<StepsEntity> = stepEntities.filter { it.ticketNumber !in editedTicketNumbers }
 
-    private fun getInsertingValuesSendStep(
-        editedTicketNumbers: List<String>,
-        sendStepEntities: List<SendStepsEntity>
-    ): List<SendStepsEntity> = sendStepEntities.filter { it.ticketNumber !in editedTicketNumbers }
+
 }
