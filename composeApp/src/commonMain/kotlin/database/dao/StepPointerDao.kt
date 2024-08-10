@@ -8,7 +8,7 @@ import database.entity.StepPointerEntity
 
 @Dao
 interface  StepPointerDao {
-    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAll(task: List<StepPointerEntity>)
 
     @Query("UPDATE sqlite_sequence SET seq = 0 WHERE name = 'StepPointerEntity'")
@@ -29,6 +29,9 @@ interface  StepPointerDao {
     @Query("UPDATE StepPointerEntity SET edited = :isEdited WHERE ticketNumber = :ticketNumber")
     suspend fun updateIsEdited(ticketNumber : String,isEdited : Boolean )
 
+
+    @Query("SELECT * FROM StepPointerEntity WHERE Edited = true")
+    suspend fun selectEditedTickets() : List<StepPointerEntity>
 
 
 

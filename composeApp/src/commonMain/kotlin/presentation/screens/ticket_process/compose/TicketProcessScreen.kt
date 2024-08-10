@@ -24,11 +24,15 @@ import com.irancell.nwg.wfm.presentation.theme.spacing2X
 import presentation.screens.ticket_process.viewModel.TicketProcessVM
 import presentation.screens.ticket_process.components.processBar
 import dev.icerock.moko.resources.compose.stringResource
+import io.github.aakira.napier.LogLevel
+import io.github.aakira.napier.Napier
 import irancell.nwg.wfm.DrawController
 import irancell.nwg.wfm.InternalStorage
 import irancell.nwg.wfm.MR
 import irancell.nwg.wfm.provideAppContext
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -75,6 +79,7 @@ class TicketProcessScreen(
         val reloadState by viewModel.reloadState.collectAsState()
         val state by viewModel.state.collectAsState()
 
+        var isClickable by remember { mutableStateOf(true) }
 
         LaunchedEffect(Unit) {
             viewModel.updateTicketNumber(ticketNumber)
@@ -122,6 +127,9 @@ class TicketProcessScreen(
 
                 }
 
+                TicketProcessEvent.InProgress -> {
+                    ""
+                }
             }
 
 
@@ -130,8 +138,8 @@ class TicketProcessScreen(
             if (viewModel.events.value == TicketProcessEvent.Default) {
 
                 scope.launch {
-                    async {   viewModel.saveAndDeletePhotoByComponentKey() }.await()
-                    if(state is ViewStates.Success) {
+                    async { viewModel.saveAndDeletePhotoByComponentKey() }.await()
+                    if (state is ViewStates.Success) {
                         viewModel.updateLevel(PROCEED.PREVIOUS)
                     }
                 }
@@ -167,7 +175,19 @@ class TicketProcessScreen(
             bottomSheetHasHeader = viewModel.events.value != TicketProcessEvent.Default,
             topBar = {
                 MenuItemsTopBar(stringResource(MR.strings.ticket_process)) {
-                    backClick()
+                    Napier.log(
+                        LogLevel.ASSERT,
+                        tag = "backButtonEvent",
+                        message = isClickable.toString()
+                    )
+                    if (isClickable) {
+                        isClickable = false
+                        backClick()
+                        scope.launch {
+                            delay(500)
+                            isClickable = true
+                        }
+                    }
                 }
             },
             bottomSheetTitle = bottomSheetTitle,
@@ -225,8 +245,8 @@ class TicketProcessScreen(
                                     }
 
                                     if (errors.isEmpty()) {
-                                        async {   viewModel.saveAndDeletePhotoByComponentKey() }.await()
-                                        if(state is ViewStates.Success) {
+                                        async { viewModel.saveAndDeletePhotoByComponentKey() }.await()
+                                        if (state is ViewStates.Success) {
                                             viewModel.updateLevel(PROCEED.NEXT)
                                         }
                                     }
@@ -241,6 +261,11 @@ class TicketProcessScreen(
 
                     }
 
+                    TicketProcessEvent.InProgress -> {
+                        scope.launch {
+                            scaffoldState.bottomSheetState.collapse()
+                        }
+                    }
                 }
 
             },
@@ -312,6 +337,12 @@ class TicketProcessScreen(
                     TicketProcessEvent.Default -> {
 
                     }
+
+                    TicketProcessEvent.InProgress -> {
+                        scope.launch {
+                            scaffoldState.bottomSheetState.collapse()
+                        }
+                    }
                 }
 
 
@@ -319,7 +350,7 @@ class TicketProcessScreen(
             content = {
                 Column {
                     processBar(stepDetails, currentLevelState)
-                    if(reloadState) {
+                    if (reloadState) {
                         initialize(
                             taskID = currentLevelState.toString(),
                             modifier = Modifier,
@@ -348,13 +379,13 @@ class TicketProcessScreen(
                                     )
                                 }
                             },
-                            onAddItem = {listComponent, listValueDomain, listIndexParent, indexChild ->
+                            onAddItem = { listComponent, listValueDomain, listIndexParent, indexChild ->
                                 viewModel.addOrRemoveComponentDomainRepeatableToList(
                                     listComponent,
                                     indexChild
                                 )
                             },
-                            onRemoveItem = {listComponent, listValueDomain, listIndexParent, indexChild ->
+                            onRemoveItem = { listComponent, listValueDomain, listIndexParent, indexChild ->
                                 viewModel.addOrRemoveComponentDomainRepeatableToList(
                                     listComponent,
                                     indexChild
@@ -387,11 +418,25 @@ class TicketProcessScreen(
 
             }, onBackPressed = {
 
-                backClick()
-            })
+                Napier.log(
+                    LogLevel.ASSERT,
+                    tag = "backButtonEvent",
+                    message = isClickable.toString()
+                )
+                if (isClickable) {
+                    isClickable = false
+                    backClick()
+                    scope.launch {
+                        delay(500)
+                        isClickable = true
+                    }
+                }
 
 
-    }
+})
+
+
+}
 
 
 }

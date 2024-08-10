@@ -7,6 +7,42 @@ import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.buildJsonObject
 
 
+fun Map<String, Any>.mutableToJson(): String {
+    val jsonObject = buildJsonObject {
+        this@mutableToJson.forEach { (key, value) ->
+            var valuee = value
+            if(valuee is JsonPrimitive)
+                valuee  = valuee.content
+            when (valuee) {
+
+                is String -> put(key, JsonPrimitive(valuee))
+                is Int -> put(key, JsonPrimitive(valuee))
+                is Boolean -> put(key, JsonPrimitive(valuee))
+                is Double -> put(key, JsonPrimitive(valuee))
+                is Float -> put(key, JsonPrimitive(valuee.toDouble()))
+                is Long -> put(key, JsonPrimitive(valuee))
+                is List<*> -> {
+                    val jsonArray = JsonArray(valuee.map { element ->
+                        var elementt = element
+                        if(elementt is JsonPrimitive)
+                            elementt  = elementt.content
+                        when (elementt) {
+                            is String -> JsonPrimitive(elementt)
+                            else -> throw IllegalArgumentException("Unsupported list element type")
+                        }
+                    })
+                    put(key, jsonArray)
+                }
+                else -> throw IllegalArgumentException("Unsupported type")
+            }
+        }
+    }
+    return Json.encodeToString(jsonObject)
+}
+
+
+
+
 fun Map<String, Any>.toJson(): String {
     val jsonObject = buildJsonObject {
         this@toJson.forEach { (key, value) ->
@@ -32,6 +68,3 @@ fun Map<String, Any>.toJson(): String {
     }
     return Json.encodeToString(jsonObject)
 }
-
-
-

@@ -41,10 +41,7 @@ class StoreStepFormUseCase(
                 FormStruct.serializer(), FormStruct(components = (params.second.toComponent()))
             ), Json.encodeToString(params.third)
         )
-//        val data = iStepsRepository.getDataByTicketNumberAndStep(
-//            stepPointerDomain.ticketNumber,
-//            stepPointerDomain.activeActivity
-//        ).toActivityDomain()
+
         try {
             val location = Location.getLastLocation()
             params.second.findComponentByKey("submitted_latitude")?.values =
@@ -59,8 +56,7 @@ class StoreStepFormUseCase(
 
 
         params.second.findImageComponents().getKeysAndValues(dictImages)
-        Napier.log(LogLevel.ASSERT, tag = "dicttttt", message = dictImages.toString())
-        params.second.filter { it.type != FormViewerTypes.ImageView }.getKeysAndValues(dict)
+        params.second.getKeysAndValues(dict)
         iSendStepsRepository.updateKeyValueStructure(
             stepPointerDomain.ticketNumber,
             stepPointerDomain.activeActivity,
@@ -174,6 +170,8 @@ class StoreStepFormUseCase(
         }
        return imageComponents
     }
+
+
 
 
 }

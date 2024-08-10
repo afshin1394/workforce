@@ -15,6 +15,10 @@ class StepPointerRepositoryImpl(private val db : AppDatabase) : IStepPointerRepo
         db.stepPointerDao().deleteAll(editedAvailableTickets)
     }
 
+    override suspend fun getEditedTickets(): List<String> {
+       return db.stepPointerDao().selectEditedTickets().map { it.ticketNumber }
+    }
+
     override suspend fun getActiveActivityByTicketNumber(ticketNumber: String) : StepPointerDomain {
        return db.stepPointerDao().selectActiveActivityByTicketNumber(ticketNumber).toStepPointerDomain()
     }

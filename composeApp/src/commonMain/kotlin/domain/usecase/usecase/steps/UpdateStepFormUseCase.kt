@@ -119,7 +119,7 @@ class UpdateStepFormUseCase(
 
         }
         params.third.findImageComponents().getKeysAndValues(dictImages)
-        params.third.filter { it.type != FormViewerTypes.ImageView} .getKeysAndValues(dict)
+        params.third.getKeysAndValues(dict)
         iSendStepsRepository.updateKeyValueStructure(stepPointerDomain.ticketNumber,stepPointerDomain.activeActivity,dict.toJson(),dictImages.toJson())
 
         Napier.log(LogLevel.ASSERT,tag="params.fifth", message = stepPointerDomain.activeActivity.toString())

@@ -15,6 +15,7 @@ import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.jsonObject
 import utils.convertToZip
 import utils.formatUploadDomainList
+import utils.mutableToJson
 
 class SendStepsOfTicketToServerUseCase(
     private val iSendStepsRepository: ISendStepsRepository,
@@ -44,59 +45,58 @@ class SendStepsOfTicketToServerUseCase(
         Napier.log(LogLevel.ASSERT,tag="imageMap", message = imageMap.toString())
 
 //
-        val finalMap = mutableMapOf<String,Any>()
             sortedSendSteps.forEachIndexed { index, item ->
                 if (index != 0) {
                     try {
-                        finalMap.putAll(
-                            jsonToMap(
-                                item.key_value_structure.replace("}\"", "}").replace("\"{", "{")
-                                    .replace("\\", "")
-                            )
+                        val map = jsonToMap(
+                            item.key_value_structure.replace("}\"", "}").replace("\"{", "{")
+                                .replace("\\", "")
                         )
-                    }catch (_:Exception){
+
+                        updateCommonKeys(map, imageMap)
+
+
+
+                        submitAllRequest.steps
+                            .add(StepRequest(item.activityId.toInt(), map.mutableToJson(), 0))
+                    } catch (_:Exception){
 
                     }
-
-
-                    submitAllRequest.steps
-                        .add(StepRequest(item.activityId.toInt(), item.key_value_structure, 0))
                 } else {
-                    try{
-                        finalMap.putAll(
+                    try {
+                        val map =
                             jsonToMap(
                                 item.key_value_structure.replace("}\"", "}").replace("\"{", "{")
                                     .replace("\\", "")
+                            )
+
+                        updateCommonKeys(map, imageMap)
+
+
+
+                        submitAllRequest.steps.add(
+                            StepRequest(
+                                item.activityId.toInt(),
+                                map.mutableToJson(),
+                                item.wi.toInt()
                             )
                         )
                     }catch (_:Exception){
 
                     }
-
-                    submitAllRequest.steps.add(
-                        StepRequest(
-                            item.activityId.toInt(),
-                            item.key_value_structure,
-                            item.wi.toInt()
-                        )
-                    )
                 }
             }
 //
 //
-//        Napier.log(
-//            LogLevel.ASSERT,
-//            tag = "sortedSendSteps",
-//            message = finalMap.toString()
-//        )
 
+          Napier.log(LogLevel.ASSERT,tag="submitAllRequest", message = Json.encodeToString(SubmitAllRequest.serializer(),submitAllRequest).replace("}\"", "}").replace("\"{", "{").replace("\\",""))
 
-//        iSendStepsRepository.sendData(Json.encodeToString(SubmitAllRequest.serializer(),submitAllRequest).replace("}\"", "}").replace("\"{", "{").replace("\\",""))
+         iSendStepsRepository.sendData(Json.encodeToString(SubmitAllRequest.serializer(),submitAllRequest).replace("}\"", "}").replace("\"{", "{").replace("\\",""))
 
     }
-    fun jsonToMap(jsonString: String): Map<String, Any> {
+    fun jsonToMap(jsonString: String): MutableMap<String, Any> {
         val jsonElement = Json.parseToJsonElement(jsonString)
-        return jsonElement.jsonObject.toMap()
+        return jsonElement.jsonObject.toMutableMap()
     }
     fun mapToList(map : Map<String,Any>) : List<String>{
         val listOfImages = arrayListOf<String>()
@@ -135,4 +135,17 @@ class SendStepsOfTicketToServerUseCase(
 
             return resultMap
         }
+
+    fun updateCommonKeys(map1: MutableMap<String, Any>, map2: MutableMap<String, Any>) {
+        // Iterate over the keys of map1
+        for (key in map1.keys) {
+            // Check if map2 contains the same key
+            if (map2.containsKey(key)) {
+                // Replace the value in map1 with the value from map2
+                map2[key]?.let {
+                    map1[key] = it
+                }
+            }
+        }
+    }
     }

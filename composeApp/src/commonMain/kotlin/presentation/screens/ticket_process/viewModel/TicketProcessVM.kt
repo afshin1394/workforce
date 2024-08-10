@@ -77,6 +77,7 @@ class TicketProcessVM(
     val logicCalculation: LogicCalculation = LogicCalculation(tempComponentList)
 
      fun getMokStepsForm(proceed: String) {
+         events.value = TicketProcessEvent.InProgress
          viewModelScope.launch(Dispatchers.Main) {
         updateStepFormUseCase(
             Tuple5(
@@ -90,6 +91,8 @@ class TicketProcessVM(
             when (it.status) {
                 AsyncStatus.ERROR -> {
                     handleError(it.resultStatus)
+                    events.value = TicketProcessEvent.Default
+
                 }
 
                 AsyncStatus.LOADING -> {
@@ -135,6 +138,7 @@ class TicketProcessVM(
                         _stepDetails.update { data.stepDetails }
                         _reloadState.update { true }
                         _stepEvent.update { StepEvent.IN_PROCESS }
+                        events.value = TicketProcessEvent.Default
 
                         updateState(ViewStates.Success())
                         getPhotoByComponentKey()
@@ -223,6 +227,8 @@ class TicketProcessVM(
     }
 
     private  fun storeStepForm() {
+        events.value = TicketProcessEvent.InProgress
+
         viewModelScope.launch {
             storeStepFormUseCase(
                 Tuple4(
@@ -235,6 +241,8 @@ class TicketProcessVM(
                 when (it.status) {
                     AsyncStatus.ERROR -> {
                         handleError(it.resultStatus)
+                        events.value = TicketProcessEvent.Default
+
                     }
 
                     AsyncStatus.LOADING -> {
@@ -242,6 +250,8 @@ class TicketProcessVM(
                     }
 
                     AsyncStatus.SUCCESS -> {
+                        events.value = TicketProcessEvent.Default
+
                         updateState(ViewStates.Success())
                         _stepEvent.update { StepEvent.START }
 

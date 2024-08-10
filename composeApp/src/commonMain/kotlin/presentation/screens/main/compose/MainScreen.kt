@@ -84,6 +84,7 @@ class MainScreen(
         var indexPhotoSelected by remember { mutableStateOf(0) }
         val showAcceptDialog  by viewModel.showAcceptDialog.collectAsState()
         val isTicketEditedState by viewModel.ticketIsEdited.collectAsState()
+        var isClickable by remember { mutableStateOf(true) }
 
 
         val reloadState by viewModel.reload.collectAsState()
@@ -268,6 +269,8 @@ class MainScreen(
                                 navigator.push(formViewerScreen)
 
                             }
+
+
                         }
 
                     }
@@ -753,16 +756,30 @@ class MainScreen(
                     TicketListScreen(
                         searchText = "",
                         onEvent = { mainEvent: MainEvent, task: TaskDomain? ->
-                            Napier.i("TicketListScreen")
-                            viewModel.events.value = mainEvent
-                            viewModel.selectedTask.value = task
-                            viewModel.resetSuspendTask()
+                            if (isClickable) {
+                                isClickable = false
+                                viewModel.events.value = mainEvent
+                                viewModel.selectedTask.value = task
+                                viewModel.resetSuspendTask()
+                                scope.launch {
+                                    delay(500)
+                                    isClickable = true
+                                }
+                            }
+                                Napier.i("TicketListScreen")
+
                         },
                         tasks = ArrayList(viewModel.tasks.toList()), onAccept = {
-                            viewModel.checkIfTicketIsEdited()
-                            viewModel.selectedTask.value = it
-                            viewModel.resetSuspendTask()
-
+                            if (isClickable) {
+                                isClickable = false
+                                viewModel.checkIfTicketIsEdited()
+                                viewModel.selectedTask.value = it
+                                viewModel.resetSuspendTask()
+                                scope.launch {
+                                    delay(500)
+                                    isClickable = true
+                                }
+                            }
                         }
                     )
                     if (viewModel.showAcceptDialog.value) {

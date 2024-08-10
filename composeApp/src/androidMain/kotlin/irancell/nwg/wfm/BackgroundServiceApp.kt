@@ -71,7 +71,6 @@ internal actual class BackgroundServiceApp : Service() , KoinComponent {
         const val CHANNEL_ID = "GPS TRACKER"
         actual fun stopBackgroundService(){
 
-
             /*if (getSharedPref().getBool(isRunningGPS, false))*/
             (provideAppContext() as Context).stopService(gpsTrackingIntent)
 
@@ -276,7 +275,7 @@ internal actual class BackgroundServiceApp : Service() , KoinComponent {
 
         val alarmManager = getSystemService(ALARM_SERVICE) as AlarmManager
         val currentTimeMillis = SystemClock.elapsedRealtime()
-        val intervalMillis = TimeUnit.MILLISECONDS.toMillis(5000)
+        val intervalMillis = TimeUnit.MILLISECONDS.toMillis(500)
 
         alarmManager.setExact(
             AlarmManager.ELAPSED_REALTIME_WAKEUP,

@@ -33,7 +33,7 @@ class UpdateTaskUseCase (
         iInitialFormRepository.resetEntitySequence()
         Napier.log(LogLevel.ASSERT,tag="UpdateTaskUseCase", message = "resetEntitySequence")
 
-        iInitialFormRepository.insertAll(arrayListOf( initialTasks[0]))
+        iInitialFormRepository.insertAll(initialTasks)
 
         Napier.log(LogLevel.ASSERT,tag="UpdateTaskUseCase", message = "insertAll")
 
@@ -44,7 +44,7 @@ class UpdateTaskUseCase (
         iTaskRepository.resetEntitySequence()
         Napier.log(LogLevel.ASSERT,tag="UpdateTaskUseCase", message = "resetEntitySequence")
 
-        iTaskRepository.insertAll(arrayListOf(tasks.details.toTaskEntityList()[0]))
+        iTaskRepository.insertAll(tasks.details.toTaskEntityList())
         Napier.log(LogLevel.ASSERT,tag="UpdateTaskUseCase", message = "insertAll")
 
         val domainList = iTaskRepository.getAll().toTaskDomainList()
