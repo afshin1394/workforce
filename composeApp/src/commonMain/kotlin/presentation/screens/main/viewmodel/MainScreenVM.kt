@@ -7,6 +7,7 @@ import androidx.compose.runtime.mutableStateOf
 import com.irancell.nwg.wfm.presentation.components.FilterSectionItem
 import presentation.model.FilterType
 import com.irancell.nwg.wfm.presentation.model.SelectableItem
+import com.irancell.nwg.wfm.presentation.model.View
 import domain.models.PhotoDomain
 import presentation.model.StateFilter
 import presentation.screens.main.events.MainEvent
@@ -20,6 +21,7 @@ import domain.usecase.usecase.photo.DeleteByComponentKeyUseCase
 import domain.usecase.usecase.photo.GetPhotoByComponentKeyUseCase
 import domain.usecase.usecase.photo.InsertPhotoUseCase
 import domain.usecase.usecase.profile.GetProfileUseCase
+import domain.usecase.usecase.steps.UpdateIsEditedTicketUseCase
 import domain.usecase.usecase.suspendTask.DeleteByTaskIdUseCase
 import domain.usecase.usecase.suspendTask.GetSuspendTaskByIdUseCase
 import domain.usecase.usecase.suspendTask.StoreSuspendTaskUseCase
@@ -55,8 +57,9 @@ class MainScreenVM(
     private val insertPhotoUseCase: InsertPhotoUseCase,
     private val getPhotoByComponentKeyUseCase: GetPhotoByComponentKeyUseCase,
     private val deleteByComponentKeyUseCase: DeleteByComponentKeyUseCase,
-    private val checkForEditedTicketUseCase: CheckForEditedTicketUseCase
-    ) : BaseViewModel() {
+    private val checkForEditedTicketUseCase: CheckForEditedTicketUseCase,
+    private val updateIsEditedTicketUseCase: UpdateIsEditedTicketUseCase
+) : BaseViewModel() {
     private val _availability = MutableStateFlow(false)
     val availability = _availability.asStateFlow()
 
@@ -75,7 +78,7 @@ class MainScreenVM(
     val positionSelected = _positionSelected.asStateFlow()
 
 
-    private val _ticketIsEdited = MutableStateFlow<Boolean?>(null)
+    private val _ticketIsEdited = MutableStateFlow<Boolean>(false)
     var ticketIsEdited = _ticketIsEdited.asStateFlow()
 
 
@@ -99,16 +102,20 @@ class MainScreenVM(
     var showAcceptDialog = _showAcceptDialog.asStateFlow()
 
 
-
     init {
         getCurrentAvailability()
         getProfileName()
         getTasks()
     }
 
-    fun updateShowAcceptDialog(showDialog : Boolean){
+    fun updateIsEditedTicket(isEdited: Boolean) {
+        _ticketIsEdited.update { isEdited }
+    }
+
+    fun updateShowAcceptDialog(showDialog: Boolean) {
         _showAcceptDialog.update { showDialog }
     }
+
     fun updatePositionSelected(position: Int) {
         _positionSelected.update { position }
     }
@@ -443,11 +450,6 @@ class MainScreenVM(
     }
 
 
-
-
-
-
-
     val suspendTaskDomain = MutableStateFlow<SuspendTaskDomain>(
         SuspendTaskDomain(
             selectedTask.value?.basic_info?.ticket_number ?: "0",
@@ -774,9 +776,11 @@ class MainScreenVM(
 //        }
     }
 
-     fun checkIfTicketIsEdited(){
+    fun checkIfTicketIsEdited() {
         viewModelScope.launch {
-            checkForEditedTicketUseCase(selectedTask.value?.basic_info?.ticket_number?:"").collect{
+            checkForEditedTicketUseCase(
+                selectedTask.value?.basic_info?.ticket_number ?: ""
+            ).collect {
                 when (it.status) {
                     AsyncStatus.ERROR -> {
                         handleError(it.resultStatus)
@@ -792,6 +796,9 @@ class MainScreenVM(
                     AsyncStatus.SUCCESS -> {
                         it.data?.let { isEdited ->
                             _ticketIsEdited.update { isEdited }
+                            if(!isEdited)
+                                updateShowAcceptDialog(true)
+
                         }
                         updateState(ViewStates.Success())
 
@@ -833,5 +840,32 @@ class MainScreenVM(
         }
 
     }
+
+    fun updateEdited(isEdited: Boolean) {
+        viewModelScope.launch {
+            updateIsEditedTicketUseCase(
+                Pair(
+                    selectedTask.value?.basic_info?.ticket_number.toString(),
+                    isEdited
+                )
+            ).collect {
+                when (it.status) {
+                    AsyncStatus.ERROR -> {
+                        handleError(it.resultStatus)
+                    }
+
+                    AsyncStatus.LOADING -> {
+                        updateState(ViewStates.Loading)
+                    }
+
+                    AsyncStatus.SUCCESS -> {
+                        checkIfTicketIsEdited()
+                    }
+                }
+            }
+        }
+
+    }
+
 
 }

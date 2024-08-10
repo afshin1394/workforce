@@ -105,6 +105,7 @@ class MainScreen(
             rememberDrawerState(initialValue = DrawerValue.Closed)
         val events by viewModel.events
 
+
         var hasDrawer by mutableStateOf(true)
 
 
@@ -589,13 +590,14 @@ class MainScreen(
 
                         EditPhotoComponent(
                             angle =0.0F,
+                            key = "Suspend",
+                            path = InternalStorage.getSuspendRouteEdited(provideAppContext()),
                             photoDomain = viewModel.photoDomainList[positionSelectedPhotoForEdit],
                             onEditUri = { editUri, originUri ->
 
-                                viewModel. photoDomainList.getOrNull(positionSelectedPhotoForEdit)?.let {
+                                viewModel.photoDomainList.getOrNull(positionSelectedPhotoForEdit)?.let {
                                     viewModel.photoDomainList[positionSelectedPhotoForEdit] =
                                         it.copy(edited_uri = editUri )
-
                                 }
 
                                 viewModel.events.value = MainEvent.PhotoPreview
@@ -700,6 +702,17 @@ class MainScreen(
 
             },
             content = {
+                    if(isTicketEditedState) {
+                        viewModel.updateIsEditedTicket(false)
+                        LaunchedEffect(Unit) {
+                            navigator.push(
+                                TicketInfoScreen(
+                                    viewModel.selectedTask.value?.basic_info?.ticket_number.toString()
+                                )
+                            )
+                        }
+                    }
+
 
                 if (viewModel.events.value == MainEvent.PhotoPreview) {
                     Napier.log(LogLevel.ASSERT, tag = "drawerState",message = drawerState.isOpen.toString())
@@ -715,14 +728,14 @@ class MainScreen(
                     viewModel.selectedTask.value?.let {
                         InternalStorage.createWorkItemImages(
                             provideAppContext(),
-                            "Suspend/Original/",
-                            it.basic_info.ticket_number.toString()
+                            "",
+                           ""
                         )
 
                         Camera.launchCamera(
                             InternalStorage.getSuspendRouteOriginal(
                                 provideAppContext()
-                            ) + "${it.basic_info.ticket_number}",
+                            ) ,
                             "Suspend"
                         )
 
@@ -731,7 +744,7 @@ class MainScreen(
                 }
                 if (availability) {
 
-                    if (reloadState){
+                    if (reloadState) {
                         viewModel.getTasks()
                     }
 
@@ -749,20 +762,14 @@ class MainScreen(
                             viewModel.checkIfTicketIsEdited()
                             viewModel.selectedTask.value = it
                             viewModel.resetSuspendTask()
-                            viewModel.updateShowAcceptDialog(true)
 
                         }
                     )
-                    if(viewModel.showAcceptDialog.value) {
-                        isTicketEditedState?.let { isEditedState ->
-                            if (isEditedState) {
+                    if (viewModel.showAcceptDialog.value) {
+                            if (isTicketEditedState) {
                                 viewModel.selectedTask.value?.let {
                                     viewModel.updateShowAcceptDialog(false)
-                                    navigator.push(
-                                        TicketInfoScreen(
-                                            it.basic_info.ticket_number ?: "0"
-                                        )
-                                    )
+
                                 }
                             } else {
                                 CustomDialogDoubleAction(
@@ -774,17 +781,15 @@ class MainScreen(
                                         viewModel.updateShowAcceptDialog(false)
                                     },
                                     onConfirm = {
+                                        viewModel.updateShowAcceptDialog(false)
                                         viewModel.selectedTask.value?.let {
-                                            navigator.push(
-                                                TicketInfoScreen(
-                                                    it.basic_info.ticket_number ?: "0"
-                                                )
-                                            )
+                                            viewModel.updateEdited(true)
                                         }
                                     })
                             }
-                        }
+
                     }
+
 
 
 

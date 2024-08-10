@@ -27,8 +27,8 @@ interface SendStepsDao {
     @Query("SELECT ticketNumber FROM SendStepsEntity WHERE edited = true")
     suspend fun selectEditedTickets() : List<String>
 
-    @Query("UPDATE SendStepsEntity SET key_value_structure = :keyValueStructure , edited = true WHERE ticketNumber = :ticketNumber AND activityId = :activityId")
-    suspend fun updateKeyValueStructure(ticketNumber: String,activityId : Long, keyValueStructure: String)
+    @Query("UPDATE SendStepsEntity SET key_value_structure = :keyValueStructure , key_value_image_structure = :keyValueImageStructure , edited = true WHERE ticketNumber = :ticketNumber AND activityId = :activityId")
+    suspend fun updateKeyValueStructure(ticketNumber: String,activityId : Long, keyValueStructure: String,keyValueImageStructure: String)
 
 
     @Query("SELECT * FROM SendStepsEntity WHERE ticketNumber = :ticketNumber AND  activityId = :activityId LIMIT 1")

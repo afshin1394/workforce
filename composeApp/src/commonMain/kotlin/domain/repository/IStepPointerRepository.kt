@@ -11,4 +11,5 @@ interface IStepPointerRepository {
     suspend fun checkIfTicketIsEdited(ticketNumber: String) : Boolean
     suspend fun resetEntitySequence()
     suspend fun updateActiveActivity(ticketNumber: String,activeActivity : Long)
+    suspend fun updateIsEdited(ticketNumber: String,isEdited : Boolean)
 }

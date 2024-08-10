@@ -13,5 +13,8 @@ interface IPhotoRepository {
 
     suspend fun deleteByKey(key:String)
 
+    suspend fun getTicketProcessPhotos(componentKeyList : List<String>) : List<PhotoEntity>
+
+
 
 }

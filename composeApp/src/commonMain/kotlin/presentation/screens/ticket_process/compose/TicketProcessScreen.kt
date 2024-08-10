@@ -25,7 +25,9 @@ import presentation.screens.ticket_process.viewModel.TicketProcessVM
 import presentation.screens.ticket_process.components.processBar
 import dev.icerock.moko.resources.compose.stringResource
 import irancell.nwg.wfm.DrawController
+import irancell.nwg.wfm.InternalStorage
 import irancell.nwg.wfm.MR
+import irancell.nwg.wfm.provideAppContext
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
@@ -128,7 +130,10 @@ class TicketProcessScreen(
             if (viewModel.events.value == TicketProcessEvent.Default) {
 
                 scope.launch {
-                    viewModel.updateLevel(PROCEED.PREVIOUS)
+                    async {   viewModel.saveAndDeletePhotoByComponentKey() }.await()
+                    if(state is ViewStates.Success) {
+                        viewModel.updateLevel(PROCEED.PREVIOUS)
+                    }
                 }
             } else {
                 when (viewModel.events.value) {
@@ -250,8 +255,6 @@ class TicketProcessScreen(
                                 indexPhotoSelected = position
                                 viewModel.updatePositionSelected(position)
                                 viewModel.events.value = TicketProcessEvent.EditPhoto
-
-
                             },
                             onDeletePhoto = {
 
@@ -276,7 +279,8 @@ class TicketProcessScreen(
 
                         EditPhotoComponent(
                             angle = 0.0F,
-
+                            key = componentKey,
+                            path = InternalStorage.getProcessRouteEdited(provideAppContext()),
                             photoDomain = viewModel.photoDomainList[viewModel.findPhotoIndexByIdAndPosition(
                                 componentKey,
                                 positionSelectedPhotoForEdit

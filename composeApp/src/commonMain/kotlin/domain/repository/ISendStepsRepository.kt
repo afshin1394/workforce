@@ -4,6 +4,7 @@ import data.network.request.step.SubmitAllRequest
 import database.entity.SendStepsEntity
 import database.entity.StepPointerEntity
 import database.entity.StepsEntity
+import dev.icerock.moko.resources.StringResource
 
 interface ISendStepsRepository {
     suspend fun sendData(json: String)
@@ -13,5 +14,5 @@ interface ISendStepsRepository {
     suspend fun getDataByTicketNumberAndStep(ticketNumber : String,activityId : Long) : SendStepsEntity
     suspend fun getEditedTickets(): List<String>
     suspend fun resetEntitySequence()
-    suspend fun updateKeyValueStructure(ticketNumber: String,activityId: Long,keyValueStructure : String)
+    suspend fun updateKeyValueStructure(ticketNumber: String,activityId: Long,keyValueStructure : String,keyValueImageStructure : String)
 }

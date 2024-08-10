@@ -6,7 +6,7 @@ import kotlin.random.Random
 
 fun extractKeyFromValue(value: String): String? {
     val atIndex = value.indexOf('@')
-    val starIndex = value.indexOf('*', atIndex)
+    val starIndex = value.indexOf('.', atIndex)
     return if (atIndex != -1 && starIndex != -1) {
         value.substring(atIndex + 1, starIndex)
     } else {
@@ -28,11 +28,13 @@ fun generateRandom6DigitNumber(): Int {
 }
 
 fun getFileExtension(filePath: String): String {
-    return File(filePath).extension()
+    val nameWithoutParams = filePath.substringBeforeLast('*')
+    return nameWithoutParams.substringAfterLast('.', "")
 }
+
 fun getMimeType(filePath: String): String {
-    val extension = getFileExtension(filePath)
-    return when (extension.toLowerCase()) {
+    val extension = getFileExtension(filePath).toLowerCase()
+    return when (extension) {
         "jpg", "jpeg" -> "image/jpeg"
         "png" -> "image/png"
         "gif" -> "image/gif"
@@ -52,7 +54,7 @@ fun formatUploadDomainList(uploadList: List<UploadDomain>): List<UploadDomain> {
             val fileExtension = getFileExtension(upload.value?:"")
             val fileMimeType = getMimeType(upload.value?:"")
             val fileSize = extractFileSizeFromKey(upload.key?:"") ?: 0L
-            val newValue = "${upload.value}${"*"}${random6Digit}${"*"}${fileMimeType}${"*"}${upload.key+"."+fileExtension}${"*"}${fileSize}"
+            val newValue = "${upload.value!!.substringBeforeLast('*')}${"*"}${random6Digit}${"*"}${fileMimeType}${"*"}${upload.key+"."+fileExtension}${"*"}${upload.value!!.substringAfterLast('*')}"
             val newUploadDomain = UploadDomain(key = keyFromValue, value = newValue)
             formattedList.add(newUploadDomain)
         }

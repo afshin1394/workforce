@@ -51,17 +51,17 @@ actual class FilePicker {
                         val contentResolver = context.contentResolver
                         val files = mutableListOf<Pair<String, File>>()
 
-                        val directory = File(  InternalStorage.getUploadFileRouteOriginal(provideAppContext()) , "UploadedFiles") // نام پوشه برای ذخیره فایل‌ها
+                        val directory = File(  InternalStorage.getUploadFileRouteOriginal(provideAppContext()) , "UploadedFiles")
                         if (!directory.exists()) {
                             directory.mkdirs()
                         }
                         for (uri in uris) {
                             val fileName = getFileName(uri, contentResolver)
                             val fileExtension = MimeTypeMap.getSingleton().getExtensionFromMimeType(contentResolver.getType(uri))
-                            val destinationFile = File(directory, "$fileName")
-                            val destinationFile2 = File(directory, "${"@"}${key}${"*"}${destinationFile.length()}${"*"}${fileName}")
-                            saveFileToInternalStorage(uri, contentResolver, destinationFile2)
-                            files.add("${"*"}${destinationFile.length()}${"*"}${fileName}"!! to destinationFile2)
+                            //val destinationFile = File(directory, "$fileName")
+                            val destinationFile = File(directory, "${"@"}${key}${"."}{fileName}")
+                            saveFileToInternalStorage(uri, contentResolver, destinationFile)
+                            files.add("${fileName}"!! to destinationFile)
                         }
                         onSuccess(files)
                     }

@@ -1,8 +1,11 @@
 package domain.usecase.usecase.steps
 
+import arrow.core.Tuple4
+import data.network.response.task.Component
 import data.network.response.task.FormStruct
 import database.entity.SendStepsEntity
 import domain.mappers.toComponent
+import domain.mappers.toPhotoDomainList
 import domain.mappers.toPhotoEntityList
 import domain.models.PhotoDomain
 import domain.models.form_struct.ComponentDomain
@@ -25,10 +28,12 @@ class StoreStepFormUseCase(
     private val iStepsRepository: IStepsRepository,
     private val iStepPointerRepository: IStepPointerRepository,
     private val iSendStepsRepository: ISendStepsRepository,
-) : BaseUseCase<Unit, Triple<String, List<ComponentDomain>, List<PhotoDomain>>>() {
+    private val iPhotoRepository: IPhotoRepository
+) : BaseUseCase<Unit, Tuple4<String, List<ComponentDomain>, List<PhotoDomain>,Int>>() {
 
-    override suspend fun run(params: Triple<String, List<ComponentDomain>, List<PhotoDomain>>) {
+    override suspend fun run(params: Tuple4<String, List<ComponentDomain>, List<PhotoDomain>, Int>) {
         val dict = mutableMapOf<String, Any>()
+        val dictImages = mutableMapOf<String,Any>()
 
         val stepPointerDomain = iStepPointerRepository.getActiveActivityByTicketNumber(params.first)
         iStepsRepository.updateFormStructure(
@@ -53,16 +58,18 @@ class StoreStepFormUseCase(
         }
 
 
-        params.second.getKeysAndValues(dict)
+        params.second.findImageComponents().getKeysAndValues(dictImages)
+        Napier.log(LogLevel.ASSERT, tag = "dicttttt", message = dictImages.toString())
+        params.second.filter { it.type != FormViewerTypes.ImageView }.getKeysAndValues(dict)
         iSendStepsRepository.updateKeyValueStructure(
             stepPointerDomain.ticketNumber,
             stepPointerDomain.activeActivity,
-            dict.toJson()
+            dict.toJson(),
+            dictImages.toJson()
         )
 
 
         Napier.log(LogLevel.ASSERT, "keyValue ", message = dict.toJson())
-
 
     }
 
@@ -140,6 +147,35 @@ class StoreStepFormUseCase(
         }
         return null
     }
+
+    fun  List<ComponentDomain>.findComponentsByType( type: String): List<ComponentDomain> {
+        return this.flatMap { component ->
+            listOf(component).plus(component.components?.let {it.findComponentsByType(type) } ?: emptyList())
+        }.filter { it.type == type }
+    }
+
+   private suspend fun List<ComponentDomain>.findImageComponents() : List<ComponentDomain>{
+        val imageComponents = this.findComponentsByType(FormViewerTypes.ImageView)
+        val photoDomainList  = iPhotoRepository.getTicketProcessPhotos(imageComponents.mapNotNull { it.key }).toPhotoDomainList()
+
+        imageComponents.forEach {
+                component->
+            val newValues =  mutableListOf<ValueDomain>()
+            photoDomainList.forEach {
+                    photoDomain ->
+                if (component.key == photoDomain.component_key){
+                    if(photoDomain.origin_uri.isNotEmpty())
+                        newValues.add(ValueDomain(value =  photoDomain.origin_uri))
+                    if(photoDomain.edited_uri.isNotEmpty())
+                        newValues.add(ValueDomain(value =  photoDomain.edited_uri))
+                }
+            }
+            component.values = newValues
+        }
+       return imageComponents
+    }
+
+
 }
 
 

@@ -4,6 +4,7 @@ package presentation.screens.ticket_process.viewModel
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import arrow.core.Tuple4
+import arrow.core.Tuple5
 import domain.models.PhotoDomain
 import domain.models.form_struct.ComponentDomain
 import domain.models.form_struct.ValueDomain
@@ -13,7 +14,7 @@ import domain.usecase.usecase.steps.StepDetail
 import domain.usecase.usecase.steps.StoreStepFormUseCase
 import domain.usecase.usecase.photo.GetPhotoByComponentKeyUseCase
 import domain.usecase.usecase.photo.InsertPhotoUseCase
-import domain.usecase.usecase.steps.StoreKeyValueUseCase
+import domain.usecase.usecase.steps.SendStepsOfTicketToServerUseCase
 import io.github.aakira.napier.LogLevel
 import io.github.aakira.napier.Napier
 import irancell.nwg.wfm.Location
@@ -38,12 +39,15 @@ class TicketProcessVM(
     private val updateStepFormUseCase: UpdateStepFormUseCase,
     private val getPhotoByComponentKeyUseCase: GetPhotoByComponentKeyUseCase,
     private val storeStepFormUseCase: StoreStepFormUseCase,
-    private val storeKeyValueUseCase: StoreKeyValueUseCase,
     private val deleteByComponentKeyUseCase: DeleteByComponentKeyUseCase,
-    private val insertPhotoUseCase: InsertPhotoUseCase
+    private val insertPhotoUseCase: InsertPhotoUseCase,
+    private val sendStepsOfTicketToServerUseCase: SendStepsOfTicketToServerUseCase
 ) : BaseViewModel() {
     private val _currentLevel = MutableStateFlow(0)
     val currentLevel = _currentLevel.asStateFlow()
+
+    private val _completed = MutableStateFlow(false)
+    val completed = _completed.asStateFlow()
 
     private val _reloadState = MutableStateFlow(false)
     var reloadState = _reloadState.asStateFlow()
@@ -72,85 +76,73 @@ class TicketProcessVM(
 
     val logicCalculation: LogicCalculation = LogicCalculation(tempComponentList)
 
-    fun getMokStepsForm(proceed: String) {
-        viewModelScope.launch {
-            updateStepFormUseCase(
-                Tuple4(
-                    _ticketNumber.value,
-                    proceed,
-                    tempComponentList.toList(),
-                    photoDomainList.toList()
-                )
-            ).collect {
-                when (it.status) {
-                    AsyncStatus.ERROR -> {
-                        handleError(it.resultStatus)
-                    }
+     fun getMokStepsForm(proceed: String) {
+         viewModelScope.launch(Dispatchers.Main) {
+        updateStepFormUseCase(
+            Tuple5(
+                _ticketNumber.value,
+                proceed,
+                tempComponentList.toList(),
+                photoDomainList.toList(),
+                _currentLevel.value
+            )
+        ).collect {
+            when (it.status) {
+                AsyncStatus.ERROR -> {
+                    handleError(it.resultStatus)
+                }
 
-                    AsyncStatus.LOADING -> {
-                        updateState(ViewStates.Loading)
-                    }
+                AsyncStatus.LOADING -> {
+                    updateState(ViewStates.Loading)
+                }
 
-                    AsyncStatus.SUCCESS -> {
-                        storeKeyValueUseCase(ticketNumber.value).collect {
-                            when (it.status) {
-                                AsyncStatus.ERROR -> {
+                AsyncStatus.SUCCESS -> {
 
-                                }
+                    it.data?.let { data ->
 
-                                AsyncStatus.LOADING -> {
+                        data.activityDomain.form.form_structure.components?.let {
+                            Napier.log(
+                                LogLevel.ASSERT,
+                                "form_structure.components",
+                                message = it.toString()
+                            )
+                            tempComponentList.clear()
+                            tempComponentList.addAll(it.toList())
 
-                                }
-
-                                AsyncStatus.SUCCESS -> {
-
-                                }
-                            }
                         }
-                        it.data?.let { data ->
+                        Napier.log(
+                            LogLevel.ASSERT,
+                            "data.stepCounter",
+                            message = it.data.activityDomain.photoDomainList.toString()
+                        )
 
-                            data.activityDomain.form.form_structure.components?.let {
-                                Napier.log(
-                                    LogLevel.ASSERT,
-                                    "form_structure.components",
-                                    message = it.toString()
-                                )
-                                tempComponentList.clear()
-                                tempComponentList.addAll(it.toList())
+                        photoDomainList.clear()
+                        photoDomainList.addAll(data.activityDomain.photoDomainList)
 
-                            }
-                            Napier.log(
-                                LogLevel.ASSERT,
-                                "data.stepCounter",
-                                message = it.data.activityDomain.photoDomainList.toString()
-                            )
+                        Napier.log(
+                            LogLevel.ASSERT,
+                            "data.stepCounter",
+                            message = data.stepCounter.toString()
+                        )
+                        Napier.log(
+                            LogLevel.ASSERT,
+                            "data.stepCounter",
+                            message = data.stepTitle
+                        )
 
-                            photoDomainList.clear()
-                            photoDomainList.addAll(data.activityDomain.photoDomainList)
+                        _currentLevel.update { data.stepCounter }
+                        _currentLevelName.update { data.stepTitle }
+                        _stepDetails.update { data.stepDetails }
+                        _reloadState.update { true }
+                        _stepEvent.update { StepEvent.IN_PROCESS }
 
-                            Napier.log(
-                                LogLevel.ASSERT,
-                                "data.stepCounter",
-                                message = data.stepCounter.toString()
-                            )
-                            Napier.log(
-                                LogLevel.ASSERT,
-                                "data.stepCounter",
-                                message = data.stepTitle
-                            )
-
-                            _currentLevel.update { data.stepCounter }
-                            _currentLevelName.update { data.stepTitle }
-                            _stepDetails.update { data.stepDetails }
-                            _reloadState.update { true }
-                            _stepEvent.update { StepEvent.IN_PROCESS }
-
-                            updateState(ViewStates.Success())
-                            getPhotoByComponentKey()
-                        }
+                        updateState(ViewStates.Success())
+                        getPhotoByComponentKey()
                     }
                 }
             }
+        }
+
         }
     }
 
@@ -161,25 +153,32 @@ class TicketProcessVM(
             tag = "updateLevelupdateLevel",
             message = _stepEvent.value.toString()
         )
-        if (!(proceed == PROCEED.PREVIOUS && _currentLevel.value == 0)) {
-            _reloadState.update { false }
-            getMokStepsForm(proceed)
+        if (_currentLevel.value == _stepDetails.value.size - 1 && proceed != PROCEED.PREVIOUS) {
+            storeLastStep()
 
         } else {
-            storeStepForm()
+            if (!(proceed == PROCEED.PREVIOUS && _currentLevel.value == 0)) {
+                _reloadState.update { false }
+                getMokStepsForm(proceed)
 
+            } else {
+                storeStepForm()
+
+            }
         }
 
 
     }
 
-    private fun storeStepForm() {
-        viewModelScope.launch {
+
+    private fun storeLastStep() {
+        viewModelScope.launch(Dispatchers.Main) {
             storeStepFormUseCase(
-                Triple(
+                Tuple4(
                     _ticketNumber.value,
                     tempComponentList.toList(),
-                    photoDomainList.toList()
+                    photoDomainList.toList(),
+                    _currentLevel.value
                 )
             ).collect {
                 when (it.status) {
@@ -192,19 +191,57 @@ class TicketProcessVM(
                     }
 
                     AsyncStatus.SUCCESS -> {
-                        storeKeyValueUseCase(ticketNumber.value).collect {
-                            when (it.status) {
-                                AsyncStatus.ERROR -> {
-                                }
+                        sendToServer()
 
-                                AsyncStatus.LOADING -> {
-                                }
+                    }
+                }
+            }
+        }
+    }
 
-                                AsyncStatus.SUCCESS -> {
+    private  fun sendToServer() {
+        viewModelScope.launch {
+            sendStepsOfTicketToServerUseCase(_ticketNumber.value).collect {
+                when (it.status) {
+                    AsyncStatus.ERROR -> {
+                        handleError(it.resultStatus)
+                    }
 
-                                }
-                            }
-                        }
+                    AsyncStatus.LOADING -> {
+                        updateState(ViewStates.Loading)
+                    }
+
+                    AsyncStatus.SUCCESS -> {
+
+
+                        updateState(ViewStates.Success())
+
+                    }
+                }
+            }
+        }
+    }
+
+    private  fun storeStepForm() {
+        viewModelScope.launch {
+            storeStepFormUseCase(
+                Tuple4(
+                    _ticketNumber.value,
+                    tempComponentList.toList(),
+                    photoDomainList.toList(),
+                    _currentLevel.value
+                )
+            ).collect {
+                when (it.status) {
+                    AsyncStatus.ERROR -> {
+                        handleError(it.resultStatus)
+                    }
+
+                    AsyncStatus.LOADING -> {
+                        updateState(ViewStates.Loading)
+                    }
+
+                    AsyncStatus.SUCCESS -> {
                         updateState(ViewStates.Success())
                         _stepEvent.update { StepEvent.START }
 
@@ -502,7 +539,7 @@ class TicketProcessVM(
                     }
                 }
             }
-        }else{
+        } else {
             updateState(ViewStates.Success())
         }
     }

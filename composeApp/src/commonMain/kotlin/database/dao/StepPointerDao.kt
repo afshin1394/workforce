@@ -26,6 +26,9 @@ interface  StepPointerDao {
     @Query("UPDATE StepPointerEntity SET activeActivity = :activeActivity , edited = true WHERE ticketNumber = :ticketNumber")
     suspend fun updateActiveActivity(ticketNumber : String ,activeActivity: Long)
 
+    @Query("UPDATE StepPointerEntity SET edited = :isEdited WHERE ticketNumber = :ticketNumber")
+    suspend fun updateIsEdited(ticketNumber : String,isEdited : Boolean )
+
 
 
 

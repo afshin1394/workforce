@@ -15,11 +15,11 @@ import java.util.UUID
 
 
 
-actual fun SaveBitmapToFile(savePath : String,bitmap: Any):Any{
+actual fun SaveBitmapToFile(savePath : String,key : String,bitmap: Any):Any{
 
     lateinit var uri : Uri
     val context = (provideAppContext() as Context)
-    val file =createImageFile(context.filesDir.path + savePath)
+    val file = createImageFile(savePath,key)
 
     val out: OutputStream = FileOutputStream(file)
     (bitmap as Bitmap).compress(Bitmap.CompressFormat.JPEG, 100, out)
@@ -27,13 +27,12 @@ actual fun SaveBitmapToFile(savePath : String,bitmap: Any):Any{
     out.close()
 
    uri = InternalStorage.getUriForFile(context, file)
-    return uri
-
+   return uri
 
 }
 
-private fun createImageFile(path : String): File {
+private fun createImageFile(path : String,key : String): File {
     val uuid = UUID.randomUUID().toString()
-    val imageFileName = "${uuid}.jpg"
+    val imageFileName = "${uuid}${"@"}${key}.jpg"
     return File(path, imageFileName)
 }

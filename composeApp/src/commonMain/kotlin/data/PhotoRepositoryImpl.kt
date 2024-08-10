@@ -1,9 +1,9 @@
 package data
 
+import androidx.compose.animation.core.rememberTransition
 import database.AppDatabase
 import database.entity.PhotoEntity
 import domain.repository.IPhotoRepository
-
 
 
 class PhotoRepositoryImpl(private val db: AppDatabase) : IPhotoRepository {
@@ -18,18 +18,23 @@ class PhotoRepositoryImpl(private val db: AppDatabase) : IPhotoRepository {
     }
 
 
-    override suspend fun getPhotoListByKey(ticketNumber: String): List<PhotoEntity>  {
+    override suspend fun getPhotoListByKey(ticketNumber: String): List<PhotoEntity> {
 
-        return db.photoDao().selectByComponentKey(ticketNumber=ticketNumber)
+        return db.photoDao().selectByComponentKey(ticketNumber = ticketNumber)
 
     }
-
 
 
     override suspend fun deleteByKey(ticketNumber: String) {
-        db.photoDao().deleteByComponentKey(ticketNumber=ticketNumber)
+        db.photoDao().deleteByComponentKey(ticketNumber = ticketNumber)
 
     }
+
+    override suspend fun getTicketProcessPhotos(componentKeyList: List<String>): List<PhotoEntity> {
+        return db.photoDao().getPhotosByComponentKeyList(componentKeyList)
+    }
+
+
 
 
 }

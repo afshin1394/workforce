@@ -46,8 +46,9 @@ class SendStepRepositoryImpl(private val db : AppDatabase,private val httpClient
     override suspend fun updateKeyValueStructure(
         ticketNumber: String,
         activityId: Long,
-        keyValueStructure: String
+        keyValueStructure: String,
+        keyValueImageStructure : String,
     ) {
-        db.sendStepsDao().updateKeyValueStructure(ticketNumber,activityId,keyValueStructure)
+        db.sendStepsDao().updateKeyValueStructure(ticketNumber,activityId,keyValueStructure,keyValueImageStructure)
     }
 }

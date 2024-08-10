@@ -26,6 +26,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.stack.Stack
+import com.benasher44.uuid.Uuid
+import com.benasher44.uuid.uuid4
 import com.irancell.nwg.wfm.presentation.theme.spacing05X
 import domain.models.PhotoDomain
 import io.github.aakira.napier.LogLevel
@@ -33,10 +35,12 @@ import io.github.aakira.napier.Napier
 import irancell.nwg.wfm.CreateDrawBox
 import irancell.nwg.wfm.DrawController
 import irancell.nwg.wfm.ImageBitmapToBitmap
+import irancell.nwg.wfm.InternalStorage
 import irancell.nwg.wfm.ParseUri
 import irancell.nwg.wfm.SaveBitmapToFile
 import irancell.nwg.wfm.UriToImageBitmap
 import irancell.nwg.wfm.getDpi
+import irancell.nwg.wfm.provideAppContext
 import presentation.screens.main.components.formViewer.draw.BrushModal
 import presentation.screens.main.components.formViewer.draw.ColorModal
 import presentation.screens.main.components.formViewer.draw.ControlsBarEditPhoto
@@ -52,13 +56,11 @@ import presentation.theme.surfaceDefault
 @Composable
 fun EditPhotoComponent(
     angle: Float,
+    key : String,
+    path : String,
     photoDomain: PhotoDomain,
-
     onEditUri: (newUri: String, originUri: String) -> Unit
 ) {
-
-
-
 
 
     val undoVisibility = remember { mutableStateOf(false) }
@@ -110,6 +112,13 @@ fun EditPhotoComponent(
     Napier.log(LogLevel.ASSERT,tag = "andazee", message = heightImage.toString())
 
 
+    LaunchedEffect(Unit){
+        InternalStorage.createWorkItemImages(
+            provideAppContext(),
+            "",
+            ""
+        )
+    }
 
 
 
@@ -137,10 +146,15 @@ fun EditPhotoComponent(
 
                         savedImageUriCheck.value = true
 
+                        Napier.log(LogLevel.ASSERT, tag = "pathFinal", message = path )
+
+
                         savedImageUri.value = SaveBitmapToFile(
-                            "/wfmImages/Suspend/",
+                            path,
+                            key,
                             ImageBitmapToBitmap(image)
                         ).toString()
+                        Napier.log(LogLevel.ASSERT, tag = "EditPhoto", message = savedImageUri.value)
 
 
                     }
@@ -178,8 +192,10 @@ fun EditPhotoComponent(
 
                         savedImageUriCheck.value = true
 
+
                         savedImageUri.value = SaveBitmapToFile(
-                            "/wfmImages/Suspend/",
+                            path,
+                            key,
                             ImageBitmapToBitmap(image)
                         ).toString()
 

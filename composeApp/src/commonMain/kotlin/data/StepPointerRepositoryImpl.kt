@@ -31,4 +31,8 @@ class StepPointerRepositoryImpl(private val db : AppDatabase) : IStepPointerRepo
         db.stepPointerDao().updateActiveActivity(ticketNumber,activeActivity)
     }
 
+    override suspend fun updateIsEdited(ticketNumber: String,isEdited : Boolean) {
+        db.stepPointerDao().updateIsEdited(ticketNumber,isEdited)
+    }
+
 }

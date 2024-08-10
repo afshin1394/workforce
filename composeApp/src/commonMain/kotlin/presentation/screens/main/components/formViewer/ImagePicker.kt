@@ -75,18 +75,19 @@ fun ImagePicker(
 
         InternalStorage.createWorkItemImages(
             provideAppContext(),
-            "Process/Original/",
-            componentId
+            "",
+            ""
         )
+        item.key?.let {
+            Camera.launchCamera(
+                InternalStorage.getProcessRouteOriginal(
+                    provideAppContext()
+                ) , it
+            )
 
-        Camera.launchCamera(
-            InternalStorage.getProcessRouteOriginal(
-                provideAppContext()
-            ) + componentId,item.key!!
-        )
+            openCamera = false
 
-        openCamera = false
-
+        }
     }
 
     if(!hideLogic) {

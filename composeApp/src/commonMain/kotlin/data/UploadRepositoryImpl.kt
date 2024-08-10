@@ -29,25 +29,15 @@ class UploadRepositoryImpl(
             setBody(
                 MultiPartFormDataContent(
                     formData {
-                        append("extra_info", jsonExtraInfo, Headers.build {
-                            append(HttpHeaders.ContentType, "text/plain")
-                        })
-                        append("total_part", uploadRequest.totalPart.toString(), Headers.build {
-                            append(HttpHeaders.ContentType, "text/plain")
-                        })
-                        append("current_part", uploadRequest.currentPart.toString(), Headers.build {
-                            append(HttpHeaders.ContentType, "text/plain")
-                        })
-                        append("name", uploadRequest.name, Headers.build {
-                            append(HttpHeaders.ContentType, "text/plain")
-                        })
-                        append("custom_id", uploadRequest.customId, Headers.build {
-                            append(HttpHeaders.ContentType, "text/plain")
-                        })
+                        append("extra_info", jsonExtraInfo)
+                        append("total_part", uploadRequest.totalPart.toString())
+                        append("current_part", uploadRequest.currentPart.toString())
+                        append("name", uploadRequest.name)
+                        append("custom_id", uploadRequest.customId)
 
                         // Adding file part
                         append("file", uploadRequest.file, Headers.build {
-                            append(HttpHeaders.ContentDisposition, "form-data; name=file; filename=\"file.zip\"")
+                            append(HttpHeaders.ContentDisposition, "form-data; name=file; filename=\"files.zip\"")
                             append(HttpHeaders.ContentType, "application/zip")
                         })
                     }

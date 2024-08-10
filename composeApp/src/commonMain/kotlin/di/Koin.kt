@@ -48,7 +48,9 @@ import domain.usecase.usecase.photo.InsertPhotoUseCase
 
 import domain.usecase.usecase.profile.GetProfileUseCase
 import domain.usecase.usecase.profile.StoreProfileUseCase
+import domain.usecase.usecase.steps.SendStepsOfTicketToServerUseCase
 import domain.usecase.usecase.steps.StoreKeyValueUseCase
+import domain.usecase.usecase.steps.UpdateIsEditedTicketUseCase
 import domain.usecase.usecase.steps.UpdateStepsUseCase
 import domain.usecase.usecase.suspendTask.DeleteByTaskIdUseCase
 import domain.usecase.usecase.suspendTask.GetSuspendTaskByIdUseCase
@@ -128,13 +130,15 @@ fun useCaseModule() = module {
     single { InsertPhotoUseCase(get()) }
     single { GetPhotoByComponentKeyUseCase(get()) }
     single { DeleteByComponentKeyUseCase(get()) }
-    single { UpdateStepsUseCase(get(),get(),get()) }
-    single { UpdateStepFormUseCase(get(),get(),get()) }
-    single { StoreStepFormUseCase(get(),get(),get()) }
+    single { UpdateStepsUseCase(get(),get(),get(),get()) }
+    single { UpdateStepFormUseCase(get(),get(),get(),get()) }
+    single { StoreStepFormUseCase(get(),get(),get(),get()) }
     single { CheckForEditedTicketUseCase(get()) }
     single { StoreKeyValueUseCase(get(),get(),get()) }
     single { SendFileToServerUseCase(get()) }
     single { StoreKeyValueUseCase(get(),get(),get()) }
+    single { SendStepsOfTicketToServerUseCase(get(),get()) }
+    single { UpdateIsEditedTicketUseCase(get())}
 }
 
 fun httpModule() = module {
@@ -143,6 +147,8 @@ fun httpModule() = module {
             expectSuccess = true
             install(ContentNegotiation) {
                 json(
+
+
                     Json {
                         ignoreUnknownKeys = true
                         prettyPrint = true
@@ -217,7 +223,7 @@ fun httpModule() = module {
 
 fun viewModelModule() = module {
     viewModelDefinition { AboutScreenVM() }
-    viewModelDefinition { MainScreenVM(get(), get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get()) }
+    viewModelDefinition { MainScreenVM(get(), get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get()) }
     viewModelDefinition { SettingScreenVM() }
     viewModelDefinition { GpsTrackingReportScreenVM(get()) }
     viewModelDefinition { LoginScreenVM(get()) }

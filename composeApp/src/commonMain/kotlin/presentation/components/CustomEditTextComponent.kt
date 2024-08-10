@@ -39,7 +39,6 @@ fun CustomEditTextComponent(
 
         Row(
             modifier = modifier
-
                 .padding(vertical = 10.dp, horizontal = spacing15X),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Start
@@ -51,7 +50,6 @@ fun CustomEditTextComponent(
                 onValueChange = {
                     value = it
                     updateText(value)
-
                 },
                 decorationBox = {
                     Row(

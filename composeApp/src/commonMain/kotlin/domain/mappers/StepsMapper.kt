@@ -2,6 +2,7 @@ import data.network.response.task.FormStruct
 import data.network.response.task.step.Activity
 import data.network.response.task.step.Form
 import data.network.response.task.step.TaskStepResponse
+import database.entity.SendStepsEntity
 import database.entity.StepsEntity
 import domain.mappers.toComponentDomain
 import domain.mappers.toConditionalDomain
@@ -99,5 +100,17 @@ fun StepsEntity.toActivityDomain() : ActivityDomain{
 fun List<StepsEntity>.toActivityDomainList(): List<ActivityDomain>{
     return  this.map {
         it.toActivityDomain()
+    }
+}
+
+//sendStep
+
+fun StepsEntity.toSendStepEntity() : SendStepsEntity {
+    return SendStepsEntity(this.pk,this.ticketNumber,this.wi,this.title,this.tag,this.activityId,"","",this.edited)
+}
+//
+fun List<StepsEntity>.toSendStepEntity() : List<SendStepsEntity>{
+    return map{
+        it.toSendStepEntity()
     }
 }

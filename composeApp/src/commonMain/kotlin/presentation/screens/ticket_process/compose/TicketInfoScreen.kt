@@ -231,11 +231,12 @@ class TicketInfoScreen(
 
                         EditPhotoComponent(
                             angle = 0.0F,
-
+                            key = componentId,
                             photoDomain = viewModel.photoDomainList[viewModel.findPhotoIndexByIdAndPosition(
                                 componentId,
                                 positionSelectedPhotoForEdit
                             ) ?: 0],
+                            path = "",
                             onEditUri = { editUri, originUri ->
                                 viewModel.updateImageUriForEditPhoto(
                                     editUri,

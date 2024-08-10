@@ -11,5 +11,6 @@ data class SendStepsEntity(
     val tag : Long,
     val activityId: Long,
     val key_value_structure: String,
+    val key_value_image_structure : String,
     val edited : Boolean
 )
