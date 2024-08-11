@@ -65,7 +65,7 @@ fun initialize(
 
     val selectedComponent = remember { mutableStateOf<ComponentDomain?>(null) }
     val indexFile = remember { mutableStateOf<Int>(0) }
-
+    val uploadDomainLists = remember { mutableStateMapOf<String, MutableState<List<ValueDomain>>>() }
 
 
     val listState = rememberLazyListState()
@@ -496,8 +496,13 @@ fun initialize(
 
 
                     FormViewerTypes.FileUpload -> {
-                        var uploadDomainList =
-                            selectedComponent.value?.values ?: emptyList()
+                        // Ensure there is an upload list for this item key
+                        if (!uploadDomainLists.containsKey(item.key)) {
+                            uploadDomainLists[item.key!!] = mutableStateOf(selectedComponent.value?.values  ?: item.values ?: emptyList())
+                        }
+
+                        val uploadDomainList = uploadDomainLists[item.key!!]!!
+
                         val initialMessageError: ResourceFormattedStringDesc =
                             item.validate?.messageError ?: ResourceFormattedStringDesc(
                                 MR.strings.empty_error_message,
@@ -508,13 +513,13 @@ fun initialize(
 
                         UploadFileComponent(
                             item = item,
-                            label = item.key?:"",
+                            label = item.key ?: "",
                             errorMessage = if (errorMessage.value == initialMessageError) errorMessage.value else initialMessageError,
                             modifier = Modifier,
-                            uploadList = uploadDomainList,
-                            onSelected = { list ->
+                            uploadList = uploadDomainList.value,
+                            onChooseFileFromDevice = { list ->
                                 selectedComponent.value?.let {
-                                    val oldList = uploadDomainList
+                                    val oldList = uploadDomainList.value
                                     val newValues = mutableListOf<ValueDomain>()
 
                                     updateFileUploadValidationError(
@@ -525,27 +530,25 @@ fun initialize(
                                     )
 
                                     val newList = (oldList + newValues).distinct()
-                                    uploadDomainList = newList
+                                    uploadDomainList.value = newList
                                     it.values = newList
 
                                     onChanges(
                                         components,
-                                        newValues,
+                                        it.values,
                                         currentParentIndex,
                                         indexFile.value
                                     )
                                 }
-
                             },
                             onClickUpload = {
-
                                 selectedComponent.value = it
                                 indexFile.value = index
-                                Napier.log(LogLevel.ASSERT,tag = "UploadFileComponent",message =index.toString())
-
+                                Napier.log(LogLevel.ASSERT, tag = "UploadFileComponent", message = index.toString())
                             }
                         )
                     }
+
 
                     FormViewerTypes.ImageView -> {
                         val initialMessageError: ResourceFormattedStringDesc =

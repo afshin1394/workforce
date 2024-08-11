@@ -18,7 +18,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -38,7 +37,6 @@ import dev.icerock.moko.resources.compose.localized
 import dev.icerock.moko.resources.compose.painterResource
 import dev.icerock.moko.resources.desc.ResourceFormattedStringDesc
 import domain.models.form_struct.ComponentDomain
-import domain.models.form_struct.ProcessLogicDomain
 import domain.models.form_struct.ValueDomain
 import irancell.nwg.wfm.FilePicker
 import irancell.nwg.wfm.MR
@@ -58,7 +56,7 @@ fun UploadFileComponent(
     modifier: Modifier,
     uploadList: List<ValueDomain>,
     onClickUpload : (item : ComponentDomain) -> Unit,
-    onSelected: (MutableList<ValueDomain>) -> Unit
+    onChooseFileFromDevice: (MutableList<ValueDomain>) -> Unit
 ) {
 
     val disableLogic = item.processLogicDomain.disabled
@@ -104,7 +102,7 @@ fun UploadFileComponent(
                 uploadDomainListForSend.add(uploadDomain)
             }
 
-            onSelected(uploadDomainListForSend)
+            onChooseFileFromDevice(uploadDomainListForSend)
 
         }
     }
@@ -223,4 +221,3 @@ fun UploadFileComponent(
         }
     }
 }
-
