@@ -19,6 +19,7 @@ const val IsScrollDateTimePickerInList = "isScrollDateTimePickerInList"
 sealed interface ServiceState{
     data object Normal : ServiceState
     data object Faulty : ServiceState
+    data object Suspend : ServiceState
 }
 
 
