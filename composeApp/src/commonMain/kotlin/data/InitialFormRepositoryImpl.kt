@@ -8,9 +8,7 @@ class InitialFormRepositoryImpl(
     private val db: AppDatabase,
 ) : IInitialFormRepository {
     override suspend fun insertAll(initialForms : List<InitialFormEntity>) {
-
         db.initialFormDao().insertAll(initialForms)
-
     }
 
     override suspend fun getAll(): List<InitialFormEntity> {

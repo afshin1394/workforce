@@ -26,6 +26,7 @@ import domain.models.task.TaskDomain
 import io.github.aakira.napier.LogLevel
 import io.github.aakira.napier.Napier
 import irancell.nwg.wfm.BackButtonHandler
+import irancell.nwg.wfm.BackgroundServiceApp
 import irancell.nwg.wfm.Camera
 import irancell.nwg.wfm.DrawController
 import irancell.nwg.wfm.ExitApp
@@ -63,6 +64,7 @@ import presentation.theme.textInverseDisabled
 import presentation.theme.textPrimary
 import utils.Availability
 import utils.PhoneNumber
+import utils.ServiceState
 import utils.Token
 
 class MainScreen(
@@ -713,6 +715,7 @@ class MainScreen(
                                     viewModel.selectedTask.value?.basic_info?.ticket_number.toString()
                                 )
                             )
+                            BackgroundServiceApp.updateServiceState(ServiceState.Normal)
                         }
                     }
 
@@ -783,10 +786,11 @@ class MainScreen(
                         }
                     )
                     if (viewModel.showAcceptDialog.value) {
-                            if (isTicketEditedState) {
+                        BackgroundServiceApp.updateServiceState(ServiceState.Suspend)
+
+                        if (isTicketEditedState) {
                                 viewModel.selectedTask.value?.let {
                                     viewModel.updateShowAcceptDialog(false)
-
                                 }
                             } else {
                                 CustomDialogDoubleAction(

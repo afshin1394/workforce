@@ -108,7 +108,7 @@ fun repositoryModule() = module {
 fun useCaseModule() = module {
     //UseCases
     single { GetGeneralLocationListUseCase(get()) }
-    single { GetAvailabilityUseCase() }
+    single { GetAvailabilityUseCase(get()) }
     single { StoreAvailabilityUseCase() }
     single { SendLocationToServerUseCase(get()) }
     single { StoreLocationDataUseCase(get()) }
@@ -223,7 +223,7 @@ fun httpModule() = module {
 
 fun viewModelModule() = module {
     viewModelDefinition { AboutScreenVM() }
-    viewModelDefinition { MainScreenVM(get(), get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get()) }
+    viewModelDefinition { MainScreenVM(get(), get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get()) }
     viewModelDefinition { SettingScreenVM() }
     viewModelDefinition { GpsTrackingReportScreenVM(get()) }
     viewModelDefinition { LoginScreenVM(get()) }

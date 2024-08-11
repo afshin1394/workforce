@@ -192,8 +192,9 @@ internal actual class BackgroundServiceApp : Service() , KoinComponent {
                         }
                     }
                 }
-
+                if(!serviceState.equals(ServiceState.Suspend))
                 updateTask()
+
                 startAlarm()
                 scope.cancel()
             }

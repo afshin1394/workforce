@@ -46,7 +46,6 @@ import utils.ViewStates
 import utils.getCurrentDate
 
 class MainScreenVM(
-    private val storeAvailabilityUseCase: StoreAvailabilityUseCase,
     private val getAvailabilityUseCase: GetAvailabilityUseCase,
     private val changeServerAvailabilityUseCase: ChangeServerAvailabilityUseCase,
     private val getTasksUseCase: GetTasksUseCase,
@@ -170,6 +169,12 @@ class MainScreenVM(
                         println("testtttttttavaliblity ${it.data}")
                         it.data?.let { available ->
                             _availability.update { available }
+                            if(_availability.value) {
+                                BackgroundServiceApp.startBackgroundService()
+                                BackgroundServiceApp.updateServiceState(ServiceState.Normal)
+                            }
+                            else
+                                BackgroundServiceApp.stopBackgroundService()
                         }
                     }
                 }
@@ -183,10 +188,10 @@ class MainScreenVM(
         viewModelScope.launch(Dispatchers.IO) {
 
 
-            changeServerAvailabilityUseCase(!_availability.value).collect {
-                when (it) {
+            changeServerAvailabilityUseCase(Unit).collect {result->
+                when (result) {
                     is AsyncResult.Error -> {
-                        handleError(it.resultStatus)
+                        handleError(result.resultStatus)
                     }
 
                     is AsyncResult.Loading -> {
@@ -194,45 +199,26 @@ class MainScreenVM(
                     }
 
                     is AsyncResult.Success -> {
+                        _availability.update { result.data?:false}
+                        updateState(ViewStates.Success())
+                        events.value = MainEvent.Default
+                        Napier.log(
+                            LogLevel.ASSERT,
+                            "storeAvailabilityUseCase start back",
+                            message = _availability.value.toString()
+                        )
+                        if (_availability.value) {
+                            BackgroundServiceApp.startBackgroundService()
+                            BackgroundServiceApp.updateServiceState(ServiceState.Normal)
+                            getTasks()
 
-                        _availability.update { !it }
-                        storeAvailabilityUseCase(
-                            Pair(_availability.value, it.data.toString())
-                        ).collect {
-                            when (it.status) {
-                                AsyncStatus.ERROR -> {
-                                    handleError(it.resultStatus)
-
-                                }
-
-                                AsyncStatus.LOADING -> {
-
-                                }
-
-                                AsyncStatus.SUCCESS -> {
-                                    updateState(ViewStates.Success())
-                                    events.value = MainEvent.Default
-                                    Napier.log(
-                                        LogLevel.ASSERT,
-                                        "storeAvailabilityUseCase start back",
-                                        message = _availability.value.toString()
-                                    )
-                                    if (_availability.value) {
-                                        BackgroundServiceApp.startBackgroundService()
-                                        BackgroundServiceApp.updateServiceState(ServiceState.Normal)
-                                        getTasks()
-
-                                    } else {
-                                        Napier.log(
-                                            LogLevel.ASSERT,
-                                            "storeAvailabilityUseCase stop back",
-                                            message = _availability.value.toString()
-                                        )
-                                        BackgroundServiceApp.stopBackgroundService()
-                                    }
-
-                                }
-                            }
+                        } else {
+                            Napier.log(
+                                LogLevel.ASSERT,
+                                "storeAvailabilityUseCase stop back",
+                                message = _availability.value.toString()
+                            )
+                            BackgroundServiceApp.stopBackgroundService()
                         }
                     }
                 }
