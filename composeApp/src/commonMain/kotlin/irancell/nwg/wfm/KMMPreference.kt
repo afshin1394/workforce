@@ -25,4 +25,8 @@ class KMMPreference(private val context: KMMContext) {
     fun getBool(key: String, default: Boolean): Boolean =
         context.getBool(key, default)
 
+    fun deleteAll() {
+        context.delete()
+    }
+
 }

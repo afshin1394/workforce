@@ -14,6 +14,7 @@ const val SelectLanguage = "SelectLanguage"
 const val isRunningGPS = "isRunningGPS"
 const val ModeApp = "modeApp"
 const val IsScrollDateTimePickerInList = "isScrollDateTimePickerInList"
+const val TicketNumber = "TicketNumber"
 
 
 sealed interface ServiceState{

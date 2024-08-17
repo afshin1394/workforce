@@ -7,8 +7,8 @@ import domain.repository.IPhotoRepository
 import domain.usecase.BaseUseCase
 
 class GetTicketProcessPhotos(private val iPhotoRepository: IPhotoRepository) :
-    BaseUseCase<List<PhotoDomain>, List<String>>() {
-    override suspend fun run(params: List<String>): List<PhotoDomain> {
-      return iPhotoRepository.getTicketProcessPhotos(params).toPhotoDomainList()
+    BaseUseCase<List<PhotoDomain>,  Pair<String,List<String>>>() {
+    override suspend fun run(params: Pair<String,List<String>>): List<PhotoDomain> {
+      return iPhotoRepository.getTicketProcessPhotos(params.first,params.second).toPhotoDomainList()
     }
 }

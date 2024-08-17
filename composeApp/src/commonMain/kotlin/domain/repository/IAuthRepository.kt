@@ -5,6 +5,7 @@ import data.network.request.auth.ResendNetworkRequest
 import data.network.request.auth.VerifyNetworkRequest
 import data.network.response.auth.LoginNetworkResponse
 import data.network.response.auth.VerifyNetworkResponse
+import io.ktor.http.HttpStatusCode
 
 interface IAuthRepository {
 
@@ -13,5 +14,6 @@ interface IAuthRepository {
     suspend fun verify(verifyNetworkRequest: VerifyNetworkRequest) : VerifyNetworkResponse
 
     suspend fun resend(resendNetworkRequest: ResendNetworkRequest)
-    suspend fun logout()
+    suspend fun logout(): Pair<HttpStatusCode,String>
+    suspend fun deleteAllTableDB()
 }

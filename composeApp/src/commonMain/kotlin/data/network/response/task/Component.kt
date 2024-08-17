@@ -18,8 +18,10 @@ data class Component(
     val label: String?= null,
     @SerialName("layout")
     val layout: Layout?= null,
-    @SerialName("subType")
+    @SerialName("subtype")
     val subType : String?= null,
+    @SerialName("isMulti")
+    val isMulti : Boolean?= null,
     @SerialName("validate")
     val validate : Validate?= null,
     @SerialName("values")

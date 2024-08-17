@@ -8,7 +8,6 @@ import domain.usecase.BaseUseCase
 
 class GetTasksUseCase(
     private val iTaskRepository: ITaskRepository,
-    private val iInitialFormRepository: IInitialFormRepository
 ) : BaseUseCase<List<TaskDomain>, Unit>() {
     override suspend fun run(params: Unit): List<TaskDomain> {
         return iTaskRepository.getAll().toTaskDomainList()

@@ -39,6 +39,47 @@ import domain.models.form_struct.ValueDomain
 import irancell.nwg.wfm.nullIfAllPropertiesNull
 
 import kotlinx.serialization.json.Json
+private fun mapSubtypeToType(subtype: String?): String? {
+    return when (subtype) {
+        "datetime" -> "datetime"
+        "date" -> "date"
+        "time" -> "time"
+        "multi" -> "multi"
+        else -> null
+    }
+
+}
+
+private fun mapTypeToSubType(type: String?): String? {
+    return when (type) {
+        "datetime" -> "datetime"
+        "date" -> "datetime"
+        "time" -> "datetime"
+        "multi" -> "select"
+        else -> null
+    }
+
+}
+
+private fun List<ComponentDomain>.updateComponentTypes(): List<ComponentDomain> {
+    return this.map { component ->
+        val newType = mapSubtypeToType(component.subType) ?: component.type
+        component.copy(
+            type = newType,
+            components = component.components?.updateComponentTypes()
+        )
+    }
+}
+private fun List<Component>.updateComponentTypesReverse(): List<Component> {
+    return this.map { component ->
+        val newType = mapTypeToSubType(component.type) ?: component.type
+        component.copy(
+            type = newType,
+            components = component.components?.updateComponentTypesReverse()
+        )
+    }
+}
+
 
 fun Detail.toInitialFormEntity(): InitialFormEntity {
     return   InitialFormEntity(
@@ -77,8 +118,10 @@ fun  FormStruct.toInitialFormDomain(ticketNumber : String) : InitialFormDomain {
 }
 
 fun  List<Component>.toComponentDomain() : List<ComponentDomain> {
-    return map {  ComponentDomain(id= it.id,it.key,hide= it.hide,type= it.type,label= it.label, readOnly =  it.readOnly?:false, layout =  it.layout?.toLayoutDomain(), subType =  it.subType, validate =  it.validate?.toValidateDomain(), values =  it.values?.toValueDomain(), conditional =  it.conditional?.toConditionalDomain(), components =  it.components?.toComponentDomain())   }
+    return map {  ComponentDomain(id= it.id,it.key,hide= it.hide,type=  it.type,label= it.label, readOnly =  it.readOnly?:false, layout =  it.layout?.toLayoutDomain(), subType =  it.subType, isMulti = it.isMulti?:false, validate =  it.validate?.toValidateDomain(), values =  it.values?.toValueDomain(), conditional =  it.conditional?.toConditionalDomain(), components =  it.components?.toComponentDomain())   }.updateComponentTypes()
 }
+
+
 
 
 
@@ -165,7 +208,7 @@ fun Operator.toOperatorDomain():OperatorDomain{
 
 
 fun  List<ComponentDomain>.toComponent() : List<Component> {
-    return map {  Component(id= it.id,it.key ,hide=  it.hide,type = it.type?:"default", readOnly = it.readOnly ,label= it.label, layout =  it.layout?.toLayout(), subType =  it.subType, validate =  it.validate?.toValidate(), values =  it.values?.toValue(), conditional =  it.conditional?.toConditional(), components =  it.components?.toComponent())   }
+    return map {  Component(id= it.id,it.key ,hide=  it.hide,type = it.type?:"default", readOnly = it.readOnly ,label= it.label, layout =  it.layout?.toLayout(), subType =  it.subType, isMulti =  it.isMulti, validate =  it.validate?.toValidate(), values =  it.values?.toValue(), conditional =  it.conditional?.toConditional(), components =  it.components?.toComponent())}.updateComponentTypesReverse()
 }
 
 

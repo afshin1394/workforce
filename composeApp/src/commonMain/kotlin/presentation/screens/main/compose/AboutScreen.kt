@@ -62,7 +62,7 @@ class AboutScreen(
 
 
                     Spacer(modifier = Modifier.padding(30.dp))
-                    Image(painter = painterResource(MR.images.ic_iTicket), contentDescription = "wfm", modifier = Modifier
+                    Image(painter = painterResource(MR.images.ic_i_ticket), contentDescription = "wfm", modifier = Modifier
                         .width(72.dp)
                         .height(72.dp))
                     Spacer(modifier = Modifier.padding(spacing25X))

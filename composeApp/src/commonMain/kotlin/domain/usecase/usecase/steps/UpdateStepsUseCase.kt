@@ -42,7 +42,6 @@ class UpdateStepsUseCase(
 //            .filter { it.basic_info.ticket_number != null && it.basic_info.ticket_number in editedTickets }
 //            .map { it.basic_info.ticket_number!! }
 //            .toHashSet().toList()
-        Napier.log(LogLevel.ASSERT,tag="editeete", message = editedTickets.toString())
         iStepsRepository.deleteAll(editedTickets)
         iStepsRepository.resetEntitySequence()
         iStepsRepository.insertAll(getInsertingValues(editedTickets, stepEntities.sortedBy { it.activityId  }))

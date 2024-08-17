@@ -68,6 +68,9 @@ class TicketInfoVM(
                         updateState(ViewStates.Loading)
                     }
 
+                    AsyncStatus.EMPTY->{
+                    }
+
                     AsyncStatus.SUCCESS -> {
                         val initialFormDomain = it.data
 
@@ -84,9 +87,11 @@ class TicketInfoVM(
                                 tempComponentList.addAll(this)
                             }
 
+                            updateState(ViewStates.Success())
 
+                        }else{
+                            updateState(ViewStates.EMPTY)
                         }
-                        updateState(ViewStates.Success())
 
 
                     }
@@ -166,6 +171,9 @@ class TicketInfoVM(
                     AsyncStatus.LOADING -> {
                         Napier.log(LogLevel.ASSERT, "getAllPhotoUseCase", message = "LOADING: ")
                         updateState(ViewStates.Loading)
+
+                    }
+                    AsyncStatus.EMPTY->{
 
                     }
 
@@ -375,6 +383,9 @@ class TicketInfoVM(
                             updateState(ViewStates.Loading)
 
                         }
+                        AsyncStatus.EMPTY->{
+
+                        }
 
                         AsyncStatus.SUCCESS -> {
                             insertNewPhoto()
@@ -410,6 +421,10 @@ class TicketInfoVM(
 
                     AsyncStatus.LOADING -> {
                         updateState(ViewStates.Loading)
+
+                    }
+
+                    AsyncStatus.EMPTY->{
 
                     }
 

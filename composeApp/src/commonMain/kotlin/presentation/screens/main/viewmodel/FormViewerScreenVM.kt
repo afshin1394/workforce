@@ -85,6 +85,9 @@ class FormViewerScreenVM(
                         Napier.log(LogLevel.ASSERT, "getAllPhotoUseCase", message = "LOADING: ")
                         updateState(ViewStates.Loading)
                     }
+                    AsyncStatus.EMPTY->{
+
+                    }
 
                     AsyncStatus.SUCCESS -> {
                         photoDomainList.clear()
@@ -145,6 +148,10 @@ class FormViewerScreenVM(
                     AsyncStatus.LOADING -> {
                         updateState(ViewStates.Loading)
                         println("apiUpload  ${"Loading"}")
+                    }
+                    AsyncStatus.EMPTY->{
+
+
                     }
 
                     AsyncStatus.SUCCESS -> {

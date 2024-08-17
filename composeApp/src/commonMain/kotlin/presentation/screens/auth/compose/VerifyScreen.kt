@@ -69,7 +69,7 @@ class VerifyScreen(private val phoneNumber: String = "") : Screen {
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Image(
-                            painter = painterResource(MR.images.ic_iTicket),
+                            painter = painterResource(MR.images.ic_i_ticket),
                             contentDescription = "ic_wfm",
                             modifier = Modifier
                                 .width(82.dp)
@@ -89,6 +89,9 @@ class VerifyScreen(private val phoneNumber: String = "") : Screen {
                                 }
 
                                 ViewStates.Loading -> {
+                                }
+                                ViewStates.EMPTY->{
+
                                 }
 
 

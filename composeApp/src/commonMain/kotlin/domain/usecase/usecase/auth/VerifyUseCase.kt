@@ -1,6 +1,5 @@
 package domain.usecase.usecase.auth
 
-import data.AuthRepositoryImpl
 import domain.mappers.toVerifyNetworkRequest
 import domain.mappers.toVerifyResponseDomain
 import domain.models.VerifyRequestDomain

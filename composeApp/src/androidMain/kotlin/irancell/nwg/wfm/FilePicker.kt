@@ -59,7 +59,7 @@ actual class FilePicker {
                             val fileName = getFileName(uri, contentResolver)
                             val fileExtension = MimeTypeMap.getSingleton().getExtensionFromMimeType(contentResolver.getType(uri))
                             //val destinationFile = File(directory, "$fileName")
-                            val destinationFile = File(directory, "${"@"}${key}${"."}{fileName}")
+                            val destinationFile = File(directory, "${"@"}${key}${"."}${fileName}")
                             saveFileToInternalStorage(uri, contentResolver, destinationFile)
                             files.add("${fileName}"!! to destinationFile)
                         }

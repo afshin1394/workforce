@@ -28,113 +28,124 @@ class SendStepsOfTicketToServerUseCase(
         val sortedSendSteps = sendStepsEntity.sortedBy { it.activityId }
         val submitAllRequest = SubmitAllRequest(ticket_num = params, steps = arrayListOf())
         val listOfString = arrayListOf<String>()
-        sendStepsEntity.forEachIndexed { index,sendStepsEntity->
-            try{
-             val map = jsonToMap(sendStepsEntity.key_value_image_structure.replace("}\"", "}").replace("\"{", "{")
-                .replace("\\", ""))
+        sendStepsEntity.forEachIndexed { index, sendStepsEntity ->
+            try {
+                val map = jsonToMap(
+                    sendStepsEntity.key_value_image_structure
+                )
 
-            listOfString.addAll(mapToList(map))
-            }catch (_:Exception){
-
+                listOfString.addAll(mapToList(map))
+            } catch (e: Exception) {
+                Napier.log(LogLevel.ASSERT, tag = "listOfString", message = e.toString())
             }
         }
-        val data = iUploadRepository.fetchUpload(convertToZip(list = listOfString,"testt",params)).toUploadDomainList()
+        val data = iUploadRepository.fetchUpload(convertToZip(list = listOfString, "testt", params))
+            .toUploadDomainList()
         val formattedList = formatUploadDomainList(data)
 
         val imageMap = listToMap(formattedList)
-        Napier.log(LogLevel.ASSERT,tag="imageMap", message = imageMap.toString())
+        Napier.log(LogLevel.ASSERT, tag = "imageMap", message = imageMap.toString())
 
 //
-            sortedSendSteps.forEachIndexed { index, item ->
-                if (index != 0) {
-                    try {
-                        val map = jsonToMap(
+        sortedSendSteps.forEachIndexed { index, item ->
+            if (index != 0) {
+                try {
+                    val map = jsonToMap(
+                        item.key_value_structure.replace("}\"", "}").replace("\"{", "{")
+                            .replace("\\", "")
+                    )
+
+                    updateCommonKeys(map, imageMap)
+
+
+
+                    submitAllRequest.steps
+                        .add(StepRequest(item.activityId.toInt(), map.mutableToJson(), 0))
+                } catch (_: Exception) {
+
+                }
+            } else {
+                try {
+                    val map =
+                        jsonToMap(
                             item.key_value_structure.replace("}\"", "}").replace("\"{", "{")
                                 .replace("\\", "")
                         )
 
-                        updateCommonKeys(map, imageMap)
+                    updateCommonKeys(map, imageMap)
 
 
 
-                        submitAllRequest.steps
-                            .add(StepRequest(item.activityId.toInt(), map.mutableToJson(), 0))
-                    } catch (_:Exception){
-
-                    }
-                } else {
-                    try {
-                        val map =
-                            jsonToMap(
-                                item.key_value_structure.replace("}\"", "}").replace("\"{", "{")
-                                    .replace("\\", "")
-                            )
-
-                        updateCommonKeys(map, imageMap)
-
-
-
-                        submitAllRequest.steps.add(
-                            StepRequest(
-                                item.activityId.toInt(),
-                                map.mutableToJson(),
-                                item.wi.toInt()
-                            )
+                    submitAllRequest.steps.add(
+                        StepRequest(
+                            item.activityId.toInt(),
+                            map.mutableToJson(),
+                            item.wi.toInt()
                         )
-                    }catch (_:Exception){
+                    )
+                } catch (_: Exception) {
 
-                    }
                 }
             }
+        }
 //
 //
 
-          Napier.log(LogLevel.ASSERT,tag="submitAllRequest", message = Json.encodeToString(SubmitAllRequest.serializer(),submitAllRequest).replace("}\"", "}").replace("\"{", "{").replace("\\",""))
+        Napier.log(
+            LogLevel.ASSERT,
+            tag = "submitAllRequest",
+            message = Json.encodeToString(SubmitAllRequest.serializer(), submitAllRequest)
+                .replace("}\"", "}").replace("\"{", "{").replace("\\", "")
+        )
 
-         iSendStepsRepository.sendData(Json.encodeToString(SubmitAllRequest.serializer(),submitAllRequest).replace("}\"", "}").replace("\"{", "{").replace("\\",""))
+        iSendStepsRepository.sendData(
+            Json.encodeToString(
+                SubmitAllRequest.serializer(),
+                submitAllRequest
+            ).replace("}\"", "}").replace("\"{", "{").replace("\\", "")
+        )
 
     }
+
     fun jsonToMap(jsonString: String): MutableMap<String, Any> {
         val jsonElement = Json.parseToJsonElement(jsonString)
         return jsonElement.jsonObject.toMutableMap()
     }
-    fun mapToList(map : Map<String,Any>) : List<String>{
-        val listOfImages = arrayListOf<String>()
+
+    fun mapToList(map: Map<String, Any>): List<String> {
+        val listOfImages = hashSetOf<String>()
         map.forEach { it ->
             val key = it.key
-            if(map[key] is JsonPrimitive) {
-                listOfImages.add((map[key] as JsonPrimitive).content)
-            }else {
-                val values = map[key] as List<*>
-                values.forEach { value->
-                    listOfImages.add((value as JsonPrimitive).content)
-                }
+            val values = map[key] as List<*>
+            values.forEach { value ->
+                listOfImages.add(
+                    (value as JsonPrimitive).content.replace(" ", "").replace("(", "")
+                        .replace(")", "").replace("$", "")
+                )
             }
+
         }
-        return listOfImages
+        return listOfImages.toList()
     }
-    fun listToMap( uploadList : List<UploadDomain>) : MutableMap<String, Any>{
+
+    fun listToMap(uploadList: List<UploadDomain>): MutableMap<String, Any> {
 
 
-            val resultMap = mutableMapOf<String, Any>()
+        val resultMap = mutableMapOf<String, Any>()
 
-            // Grouping the list by the key
-            val groupedMap = uploadList.filter { it.key != null && it.value != null }
-                .groupBy { it.key!! }
+        // Grouping the list by the key
+        val groupedMap = uploadList.filter { it.key != null && it.value != null }
+            .groupBy { it.key!! }
 
-            // Iterating through each group
-            for ((key, uploadDomains) in groupedMap) {
-                if (uploadDomains.size == 1) {
-                    // If there's only one value, add it as a String
-                    resultMap[key] = uploadDomains[0].value?:""
-                } else {
-                    // If there are multiple values, add them as a List<String>
-                    resultMap[key] = uploadDomains.map { it.value?:"" }
-                }
-            }
+        // Iterating through each group
+        for ((key, uploadDomains) in groupedMap) {
+            // If there are multiple values, add them as a List<String>
+            resultMap[key] = uploadDomains.map { it.value ?: "" }
 
-            return resultMap
         }
+
+        return resultMap
+    }
 
     fun updateCommonKeys(map1: MutableMap<String, Any>, map2: MutableMap<String, Any>) {
         // Iterate over the keys of map1
@@ -148,4 +159,4 @@ class SendStepsOfTicketToServerUseCase(
             }
         }
     }
-    }
+}

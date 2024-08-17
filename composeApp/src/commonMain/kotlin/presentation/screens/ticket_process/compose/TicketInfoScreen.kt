@@ -22,6 +22,7 @@ import presentation.theme.surfaceBrandDefault
 import presentation.theme.textInverse
 import dev.icerock.moko.resources.compose.stringResource
 import domain.models.PhotoDomain
+import irancell.nwg.wfm.BackgroundServiceApp
 import irancell.nwg.wfm.DrawController
 import irancell.nwg.wfm.MR
 import kotlinx.coroutines.FlowPreview
@@ -42,6 +43,7 @@ import presentation.theme.body_large
 import presentation.theme.surfaceDefault
 import presentation.theme.textPrimary
 import utils.AsyncStatus
+import utils.ServiceState
 import utils.ViewStates
 
 
@@ -79,7 +81,6 @@ class TicketInfoScreen(
         LaunchedEffect(Unit) {
             viewModel.getInitialForm(ticket_number)
             viewModel.updateTicketNumber(ticket_number)
-
         }
 
 

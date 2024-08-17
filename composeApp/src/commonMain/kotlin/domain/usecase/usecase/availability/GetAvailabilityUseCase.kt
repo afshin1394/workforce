@@ -4,6 +4,7 @@ import domain.repository.IAvailabilityRepository
 import domain.usecase.BaseUseCase
 import irancell.nwg.wfm.getSharedPref
 import utils.Availability
+import utils.AvailabilityObjectId
 
 class GetAvailabilityUseCase(private val iAvailabilityRepository: IAvailabilityRepository) : BaseUseCase<Boolean,Unit>() {
     override suspend fun run(params: Unit) : Boolean {

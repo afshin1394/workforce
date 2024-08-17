@@ -141,6 +141,13 @@ fun ticketCard(
                 Spacer(modifier = modifier.padding(spacing15X))
 
 
+
+            }
+            Spacer(modifier = modifier.padding(vertical = spacing05X))
+
+            Row(verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Start
+            ) {
                 Card(
                     colors = CardDefaults.cardColors(subtleDefault),
                     modifier = modifier
@@ -160,42 +167,9 @@ fun ticketCard(
                         style = body_small, color = textBrand
                     )
                 }
+
             }
             Spacer(modifier = modifier.padding(vertical = spacing05X))
-
-//            Row(verticalAlignment = Alignment.CenterVertically) {
-//                Image(
-//                    painterResource(MR.images.location),
-//                    contentDescription = "",
-//                    modifier = modifier
-//                        .width(20.dp)
-//                        .height(20.dp)
-//                )
-//                androidx.compose.material3.Text(
-//                    text = "Amanieh,Miradamad Bv,Naft St", style = body_small,
-//                    modifier = modifier
-//                        .width(200.dp)
-//                        .height(20.dp),
-//                    color = Color(0xFF666666),
-//                )
-//
-//                Spacer(modifier = modifier.padding(spacing2X))
-//
-//
-//                Image(
-//                    painterResource(MR.images.durartion),
-//                    contentDescription = "",
-//                    contentScale = ContentScale.Crop,
-//                    modifier = modifier
-//                        .width(20.dp)
-//                        .height(20.dp)
-//                )
-//                androidx.compose.material3.Text(
-//                    text = "4h 13m", style = body_small, color = textWarning
-//                )
-//
-//            }
-//            Spacer(modifier = modifier.padding(vertical = spacing05X))
 
             Row(verticalAlignment = Alignment.CenterVertically) {
 //                if (task.instanceStateId != Completed.id) {

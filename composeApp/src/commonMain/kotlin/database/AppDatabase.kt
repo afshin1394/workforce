@@ -2,6 +2,7 @@ package database
 
 import androidx.room.Database
 import androidx.room.RoomDatabase
+import database.dao.DeleteAllTableDao
 import database.dao.GeneralLocationDao
 import database.dao.InitialFormDao
 import database.dao.PhotoDao
@@ -48,8 +49,9 @@ abstract class AppDatabase : RoomDatabase(), DB {
     abstract fun stepPointerDao(): StepPointerDao
     abstract fun sendStepsDao() : SendStepsDao
 
+    abstract fun deleteAllTableDao():DeleteAllTableDao
+
     override fun clearAllTables() {
-        super.clearAllTables()
     }
 
 }

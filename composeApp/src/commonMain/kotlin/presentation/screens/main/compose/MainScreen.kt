@@ -333,9 +333,7 @@ class MainScreen(
 
 
                             }, onSecondButtonClick = {
-                                getSharedPref().put(Availability, false)
-                                getSharedPref().put(PhoneNumber, "")
-                                getSharedPref().put(Token, "")
+                                viewModel.logoutCallApi()
                                 navigator.popAll()
                                 navigator.push(loginScreen)
 
@@ -715,7 +713,6 @@ class MainScreen(
                                     viewModel.selectedTask.value?.basic_info?.ticket_number.toString()
                                 )
                             )
-                            BackgroundServiceApp.updateServiceState(ServiceState.Normal)
                         }
                     }
 
@@ -724,7 +721,6 @@ class MainScreen(
                     Napier.log(LogLevel.ASSERT, tag = "drawerState",message = drawerState.isOpen.toString())
 
                     scope.launch {
-
                         drawerState.close()
                     }
 
@@ -774,6 +770,7 @@ class MainScreen(
                         },
                         tasks = ArrayList(viewModel.tasks.toList()), onAccept = {
                             if (isClickable) {
+                                BackgroundServiceApp.updateServiceState(ServiceState.Suspend)
                                 isClickable = false
                                 viewModel.checkIfTicketIsEdited()
                                 viewModel.selectedTask.value = it
@@ -786,7 +783,6 @@ class MainScreen(
                         }
                     )
                     if (viewModel.showAcceptDialog.value) {
-                        BackgroundServiceApp.updateServiceState(ServiceState.Suspend)
 
                         if (isTicketEditedState) {
                                 viewModel.selectedTask.value?.let {
@@ -800,6 +796,7 @@ class MainScreen(
                                     titleButton = MR.strings.aaccept,
                                     onDismiss = {
                                         viewModel.updateShowAcceptDialog(false)
+                                        BackgroundServiceApp.updateServiceState(ServiceState.Normal)
                                     },
                                     onConfirm = {
                                         viewModel.updateShowAcceptDialog(false)

@@ -94,7 +94,7 @@ fun repositoryModule() = module {
     single<IGeneralLocationRepository> { GeneralLocationRepositoryImpl(get(), get(named("tokenized"))) }
     single<IAvailabilityRepository> { AvailabilityRepositoryImpl(get(named("tokenized"))) }
     single<ISuspendTaskRepository> { SuspendTaskRepositoryImpl(get(), get(named("tokenized"))) }
-    single<IAuthRepository> { AuthRepositoryImpl(get(named("noToken")),get(named("tokenized"))) }
+    single<IAuthRepository> { AuthRepositoryImpl(get(named("noToken")),get(named("tokenized")),get ()) }
     single<ITaskRepository> { TaskRepositoryImpl(get(named("tokenized")),get()) }
     single<IProfileRepository>{ ProfileRepositoryImpl(get(named("tokenized")),get()) }
     single<IInitialFormRepository>{ InitialFormRepositoryImpl(get()) }
@@ -115,7 +115,7 @@ fun useCaseModule() = module {
     single { ChangeServerAvailabilityUseCase(get()) }
     single { GetAvailabilityObjectIdUseCase() }
     single { LoginUseCase(get()) }
-    single { GetTasksUseCase(get(),get()) }
+    single { GetTasksUseCase(get()) }
     single { UpdateTaskUseCase(get(),get()) }
     single { LoginUseCase(get()) }
     single { VerifyUseCase(get()) }
@@ -223,7 +223,7 @@ fun httpModule() = module {
 
 fun viewModelModule() = module {
     viewModelDefinition { AboutScreenVM() }
-    viewModelDefinition { MainScreenVM(get(), get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get()) }
+    viewModelDefinition { MainScreenVM(get(), get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get()) }
     viewModelDefinition { SettingScreenVM() }
     viewModelDefinition { GpsTrackingReportScreenVM(get()) }
     viewModelDefinition { LoginScreenVM(get()) }

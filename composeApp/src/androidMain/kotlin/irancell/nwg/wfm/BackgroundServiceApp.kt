@@ -39,7 +39,10 @@ import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import utils.AsyncStatus
+import utils.AvailabilityObjectId
 import utils.ServiceState
+import utils.TicketNumber
+import utils.ViewStates
 import utils.getCurrentDate
 import java.util.concurrent.TimeUnit
 
@@ -163,6 +166,9 @@ internal actual class BackgroundServiceApp : Service() , KoinComponent {
                             val errorMessage = it.message!!
 
                         }
+                        AsyncStatus.EMPTY->{
+
+                        }
                         AsyncStatus.LOADING -> {
                         }
                         AsyncStatus.SUCCESS -> {
@@ -176,7 +182,9 @@ internal actual class BackgroundServiceApp : Service() , KoinComponent {
                         lat,
                         lon,
                         getCurrentDate(),
-                        0
+                        0,
+                        getSharedPref().getString(AvailabilityObjectId)?.toLong()?:0,
+                        getSharedPref().getString(TicketNumber)?:""
                     ))
                 ).collect{
                     when(it.status){
@@ -186,6 +194,8 @@ internal actual class BackgroundServiceApp : Service() , KoinComponent {
 
                         }
                         AsyncStatus.LOADING -> {
+                        }
+                        AsyncStatus.EMPTY->{
                         }
                         AsyncStatus.SUCCESS -> {
 
@@ -217,6 +227,9 @@ internal actual class BackgroundServiceApp : Service() , KoinComponent {
                     }
                     AsyncStatus.LOADING -> {
                     }
+                    AsyncStatus.EMPTY->{
+
+                    }
                     AsyncStatus.SUCCESS -> {
                         updateSteps()
                         println("TaskCallApi${"SUCCESS"}")
@@ -237,6 +250,9 @@ internal actual class BackgroundServiceApp : Service() , KoinComponent {
                         "updateSteps",
                         message = "ERROR: " + it.message
                     )
+
+                }
+                AsyncStatus.EMPTY->{
 
                 }
 

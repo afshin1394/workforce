@@ -88,6 +88,9 @@ class VerifyScreenVM(
                         updateState(ViewStates.Loading)
                         Napier.log(LogLevel.ASSERT, tag = "gettoken", message = "LOADING")
                     }
+                    AsyncStatus.EMPTY->{
+
+                    }
                     AsyncStatus.SUCCESS -> {
                         getSharedPref().put(Token, authToken)
                         getProfile()
@@ -111,6 +114,9 @@ class VerifyScreenVM(
                     AsyncStatus.LOADING -> {
 
                         Napier.log(LogLevel.ASSERT, tag = "getProfile", message = "LOADING")
+
+                    }
+                    AsyncStatus.EMPTY->{
 
                     }
                     AsyncStatus.SUCCESS -> {
@@ -138,6 +144,10 @@ class VerifyScreenVM(
                     AsyncStatus.LOADING -> {
 
                         Napier.log(LogLevel.ASSERT, tag = "serviice", message = "LOADING")
+
+                    }
+
+                    AsyncStatus.EMPTY->{
 
                     }
                     AsyncStatus.SUCCESS -> {

@@ -15,5 +15,11 @@ data class LiveLocationRequest(
     val recorded_date: String,
 
     @SerialName("site")
-    val site: Long
+    val site: Long,
+
+    @SerialName("attendance")
+    val attendance: Long,
+    @SerialName("ticket_num")
+    val ticket_num: String
+
 )

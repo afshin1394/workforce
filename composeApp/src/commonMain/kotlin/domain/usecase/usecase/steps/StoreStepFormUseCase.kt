@@ -22,6 +22,7 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import toActivityDomain
 import utils.FormViewerTypes
+import utils.parsGpsDateTime
 import utils.toJson
 
 class StoreStepFormUseCase(
@@ -31,7 +32,9 @@ class StoreStepFormUseCase(
     private val iPhotoRepository: IPhotoRepository
 ) : BaseUseCase<Unit, Tuple4<String, List<ComponentDomain>, List<PhotoDomain>,Int>>() {
 
+
     override suspend fun run(params: Tuple4<String, List<ComponentDomain>, List<PhotoDomain>, Int>) {
+        Location.start {  }
         val dict = mutableMapOf<String, Any>()
         val dictImages = mutableMapOf<String,Any>()
 
@@ -44,18 +47,22 @@ class StoreStepFormUseCase(
 
         try {
             val location = Location.getLastLocation()
+            Napier.log(LogLevel.ASSERT,tag="gpsssss", message = location.latitude)
+            Napier.log(LogLevel.ASSERT,tag="gpsssss", message = location.longitude)
+
             params.second.findComponentByKey("submitted_latitude")?.values =
                 arrayListOf(ValueDomain("submitted_latitude", location.latitude))
             params.second.findComponentByKey("submitted_longitude")?.values =
                 arrayListOf(ValueDomain("submitted_latitude", location.longitude))
-//            data.form.form_structure.components?.findComponentByKey("submitted_date")?.values =
-//                arrayListOf(ValueDomain("submitted_date", location.datetime))
+            params.second.findComponentByKey("submitted_date")?.values =
+                arrayListOf(ValueDomain("submitted_date", location.datetime.parsGpsDateTime()))
         } catch (e: Exception) {
 
         }
 
 
-        params.second.findImageComponents().getKeysAndValues(dictImages)
+        params.second.findImageComponents(params.first).getKeysAndValues(dictImages)
+        params.second.findComponentsByType(FormViewerTypes.FileUpload).getKeysAndValues(dictImages)
         params.second.getKeysAndValues(dict)
         iSendStepsRepository.updateKeyValueStructure(
             stepPointerDomain.ticketNumber,
@@ -66,7 +73,15 @@ class StoreStepFormUseCase(
 
 
         Napier.log(LogLevel.ASSERT, "keyValue ", message = dict.toJson())
+        Location.stop()
 
+    }
+    fun ComponentDomain.shouldBeArray(): Boolean {
+        return when (type) {
+            FormViewerTypes.Select , FormViewerTypes.Multi -> isMulti
+            FormViewerTypes.Checklist, FormViewerTypes.FileUpload, FormViewerTypes.ImageView -> true
+            else -> false
+        }
     }
 
     fun ComponentDomain.isSelectable() =
@@ -86,9 +101,13 @@ class StoreStepFormUseCase(
     }
 
     fun ComponentDomain.addSelectableItem(dict: MutableMap<String, Any>) {
-        if (this.values?.get(0)?.isSelected == true)
-            dict[this.key ?: ""] =
-                this.values?.get(0)?.value.toString()
+        Napier.log(LogLevel.ASSERT, tag = "addSelectableItem", message = this.key.toString())
+        this.values?.forEach {
+            if(it.isSelected)
+                dict[this.key ?: ""] =
+                    it.value.toString()
+        }
+
     }
 
     fun ComponentDomain.addItems(dict: MutableMap<String, Any>) {
@@ -105,19 +124,18 @@ class StoreStepFormUseCase(
             this.values?.get(0)?.value.toString()
     }
 
-    fun List<ComponentDomain>.getKeysAndValues(dict: MutableMap<String, Any>) {
+    fun List<ComponentDomain>.getKeysAndValues(dict: MutableMap<String,Any>)  {
         this.forEach { componentDomain ->
             componentDomain.values?.let { values ->
+
                 if (values.isNotEmpty()) {
-                    if (componentDomain.isSelectable()) {
-                        if (values.filter { it.isSelected }.size > 1)
+                    if(componentDomain.isSelectable()){
+                        if(componentDomain.shouldBeArray())
                             componentDomain.addSelectableItems(dict)
                         else
                             componentDomain.addSelectableItem(dict)
-
-
-                    } else {
-                        if (values.size > 1)
+                    }else{
+                        if(componentDomain.shouldBeArray())
                             componentDomain.addItems(dict)
                         else
                             componentDomain.addItem(dict)
@@ -150,9 +168,9 @@ class StoreStepFormUseCase(
         }.filter { it.type == type }
     }
 
-   private suspend fun List<ComponentDomain>.findImageComponents() : List<ComponentDomain>{
+   private suspend fun List<ComponentDomain>.findImageComponents(ticket_number : String) : List<ComponentDomain>{
         val imageComponents = this.findComponentsByType(FormViewerTypes.ImageView)
-        val photoDomainList  = iPhotoRepository.getTicketProcessPhotos(imageComponents.mapNotNull { it.key }).toPhotoDomainList()
+        val photoDomainList  = iPhotoRepository.getTicketProcessPhotos(ticket_number,imageComponents.mapNotNull { it.key }).toPhotoDomainList()
 
         imageComponents.forEach {
                 component->

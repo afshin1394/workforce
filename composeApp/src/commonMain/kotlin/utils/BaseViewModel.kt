@@ -24,6 +24,7 @@ sealed class ViewStates() {
     data class Error(val message: StringResource) : ViewStates()
     data class Success(val message: StringResource? = MR.strings.success) : ViewStates()
     data object Reload : ViewStates()
+    data object EMPTY : ViewStates()
 
     data class UnAuthorized(val message: StringResource) : ViewStates()
 }

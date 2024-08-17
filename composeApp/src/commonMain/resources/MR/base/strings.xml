@@ -163,5 +163,6 @@
     <string name="empty_error_message" />
     <string name="continue_flow_title" >Continue ticket process</string>
     <string name="continue_flow_message" >If you proceed you wont get updates for this ticket anymore during the process</string>
+    <string name="empty_list" > List is empty</string>
 
 </resources>

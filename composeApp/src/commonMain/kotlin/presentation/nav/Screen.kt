@@ -50,7 +50,7 @@ sealed class Screen() : ScreenProvider{
 
     sealed class  Auth() : Screen() {
         data object Login : Auth()
-        data class Verify(val phoneNumber : String = "") : Auth()
+        data object Verify : Auth()
     }
 
     sealed class  TicketProcess() : Screen(){

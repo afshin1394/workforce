@@ -7,17 +7,19 @@ import domain.models.LoginRequestDomain
 
 fun LiveLocationRequest.toLiveLocationDomain() : LiveLocationDomain {
     return LiveLocationDomain(
-        latitude = latitude, longitude = longitude, date = recorded_date,site= site
+        latitude = latitude, longitude = longitude, recorded_date = recorded_date,site= site,
+        attendance = attendance, ticket_num = ticket_num
     )
 }
 fun LiveLocationDomain.toLiveLocationRequest() : LiveLocationRequest {
     return LiveLocationRequest(
-        latitude = latitude, longitude = longitude, recorded_date = date,site= site
+        latitude = latitude, longitude = longitude, recorded_date = recorded_date,site= site,
+        attendance = attendance, ticket_num = ticket_num
     )
 }
 
 fun List<LiveLocationDomain>.toLiveLocationRequestList() : List<LiveLocationRequest>{
-   return map {
+    return map {
         it.toLiveLocationRequest()
     }
 }

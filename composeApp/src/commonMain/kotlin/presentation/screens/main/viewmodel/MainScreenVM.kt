@@ -13,6 +13,7 @@ import presentation.model.StateFilter
 import presentation.screens.main.events.MainEvent
 import domain.models.SuspendTaskDomain
 import domain.models.task.TaskDomain
+import domain.usecase.usecase.auth.LogoutUseCase
 import domain.usecase.usecase.availability.ChangeServerAvailabilityUseCase
 import domain.usecase.usecase.availability.GetAvailabilityUseCase
 import domain.usecase.usecase.availability.StoreAvailabilityUseCase
@@ -30,6 +31,7 @@ import io.github.aakira.napier.LogLevel
 import io.github.aakira.napier.Napier
 import irancell.nwg.wfm.BackgroundServiceApp
 import irancell.nwg.wfm.Location
+import irancell.nwg.wfm.getSharedPref
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.delay
@@ -40,8 +42,13 @@ import kotlinx.coroutines.launch
 import utils.AsyncResult
 
 import utils.AsyncStatus
+import utils.Availability
 import utils.BaseViewModel
+import utils.PhoneNumber
 import utils.ServiceState
+import utils.SessionId
+import utils.TicketNumber
+import utils.Token
 import utils.ViewStates
 import utils.getCurrentDate
 
@@ -57,7 +64,8 @@ class MainScreenVM(
     private val getPhotoByComponentKeyUseCase: GetPhotoByComponentKeyUseCase,
     private val deleteByComponentKeyUseCase: DeleteByComponentKeyUseCase,
     private val checkForEditedTicketUseCase: CheckForEditedTicketUseCase,
-    private val updateIsEditedTicketUseCase: UpdateIsEditedTicketUseCase
+    private val updateIsEditedTicketUseCase: UpdateIsEditedTicketUseCase,
+    private val logoutUseCase: LogoutUseCase,
 ) : BaseViewModel() {
     private val _availability = MutableStateFlow(false)
     val availability = _availability.asStateFlow()
@@ -81,6 +89,8 @@ class MainScreenVM(
     var ticketIsEdited = _ticketIsEdited.asStateFlow()
 
 
+    private val _ticketNumber = MutableStateFlow<String>(getSharedPref().getString(TicketNumber).orEmpty())
+    var ticketNumber = _ticketNumber.asStateFlow()
     var selectedTask: MutableState<TaskDomain?> = mutableStateOf(null)
 
     var events = mutableStateOf<MainEvent>(MainEvent.Default)
@@ -105,6 +115,7 @@ class MainScreenVM(
         getCurrentAvailability()
         getProfileName()
         getTasks()
+        updateTicketNumber("")
     }
 
     fun updateIsEditedTicket(isEdited: Boolean) {
@@ -131,6 +142,10 @@ class MainScreenVM(
                         AsyncStatus.LOADING -> {
 
                         }
+                        AsyncStatus.EMPTY->{
+
+                        }
+
 
                         AsyncStatus.SUCCESS -> {
                             it.data?.let {
@@ -161,6 +176,10 @@ class MainScreenVM(
 
                     AsyncStatus.LOADING -> {
                         updateState(ViewStates.Loading)
+                    }
+
+                    AsyncStatus.EMPTY->{
+
                     }
 
                     AsyncStatus.SUCCESS -> {
@@ -196,6 +215,10 @@ class MainScreenVM(
 
                     is AsyncResult.Loading -> {
                         updateState(ViewStates.Loading)
+                    }
+
+                    is AsyncResult.Empty->{
+
                     }
 
                     is AsyncResult.Success -> {
@@ -382,6 +405,13 @@ class MainScreenVM(
         _openCamera.update { openCamera }
     }
 
+    fun updateTicketNumber(ticketNum: String) {
+        _ticketNumber.update { ticketNum }
+        getSharedPref().put(TicketNumber,ticketNumber.value)
+
+
+    }
+
     fun getTasks() {
 
         viewModelScope.launch(Dispatchers.Main) {
@@ -402,6 +432,16 @@ class MainScreenVM(
                     AsyncStatus.LOADING -> {
                         Napier.log(LogLevel.ASSERT, "getAllWorksUseCase", message = "LOADING: ")
                         // updateState(ViewStates.Loading)
+
+                    }
+
+                    AsyncStatus.EMPTY->{
+                        Napier.log(
+                            LogLevel.ASSERT,
+                            "getAllWorksUseCase",
+                            message = "EMPTY: "
+                        )
+                        _reload.update { true }
 
                     }
 
@@ -465,6 +505,10 @@ class MainScreenVM(
 
                         }
 
+                        AsyncStatus.EMPTY->{
+
+                        }
+
                         AsyncStatus.SUCCESS -> {
                             updateState(ViewStates.Success())
                             val suspendTask = it.data
@@ -501,6 +545,9 @@ class MainScreenVM(
 
                         }
 
+                        AsyncStatus.EMPTY->{
+
+                        }
                         AsyncStatus.SUCCESS -> {
 
                             storeSuspendTask()
@@ -543,6 +590,10 @@ class MainScreenVM(
                     AsyncStatus.LOADING -> {
                         Napier.log(LogLevel.ASSERT, "getAllWorksUseCase", message = "LOADING: ")
                         updateState(ViewStates.Loading)
+
+                    }
+
+                    AsyncStatus.EMPTY->{
 
                     }
 
@@ -644,6 +695,10 @@ class MainScreenVM(
 
                     }
 
+                    AsyncStatus.EMPTY->{
+
+                    }
+
                     AsyncStatus.SUCCESS -> {
                         photoDomainList.clear()
                         updateState(ViewStates.Success())
@@ -716,6 +771,9 @@ class MainScreenVM(
                             updateState(ViewStates.Loading)
 
                         }
+                        AsyncStatus.EMPTY->{
+
+                        }
 
                         AsyncStatus.SUCCESS -> {
                             updateState(ViewStates.Success())
@@ -779,6 +837,10 @@ class MainScreenVM(
 
                     }
 
+                    AsyncStatus.EMPTY->{
+
+                    }
+
                     AsyncStatus.SUCCESS -> {
                         it.data?.let { isEdited ->
                             _ticketIsEdited.update { isEdited }
@@ -787,6 +849,7 @@ class MainScreenVM(
 
                         }
                         updateState(ViewStates.Success())
+                        updateTicketNumber(selectedTask.value?.basic_info?.ticket_number ?:"")
 
                     }
 
@@ -810,6 +873,9 @@ class MainScreenVM(
                         AsyncStatus.LOADING -> {
                             Napier.log(LogLevel.ASSERT, "saveSuspendTask", message = "LOADING: ")
                             updateState(ViewStates.Loading)
+
+                        }
+                        AsyncStatus.EMPTY->{
 
                         }
 
@@ -844,6 +910,10 @@ class MainScreenVM(
                         updateState(ViewStates.Loading)
                     }
 
+                    AsyncStatus.EMPTY->{
+
+                    }
+
                     AsyncStatus.SUCCESS -> {
                         checkIfTicketIsEdited()
                     }
@@ -851,6 +921,34 @@ class MainScreenVM(
             }
         }
 
+    }
+
+    fun logoutCallApi() {
+
+        viewModelScope.launch {
+            logoutUseCase(Unit).collect {
+                when (it.status) {
+                    AsyncStatus.ERROR -> {
+
+                        println("apiiLogout   ${"ERROR"}")
+                    }
+
+                    AsyncStatus.LOADING -> {
+
+                    }
+                    AsyncStatus.EMPTY->{
+
+                    }
+
+                    AsyncStatus.SUCCESS -> {
+
+                        println("apiiLogout   ${"success"}")
+
+
+                    }
+                }
+            }
+        }
     }
 
 

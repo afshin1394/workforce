@@ -56,11 +56,7 @@ class LoginScreen() : Screen {
         val authValidationState by viewModel.authValidationState.collectAsState()
         val verifyScreen =
             rememberScreen(
-                presentation.nav.Screen.Auth.Verify(
-                    phoneNumber = getSharedPref().getString(
-                        PhoneNumber
-                    ) ?: ""
-                )
+                presentation.nav.Screen.Auth.Verify
             )
 
 
@@ -83,6 +79,8 @@ class LoginScreen() : Screen {
                         }
                         ViewStates.Loading -> {
                         }
+                        ViewStates.EMPTY->{
+                        }
                         is ViewStates.Success -> {
                             scope.launch {
                                 navigator.push(verifyScreen)
@@ -103,7 +101,7 @@ class LoginScreen() : Screen {
                     }
 
                     Image(
-                        painter = dev.icerock.moko.resources.compose.painterResource(MR.images.ic_iTicket_text),
+                        painter = dev.icerock.moko.resources.compose.painterResource(MR.images.ic_i_ticket),
                         contentDescription = "ic_wfm",
                         modifier = Modifier
                             .width(72.dp)

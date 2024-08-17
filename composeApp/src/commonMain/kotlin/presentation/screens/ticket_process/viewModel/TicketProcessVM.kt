@@ -77,8 +77,8 @@ class TicketProcessVM(
     val logicCalculation: LogicCalculation = LogicCalculation(tempComponentList)
 
      fun getMokStepsForm(proceed: String) {
-         events.value = TicketProcessEvent.InProgress
-         viewModelScope.launch(Dispatchers.Main) {
+        events.value = TicketProcessEvent.InProgress
+        viewModelScope.launch(Dispatchers.Main) {
         updateStepFormUseCase(
             Tuple5(
                 _ticketNumber.value,
@@ -99,6 +99,10 @@ class TicketProcessVM(
                     updateState(ViewStates.Loading)
                 }
 
+                AsyncStatus.EMPTY->{
+
+
+                }
                 AsyncStatus.SUCCESS -> {
 
                     it.data?.let { data ->
@@ -193,9 +197,12 @@ class TicketProcessVM(
                     AsyncStatus.LOADING -> {
                         updateState(ViewStates.Loading)
                     }
+                    AsyncStatus.EMPTY->{
+                    }
 
                     AsyncStatus.SUCCESS -> {
                         sendToServer()
+
 
                     }
                 }
@@ -213,6 +220,9 @@ class TicketProcessVM(
 
                     AsyncStatus.LOADING -> {
                         updateState(ViewStates.Loading)
+                    }
+
+                    AsyncStatus.EMPTY->{
                     }
 
                     AsyncStatus.SUCCESS -> {
@@ -247,6 +257,9 @@ class TicketProcessVM(
 
                     AsyncStatus.LOADING -> {
                         updateState(ViewStates.Loading)
+                    }
+
+                    AsyncStatus.EMPTY->{
                     }
 
                     AsyncStatus.SUCCESS -> {
@@ -382,8 +395,11 @@ class TicketProcessVM(
 
                     AsyncStatus.LOADING -> {
                         Napier.log(LogLevel.ASSERT, "getAllPhotoUseCase", message = "LOADING: ")
-                        updateState(ViewStates.Loading)
+                       // updateState(ViewStates.Loading)
 
+                    }
+
+                    AsyncStatus.EMPTY->{
                     }
 
                     AsyncStatus.SUCCESS -> {
@@ -441,9 +457,12 @@ class TicketProcessVM(
         return null
     }
 
-    fun updateImageUriForDeletePhoto(po: Int, id: String) {
-        val itemIndex = findPhotoIndexByIdAndPosition(id, po)
+    fun updateImageUriForDeletePhoto(po: Int, key: String) {
+        val itemIndex = findPhotoIndexByIdAndPosition(key, po)
         itemIndex?.let {
+            val values = tempComponentList.findComponentByKey(key)?.values?.toMutableList()
+            values?.removeAt(itemIndex)
+            tempComponentList.findComponentByKey(key)?.values = values
             photoDomainList.removeAt(it)
             events.value = TicketProcessEvent.Default
         }
@@ -541,6 +560,8 @@ class TicketProcessVM(
                             updateState(ViewStates.Loading)
 
                         }
+                        AsyncStatus.EMPTY->{
+                        }
 
                         AsyncStatus.SUCCESS -> {
                             insertNewPhoto()
@@ -581,6 +602,10 @@ class TicketProcessVM(
 
                     }
 
+                    AsyncStatus.EMPTY->{
+
+                    }
+
                     AsyncStatus.SUCCESS -> {
                         updateState(ViewStates.Success())
 
@@ -593,6 +618,20 @@ class TicketProcessVM(
 
         }
 
+    }
+    private fun List<ComponentDomain>.findComponentByKey(key: String): ComponentDomain? {
+        this.forEach { component ->
+            if (component.key == key) {
+                return component
+            }
+
+            // Recursively search in the children
+            val found = component.components?.findComponentByKey(key)
+            if (found != null) {
+                return found
+            }
+        }
+        return null
     }
 
 

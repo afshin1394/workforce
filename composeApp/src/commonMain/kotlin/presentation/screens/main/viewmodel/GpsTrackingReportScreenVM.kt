@@ -35,6 +35,9 @@ class GpsTrackingReportScreenVM(
                         updateState(ViewStates.Loading)
 
                     }
+                    AsyncStatus.EMPTY->{
+
+                    }
                     AsyncStatus.SUCCESS -> {
                         it.data?.let { locations -> generalLocationList.addAll(locations) }
                         updateState(ViewStates.Success())

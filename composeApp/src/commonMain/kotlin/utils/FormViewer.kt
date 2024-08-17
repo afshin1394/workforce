@@ -513,7 +513,7 @@ fun initialize(
 
                         UploadFileComponent(
                             item = item,
-                            label = item.key ?: "",
+                            label = item.label ?: "",
                             errorMessage = if (errorMessage.value == initialMessageError) errorMessage.value else initialMessageError,
                             modifier = Modifier,
                             uploadList = uploadDomainList.value,

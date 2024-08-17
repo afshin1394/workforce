@@ -71,6 +71,9 @@ class LoginScreenVM(
                         updateState(ViewStates.Loading)
                         Napier.log(LogLevel.ASSERT, tag = "serviice", message = "LOADING")
                     }
+                    AsyncStatus.EMPTY->{
+                        updateState(ViewStates.EMPTY)
+                    }
 
                     AsyncStatus.SUCCESS -> {
                         updateState(ViewStates.Success())

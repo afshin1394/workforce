@@ -46,6 +46,8 @@ class AccountScreenVM(
                     AsyncStatus.LOADING -> {
                         updateState(ViewStates.Loading)
                     }
+                    AsyncStatus.EMPTY->{
+                    }
                     AsyncStatus.SUCCESS -> {
                         it.data?.let { profileDomain->
                             _profileDomain.update { profileDomain }

@@ -30,8 +30,8 @@ class PhotoRepositoryImpl(private val db: AppDatabase) : IPhotoRepository {
 
     }
 
-    override suspend fun getTicketProcessPhotos(componentKeyList: List<String>): List<PhotoEntity> {
-        return db.photoDao().getPhotosByComponentKeyList(componentKeyList)
+    override suspend fun getTicketProcessPhotos(ticketNumber: String,componentKeyList: List<String>): List<PhotoEntity> {
+        return db.photoDao().getPhotosByComponentKeyList(ticketNumber,componentKeyList)
     }
 
 

@@ -103,7 +103,7 @@ class SplashScreen() : Screen, KoinComponent {
                             modifier = Modifier.fillMaxSize()
                         )
                         Image(
-                            painter = painterResource(MR.images.ic_iTicket_text),
+                            painter = painterResource(MR.images.ic_i_ticket),
                             contentScale = ContentScale.FillBounds,
                             contentDescription = "",
                             modifier = Modifier
@@ -153,10 +153,14 @@ class SplashScreen() : Screen, KoinComponent {
 
                         scope.launch {
                             delay(1000)
-                            if (getSharedPref().getString(Token).toString().length > 6)
+                            if (getSharedPref().getString(Token).toString().length > 6) {
+                                navigator.popAll()
                                 navigator.push(mainScreen)
-                            else
+                            }
+                            else {
+                                navigator.popAll()
                                 navigator.push(loginScreen)
+                            }
                         }
                     }
 

@@ -30,8 +30,8 @@ interface PhotoDao {
     @Query("UPDATE PhotoEntity SET edited_uri = :editedUri WHERE origin_uri = :originUri")
     suspend fun updateEditUri(originUri: String, editedUri: String)
 
-    @Query("select * from PhotoEntity where component_key in (:componentKeyList) order by component_key")
-    suspend fun getPhotosByComponentKeyList(componentKeyList : List<String>) : List<PhotoEntity>
+    @Query("select * from PhotoEntity where component_key in (:componentKeyList) AND ticket_number = :ticketNumber order by component_key")
+    suspend fun getPhotosByComponentKeyList(ticketNumber: String,componentKeyList : List<String>) : List<PhotoEntity>
 
 
 }

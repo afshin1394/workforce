@@ -1,11 +1,8 @@
 package domain.usecase.usecase.availability
 
-import data.AvailabilityRepositoryImpl
 import data.network.request.ChangeAvailabilityRequest
 import domain.repository.IAvailabilityRepository
 import domain.usecase.BaseUseCase
-import io.github.aakira.napier.LogLevel
-import io.github.aakira.napier.Napier
 import io.ktor.http.HttpStatusCode
 import irancell.nwg.wfm.getSharedPref
 import utils.Availability

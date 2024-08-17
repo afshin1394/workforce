@@ -25,6 +25,8 @@ import toActivityDomain
 import toActivityDomainList
 import utils.FormViewerTypes
 import utils.PROCEED
+import utils.getCurrentDate
+import utils.parsGpsDateTime
 import utils.toJson
 
 data class StructureActivity(
@@ -43,6 +45,7 @@ class UpdateStepFormUseCase(
 ) : BaseUseCase<StructureActivity, Tuple5<String, String, List<ComponentDomain>, List<PhotoDomain>, Int>>() {
 
     override suspend fun run(params: Tuple5<String, String,List<ComponentDomain>,List<PhotoDomain>,Int>): StructureActivity {
+        Location.start {  }
         val dict = mutableMapOf<String, Any>()
         val dictImages = mutableMapOf<String, Any>()
         Napier.log(LogLevel.ASSERT,tag="processType", message = params.second)
@@ -62,7 +65,6 @@ class UpdateStepFormUseCase(
                 ),
                 photoList = Json.encodeToString(params.fourth)
             )
-
 
         }
 
@@ -100,7 +102,7 @@ class UpdateStepFormUseCase(
         )
 
 
-       val data =iStepsRepository.getDataByTicketNumberAndStep(
+       val data = iStepsRepository.getDataByTicketNumberAndStep(
                 stepPointerDomain.ticketNumber,
         stepListSorted.get(nextIndex).id
         ).toActivityDomain()
@@ -109,21 +111,34 @@ class UpdateStepFormUseCase(
         try {
 
             val location = Location.getLastLocation()
+            Napier.log(LogLevel.ASSERT,tag="gpsssss", message = location.latitude)
+            Napier.log(LogLevel.ASSERT,tag="gpsssss", message = location.longitude)
+
+            data.form.form_structure.components?.findComponentByKey("submitted_latitude")?.values =
+                arrayListOf(ValueDomain("submitted_latitude", location.latitude))
+            data.form.form_structure.components?.findComponentByKey("submitted_longitude")?.values =
+                arrayListOf(ValueDomain("submitted_latitude", location.longitude))
+            data.form.form_structure.components?.findComponentByKey("submitted_date")?.values =
+                arrayListOf(ValueDomain("submitted_date", location.datetime.parsGpsDateTime()))
+
             params.third.findComponentByKey("submitted_latitude")?.values =
                 arrayListOf(ValueDomain("submitted_latitude", location.latitude))
             params.third.findComponentByKey("submitted_longitude")?.values =
                 arrayListOf(ValueDomain("submitted_latitude", location.longitude))
-//            data.form.form_structure.components?.findComponentByKey("submitted_date")?.values =
-//                arrayListOf(ValueDomain("submitted_date", location.datetime))
-        }catch (e:Exception){
+            params.third.findComponentByKey("submitted_date")?.values =
+                arrayListOf(ValueDomain("submitted_date", location.datetime.parsGpsDateTime()))
+
+        }catch (_:Exception){
 
         }
-        params.third.findImageComponents().getKeysAndValues(dictImages)
+        params.third.findImageComponents(params.first).getKeysAndValues(dictImages)
+        params.third.findComponentsByType(FormViewerTypes.FileUpload).getKeysAndValues(dictImages)
         params.third.getKeysAndValues(dict)
         iSendStepsRepository.updateKeyValueStructure(stepPointerDomain.ticketNumber,stepPointerDomain.activeActivity,dict.toJson(),dictImages.toJson())
 
         Napier.log(LogLevel.ASSERT,tag="params.fifth", message = stepPointerDomain.activeActivity.toString())
         Napier.log(LogLevel.ASSERT,tag="dict", message = dict.toJson())
+        Location.stop()
         return StructureActivity(
             nextIndex,
             stepListSorted[nextIndex].title,
@@ -133,16 +148,16 @@ class UpdateStepFormUseCase(
     }
 
 
-    private fun mapSubtypeToType(subtype: String?): String? {
-        return when (subtype) {
-            "datetime" -> "datetime"
-            "date" -> "date"
-            "time" -> "time"
-            "multi" -> "multi"
-            else -> null
-        }
 
+    fun ComponentDomain.shouldBeArray(): Boolean {
+        return when (type) {
+            FormViewerTypes.Select -> isMulti
+            FormViewerTypes.Multi-> isMulti
+            FormViewerTypes.Checklist, FormViewerTypes.FileUpload, FormViewerTypes.ImageView -> true
+            else -> false
+        }
     }
+
     fun ComponentDomain.isSelectable() =
         this.type == FormViewerTypes.Checklist || this.type == FormViewerTypes.Radio || this.type == FormViewerTypes.Select
 
@@ -160,9 +175,12 @@ class UpdateStepFormUseCase(
     }
 
     fun ComponentDomain.addSelectableItem(dict: MutableMap<String,Any>) {
-        if (this.values?.get(0)?.isSelected == true)
-            dict[this.key ?: ""] =
-                this.values?.get(0)?.value.toString()
+        Napier.log(LogLevel.ASSERT, tag = "addSelectableItem", message = this.key.toString())
+        this.values?.forEach {
+            if(it.isSelected)
+                dict[this.key ?: ""] =
+                    it.value.toString()
+        }
     }
 
     fun ComponentDomain.addItems(dict: MutableMap<String,Any>) {
@@ -182,17 +200,16 @@ class UpdateStepFormUseCase(
     fun List<ComponentDomain>.getKeysAndValues(dict: MutableMap<String,Any>)  {
         this.forEach { componentDomain ->
             componentDomain.values?.let { values ->
-
                 if (values.isNotEmpty()) {
                     if(componentDomain.isSelectable()){
-                        if(values.filter { it.isSelected }.size> 1)
+                        if(componentDomain.shouldBeArray())
                             componentDomain.addSelectableItems(dict)
                         else
                             componentDomain.addSelectableItem(dict)
 
 
                     }else{
-                        if(values.size>1)
+                        if(componentDomain.shouldBeArray())
                             componentDomain.addItems(dict)
                         else
                             componentDomain.addItem(dict)
@@ -225,9 +242,9 @@ class UpdateStepFormUseCase(
         }.filter { it.type == type }
     }
 
-    private suspend fun List<ComponentDomain>.findImageComponents() : List<ComponentDomain>{
+    private suspend fun List<ComponentDomain>.findImageComponents(ticket_number : String) : List<ComponentDomain> {
         val imageComponents = this.findComponentsByType(FormViewerTypes.ImageView)
-        val photoDomainList  = iPhotoRepository.getTicketProcessPhotos(imageComponents.mapNotNull { it.key }).toPhotoDomainList()
+        val photoDomainList  = iPhotoRepository.getTicketProcessPhotos(ticket_number,imageComponents.mapNotNull { it.key }).toPhotoDomainList()
 
         imageComponents.forEach {
                 component->
@@ -245,4 +262,5 @@ class UpdateStepFormUseCase(
         }
         return imageComponents
     }
+
 }

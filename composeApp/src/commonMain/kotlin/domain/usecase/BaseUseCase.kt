@@ -35,7 +35,13 @@ abstract class BaseUseCase<out Type, in Params> {
         emit(AsyncResult.Loading(null, isLoading = true))
         try {
             val result = run(params)
-            emit(AsyncResult.Success(result, ResultStatus.SUCCESS))
+            if ( result is List<*> && result.isEmpty()){
+                emit(AsyncResult.Empty(null, false))
+            }else{
+                emit(AsyncResult.Success(result, ResultStatus.SUCCESS))
+
+            }
+
         } catch (exception: Exception) {
             exception.message?.let {
                 val resultStatus = exception.handleError()

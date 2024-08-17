@@ -26,6 +26,7 @@ import presentation.screens.ticket_process.components.processBar
 import dev.icerock.moko.resources.compose.stringResource
 import io.github.aakira.napier.LogLevel
 import io.github.aakira.napier.Napier
+import irancell.nwg.wfm.BackgroundServiceApp
 import irancell.nwg.wfm.DrawController
 import irancell.nwg.wfm.InternalStorage
 import irancell.nwg.wfm.MR
@@ -51,6 +52,7 @@ import presentation.theme.surfaceDefault
 import presentation.theme.textInverse
 import presentation.theme.textPrimary
 import utils.PROCEED
+import utils.ServiceState
 import utils.ViewStates
 import utils.initialize
 import utils.validateComponents

@@ -312,8 +312,8 @@ import presentation.screens.ticket_process.compose.TicketProcessScreen
             register<Screen.Auth.Login> {
                 LoginScreen()
             }
-            register<Screen.Auth.Verify> { provider ->
-                VerifyScreen(provider.phoneNumber)
+            register<Screen.Auth.Verify> {
+                VerifyScreen()
             }
             register<Screen.Main.Menu.MyTickets> {
                 MainScreen()

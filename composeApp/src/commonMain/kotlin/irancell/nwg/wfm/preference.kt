@@ -12,3 +12,5 @@ expect fun KMMContext.getString(key: String) : String?
 expect fun KMMContext.putBool(key: String, value: Boolean)
 
 expect fun KMMContext.getBool(key: String, default: Boolean): Boolean
+
+expect fun KMMContext.delete()
