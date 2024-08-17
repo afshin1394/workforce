@@ -56,7 +56,8 @@ fun UploadFileComponent(
     modifier: Modifier,
     uploadList: List<ValueDomain>,
     onClickUpload : (item : ComponentDomain) -> Unit,
-    onChooseFileFromDevice: (MutableList<ValueDomain>) -> Unit
+    onChooseFileFromDevice: (MutableList<ValueDomain>) -> Unit,
+    onRemoveFile: (ValueDomain) -> Unit
 ) {
 
     val disableLogic = item.processLogicDomain.disabled
@@ -193,6 +194,18 @@ fun UploadFileComponent(
                                 text = item.label.toString().substringAfterLast("/"),
                                 style = body_small,
                                 color = Color.DarkGray
+                            )
+                            Image(
+                                painter = painterResource(MR.images.close),
+                                contentDescription = null,
+                                modifier = Modifier
+                                    .size(16.dp)
+                                    .clickable {
+                                        // Delete item from the list
+
+
+                                        onRemoveFile(item)
+                                    },
                             )
                         }
                     }

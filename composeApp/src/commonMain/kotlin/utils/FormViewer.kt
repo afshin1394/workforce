@@ -513,13 +513,13 @@ fun initialize(
 
                         UploadFileComponent(
                             item = item,
-                            label = item.label ?: "",
+                            label = item.key ?: "",
                             errorMessage = if (errorMessage.value == initialMessageError) errorMessage.value else initialMessageError,
                             modifier = Modifier,
                             uploadList = uploadDomainList.value,
                             onChooseFileFromDevice = { list ->
                                 selectedComponent.value?.let {
-                                    val oldList = uploadDomainList.value
+                                    val oldList = uploadDomainList.value.toMutableList()
                                     val newValues = mutableListOf<ValueDomain>()
 
                                     updateFileUploadValidationError(
@@ -529,7 +529,10 @@ fun initialize(
                                         newValues
                                     )
 
-                                    val newList = (oldList + newValues).distinct()
+                                    // Update the list and remove duplicates
+                                    oldList.addAll(newValues)
+                                    val newList = oldList.distinct()
+
                                     uploadDomainList.value = newList
                                     it.values = newList
 
@@ -545,7 +548,22 @@ fun initialize(
                                 selectedComponent.value = it
                                 indexFile.value = index
                                 Napier.log(LogLevel.ASSERT, tag = "UploadFileComponent", message = index.toString())
+                            },
+                            onRemoveFile = { fileToRemove ->
+
+                                val newList = uploadDomainList.value.toMutableList()
+                                newList.remove(fileToRemove)
+                                uploadDomainList.value = newList
+                                item.values = newList
+
+                                onChanges(
+                                    components,
+                                    item.values,
+                                    currentParentIndex,
+                                    indexFile.value
+                                )
                             }
+
                         )
                     }
 
