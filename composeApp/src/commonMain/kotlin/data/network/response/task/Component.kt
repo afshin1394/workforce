@@ -31,7 +31,11 @@ data class Component(
     @SerialName("components")
     val components : List<Component>?= null,
     @SerialName("readonly")
-    val readOnly : Boolean? = null
+    val readOnly : Boolean? = null,
+    @SerialName("repeatable")
+    val repeatable : Boolean? = null,
+    @SerialName("removable")
+    val removable : Boolean? = null,
 
 //    @SerialName("logics")
 //    val logics : List<Logic>?= null

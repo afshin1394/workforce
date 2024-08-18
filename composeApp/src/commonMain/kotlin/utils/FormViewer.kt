@@ -113,7 +113,7 @@ fun initialize(
                             onDeleteClick = {
 
                                 val newComponents =
-                                    item.key?.let { it1 -> removeComponentById(components, it1) }
+                                    item.id?.let { it1 -> removeComponentById(components, it1) }
                                 onRemoveItem(newComponents!!, null, currentParentIndex, index)
 
                                 scope.launch {
@@ -824,7 +824,7 @@ fun copyComponentWithValues(
     }?.toMutableList()
 
     return component.copy(
-        id = "${component.key}copy$uuid",
+        id = "${component.id}copy$uuid",
         components = copiedComponents,
         values = values?.toMutableList(),
         removable = true,
@@ -833,12 +833,12 @@ fun copyComponentWithValues(
 }
 
 
-fun removeComponentById(components: List<ComponentDomain>, key: String): List<ComponentDomain> {
+fun removeComponentById(components: List<ComponentDomain>, id: String): List<ComponentDomain> {
     val mutableComponents = components.toMutableList()
     val iterator = mutableComponents.iterator()
     while (iterator.hasNext()) {
         val component = iterator.next()
-        if (component.key == key) {
+        if (component.id == id) {
             iterator.remove()
             break
         }

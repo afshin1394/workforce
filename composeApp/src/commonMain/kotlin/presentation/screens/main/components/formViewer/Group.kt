@@ -68,8 +68,6 @@ fun groupComponent(
         }
         item.components?.let {
             initialize(taskID,modifier.heightIn(0.dp, 1000.dp),photoDomainList,
-
-
                 it,
                 onChanges as (List<ComponentDomain>, List<ValueDomain>?, List<Int>, Int) -> Unit,
                 onAddItem  as (List<ComponentDomain>, List<ValueDomain>?, List<Int>, Int) -> Unit,

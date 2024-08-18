@@ -88,13 +88,14 @@ fun TaskStepResponse.toStepDetailsEntity(ticketNumber: String,photoList : String
 }
 
 fun StepsEntity.toActivityDomain() : ActivityDomain{
+    val json = Json { ignoreUnknownKeys = true }
     val photoDomainList = try{
-        Json.decodeFromString<List<PhotoDomain>>(this.photoList)
+        json.decodeFromString<List<PhotoDomain>>(this.photoList)
 
     }catch (exception:Exception){
         arrayListOf()
     }
-    return ActivityDomain(id = this.activityId, title = this.title, process_id = this.activityId.toInt(), task = 0,kind="", form = FormDomain(form_structure = Json.decodeFromString<FormStruct>(this.formStructure).toFormStructDomain())  , form_id = this.pk.toInt(), photoDomainList = photoDomainList, tag = this.tag)
+    return ActivityDomain(id = this.activityId, title = this.title, process_id = this.activityId.toInt(), task = 0,kind="", form = FormDomain(form_structure = json.decodeFromString<FormStruct>(this.formStructure).toFormStructDomain())  , form_id = this.pk.toInt(), photoDomainList = photoDomainList, tag = this.tag)
 }
 
 fun List<StepsEntity>.toActivityDomainList(): List<ActivityDomain>{
