@@ -19,12 +19,12 @@ class UpdateTaskUseCase (
         val tasks = iTaskRepository.fetchWorks()
         Napier.log(LogLevel.ASSERT,tag="UpdateTaskUseCase", message = tasks.toString())
         val initialTasks = arrayListOf<InitialFormEntity>()
-        tasks.details.forEach {
-            it.initial_form?.let {initialForm->
-                val jsonString = Json.encodeToString(FormStruct.serializer(), initialForm)
-                initialTasks.add(InitialFormEntity(it.basic_info.ticket_number?:"",jsonString))
-            }
-        }
+//        tasks.details.forEach {
+//            it.initial_form?.let {initialForm->
+//                val jsonString = Json.encodeToString(FormStruct.serializer(), initialForm)
+//                initialTasks.add(InitialFormEntity(it.basic_info.ticket_number?:"",jsonString))
+//            }
+//        }
         Napier.log(LogLevel.ASSERT,tag="UpdateTaskUseCase", message = initialTasks.toString())
 
         iInitialFormRepository.deleteAll()
@@ -33,7 +33,7 @@ class UpdateTaskUseCase (
         iInitialFormRepository.resetEntitySequence()
         Napier.log(LogLevel.ASSERT,tag="UpdateTaskUseCase", message = "resetEntitySequence")
 
-        iInitialFormRepository.insertAll(initialTasks)
+//        iInitialFormRepository.insertAll(initialTasks)
 
         Napier.log(LogLevel.ASSERT,tag="UpdateTaskUseCase", message = "insertAll")
 

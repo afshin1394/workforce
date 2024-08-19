@@ -9,9 +9,9 @@ data class Detail(
     @SerialName("basic_info")
     val basic_info: BasicInfo,
     @SerialName("init_form")
-    val initial_form: FormStruct? = null,
+    val initial_form: List<InitForm>? = null,
 ){
     override fun toString(): String {
-        return "Detail(basic_info=$basic_info, initial_form=$initial_form)"
+        return "Detail(basic_info=$basic_info)"
     }
 }

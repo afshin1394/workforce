@@ -296,7 +296,7 @@ internal actual class BackgroundServiceApp : Service() , KoinComponent {
 
         val alarmManager = getSystemService(ALARM_SERVICE) as AlarmManager
         val currentTimeMillis = SystemClock.elapsedRealtime()
-        val intervalMillis = TimeUnit.MILLISECONDS.toMillis(500)
+        val intervalMillis = TimeUnit.MILLISECONDS.toMillis(2000)
 
         alarmManager.setExact(
             AlarmManager.ELAPSED_REALTIME_WAKEUP,
