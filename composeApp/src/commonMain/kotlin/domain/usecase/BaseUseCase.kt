@@ -39,11 +39,11 @@ abstract class BaseUseCase<out Type, in Params> {
                 emit(AsyncResult.Empty(null, false))
             }else{
                 emit(AsyncResult.Success(result, ResultStatus.SUCCESS))
-
             }
 
         } catch (exception: Exception) {
             exception.message?.let {
+
                 val resultStatus = exception.handleError()
                 Napier.log(LogLevel.ASSERT,"BaseUseCaseResultStatus", message = resultStatus.toString())
                 emit(AsyncResult.Error(it, resultStatus))

@@ -1,5 +1,9 @@
 package di
+import io.ktor.client.*
 
+import io.ktor.client.*
+
+import io.ktor.util.*
 import presentation.screens.main.viewmodel.MainScreenVM
 import com.irancell.nwg.wfm.presentation.screens.main.viewmodel.SettingScreenVM
 import presentation.screens.ticket_process.viewModel.TicketProcessVM
@@ -38,7 +42,9 @@ import domain.usecase.usecase.location.GetGeneralLocationListUseCase
 import domain.usecase.usecase.location.SendLocationToServerUseCase
 import domain.usecase.usecase.availability.StoreAvailabilityUseCase
 import domain.usecase.usecase.initialForm.GetInitialFormByTask
+import domain.usecase.usecase.location.DeleteSendLocationUseCase
 import domain.usecase.usecase.location.StoreLocationDataUseCase
+import domain.usecase.usecase.location.UpdateUnSendLocationUseCase
 import domain.usecase.usecase.steps.CheckForEditedTicketUseCase
 import domain.usecase.usecase.steps.StoreStepFormUseCase
 import domain.usecase.usecase.steps.UpdateStepFormUseCase
@@ -72,6 +78,7 @@ import io.ktor.http.ContentType
 
 import io.ktor.http.contentType
 import io.ktor.serialization.kotlinx.json.json
+import irancell.nwg.wfm.configureForPlatform
 import irancell.nwg.wfm.getSharedPref
 import irancell.nwg.wfm.viewModelDefinition
 import kotlinx.serialization.json.Json
@@ -86,6 +93,8 @@ import presentation.screens.main.viewmodel.GpsTrackingReportScreenVM
 import presentation.screens.main.viewmodel.MapVM
 import presentation.screens.main.viewmodel.NotificationScreenVM
 import presentation.screens.ticket_process.viewModel.TicketInfoVM
+import utils.DevelopmentBASEURL
+import utils.ProductionBASEURL
 import utils.Token
 
 
@@ -126,7 +135,7 @@ fun useCaseModule() = module {
     single { GetProfileUseCase(get()) }
     single { DeleteByTaskIdUseCase(get()) }
     single { GetInitialFormByTask(get())}
-    single { LogoutUseCase(get()) }
+    single { LogoutUseCase(get(),get()) }
     single { InsertPhotoUseCase(get()) }
     single { GetPhotoByComponentKeyUseCase(get()) }
     single { DeleteByComponentKeyUseCase(get()) }
@@ -137,18 +146,19 @@ fun useCaseModule() = module {
     single { StoreKeyValueUseCase(get(),get(),get()) }
     single { SendFileToServerUseCase(get()) }
     single { StoreKeyValueUseCase(get(),get(),get()) }
-    single { SendStepsOfTicketToServerUseCase(get(),get()) }
+    single { SendStepsOfTicketToServerUseCase(get(),get(),get(),get(),get()) }
     single { UpdateIsEditedTicketUseCase(get())}
+    single { UpdateUnSendLocationUseCase(get())}
+    single { DeleteSendLocationUseCase(get())}
 }
 
 fun httpModule() = module {
+
     single(named("tokenized")) {
         HttpClient {
             expectSuccess = true
             install(ContentNegotiation) {
                 json(
-
-
                     Json {
                         ignoreUnknownKeys = true
                         prettyPrint = true
@@ -156,9 +166,9 @@ fun httpModule() = module {
                     }
                 )
             }
-
+            configure()
             defaultRequest {
-                url("https://uat.ios.mtnirancell.ir/api/")
+                url(DevelopmentBASEURL)
                 contentType(ContentType.Application.Json)
                 headers {
                     append(
@@ -194,9 +204,9 @@ fun httpModule() = module {
                     }
                 )
             }
-
+            configure()
             defaultRequest {
-                url("https://uat.ios.mtnirancell.ir/api/")
+                url(DevelopmentBASEURL)
                 contentType(ContentType.Application.Json)
                 headers {
 
@@ -204,6 +214,7 @@ fun httpModule() = module {
                     append("accept", "application/json")
                 }
             }
+
 
             install(HttpTimeout) {
                 requestTimeoutMillis = 15000
@@ -219,11 +230,14 @@ fun httpModule() = module {
         }
     }
 }
+internal fun HttpClientConfig<*>.configure() {
 
+    configureForPlatform()
+}
 
 fun viewModelModule() = module {
     viewModelDefinition { AboutScreenVM() }
-    viewModelDefinition { MainScreenVM(get(), get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get()) }
+    viewModelDefinition { MainScreenVM(get(), get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get()) }
     viewModelDefinition { SettingScreenVM() }
     viewModelDefinition { GpsTrackingReportScreenVM(get()) }
     viewModelDefinition { LoginScreenVM(get()) }

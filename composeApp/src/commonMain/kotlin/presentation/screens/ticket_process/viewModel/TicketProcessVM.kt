@@ -73,7 +73,12 @@ class TicketProcessVM(
     private val _ticketNumber = MutableStateFlow("0")
     val ticketNumber = _ticketNumber.asStateFlow()
 
+    private val _ticketFlowCompleted = MutableStateFlow(false)
+    var ticketFlowCompleted = _ticketFlowCompleted.asStateFlow()
 
+    fun updateTicketFlowState(completed : Boolean){
+        _ticketFlowCompleted.update { completed }
+    }
     val logicCalculation: LogicCalculation = LogicCalculation(tempComponentList)
 
      fun getMokStepsForm(proceed: String) {
@@ -210,7 +215,7 @@ class TicketProcessVM(
         }
     }
 
-    private  fun sendToServer() {
+    private fun sendToServer() {
         viewModelScope.launch {
             sendStepsOfTicketToServerUseCase(_ticketNumber.value).collect {
                 when (it.status) {
@@ -222,12 +227,12 @@ class TicketProcessVM(
                         updateState(ViewStates.Loading)
                     }
 
-                    AsyncStatus.EMPTY->{
+                    AsyncStatus.EMPTY -> {
                     }
 
                     AsyncStatus.SUCCESS -> {
 
-
+                        _ticketFlowCompleted.update { true }
                         updateState(ViewStates.Success())
 
                     }
@@ -236,7 +241,7 @@ class TicketProcessVM(
         }
     }
 
-    private  fun storeStepForm() {
+    private fun storeStepForm() {
         events.value = TicketProcessEvent.InProgress
 
         viewModelScope.launch {
@@ -259,7 +264,7 @@ class TicketProcessVM(
                         updateState(ViewStates.Loading)
                     }
 
-                    AsyncStatus.EMPTY->{
+                    AsyncStatus.EMPTY -> {
                     }
 
                     AsyncStatus.SUCCESS -> {
@@ -338,13 +343,13 @@ class TicketProcessVM(
     }
 
     fun addOrRemoveComponentDomainRepeatableToList(
-        listComponent: List<ComponentDomain>,
+        compD:ComponentDomain,
         indexChild: Int
     ) {
-        if (listComponent[0].type == FormViewerTypes.Group) {
-            if (listComponent[0].removable) {
+      //  if (listComponent[0].type == FormViewerTypes.Group) {
+            if (compD.removable) {
                 val newComponents = tempComponentList.apply {
-                    add(indexChild + 1, listComponent[0])
+                    add(indexChild + 1, compD)
                 }
                 tempComponentList = newComponents
             } else {
@@ -353,7 +358,7 @@ class TicketProcessVM(
                 }
                 tempComponentList = newComponents
 
-            }
+           // }
         }
     }
 
@@ -395,11 +400,11 @@ class TicketProcessVM(
 
                     AsyncStatus.LOADING -> {
                         Napier.log(LogLevel.ASSERT, "getAllPhotoUseCase", message = "LOADING: ")
-                       // updateState(ViewStates.Loading)
+                        // updateState(ViewStates.Loading)
 
                     }
 
-                    AsyncStatus.EMPTY->{
+                    AsyncStatus.EMPTY -> {
                     }
 
                     AsyncStatus.SUCCESS -> {
@@ -560,7 +565,8 @@ class TicketProcessVM(
                             updateState(ViewStates.Loading)
 
                         }
-                        AsyncStatus.EMPTY->{
+
+                        AsyncStatus.EMPTY -> {
                         }
 
                         AsyncStatus.SUCCESS -> {
@@ -602,7 +608,7 @@ class TicketProcessVM(
 
                     }
 
-                    AsyncStatus.EMPTY->{
+                    AsyncStatus.EMPTY -> {
 
                     }
 
@@ -619,6 +625,7 @@ class TicketProcessVM(
         }
 
     }
+
     private fun List<ComponentDomain>.findComponentByKey(key: String): ComponentDomain? {
         this.forEach { component ->
             if (component.key == key) {

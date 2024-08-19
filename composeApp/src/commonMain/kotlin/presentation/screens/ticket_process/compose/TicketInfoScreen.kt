@@ -288,16 +288,16 @@ class TicketInfoScreen(
 
                     },
                     onAddItem = {listComponent, listValueDomain, listIndexParent, indexChild ->
-                        viewModel.addOrRemoveComponentDomainRepeatableToList(
+                    /*    viewModel.addOrRemoveComponentDomainRepeatableToList(
                             listComponent,
                             indexChild
-                        )
+                        )*/
                     },
                     onRemoveItem = {listComponent, listValueDomain, listIndexParent, indexChild ->
-                        viewModel.addOrRemoveComponentDomainRepeatableToList(
+                     /*   viewModel.addOrRemoveComponentDomainRepeatableToList(
                             listComponent,
                             indexChild
-                        )
+                        )*/
                     },
                     onChanges = { listComponent, listValueDomain, listIndexParent, indexChild ->
 

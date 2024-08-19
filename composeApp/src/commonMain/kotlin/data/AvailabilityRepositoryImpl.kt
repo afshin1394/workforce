@@ -18,8 +18,8 @@ import io.ktor.http.HttpStatusCode
 class AvailabilityRepositoryImpl(
     private val httpClient: HttpClient
 ) : IAvailabilityRepository {
-    override suspend fun fetchAvailability(): Boolean {
-        return httpClient.get("workforce_management/user/is_online/").body<AvailabilityNetworkResponse>().detail
+    override suspend fun fetchAvailability(): AvailabilityNetworkResponse {
+        return httpClient.get("workforce_management/user/is_online/").body<AvailabilityNetworkResponse>()
     }
 
     override suspend fun changeAvailability(changeAvailabilityRequest: ChangeAvailabilityRequest): Pair<HttpStatusCode,String> {

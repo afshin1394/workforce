@@ -70,11 +70,13 @@ kotlinx-serialization = "1.6.2"
 connectivity_status= "1.2.0"
 orbital = "0.3.4"
 accompanist = "0.32.0"
+workRuntimeKtx = "2.8.1"
 
 
 
 
 [libraries]
+androidx-work-runtime-ktx = { module = "androidx.work:work-runtime-ktx", version.ref = "workRuntimeKtx" }
 coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coilCompose" }
 
 android-database-sqlcipher = { module = "net.zetetic:android-database-sqlcipher", version.ref = "androidDatabaseSqlcipher" }
@@ -166,6 +168,7 @@ room-runtime={module ="androidx.room:room-runtime",version.ref ="room"}
 room-runtime-android={module="androidx.room:room-runtime-android", version.ref ="room"}
 room-compiler={module= "androidx.room:room-compiler", version.ref="room"}
 sqlite-bundled={module="androidx.sqlite:sqlite-bundled", version.ref="sqlite"}
+#work-runtime-ktx = { group = "androidx.work", name = "work-runtime-ktx", version.ref = "workRuntimeKtxVersion" }
 
 [plugins]
 moko-multiplatform = {id="dev.icerock.mobile.multiplatform-resources", version.ref = "moko-version"}

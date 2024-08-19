@@ -14,6 +14,6 @@ interface IAuthRepository {
     suspend fun verify(verifyNetworkRequest: VerifyNetworkRequest) : VerifyNetworkResponse
 
     suspend fun resend(resendNetworkRequest: ResendNetworkRequest)
-    suspend fun logout(): Pair<HttpStatusCode,String>
+    suspend fun logout(): HttpStatusCode
     suspend fun deleteAllTableDB()
 }

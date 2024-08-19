@@ -8,8 +8,9 @@ import utils.AvailabilityObjectId
 
 class GetAvailabilityUseCase(private val iAvailabilityRepository: IAvailabilityRepository) : BaseUseCase<Boolean,Unit>() {
     override suspend fun run(params: Unit) : Boolean {
-         val availability  = iAvailabilityRepository.fetchAvailability()
-         getSharedPref().put(Availability,availability)
+         val response  = iAvailabilityRepository.fetchAvailability()
+         getSharedPref().put(Availability,response.detail)
+         getSharedPref().put(AvailabilityObjectId,response.obj_id.toString())
          return  getSharedPref().getBool(Availability,false)
     }
 }

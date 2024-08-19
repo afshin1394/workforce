@@ -47,15 +47,10 @@ class AuthRepositoryImpl(
         Napier.log(LogLevel.ASSERT,"resend" ,  message = "sessionId ${resendNetworkRequest.session_id}")
     }
 
-    override suspend fun logout(): Pair<HttpStatusCode,String>{
+    override suspend fun logout(): HttpStatusCode {
 
-        val apiCall =  httpClientWithToken.get("auth/token/logout/")
-        val body = apiCall.bodyAsText()
-        val status = apiCall.status
-        val objectIdJson  = body.substringAfter("=").substringBefore(" ")
-        val objectID = Json.decodeFromString<ObjectID>(objectIdJson).detail
-        Napier.log(LogLevel.ASSERT,"objectId", message = objectID)
-        return Pair(status,objectID)
+        val apiCall = httpClientWithToken.get("auth/token/logout")
+        return apiCall.status
     }
 
     override suspend fun deleteAllTableDB() {

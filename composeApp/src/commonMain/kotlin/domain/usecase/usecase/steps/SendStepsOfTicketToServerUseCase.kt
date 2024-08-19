@@ -5,7 +5,10 @@ import data.network.request.step.StepRequest
 import data.network.request.step.SubmitAllRequest
 import domain.mappers.toUploadDomainList
 import domain.models.UploadDomain
+import domain.repository.IPhotoRepository
 import domain.repository.ISendStepsRepository
+import domain.repository.IStepPointerRepository
+import domain.repository.IStepsRepository
 import domain.repository.IUploadRepository
 import domain.usecase.BaseUseCase
 import io.github.aakira.napier.LogLevel
@@ -19,6 +22,9 @@ import utils.mutableToJson
 
 class SendStepsOfTicketToServerUseCase(
     private val iSendStepsRepository: ISendStepsRepository,
+    private val iStepsRepository: IStepsRepository,
+    private val iStepPointerRepository: IStepPointerRepository,
+    private val iPhotoRepository: IPhotoRepository,
     private val iUploadRepository: IUploadRepository,
 ) :
     BaseUseCase<Unit, String>() {
@@ -39,7 +45,7 @@ class SendStepsOfTicketToServerUseCase(
                 Napier.log(LogLevel.ASSERT, tag = "listOfString", message = e.toString())
             }
         }
-        val data = iUploadRepository.fetchUpload(convertToZip(list = listOfString, "testt", params))
+        val data = iUploadRepository.fetchUpload(convertToZip(list = listOfString.toSet().toList(), "testt", params))
             .toUploadDomainList()
         val formattedList = formatUploadDomainList(data)
 
@@ -105,6 +111,10 @@ class SendStepsOfTicketToServerUseCase(
             ).replace("}\"", "}").replace("\"{", "{").replace("\\", "")
         )
 
+       iSendStepsRepository.deleteAll(arrayListOf())
+       iStepsRepository.deleteAll(arrayListOf())
+       iStepPointerRepository.deleteAll(arrayListOf())
+       iPhotoRepository.deleteProcessImages(params)
     }
 
     fun jsonToMap(jsonString: String): MutableMap<String, Any> {

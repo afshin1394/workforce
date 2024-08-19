@@ -40,6 +40,7 @@ import kotlinx.coroutines.launch
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import org.koin.compose.koinInject
+import presentation.components.CompleteFlowDialog
 import presentation.components.CustomDialog
 import presentation.components.CustomDialogDoubleAction
 import presentation.components.CustomTopAppBar
@@ -84,7 +85,7 @@ class MainScreen(
         val profileName by viewModel.profileName.collectAsState()
         val positionSelectedPhotoForEdit by viewModel.positionSelected.collectAsState()
         var indexPhotoSelected by remember { mutableStateOf(0) }
-        val showAcceptDialog  by viewModel.showAcceptDialog.collectAsState()
+        val showAcceptDialog by viewModel.showAcceptDialog.collectAsState()
         val isTicketEditedState by viewModel.ticketIsEdited.collectAsState()
         var isClickable by remember { mutableStateOf(true) }
 
@@ -182,11 +183,11 @@ class MainScreen(
                     stringResource(MR.strings.delete_photo)
                 }
 
-                MainEvent.EditPhoto->{
+                MainEvent.EditPhoto -> {
                     stringResource(MR.strings.edit_photo)
                 }
 
-                MainEvent.DiscardSuspendTicket->{
+                MainEvent.DiscardSuspendTicket -> {
                     stringResource(MR.strings.save_change)
                 }
 
@@ -199,14 +200,18 @@ class MainScreen(
             scaffoldState = scaffoldState,
             drawerState = drawerState,
             hasDrawer = hasDrawer,
-            hasSwipeDrawer = viewModel.events.value != MainEvent.PhotoPreview &&  viewModel.events.value !=MainEvent.EditPhoto,
+            hasSwipeDrawer = viewModel.events.value != MainEvent.PhotoPreview && viewModel.events.value != MainEvent.EditPhoto,
             topBar = {
                 CustomTopAppBar(
                     availability,
                     stringResource(MR.strings.ticket_list),
                     onNavigationItemClick = {
                         scope.launch {
-                            Napier.log(LogLevel.ASSERT, tag = "drawerState",message = drawerState.isOpen.toString())
+                            Napier.log(
+                                LogLevel.ASSERT,
+                                tag = "drawerState",
+                                message = drawerState.isOpen.toString()
+                            )
 
                             if (drawerState.isOpen)
                                 drawerState.close()
@@ -224,7 +229,11 @@ class MainScreen(
             drawerContent = {
                 DrawerHeader(profileName) {
                     scope.launch {
-                        Napier.log(LogLevel.ASSERT, tag = "drawerState",message = drawerState.isOpen.toString())
+                        Napier.log(
+                            LogLevel.ASSERT,
+                            tag = "drawerState",
+                            message = drawerState.isOpen.toString()
+                        )
 
                         if (drawerState.isOpen)
                             drawerState.close()
@@ -238,7 +247,11 @@ class MainScreen(
                 DrawerBody(onItemClick = {
 
                     scope.launch {
-                        Napier.log(LogLevel.ASSERT, tag = "drawerState",message = drawerState.isOpen.toString())
+                        Napier.log(
+                            LogLevel.ASSERT,
+                            tag = "drawerState",
+                            message = drawerState.isOpen.toString()
+                        )
 
                         if (drawerState.isOpen)
                             drawerState.close()
@@ -354,6 +367,7 @@ class MainScreen(
                     MainEvent.EditPhoto -> {
 
                     }
+
                     MainEvent.DeletePhoto -> {
 
 
@@ -369,7 +383,9 @@ class MainScreen(
                                 viewModel.events.value = MainEvent.PhotoPreview
                             }, onSecondButtonClick = {
                                 viewModel.updateSuspendTicketImageUriForDeletePhoto(
-                                    viewModel.photoDomainList[positionSelectedPhotoForEdit].origin_uri, positionSelectedPhotoForEdit)
+                                    viewModel.photoDomainList[positionSelectedPhotoForEdit].origin_uri,
+                                    positionSelectedPhotoForEdit
+                                )
 
 
                             })
@@ -406,7 +422,8 @@ class MainScreen(
                     MainEvent.CancelReason -> {
 
                     }
-                    MainEvent.DiscardSuspendTicket->{
+
+                    MainEvent.DiscardSuspendTicket -> {
 
                         bottomSheetDoubleActionBottomBar(
                             BottomSheetDoubleActionModel(
@@ -522,7 +539,7 @@ class MainScreen(
                         MoreOptions(onCancelClick = {
                             viewModel.events.value = MainEvent.CancelTicket
                         }, onSuspendClick = {
-                           viewModel. photoDomainList.clear()
+                            viewModel.photoDomainList.clear()
                             viewModel.loadSuspendTask()
 
                             viewModel.events.value = MainEvent.SuspendTicket
@@ -537,7 +554,8 @@ class MainScreen(
 
 
                         SuspendTicketContentComponent(
-                            ticketNumber = viewModel.selectedTask.value!!.basic_info.ticket_number?:"0",
+                            ticketNumber = viewModel.selectedTask.value!!.basic_info.ticket_number
+                                ?: "0",
                             photoDomainList = viewModel.photoDomainList,
 
                             suspendTaskDomain = suspendTaskState,
@@ -552,7 +570,7 @@ class MainScreen(
 
                             },
                             onImageClick = {
-                                indexPhotoSelected=it
+                                indexPhotoSelected = it
                                 viewModel.events.value = MainEvent.PhotoPreview
                             }
                         )
@@ -566,9 +584,9 @@ class MainScreen(
                     MainEvent.PhotoPreview -> {
                         PhotoPreviewComponent(viewModel.photoDomainList, indexPhotoSelected,
                             onEditPhotoClick = { position ->
-                                indexPhotoSelected=position
+                                indexPhotoSelected = position
                                 viewModel.updatePositionSelected(position)
-                                viewModel.events.value=MainEvent.EditPhoto
+                                viewModel.events.value = MainEvent.EditPhoto
 
 
                             },
@@ -592,16 +610,17 @@ class MainScreen(
                     MainEvent.EditPhoto -> {
 
                         EditPhotoComponent(
-                            angle =0.0F,
+                            angle = 0.0F,
                             key = "Suspend",
                             path = InternalStorage.getSuspendRouteEdited(provideAppContext()),
                             photoDomain = viewModel.photoDomainList[positionSelectedPhotoForEdit],
                             onEditUri = { editUri, originUri ->
 
-                                viewModel.photoDomainList.getOrNull(positionSelectedPhotoForEdit)?.let {
-                                    viewModel.photoDomainList[positionSelectedPhotoForEdit] =
-                                        it.copy(edited_uri = editUri )
-                                }
+                                viewModel.photoDomainList.getOrNull(positionSelectedPhotoForEdit)
+                                    ?.let {
+                                        viewModel.photoDomainList[positionSelectedPhotoForEdit] =
+                                            it.copy(edited_uri = editUri)
+                                    }
 
                                 viewModel.events.value = MainEvent.PhotoPreview
 
@@ -665,7 +684,7 @@ class MainScreen(
                         }
                     }
 
-                    MainEvent.DiscardSuspendTicket->{
+                    MainEvent.DiscardSuspendTicket -> {
 
 
                         Text(
@@ -696,6 +715,7 @@ class MainScreen(
                     MainEvent.Default -> {
 
                     }
+
                     MainEvent.AcceptTicket -> {
 
                     }
@@ -705,20 +725,24 @@ class MainScreen(
 
             },
             content = {
-                    if(isTicketEditedState) {
-                        viewModel.updateIsEditedTicket(false)
-                        LaunchedEffect(Unit) {
-                            navigator.push(
-                                TicketInfoScreen(
-                                    viewModel.selectedTask.value?.basic_info?.ticket_number.toString()
-                                )
+                if (isTicketEditedState) {
+                    viewModel.updateIsEditedTicket(false)
+                    LaunchedEffect(Unit) {
+                        navigator.push(
+                            TicketInfoScreen(
+                                viewModel.selectedTask.value?.basic_info?.ticket_number.toString()
                             )
-                        }
+                        )
                     }
+                }
 
 
                 if (viewModel.events.value == MainEvent.PhotoPreview) {
-                    Napier.log(LogLevel.ASSERT, tag = "drawerState",message = drawerState.isOpen.toString())
+                    Napier.log(
+                        LogLevel.ASSERT,
+                        tag = "drawerState",
+                        message = drawerState.isOpen.toString()
+                    )
 
                     scope.launch {
                         drawerState.close()
@@ -731,13 +755,13 @@ class MainScreen(
                         InternalStorage.createWorkItemImages(
                             provideAppContext(),
                             "",
-                           ""
+                            ""
                         )
 
                         Camera.launchCamera(
                             InternalStorage.getSuspendRouteOriginal(
                                 provideAppContext()
-                            ) ,
+                            ),
                             "Suspend"
                         )
 
@@ -765,7 +789,7 @@ class MainScreen(
                                     isClickable = true
                                 }
                             }
-                                Napier.i("TicketListScreen")
+                            Napier.i("TicketListScreen")
 
                         },
                         tasks = ArrayList(viewModel.tasks.toList()), onAccept = {
@@ -785,10 +809,11 @@ class MainScreen(
                     if (viewModel.showAcceptDialog.value) {
 
                         if (isTicketEditedState) {
-                                viewModel.selectedTask.value?.let {
-                                    viewModel.updateShowAcceptDialog(false)
-                                }
-                            } else {
+                            viewModel.selectedTask.value?.let {
+                                viewModel.updateShowAcceptDialog(false)
+                            }
+                        } else {
+
                                 CustomDialogDoubleAction(
                                     showDialog = showAcceptDialog,
                                     message = MR.strings.continue_flow_message,
@@ -804,20 +829,12 @@ class MainScreen(
                                             viewModel.updateEdited(true)
                                         }
                                     })
-                            }
+                        }
 
                     }
 
 
-
-
-
                 }
-
-
-
-
-
 
 
             },
@@ -827,20 +844,24 @@ class MainScreen(
                     MainEvent.PhotoPreview -> {
                         viewModel.events.value = MainEvent.SuspendTicket
                     }
+
                     MainEvent.EditPhoto -> {
 
                         DrawController.reset()
                         viewModel.events.value = MainEvent.PhotoPreview
 
                     }
-                    MainEvent.DeletePhoto->{
+
+                    MainEvent.DeletePhoto -> {
                         viewModel.events.value = MainEvent.PhotoPreview
 
                     }
+
                     MainEvent.SuspendTicket -> {
                         viewModel.events.value = MainEvent.DiscardSuspendTicket
 
                     }
+
                     else -> {
                         viewModel.events.value = MainEvent.Default
 
@@ -850,7 +871,11 @@ class MainScreen(
             }, onBackPressed = {
                 if (viewModel.events.value == MainEvent.Default) {
                     scope.launch {
-                        Napier.log(LogLevel.ASSERT, tag = "drawerState",message = drawerState.isOpen.toString())
+                        Napier.log(
+                            LogLevel.ASSERT,
+                            tag = "drawerState",
+                            message = drawerState.isOpen.toString()
+                        )
                         if (drawerState.isOpen)
                             drawerState.close()
                         viewModel.events.value = MainEvent.Exit
@@ -862,20 +887,24 @@ class MainScreen(
                         MainEvent.PhotoPreview -> {
                             viewModel.events.value = MainEvent.SuspendTicket
                         }
+
                         MainEvent.EditPhoto -> {
 
                             DrawController.reset()
                             viewModel.events.value = MainEvent.PhotoPreview
 
                         }
-                        MainEvent.DeletePhoto->{
+
+                        MainEvent.DeletePhoto -> {
                             viewModel.events.value = MainEvent.PhotoPreview
 
                         }
+
                         MainEvent.SuspendTicket -> {
                             viewModel.events.value = MainEvent.DiscardSuspendTicket
 
                         }
+
                         else -> {
                             viewModel.events.value = MainEvent.Default
 

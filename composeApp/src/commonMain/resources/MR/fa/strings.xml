@@ -163,4 +163,5 @@
     <string name="continue_flow_message" >در صورت ادامه تغییرات تیکت را دریافت نخواهید کرد آیا مطمئن هستید؟</string>
 
     <string name="empty_list" > لیست خالی است</string>
+    <string name="data_sent_complete" >اطلاعات با موفقیت ارسال شد!</string>
 </resources>

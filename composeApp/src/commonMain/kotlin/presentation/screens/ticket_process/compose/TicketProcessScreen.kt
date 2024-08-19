@@ -15,6 +15,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import cafe.adriel.voyager.core.registry.rememberScreen
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
@@ -38,8 +39,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
+import presentation.components.CompleteFlowDialog
 import presentation.model.BottomSheetDoubleActionModel
 import presentation.model.SingleButtonActionModel
+import presentation.nav.Screen.Main.Menu
 import presentation.screens.main.components.EditPhotoComponent
 import presentation.screens.main.components.PhotoPreviewComponent
 import presentation.screens.main.compose.BaseScreen
@@ -82,6 +85,9 @@ class TicketProcessScreen(
         val state by viewModel.state.collectAsState()
 
         var isClickable by remember { mutableStateOf(true) }
+        val mainScreen = rememberScreen(Menu.MyTickets)
+
+        val ticketFlowCompletedState = viewModel.ticketFlowCompleted.collectAsState()
 
         LaunchedEffect(Unit) {
             viewModel.updateTicketNumber(ticketNumber)
@@ -396,6 +402,16 @@ class TicketProcessScreen(
                         )
                     }
                 }
+                   CompleteFlowDialog(showDialog =  ticketFlowCompletedState.value, message =  MR.strings.data_sent_complete, titleButton =  MR.strings.submit, onDismiss = {
+                       viewModel.updateTicketFlowState(false)
+                       navigator.popAll()
+                       navigator.push(mainScreen)
+                   }, onConfirm = {
+                       viewModel.updateTicketFlowState(false)
+                       navigator.popAll()
+                       navigator.push(mainScreen)
+                   })
+
             }, onCloseBottomSheet = {
                 when (viewModel.events.value) {
                     TicketProcessEvent.PhotoPreview -> {

@@ -56,8 +56,8 @@ fun initialize(
     photoDomainList: MutableList<PhotoDomain>,
     components: List<ComponentDomain>,
     onChanges: (list: List<ComponentDomain>, listValueDomain: List<ValueDomain>?, indexParent: List<Int>, indexChild: Int) -> Unit,
-    onAddItem: (list: List<ComponentDomain>, listValueDomain: List<ValueDomain>?, indexParent: List<Int>, indexChild: Int) -> Unit,
-    onRemoveItem: (list: List<ComponentDomain>, listValueDomain: List<ValueDomain>?, indexParent: List<Int>, indexChild: Int) -> Unit,
+    onAddItem: (componentDomain: ComponentDomain, listValueDomain: List<ValueDomain>?, indexParent: List<Int>, indexChild: Int) -> Unit,
+    onRemoveItem: (componentDomain:ComponentDomain, listValueDomain: List<ValueDomain>?, indexParent: List<Int>, indexChild: Int) -> Unit,
     onFixChange: (text: MutableStateFlow<String>) -> Unit,
     onClickImage: (indexPhotoSelected: Int, componentKey: String) -> Unit,
     currentParentIndex: List<Int> = listOf()
@@ -103,7 +103,7 @@ fun initialize(
 
                                 val newComponents =
                                     listOf(copyComponentWithValues(item, uuid4().toString()))
-                                onAddItem(newComponents, null, currentParentIndex, index)
+                                onAddItem(copyComponentWithValues(item, uuid4().toString()), null, currentParentIndex, index)
                                 scope.launch {
                                     listState.scrollToItem(index + 1)
                                 }
@@ -832,19 +832,19 @@ fun copyComponentWithValues(
     )
 }
 
-
-fun removeComponentById(components: List<ComponentDomain>, id: String): List<ComponentDomain> {
+fun removeComponentById(components: List<ComponentDomain>, id: String): ComponentDomain? {
     val mutableComponents = components.toMutableList()
     val iterator = mutableComponents.iterator()
     while (iterator.hasNext()) {
         val component = iterator.next()
         if (component.id == id) {
             iterator.remove()
-            break
+            return component.copy(removable = false)
         }
     }
-    return mutableComponents
+    return null
 }
+
 
 
 fun findPhotosByComponentId(components: List<PhotoDomain>, key: String?): MutableList<PhotoDomain> {

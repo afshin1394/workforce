@@ -90,6 +90,7 @@ val surfaceInputReadOnly = gray_5
 val surfaceBrandDefault = brand_blue_7
 val surfaceBrandDisabled = gray_5
 val surfaceSuccessStrong = success_6
+val surfaceSuccessWeak = success_1
 val surfaceBrandDark = gray_9
 
 

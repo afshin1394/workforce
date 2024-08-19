@@ -34,7 +34,9 @@ class PhotoRepositoryImpl(private val db: AppDatabase) : IPhotoRepository {
         return db.photoDao().getPhotosByComponentKeyList(ticketNumber,componentKeyList)
     }
 
-
+    override suspend fun deleteProcessImages(ticket_number: String) {
+        db.photoDao().deleteProcessPhotoByTicketNumber(ticket_number)
+    }
 
 
 }

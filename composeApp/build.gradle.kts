@@ -117,6 +117,8 @@ kotlin {
 
                 implementation("org.osmdroid:osmdroid-android:6.1.6")
                 implementation(libs.kotlin.reflect)
+//                implementation(libs.androidx.work.runtime.ktx)
+
 
             }
         }

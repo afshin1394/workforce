@@ -21,6 +21,9 @@ interface PhotoDao {
     @Query("DELETE FROM PhotoEntity WHERE ticket_number = :ticketNumber")
     suspend fun deleteByComponentKey(ticketNumber: String)
 
+    @Query("DELETE FROM PhotoEntity WHERE ticket_number = :ticketNumber AND component_key != 'Suspend'")
+    suspend fun deleteProcessPhotoByTicketNumber(ticketNumber: String)
+
     @Query("SELECT * FROM PhotoEntity WHERE ticket_number = :ticketNumber")
     suspend fun selectByComponentKey(ticketNumber: String): List<PhotoEntity>
 

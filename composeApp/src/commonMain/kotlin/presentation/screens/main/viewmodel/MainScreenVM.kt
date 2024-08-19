@@ -7,7 +7,8 @@ import androidx.compose.runtime.mutableStateOf
 import com.irancell.nwg.wfm.presentation.components.FilterSectionItem
 import presentation.model.FilterType
 import com.irancell.nwg.wfm.presentation.model.SelectableItem
-import com.irancell.nwg.wfm.presentation.model.View
+import database.entity.GeneralLocationEntity
+import domain.models.LiveLocationDomain
 import domain.models.PhotoDomain
 import presentation.model.StateFilter
 import presentation.screens.main.events.MainEvent
@@ -16,7 +17,10 @@ import domain.models.task.TaskDomain
 import domain.usecase.usecase.auth.LogoutUseCase
 import domain.usecase.usecase.availability.ChangeServerAvailabilityUseCase
 import domain.usecase.usecase.availability.GetAvailabilityUseCase
-import domain.usecase.usecase.availability.StoreAvailabilityUseCase
+import domain.usecase.usecase.location.DeleteSendLocationUseCase
+import domain.usecase.usecase.location.GetGeneralLocationListUseCase
+import domain.usecase.usecase.location.SendLocationToServerUseCase
+import domain.usecase.usecase.location.UpdateUnSendLocationUseCase
 import domain.usecase.usecase.steps.CheckForEditedTicketUseCase
 import domain.usecase.usecase.photo.DeleteByComponentKeyUseCase
 import domain.usecase.usecase.photo.GetPhotoByComponentKeyUseCase
@@ -30,6 +34,7 @@ import domain.usecase.usecase.ticket.GetTasksUseCase
 import io.github.aakira.napier.LogLevel
 import io.github.aakira.napier.Napier
 import irancell.nwg.wfm.BackgroundServiceApp
+import irancell.nwg.wfm.BackgroundWorker
 import irancell.nwg.wfm.Location
 import irancell.nwg.wfm.getSharedPref
 import kotlinx.coroutines.Dispatchers
@@ -39,16 +44,14 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import utils.AsyncResult
 
 import utils.AsyncStatus
-import utils.Availability
+import utils.AvailabilityObjectId
 import utils.BaseViewModel
-import utils.PhoneNumber
 import utils.ServiceState
-import utils.SessionId
 import utils.TicketNumber
-import utils.Token
 import utils.ViewStates
 import utils.getCurrentDate
 
@@ -66,6 +69,10 @@ class MainScreenVM(
     private val checkForEditedTicketUseCase: CheckForEditedTicketUseCase,
     private val updateIsEditedTicketUseCase: UpdateIsEditedTicketUseCase,
     private val logoutUseCase: LogoutUseCase,
+    private val sendLocationToServerUseCase: SendLocationToServerUseCase,
+    private val generalLocationListUseCase: GetGeneralLocationListUseCase,
+    private val updateUnSendLocationUseCase: UpdateUnSendLocationUseCase,
+    private val deleteSendLocationUseCase: DeleteSendLocationUseCase
 ) : BaseViewModel() {
     private val _availability = MutableStateFlow(false)
     val availability = _availability.asStateFlow()
@@ -111,12 +118,155 @@ class MainScreenVM(
     var showAcceptDialog = _showAcceptDialog.asStateFlow()
 
 
+    val generalLocationList = mutableStateListOf<GeneralLocationEntity>()
+
     init {
         getCurrentAvailability()
         getProfileName()
         getTasks()
         updateTicketNumber("")
+
+
     }
+
+
+    private fun startWorkerManager() {
+        BackgroundWorker.start(900000L) {
+            println("Work executed!      ${" is okeyyyyyyyyy"}")
+            sendLocationForServer()
+        }
+    }
+
+
+    private fun getGeneralUnSendLocationList() : List<LiveLocationDomain> {
+
+        viewModelScope.launch {
+            generalLocationListUseCase(
+                Unit,
+            ).collect {
+                when (it.status) {
+                    AsyncStatus.ERROR -> {
+                        updateState(ViewStates.Loading)
+                    }
+
+                    AsyncStatus.LOADING -> {
+                        updateState(ViewStates.Loading)
+
+                    }
+
+                    AsyncStatus.EMPTY -> {
+
+                    }
+
+                    AsyncStatus.SUCCESS -> {
+                        it.data?.let { locations -> generalLocationList.addAll(locations) }
+                        withContext(Dispatchers.Main) {
+                            updateState(ViewStates.Success())
+                        }
+                    }
+                }
+            }
+
+        }
+
+        println("AvailabilityObjectId  ${getSharedPref().getString(AvailabilityObjectId)}")
+        return generalLocationList.map { location ->
+            LiveLocationDomain(
+                latitude = location.latitude.toDouble(),
+                longitude = location.longitude.toDouble(),
+                recorded_date = location.datetime,
+                site = 0,
+                attendance = getSharedPref().getString(AvailabilityObjectId)?.toLong()?:0,
+                ticket_num = getSharedPref().getString(TicketNumber)?:""
+            )
+        }
+    }
+
+    private fun sendLocationForServer() {
+
+
+
+        viewModelScope.launch {
+
+            sendLocationToServerUseCase(
+                getGeneralUnSendLocationList()
+            ).collect {
+                when (it.status) {
+                    AsyncStatus.ERROR -> {
+                        println("Work executed!      ${" is ERROR"}")
+                    }
+
+                    AsyncStatus.LOADING -> {
+                    }
+
+                    AsyncStatus.EMPTY -> {
+                    }
+
+                    AsyncStatus.SUCCESS -> {
+                        println("Work executed!      ${" is SUCCESS"}")
+                        updateSendLocationInDB()
+
+                    }
+                }
+            }
+
+        }
+    }
+
+    private fun updateSendLocationInDB() {
+
+        viewModelScope.launch {
+
+            updateUnSendLocationUseCase(Unit).collect {
+                when (it.status) {
+                    AsyncStatus.ERROR -> {
+                        println("Work executed!      ${" is ERROR delete"}")
+
+                    }
+
+                    AsyncStatus.LOADING -> {
+                    }
+
+                    AsyncStatus.EMPTY -> {
+                    }
+
+                    AsyncStatus.SUCCESS -> {
+                        println("Work executed!      ${" is SUCCESS delete"}")
+                        deleteSendLocationInDB()
+
+                    }
+                }
+            }
+
+        }
+    }
+
+
+    private fun deleteSendLocationInDB() {
+
+        viewModelScope.launch {
+
+            deleteSendLocationUseCase(Unit).collect {
+                when (it.status) {
+                    AsyncStatus.ERROR -> {
+
+                    }
+
+                    AsyncStatus.LOADING -> {
+                    }
+
+                    AsyncStatus.EMPTY -> {
+                    }
+
+                    AsyncStatus.SUCCESS -> {
+
+                    }
+                }
+            }
+
+        }
+    }
+
 
     fun updateIsEditedTicket(isEdited: Boolean) {
         _ticketIsEdited.update { isEdited }
@@ -178,7 +328,7 @@ class MainScreenVM(
                         updateState(ViewStates.Loading)
                     }
 
-                    AsyncStatus.EMPTY->{
+                    AsyncStatus.EMPTY -> {
 
                     }
 
@@ -188,11 +338,12 @@ class MainScreenVM(
                         println("testtttttttavaliblity ${it.data}")
                         it.data?.let { available ->
                             _availability.update { available }
-                            if(_availability.value) {
+                            if (_availability.value) {
                                 BackgroundServiceApp.startBackgroundService()
                                 BackgroundServiceApp.updateServiceState(ServiceState.Normal)
-                            }
-                            else
+//                                delay(1000)
+//                                startWorkerManager()
+                            } else
                                 BackgroundServiceApp.stopBackgroundService()
                         }
                     }

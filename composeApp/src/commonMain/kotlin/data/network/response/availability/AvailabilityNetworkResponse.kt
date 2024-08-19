@@ -6,5 +6,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class AvailabilityNetworkResponse(
     @SerialName("detail")
-    val detail : Boolean
+    val detail : Boolean,
+    @SerialName("obj_id")
+    val obj_id : Int
 )
