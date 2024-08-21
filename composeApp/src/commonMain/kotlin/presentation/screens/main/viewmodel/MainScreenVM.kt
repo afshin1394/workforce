@@ -125,8 +125,6 @@ class MainScreenVM(
         getProfileName()
         getTasks()
         updateTicketNumber("")
-
-
     }
 
 
@@ -135,6 +133,9 @@ class MainScreenVM(
             println("Work executed!      ${" is okeyyyyyyyyy"}")
             sendLocationForServer()
         }
+    }
+    fun updateReloadState(isLoading : Boolean){
+        _reload.update { true }
     }
 
 
@@ -581,6 +582,8 @@ class MainScreenVM(
                     }
 
                     AsyncStatus.LOADING -> {
+                        _reload.update { false }
+
                         Napier.log(LogLevel.ASSERT, "getAllWorksUseCase", message = "LOADING: ")
                         // updateState(ViewStates.Loading)
 

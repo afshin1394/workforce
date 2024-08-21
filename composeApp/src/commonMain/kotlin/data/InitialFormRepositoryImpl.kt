@@ -16,7 +16,8 @@ class InitialFormRepositoryImpl(
     }
 
     override suspend fun getInitialFormByTicketNumber(ticket_number: String): InitialFormEntity {
-        return db.initialFormDao().selectByTicketNumber(ticketNumber = ticket_number)?:InitialFormEntity("1","")
+        return db.initialFormDao().selectByTicketNumber(ticketNumber = ticket_number)?:InitialFormEntity("1",
+            arrayListOf())
 
     }
 

@@ -17,7 +17,7 @@ const val IsScrollDateTimePickerInList = "isScrollDateTimePickerInList"
 const val TicketNumber = "TicketNumber"
 
 const val ProductionBASEURL = "http://mobile.ios.mtnirancell.ir/api/"
-const val DevelopmentBASEURL = "https://uat.ios.mtnirancell.ir/api/"
+const val DevelopmentBASEURL = "https://ios.mtnirancell.ir/api/"
 
 
 sealed interface ServiceState{

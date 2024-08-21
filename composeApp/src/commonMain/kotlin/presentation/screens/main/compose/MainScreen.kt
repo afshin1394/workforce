@@ -124,6 +124,7 @@ class MainScreen(
             viewModel.updateSuspendTicketImageUri(it.toString())
         }
 
+        val underDevelopment = stringResource(MR.strings.under_development)
 
         val bottomSheetTitle: String =
             when (events) {
@@ -223,7 +224,10 @@ class MainScreen(
                         viewModel.events.value = MainEvent.AvailabilityStatus
                     },
                     onNotificationClick = {
-                        navigator.push(notificationScreen)
+                        scope.launch {
+                            scaffoldState.snackbarHostState.showSnackbar(message = underDevelopment )
+                        }
+//                        navigator.push(notificationScreen)
                     })
             },
             drawerContent = {
@@ -260,7 +264,10 @@ class MainScreen(
 
                         when (it) {
                             Menu.About -> {
-                                navigator.push(aboutScreen)
+                                scope.launch {
+                                    scaffoldState.snackbarHostState.showSnackbar(message = underDevelopment )
+                                }
+//                                navigator.push(aboutScreen)
                             }
 
                             Menu.Logout -> {
@@ -277,11 +284,17 @@ class MainScreen(
                             }
 
                             Menu.GpsTrackingReport -> {
-                                navigator.push(gpsTrackingReportScreen)
+                                scope.launch {
+                                    scaffoldState.snackbarHostState.showSnackbar(message = underDevelopment )
+                                }
+//                                navigator.push(gpsTrackingReportScreen)
                             }
 
                             Menu.FormViewer -> {
-                                navigator.push(formViewerScreen)
+                                scope.launch {
+                                    scaffoldState.snackbarHostState.showSnackbar(message = underDevelopment )
+                                }
+//                                navigator.push(formViewerScreen)
 
                             }
 
@@ -398,6 +411,9 @@ class MainScreen(
 
                     MainEvent.CancelTicket -> {
                         CancelTicketBottomBarComponent(viewModel.enableCancelSubmit.value) {
+                            scope.launch {
+                                scaffoldState.snackbarHostState.showSnackbar(message = underDevelopment )
+                            }
                             viewModel.events.value = MainEvent.Default
                         }
                     }
@@ -410,7 +426,10 @@ class MainScreen(
                     MainEvent.SuspendTicket -> {
                         SuspendTicketBottomBarComponent(true) {
 
-                            viewModel.saveSuspendTask()
+                            scope.launch {
+                                scaffoldState.snackbarHostState.showSnackbar(message = underDevelopment )
+                            }
+//                            viewModel.saveSuspendTask()
                             viewModel.events.value = MainEvent.Default
                         }
                     }
@@ -528,8 +547,7 @@ class MainScreen(
                     MainEvent.CancelTicket -> {
                         CancelTicketComponent(viewModel.cancelReason.value, onSelectReason = {
                             viewModel.events.value = MainEvent.CancelReason
-                        }, onCompleted = {
-                            viewModel.enableCancelSubmit.value = it
+                        }, onCompleted = { viewModel.enableCancelSubmit.value = it
                         })
                     }
 
@@ -794,7 +812,6 @@ class MainScreen(
                         },
                         tasks = ArrayList(viewModel.tasks.toList()), onAccept = {
                             if (isClickable) {
-                                BackgroundServiceApp.updateServiceState(ServiceState.Suspend)
                                 isClickable = false
                                 viewModel.checkIfTicketIsEdited()
                                 viewModel.selectedTask.value = it
@@ -807,6 +824,7 @@ class MainScreen(
                         }
                     )
                     if (viewModel.showAcceptDialog.value) {
+                        BackgroundServiceApp.updateServiceState(ServiceState.Suspend)
 
                         if (isTicketEditedState) {
                             viewModel.selectedTask.value?.let {

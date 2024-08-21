@@ -76,7 +76,7 @@ fun CancelTicketBottomBarComponent(isEnabled : Boolean = false,onClick : () -> U
             )
     ) {
 
-        if (isEnabled){
+//        if (isEnabled){
             CustomButton(
                 customButtonData = CustomButtonData(
                     stringResource(MR.strings.submit), textColor = textInverse,
@@ -85,15 +85,15 @@ fun CancelTicketBottomBarComponent(isEnabled : Boolean = false,onClick : () -> U
                     onClick()
                 }
             )
-        }else{
-            CustomButton(
-                customButtonData = CustomButtonData(
-                    stringResource(MR.strings.submit), textColor = textInverseDisabled,
-                    surfaceBrandDisabled
-                )
-            )
-
-        }
+//        }else{
+//            CustomButton(
+//                customButtonData = CustomButtonData(
+//                    stringResource(MR.strings.submit), textColor = textInverseDisabled,
+//                    surfaceBrandDisabled
+//                )
+//            )
+//
+//        }
 
     }
 }

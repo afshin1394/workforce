@@ -1,11 +1,17 @@
 package utils
+import kotlinx.serialization.KSerializer
+import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.buildJsonObject
-
+import kotlinx.serialization.*
+import kotlinx.serialization.descriptors.buildClassSerialDescriptor
+import kotlinx.serialization.encoding.Decoder
+import kotlinx.serialization.encoding.Encoder
+import kotlinx.serialization.json.*
 
 fun Map<String, Any>.mutableToJson(): String {
     val jsonObject = buildJsonObject {
@@ -67,4 +73,43 @@ fun Map<String, Any>.toJson(): String {
         }
     }
     return Json.encodeToString(jsonObject)
+}
+
+
+object AnySerializer : KSerializer<Any> {
+    override val descriptor: SerialDescriptor = buildClassSerialDescriptor("Any")
+
+    override fun serialize(encoder: Encoder, value: Any) {
+        val jsonEncoder = encoder as? JsonEncoder
+            ?: throw SerializationException("This class can be saved only by Json")
+        val element = when (value) {
+            is Int -> JsonPrimitive(value)
+            is String -> JsonPrimitive(value)
+            is Boolean -> JsonPrimitive(value)
+            is List<*> -> JsonArray(value.map { JsonPrimitive(it.toString()) })
+            is Map<*, *> -> JsonObject(value.mapKeys { it.key.toString() }
+                .mapValues { JsonPrimitive(it.value.toString()) })
+            else -> throw SerializationException("Unsupported type: ${value::class}")
+        }
+        jsonEncoder.encodeJsonElement(element)
+    }
+
+    override fun deserialize(decoder: Decoder): Any {
+        val jsonDecoder = decoder as? JsonDecoder
+            ?: throw SerializationException("This class can be loaded only by Json")
+        val element = jsonDecoder.decodeJsonElement()
+        return when (element) {
+            is JsonPrimitive -> {
+                when {
+                    element.isString -> element.content
+                    element.booleanOrNull != null -> element.boolean
+                    element.intOrNull != null -> element.int
+                    else -> throw SerializationException("Unsupported primitive type")
+                }
+            }
+            is JsonArray -> element.map { it.toString() }
+            is JsonObject -> element.mapValues { it.value.toString() }
+            else -> throw SerializationException("Unsupported JSON element")
+        }
+    }
 }

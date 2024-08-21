@@ -57,6 +57,9 @@ class VerifyScreen(private val phoneNumber: String = "") : Screen {
 
 
         BaseScreen(
+            onBackPressed = {
+                navigator.pop()
+            },
             viewModel = viewModel,
             scaffoldState = scaffoldState,
             title = stringResource(MR.strings.verify),

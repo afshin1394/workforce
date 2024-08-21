@@ -389,7 +389,9 @@ fun <T : BaseViewModel> BaseScreen(
                         }
 
                         is ViewStates.UnAuthorized -> {
-                            if (navigator.items[navigator.items.lastIndex].key == "presentation.screens.auth.compose.VerifyScreen" || navigator.items[navigator.items.lastIndex].key == "presentation.screens.auth.compose.LoginScreen") {
+                            val key = navigator.items[navigator.items.lastIndex].key
+
+                            if (key != loginScreen.key && key != verifyScreen.key && key != splashScreen.key) {
                                 val message =
                                     stringResource((state as ViewStates.UnAuthorized).message)
 
@@ -403,6 +405,7 @@ fun <T : BaseViewModel> BaseScreen(
                                         navigator.push(loginScreen)
                                     }
                                 }
+
                             }
                         }
                     }

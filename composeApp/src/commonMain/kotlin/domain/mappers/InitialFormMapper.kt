@@ -24,6 +24,7 @@ import data.network.response.task.logic.LogicDomain
 import data.network.response.task.logic.TicketAutoFillLogic
 import data.network.response.task.logic.TicketAutoFillLogicDomain
 import data.network.response.task.task.Detail
+import data.network.response.task.task.InitForm
 import database.entity.InitialFormEntity
 import domain.models.form_struct.ComponentDomain
 import domain.models.form_struct.logic.ConditionDomain
@@ -36,6 +37,7 @@ import domain.models.form_struct.OperatorDomain
 import domain.models.form_struct.ValidateDomain
 import domain.models.form_struct.ValueDate
 import domain.models.form_struct.ValueDomain
+import domain.models.task.InitFormDomain
 import irancell.nwg.wfm.nullIfAllPropertiesNull
 
 import kotlinx.serialization.json.Json
@@ -81,42 +83,24 @@ private fun List<Component>.updateComponentTypesReverse(): List<Component> {
 }
 
 
-fun Detail.toInitialFormEntity(): InitialFormEntity {
-    return   InitialFormEntity(
-        ticket_number = this.basic_info.ticket_number?:"",
-        structure = this.initial_form.toString()
-    )
-}
 
-fun List<Detail>.toInitialFormEntity(): List<InitialFormEntity> {
-    return  map{
-        InitialFormEntity(
-            ticket_number = it.basic_info.ticket_number?:"",
-            structure = it.initial_form.toString()
-        )
-    }
-}
 
 fun InitialFormEntity.toInitialFormDomain() : InitialFormDomain {
-      val  formStruct = Json.decodeFromString<FormStruct>(this.structure);
-
-
-    return formStruct.toInitialFormDomain(this.ticket_number)
+    return InitialFormDomain(this.ticket_number,this.initFormList.toInitFormDomainList())
 }
 
-fun  List<InitialFormEntity>.toInitialFormDomain() : List<InitialFormDomain> {
+fun  List<InitialFormEntity>.toInitialFormDomainList() : List<InitialFormDomain> {
     return map {
-        InitialFormDomain(
-            ticket_number = it.ticket_number,
-            structure = Json.decodeFromString(it.structure)
-        )
+        it.toInitialFormDomain()
     }
 }
 
-fun  FormStruct.toInitialFormDomain(ticketNumber : String) : InitialFormDomain {
-    return InitialFormDomain(ticketNumber , FormStructDomain(this.id,this.hide,this.type,this.components?.toComponentDomain() ,this.conditional?.toConditionalDomain(),this.schemaVersion)     )
-}
 
+fun  List<InitForm>.toInitFormDomainList() : List<InitFormDomain> {
+    return map {
+        InitFormDomain(it.key,it.value)
+    }
+}
 fun  List<Component>.toComponentDomain() : List<ComponentDomain> {
     return map {  ComponentDomain(id= it.id,it.key,hide= it.hide,type=  it.type,label= it.label, readOnly =  it.readOnly?:false, repeatable = it.repeatable?:false, removable = it.removable?:false,layout =  it.layout?.toLayoutDomain(), subType =  it.subType, isMulti = it.isMulti?:false, validate =  it.validate?.toValidateDomain(), values =  it.values?.toValueDomain(), conditional =  it.conditional?.toConditionalDomain(), components =  it.components?.toComponentDomain())   }.updateComponentTypes()
 }

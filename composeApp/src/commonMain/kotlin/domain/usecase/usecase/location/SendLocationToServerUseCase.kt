@@ -12,5 +12,7 @@ class SendLocationToServerUseCase(
 )  : BaseUseCase<Unit, List<LiveLocationDomain>>(){
     override suspend fun run(params: List<LiveLocationDomain>) {
         iGeneralLocationRepository.sendLocationToServer(params.toLiveLocationRequestList())
+        iGeneralLocationRepository.updateUnSend()
+        iGeneralLocationRepository.deleteSent()
     }
 }

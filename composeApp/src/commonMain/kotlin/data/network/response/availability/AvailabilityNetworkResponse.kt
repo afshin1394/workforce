@@ -8,5 +8,5 @@ data class AvailabilityNetworkResponse(
     @SerialName("detail")
     val detail : Boolean,
     @SerialName("obj_id")
-    val obj_id : Int
+    val obj_id : Int? = null
 )

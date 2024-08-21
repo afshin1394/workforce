@@ -24,20 +24,7 @@ class GetInitialFormByTask(
     private val iIInitialFormRepository: IInitialFormRepository
 ) : BaseUseCase<InitialFormDomain, String>() {
     override suspend fun run(params: String): InitialFormDomain {
-
-        val initialForm =
-            iIInitialFormRepository.getInitialFormByTicketNumber(params).toInitialFormDomain()
-
-
-        val updatedComponents = updateComponentTypes(initialForm.structure.components)
-
-
-        return initialForm.copy(
-            structure = initialForm.structure.copy(
-                components = updatedComponents
-            )
-        )
-
+        return iIInitialFormRepository.getInitialFormByTicketNumber(params).toInitialFormDomain()
     }
 
 

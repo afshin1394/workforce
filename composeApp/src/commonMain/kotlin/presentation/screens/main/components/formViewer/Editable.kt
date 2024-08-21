@@ -32,6 +32,7 @@ import domain.models.form_struct.ProcessLogicDomain
 import io.github.aakira.napier.LogLevel
 import io.github.aakira.napier.Napier
 import presentation.theme.strokeDefaultLight
+import presentation.theme.surfaceBrandDefault
 import presentation.theme.surfaceBrandDisabled
 import presentation.theme.textInverseDisabled
 import presentation.theme.textSecondary
@@ -40,7 +41,7 @@ import presentation.theme.textSecondary
 @Composable
 fun Editable(
     type: TypeEditable,
-    processLogicDomain : ProcessLogicDomain,
+    processLogicDomain: ProcessLogicDomain,
     value: String,
     placeholder: String,
     imeAction: ImeAction,
@@ -50,11 +51,11 @@ fun Editable(
     errorMessage: ResourceFormattedStringDesc,
     onValueChange: (value: String) -> Unit
 ) {
-    Napier.log(LogLevel.ASSERT,tag= "Editablevalue", message = value)
+    Napier.log(LogLevel.ASSERT, tag = "Editablevalue", message = value)
     var valueChange by remember { mutableStateOf(value) }
-    processLogicDomain.calculatedValue?.let{
-        if(it.isNotEmpty())
-        valueChange = it
+    processLogicDomain.calculatedValue?.let {
+        if (it.isNotEmpty())
+            valueChange = it
     }
     val disableLogic = processLogicDomain.disabled
     val hideLogic = processLogicDomain.shouldHide
@@ -62,16 +63,16 @@ fun Editable(
     val requiredLogic = processLogicDomain.required
     val validateLogic = processLogicDomain.validate
     val errorMessageValidateLogic = processLogicDomain.errorMessage
-    val textFieldBackground = if (errorMessage.localized() != "" || validateLogic){
+    val textFieldBackground = if (errorMessage.localized() != "" || validateLogic) {
         Color.Red
-    }else if(readOnlyLogic || disableLogic){
+    } else if (readOnlyLogic || disableLogic) {
         surfaceBrandDisabled
-    }else{
+    } else {
         strokeDefaultLight
     }
     Napier.log(LogLevel.ASSERT, tag = "processLogicDomain", message = processLogicDomain.toString())
 
-    if(!hideLogic) {
+    if (!hideLogic) {
         Column(Modifier.padding(16.dp)) {
 
             val styledString = buildAnnotatedString {
@@ -133,7 +134,7 @@ fun Editable(
                 ),
 
 
-            )
+                )
             if (errorMessage.localized() != "") {
                 Text(
                     text = errorMessage.localized(),
@@ -156,11 +157,81 @@ fun Editable(
         }
     }
 }
-enum class TypeEditable{
+
+enum class TypeEditable {
     PHONE,
     EMAIL,
     SHORT_TEXT,
     TEXTAREA,
     LATLONG,
     NUMBER
+}
+
+@Composable
+fun SimpleEditable(
+    key: String,
+    value: String,
+) {
+    Napier.log(LogLevel.ASSERT, tag = "Editablevalue", message = value)
+    var valueChange by remember { mutableStateOf(value) }
+
+
+
+
+    Column(Modifier.padding(16.dp)) {
+
+        val styledString = buildAnnotatedString {
+            withStyle(
+                style = SpanStyle(
+                    color = textSecondary,
+                    fontSize = 14.sp
+                )
+            ) {
+                append(key)
+            }
+
+        }
+
+
+
+        Text(
+            text = styledString,
+            modifier = Modifier.fillMaxWidth().wrapContentHeight(),
+        )
+        Spacer(modifier = Modifier.padding(top = spacing05X))
+
+        TextField(
+            keyboardOptions = KeyboardOptions(
+                capitalization = KeyboardCapitalization.None,
+            ),
+            value = valueChange,
+            onValueChange = {
+
+
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .border(
+                    width = 1.dp,
+                    color = surfaceBrandDefault,
+                    shape = RoundedCornerShape(15.dp)
+                ),
+            shape = RoundedCornerShape(15.dp),
+            textStyle = TextStyle(color = textSecondary),
+            readOnly = true,
+            colors =
+            TextFieldDefaults.colors(
+                focusedIndicatorColor = Color.Transparent,
+                disabledIndicatorColor = Color.Transparent,
+                unfocusedIndicatorColor = Color.Transparent,
+                focusedContainerColor = Color.White,
+                unfocusedContainerColor = Color.White,
+                disabledContainerColor = Color.White
+            ),
+
+
+            )
+
+
+    }
 }

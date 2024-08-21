@@ -21,7 +21,11 @@ class UpdateStepsUseCase(
     private val iSendStepsRepository: ISendStepsRepository
 ) : BaseUseCase<Unit, Unit>() {
     override suspend fun run(params: Unit) {
-        val editedTickets = iSendStepsRepository.getEditedTickets()
+        val editedTickets = try {
+            iSendStepsRepository.getEditedTickets()
+        } catch (_:Exception){
+            arrayListOf()
+        }
 
         val stepEntities = arrayListOf<StepsEntity>()
         val stepPointerEntities = arrayListOf<StepPointerEntity>()

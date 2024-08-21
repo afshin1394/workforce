@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "3d69fc646b5957d0a2875968e2bd25bc",
+    "identityHash": "6549775b4c1d32796abb70220ecc152f",
     "entities": [
       {
         "tableName": "ProfileEntity",
@@ -299,7 +299,7 @@
       },
       {
         "tableName": "InitialFormEntity",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`ticket_number` TEXT NOT NULL, `structure` TEXT NOT NULL, PRIMARY KEY(`ticket_number`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`ticket_number` TEXT NOT NULL, `initFormList` TEXT NOT NULL, PRIMARY KEY(`ticket_number`))",
         "fields": [
           {
             "fieldPath": "ticket_number",
@@ -308,8 +308,8 @@
             "notNull": true
           },
           {
-            "fieldPath": "structure",
-            "columnName": "structure",
+            "fieldPath": "initFormList",
+            "columnName": "initFormList",
             "affinity": "TEXT",
             "notNull": true
           }
@@ -546,7 +546,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '3d69fc646b5957d0a2875968e2bd25bc')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '6549775b4c1d32796abb70220ecc152f')"
     ]
   }
 }

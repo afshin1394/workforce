@@ -25,6 +25,7 @@ fun CustomEditTextComponent(
     modifier: Modifier = Modifier,
     defaultText : String,
     editTextHint: String = "Describe the reason",
+    disabled : Boolean = false ,
     updateText: (value: TextFieldValue) -> Unit = {}
 ) {
     var value by remember { mutableStateOf(TextFieldValue(defaultText)) }
@@ -35,8 +36,6 @@ fun CustomEditTextComponent(
         ),
         border = BorderStroke(1.dp, strokeDefaultLight)
     ) {
-
-
         Row(
             modifier = modifier
                 .padding(vertical = 10.dp, horizontal = spacing15X),
@@ -48,8 +47,10 @@ fun CustomEditTextComponent(
                 value = value,
                 textStyle = body_large,
                 onValueChange = {
-                    value = it
-                    updateText(value)
+                    if(!disabled) {
+                        value = it
+                        updateText(value)
+                    }
                 },
                 decorationBox = {
                     Row(

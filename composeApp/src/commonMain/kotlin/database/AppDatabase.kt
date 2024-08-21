@@ -2,6 +2,7 @@ package database
 
 import androidx.room.Database
 import androidx.room.RoomDatabase
+import androidx.room.TypeConverters
 import database.dao.DeleteAllTableDao
 import database.dao.GeneralLocationDao
 import database.dao.InitialFormDao
@@ -24,12 +25,14 @@ import database.entity.StepPointerEntity
 import database.entity.StepsEntity
 import database.entity.SuspendTaskEntity
 import database.entity.TaskEntity
+import database.type_converter.InitFormTypeConverter
 
 
 @Database(
     entities = [ProfileEntity::class, RoleEntity::class, GeneralLocationEntity::class, TaskEntity::class, SuspendTaskEntity::class, InitialFormEntity::class, PhotoEntity::class, StepsEntity::class,StepPointerEntity::class,SendStepsEntity::class],
     version = 1
 )
+@TypeConverters(InitFormTypeConverter::class)
 abstract class AppDatabase : RoomDatabase(), DB {
 
 

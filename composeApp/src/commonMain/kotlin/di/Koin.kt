@@ -168,7 +168,7 @@ fun httpModule() = module {
             }
             configure()
             defaultRequest {
-                url(ProductionBASEURL)
+                url(DevelopmentBASEURL)
                 contentType(ContentType.Application.Json)
                 headers {
                     append(
@@ -206,7 +206,7 @@ fun httpModule() = module {
             }
             configure()
             defaultRequest {
-                url(ProductionBASEURL)
+                url(DevelopmentBASEURL)
                 contentType(ContentType.Application.Json)
                 headers {
 
@@ -242,7 +242,7 @@ fun viewModelModule() = module {
     viewModelDefinition { GpsTrackingReportScreenVM(get()) }
     viewModelDefinition { LoginScreenVM(get()) }
     viewModelDefinition { VerifyScreenVM(get(),get(),get()) }
-    viewModelDefinition { TicketInfoVM(get(),get(),get(),get()) }
+    viewModelDefinition { TicketInfoVM(get()) }
     viewModelDefinition { TicketProcessVM(get(),get(),get(),get(),get(),get()) }
     viewModelDefinition { FormViewerScreenVM(get(),get()) }
     viewModelDefinition { MapVM() }
