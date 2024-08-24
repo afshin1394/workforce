@@ -27,7 +27,6 @@ import utils.getCurrentDate
 actual class Location actual constructor() {
 
 
-
     actual companion object {
         var isGPSEnabled = false
         var isNetworkEnabled = false
@@ -42,9 +41,10 @@ actual class Location actual constructor() {
         var _fusedLocationClient: FusedLocationProviderClient? = null
         val fusedLocationClient get() = _fusedLocationClient!!
 
-        var lastGeneralLocation : GeneralLocationEntity = GeneralLocationEntity(0,"","",
-            getCurrentDate(),0)
-
+        var lastGeneralLocation: GeneralLocationEntity = GeneralLocationEntity(
+            0, "", "",
+            getCurrentDate(), 0, networkInfo = ""
+        )
 
 
         actual fun start(update: (GeneralLocationEntity) -> Unit) {
@@ -56,11 +56,12 @@ actual class Location actual constructor() {
                             it.latitude = it.latitude.toString().substring(0, 12).toDouble()
                         if (it.longitude.toString().length > 12)
                             it.longitude = it.longitude.toString().substring(0, 12).toDouble()
-                        lastGeneralLocation =  GeneralLocationEntity(
-                           latitude  = it.latitude.toString(),
-                           longitude =  it.longitude.toString(),
-                          datetime =   DateTime.getFormattedDate(Clock.System.now().toString()),
-                          isSent =   0
+                        lastGeneralLocation = GeneralLocationEntity(
+                            latitude = it.latitude.toString(),
+                            longitude = it.longitude.toString(),
+                            datetime = DateTime.getFormattedDate(Clock.System.now().toString()),
+                            isSent = 0,
+                            networkInfo = ""
                         )
 
                         update(
@@ -98,11 +99,12 @@ actual class Location actual constructor() {
                                 it.latitude = it.latitude.toString().substring(0, 12).toDouble()
                             if (it.longitude.toString().length > 12)
                                 it.longitude = it.longitude.toString().substring(0, 12).toDouble()
-                            lastGeneralLocation =  GeneralLocationEntity(
-                               latitude =  it.latitude.toString(),
-                              longitude =   it.longitude.toString(),
-                               datetime =  DateTime.getFormattedDate(Clock.System.now().toString()),
-                               isSent =  0
+                            lastGeneralLocation = GeneralLocationEntity(
+                                latitude = it.latitude.toString(),
+                                longitude = it.longitude.toString(),
+                                datetime = DateTime.getFormattedDate(Clock.System.now().toString()),
+                                isSent = 0,
+                                networkInfo = ""
                             )
                             update(
                                 lastGeneralLocation
@@ -176,14 +178,17 @@ actual class Location actual constructor() {
                                 if (it.longitude.toString().length > 12)
                                     it.longitude =
                                         it.longitude.toString().substring(0, 12).toDouble()
-                                lastGeneralLocation =  GeneralLocationEntity(
-                                   latitude =  it.latitude.toString(),
-                                   longitude =  it.longitude.toString(),
-                                  datetime =   DateTime.getFormattedDate(Clock.System.now().toString()),
-                                  isSent =   0
+                                lastGeneralLocation = GeneralLocationEntity(
+                                    latitude = it.latitude.toString(),
+                                    longitude = it.longitude.toString(),
+                                    datetime = DateTime.getFormattedDate(
+                                        Clock.System.now().toString()
+                                    ),
+                                    isSent = 0,
+                                    networkInfo =   ""
                                 )
                                 update(
-                                   lastGeneralLocation
+                                    lastGeneralLocation
                                 )
 
                             }
@@ -237,11 +242,14 @@ actual class Location actual constructor() {
                                 if (it.longitude.toString().length > 12)
                                     it.longitude =
                                         it.longitude.toString().substring(0, 12).toDouble()
-                                lastGeneralLocation =  GeneralLocationEntity(
-                                   latitude =  it.latitude.toString(),
-                                   longitude =  it.longitude.toString(),
-                                   datetime =  DateTime.getFormattedDate(Clock.System.now().toString()),
-                                   isSent =  0
+                                lastGeneralLocation = GeneralLocationEntity(
+                                    latitude = it.latitude.toString(),
+                                    longitude = it.longitude.toString(),
+                                    datetime = DateTime.getFormattedDate(
+                                        Clock.System.now().toString()
+                                    ),
+                                    isSent = 0,
+                                    networkInfo =   ""
                                 )
                                 update(
                                     lastGeneralLocation
@@ -270,7 +278,8 @@ actual class Location actual constructor() {
             }
 
         }
-        actual fun getLastLocation() : GeneralLocationEntity{
+
+        actual fun getLastLocation(): GeneralLocationEntity {
             return lastGeneralLocation
         }
 

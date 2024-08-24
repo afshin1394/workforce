@@ -11,4 +11,5 @@ import androidx.room.PrimaryKey
     val longitude: String,
     val datetime: String,
     val isSent: Long?,
+    val networkInfo : String,
 )

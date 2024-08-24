@@ -48,8 +48,11 @@ kotlin {
             export("dev.icerock.moko:resources:0.22.3")
             export("dev.icerock.moko:graphics:0.9.0")
             export("com.mohamedrejeb.calf:calf-ui:0.3.1")
+            linkerOpts("-framework", "CoreTelephony")
+
         }
     }
+
 
     sourceSets {
         all {
@@ -91,8 +94,6 @@ kotlin {
                 implementation(libs.room.runtime)
                 implementation(libs.sqlite.bundled)
                 implementation("com.github.skydoves:landscapist-coil3:2.3.2")
-
-
             }
         }
 
@@ -144,9 +145,7 @@ kotlin {
             dependsOn(commonMain)
 
             dependencies {
-
                 implementation(libs.ktor.client.darwin)
-
             }
         }
         val iosSimulatorArm64Main by getting {

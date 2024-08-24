@@ -1,5 +1,6 @@
 package presentation.screens.main.viewmodel
 
+import androidx.collection.emptyObjectList
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -45,6 +46,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObject
 import utils.AsyncResult
 
 import utils.AsyncStatus
@@ -178,7 +181,8 @@ class MainScreenVM(
                 recorded_date = location.datetime,
                 site = 0,
                 attendance = getSharedPref().getString(AvailabilityObjectId)?.toLong()?:0,
-                ticket_num = getSharedPref().getString(TicketNumber)?:""
+                ticket_num = getSharedPref().getString(TicketNumber)?:"",
+                network_info = Json.decodeFromString(JsonObject.serializer(),location.networkInfo)
             )
         }
     }
@@ -190,7 +194,7 @@ class MainScreenVM(
         viewModelScope.launch {
 
             sendLocationToServerUseCase(
-                getGeneralUnSendLocationList()
+                Unit
             ).collect {
                 when (it.status) {
                     AsyncStatus.ERROR -> {

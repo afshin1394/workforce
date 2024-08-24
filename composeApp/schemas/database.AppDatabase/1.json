@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "6549775b4c1d32796abb70220ecc152f",
+    "identityHash": "aa35ac5dfadbcde6177b916a9d0e7ffd",
     "entities": [
       {
         "tableName": "ProfileEntity",
@@ -132,7 +132,7 @@
       },
       {
         "tableName": "GeneralLocationEntity",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `latitude` TEXT NOT NULL, `longitude` TEXT NOT NULL, `datetime` TEXT NOT NULL, `isSent` INTEGER)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `latitude` TEXT NOT NULL, `longitude` TEXT NOT NULL, `datetime` TEXT NOT NULL, `isSent` INTEGER, `networkInfo` TEXT NOT NULL)",
         "fields": [
           {
             "fieldPath": "id",
@@ -162,6 +162,12 @@
             "fieldPath": "isSent",
             "columnName": "isSent",
             "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "networkInfo",
+            "columnName": "networkInfo",
+            "affinity": "TEXT",
+            "notNull": true
           }
         ],
         "primaryKey": {
@@ -546,7 +552,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '6549775b4c1d32796abb70220ecc152f')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'aa35ac5dfadbcde6177b916a9d0e7ffd')"
     ]
   }
 }

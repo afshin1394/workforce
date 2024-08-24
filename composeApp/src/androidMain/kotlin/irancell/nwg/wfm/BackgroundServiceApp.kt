@@ -36,8 +36,12 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.JsonObject
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
+import utils.AlarmAction
 import utils.AsyncStatus
 import utils.AvailabilityObjectId
 import utils.ServiceState
@@ -47,32 +51,39 @@ import utils.getCurrentDate
 import java.util.concurrent.TimeUnit
 
 
-internal actual class BackgroundServiceApp : Service() , KoinComponent {
+internal actual class BackgroundServiceApp : Service(), KoinComponent {
 
-    val storeLocationDataUseCase : StoreLocationDataUseCase by inject()
-    val sendLocationToServerUseCase : SendLocationToServerUseCase by inject()
-    val updateTaskUseCase : UpdateTaskUseCase by inject()
-    val updateStepsUseCase : UpdateStepsUseCase by inject()
+    val storeLocationDataUseCase: StoreLocationDataUseCase by inject()
+    val sendLocationToServerUseCase: SendLocationToServerUseCase by inject()
+    val updateTaskUseCase: UpdateTaskUseCase by inject()
+    val updateStepsUseCase: UpdateStepsUseCase by inject()
 
-    lateinit var pendingIntent: PendingIntent
+    private lateinit var pendingIntentUpdate: PendingIntent
+    private lateinit var pendingIntentStoreLocation: PendingIntent
+    private lateinit var pendingIntentSendLocation: PendingIntent
     private var lat: Double = 0.0
     private var lon: Double = 0.0
+    private val REQUEST_CODE_1 = 1
+    private val REQUEST_CODE_2 = 2
+    private val REQUEST_CODE_3 = 3
 
 
     actual companion object {
-        private val _serviceState : MutableStateFlow<ServiceState> = MutableStateFlow(ServiceState.Normal)
-        actual fun updateServiceState(serviceState: ServiceState){
+        private val _serviceState: MutableStateFlow<ServiceState> =
+            MutableStateFlow(ServiceState.Normal)
+
+        actual fun updateServiceState(serviceState: ServiceState) {
             _serviceState.update { serviceState }
         }
 
 
-        val gpsTrackingIntent : Intent by lazy {
+        val gpsTrackingIntent: Intent by lazy {
             Intent((provideAppContext() as Context), BackgroundServiceApp::class.java)
         }
 
         const val Notification_ID = 123
         const val CHANNEL_ID = "GPS TRACKER"
-        actual fun stopBackgroundService(){
+        actual fun stopBackgroundService() {
 
             /*if (getSharedPref().getBool(isRunningGPS, false))*/
             (provideAppContext() as Context).stopService(gpsTrackingIntent)
@@ -80,7 +91,8 @@ internal actual class BackgroundServiceApp : Service() , KoinComponent {
         }
 
         fun isServiceRunning(): Boolean {
-            val activityManager = (provideAppContext() as  Context).getSystemService(ACTIVITY_SERVICE) as ActivityManager
+            val activityManager =
+                (provideAppContext() as Context).getSystemService(ACTIVITY_SERVICE) as ActivityManager
             for (service in activityManager.getRunningServices(Int.MAX_VALUE)) {
                 if (BackgroundServiceApp::class.java.name == service.service.className) {
                     return true
@@ -88,6 +100,7 @@ internal actual class BackgroundServiceApp : Service() , KoinComponent {
             }
             return false
         }
+
         actual fun startBackgroundService() {
             if (!isServiceRunning()) {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -99,15 +112,11 @@ internal actual class BackgroundServiceApp : Service() , KoinComponent {
         }
 
 
-
         actual val serviceState: MutableStateFlow<ServiceState>
             get() = _serviceState
 
 
     }
-
-
-
 
 
     @OptIn(DelicateCoroutinesApi::class)
@@ -116,7 +125,17 @@ internal actual class BackgroundServiceApp : Service() , KoinComponent {
         /*getSharedPref().put(isRunningGPS, true)*/
         val notification =
             createNotification(applicationContext, "Gps Tracking On", "retrieving gps data")
-        val intent = Intent(this, BackgroundServiceApp::class.java)
+        val intent1 = Intent(this, BackgroundServiceApp::class.java)
+        intent1.setAction(AlarmAction.UPDATE)
+
+        val intent2 = Intent(this, BackgroundServiceApp::class.java)
+        intent2.setAction(AlarmAction.STORE_LOCATION)
+
+
+        val intent3 = Intent(this, BackgroundServiceApp::class.java)
+        intent3.setAction(AlarmAction.SEND_LOCATION)
+
+
         startForeground(Notification_ID, notification);
 
         Location.start() {
@@ -127,7 +146,12 @@ internal actual class BackgroundServiceApp : Service() , KoinComponent {
 
         }
 
-        pendingIntent = PendingIntent.getService(this, 0, intent, PendingIntent.FLAG_IMMUTABLE)
+        pendingIntentUpdate =
+            PendingIntent.getService(this, REQUEST_CODE_1, intent1, PendingIntent.FLAG_IMMUTABLE)
+        pendingIntentStoreLocation =
+            PendingIntent.getService(this, REQUEST_CODE_2, intent2, PendingIntent.FLAG_IMMUTABLE)
+        pendingIntentSendLocation =
+            PendingIntent.getService(this, REQUEST_CODE_3, intent3, PendingIntent.FLAG_IMMUTABLE)
     }
 
 
@@ -146,108 +170,142 @@ internal actual class BackgroundServiceApp : Service() , KoinComponent {
         var scope = CoroutineScope(Dispatchers.Main)
 
         println("checkGpsPer${isLocationEnabled()}")
+        println("checkGpsPerAction${intent?.action}")
 
+        val telephonyData = TelephonyDataImpl(this)
+        val data = telephonyData.getTelephonyData()
+
+        println("checkGpsPerAction$data")
 
 
 
         try {
             scope.launch(Dispatchers.Main) {
+                println("checkGpsPerAction in${intent?.action}")
 
-                storeLocationDataUseCase(
-                    GeneralLocationEntity(
-                        latitude = lat.toString(),
-                       longitude =  lon.toString(),
-                       datetime =  getCurrentDate(),
-                       isSent =  0
-                    )
-                ).collect{
-                    when(it.status){
-                        AsyncStatus.ERROR -> {
-                            val errorMessage = it.message!!
+                when (intent?.action) {
 
-                        }
-                        AsyncStatus.EMPTY->{
 
-                        }
-                        AsyncStatus.LOADING -> {
-                        }
-                        AsyncStatus.SUCCESS -> {
+                    AlarmAction.SEND_LOCATION -> {
 
+//                        sendLocationToServer()
+
+                    }
+
+                    AlarmAction.STORE_LOCATION -> {
+
+                        storeLocation(data)
+
+                    }
+
+                    AlarmAction.UPDATE -> {
+
+                        if (_serviceState.value != ServiceState.Suspend) {
+                            updateTask()
                         }
                     }
                 }
 
-                sendLocationToServerUseCase(
-                    listOf(LiveLocationDomain(
-                        lat,
-                        lon,
-                        getCurrentDate(),
-                        0,
-                        getSharedPref().getString(AvailabilityObjectId)?.toLong()?:0,
-                        getSharedPref().getString(TicketNumber)?:""
-                    ))
-                ).collect{
-                    when(it.status){
-                        AsyncStatus.ERROR -> {
-                            if( it.resultStatus is ResultStatus.CLIENT_EXCEPTION.UNATHORIZED || it.resultStatus is ResultStatus.CLIENT_EXCEPTION.FORBIDDEN)
-                                _serviceState.update { ServiceState.Faulty }
-
-                        }
-                        AsyncStatus.LOADING -> {
-                        }
-                        AsyncStatus.EMPTY->{
-                        }
-                        AsyncStatus.SUCCESS -> {
-
-                        }
-                    }
-                }
-                println("TaskCallApi${_serviceState.value}")
-
-                if(_serviceState.value!=ServiceState.Suspend) {
-                    println("TaskCallApi${"ServiceState.Suspend"}")
-                    updateTask()
-                }
 
                 startAlarm()
-                scope.cancel()
+
             }
 
-        }catch (e:Exception){
+        } catch (e: Exception) {
 
         }
 
 
         return START_STICKY
     }
-    private suspend fun updateTask(){
+
+    private suspend fun BackgroundServiceApp.storeLocation(data : JsonArray) {
+        storeLocationDataUseCase(
+            GeneralLocationEntity(
+                latitude = lat.toString(),
+                longitude = lon.toString(),
+                datetime = getCurrentDate(),
+                isSent = 0,
+                networkInfo = Json.encodeToString(JsonArray.serializer(),data)
+            )
+        ).collect {
+            when (it.status) {
+                AsyncStatus.ERROR -> {
+                    val errorMessage = it.message!!
+                    println("checkGpsPerAction storeLocationDataUseCase Error")
+
+                }
+
+                AsyncStatus.EMPTY -> {
+
+                }
+
+                AsyncStatus.LOADING -> {
+                }
+
+                AsyncStatus.SUCCESS -> {
+                    println("checkGpsPerAction sustoreLocationDataUseCaseccess")
+
+                }
+            }
+        }
+    }
+
+    private suspend fun BackgroundServiceApp.sendLocationToServer() {
+        sendLocationToServerUseCase(
+            Unit
+        ).collect {
+            when (it.status) {
+                AsyncStatus.ERROR -> {
+                    if (it.resultStatus is ResultStatus.CLIENT_EXCEPTION.UNATHORIZED || it.resultStatus is ResultStatus.CLIENT_EXCEPTION.FORBIDDEN)
+                        _serviceState.update { ServiceState.Faulty }
+
+                }
+
+                AsyncStatus.LOADING -> {
+                }
+
+                AsyncStatus.EMPTY -> {
+                }
+
+                AsyncStatus.SUCCESS -> {
+
+                }
+            }
+        }
+    }
+
+    private suspend fun updateTask() {
         updateTaskUseCase(Unit)
-            .collect{
-                when(it.status){
+            .collect {
+                when (it.status) {
                     AsyncStatus.ERROR -> {
-                        if( it.resultStatus is ResultStatus.CLIENT_EXCEPTION.UNATHORIZED || it.resultStatus is ResultStatus.CLIENT_EXCEPTION.FORBIDDEN)
+                        if (it.resultStatus is ResultStatus.CLIENT_EXCEPTION.UNATHORIZED || it.resultStatus is ResultStatus.CLIENT_EXCEPTION.FORBIDDEN)
                             _serviceState.update { ServiceState.Faulty }
                         println("TaskCallApi${"ERROR"}")
                     }
+
                     AsyncStatus.LOADING -> {
                     }
-                    AsyncStatus.EMPTY->{
+
+                    AsyncStatus.EMPTY -> {
 
                     }
+
                     AsyncStatus.SUCCESS -> {
                         updateSteps()
                         println("TaskCallApi${"SUCCESS"}")
-                        Log.i("getAllTask", "onStartCommand: CallApi"+it.data)
+                        Log.i("getAllTask", "onStartCommand: CallApi" + it.data)
                     }
                 }
             }
     }
+
     private suspend fun updateSteps() {
         updateStepsUseCase(Unit).collect {
             when (it.status) {
                 AsyncStatus.ERROR -> {
-//                    if( it.resultStatus is ResultStatus.CLIENT_EXCEPTION.UNATHORIZED || it.resultStatus is ResultStatus.CLIENT_EXCEPTION.FORBIDDEN)
-//                        _serviceState.update { ServiceState.Faulty }
+
 
                     Napier.log(
                         LogLevel.ASSERT,
@@ -256,7 +314,8 @@ internal actual class BackgroundServiceApp : Service() , KoinComponent {
                     )
 
                 }
-                AsyncStatus.EMPTY->{
+
+                AsyncStatus.EMPTY -> {
 
                 }
 
@@ -287,28 +346,43 @@ internal actual class BackgroundServiceApp : Service() , KoinComponent {
     }
 
 
-
-
-
-
     @SuppressLint("ScheduleExactAlarm")
     private fun startAlarm() {
 
-        val alarmManager = getSystemService(ALARM_SERVICE) as AlarmManager
-        val currentTimeMillis = SystemClock.elapsedRealtime()
-        val intervalMillis = TimeUnit.MILLISECONDS.toMillis(2000)
+        val alarmManager1 = getSystemService(ALARM_SERVICE) as AlarmManager
+        val alarmManager2 = getSystemService(ALARM_SERVICE) as AlarmManager
+        val alarmManager3 = getSystemService(ALARM_SERVICE) as AlarmManager
 
-        alarmManager.setExact(
+        val currentTimeMillis = SystemClock.elapsedRealtime()
+        val intervalMillis1 = TimeUnit.MILLISECONDS.toMillis(1000)
+        val intervalMillis2 = TimeUnit.MILLISECONDS.toMillis(15000)
+        val intervalMillis3 = TimeUnit.MILLISECONDS.toMillis(60000)
+
+
+        alarmManager1.setExact(
             AlarmManager.ELAPSED_REALTIME_WAKEUP,
-            currentTimeMillis + intervalMillis,
-            pendingIntent
+            currentTimeMillis + intervalMillis1,
+            pendingIntentUpdate,
+        )
+        alarmManager2.setExact(
+            AlarmManager.ELAPSED_REALTIME_WAKEUP,
+            currentTimeMillis + intervalMillis2,
+            pendingIntentStoreLocation,
+        )
+        alarmManager3.setExact(
+            AlarmManager.ELAPSED_REALTIME_WAKEUP,
+            currentTimeMillis + intervalMillis3,
+            pendingIntentSendLocation,
         )
     }
+
 
     private fun cancelAlarm() {
 
         val alarmManager = getSystemService(ALARM_SERVICE) as AlarmManager
-        alarmManager.cancel(pendingIntent)
+        alarmManager.cancel(pendingIntentUpdate)
+        alarmManager.cancel(pendingIntentStoreLocation)
+        alarmManager.cancel(pendingIntentSendLocation)
     }
 
     @SuppressLint("MissingPermission")

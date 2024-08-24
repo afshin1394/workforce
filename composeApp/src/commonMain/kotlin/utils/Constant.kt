@@ -16,9 +16,9 @@ const val ModeApp = "modeApp"
 const val IsScrollDateTimePickerInList = "isScrollDateTimePickerInList"
 const val TicketNumber = "TicketNumber"
 
-const val ProductionBASEURL = "http://mobile.ios.mtnirancell.ir/api/"
-const val DevelopmentBASEURL = "https://ios.mtnirancell.ir/api/"
-
+const val DeploymentBASEURL = "http://mobile.ios.mtnirancell.ir/api/"
+const val ProductionBASEURL = "https://ios.mtnirancell.ir/api/"
+const val DevelopmentBASEURL = "https://uat.ios.mtnirancell.ir/api/"
 
 sealed interface ServiceState{
     data object Normal : ServiceState
@@ -26,7 +26,11 @@ sealed interface ServiceState{
     data object Suspend : ServiceState
 }
 
-
+object AlarmAction{
+    const val UPDATE = "ALARM_UPDATE"
+    const val STORE_LOCATION = "STORE_LOCATION"
+    const val SEND_LOCATION = "SEND_LOCATION"
+}
 object ErrorCode {
     const val NETWORK_NOT_AVAILABLE = 1001
     const val NETWORK_CONNECTION_FAILED = 1002
