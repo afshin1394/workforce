@@ -13,7 +13,7 @@ actual class TelephonyDataImpl(context: Context) : TelephonyData {
     private val telephonyManager = context.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
 
     @SuppressLint("MissingPermission")
-    override fun getTelephonyData(): JsonArray {
+    override fun getTelephonyData(): JsonObject {
       return  telephonyManager.allCellInfo.toJson()
     }
 

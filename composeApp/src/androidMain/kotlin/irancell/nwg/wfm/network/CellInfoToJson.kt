@@ -15,7 +15,7 @@ import kotlinx.serialization.modules.*
 import kotlinx.serialization.serializer
 
 
-fun List<android.telephony.CellInfo>.toJson() : JsonArray{
+fun List<android.telephony.CellInfo>.toJson() : JsonObject{
     val cellInfoModule = SerializersModule {
         polymorphic(CellInfo::class) {
             subclass(CellInfoCDMA::class, CellInfoCDMA.serializer())
@@ -75,7 +75,16 @@ fun List<android.telephony.CellInfo>.toJson() : JsonArray{
     }
     val jsonString = json.encodeToString(cellInfoModule.serializer(),cellInfos)
     println( "jsonSTRING :  $jsonString")
-    return  json.parseToJsonElement(jsonString).jsonArray
+
+    val jsonArray = Json.decodeFromString<JsonArray>(jsonString)
+    val jsonObject = JsonObject(mapOf("info" to jsonArray))
+
+    // Serialize the JsonObject back to a string
+    val wrappedJsonString = Json.encodeToString(JsonObject.serializer(),jsonObject)
+
+    println( "wrappedJsonString :  $wrappedJsonString")
+
+    return  json.parseToJsonElement(wrappedJsonString).jsonObject
 
 
 }

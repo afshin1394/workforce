@@ -188,7 +188,7 @@ internal actual class BackgroundServiceApp : Service(), KoinComponent {
 
                     AlarmAction.SEND_LOCATION -> {
 
-//                        sendLocationToServer()
+                        sendLocationToServer()
 
                     }
 
@@ -219,14 +219,14 @@ internal actual class BackgroundServiceApp : Service(), KoinComponent {
         return START_STICKY
     }
 
-    private suspend fun BackgroundServiceApp.storeLocation(data : JsonArray) {
+    private suspend fun BackgroundServiceApp.storeLocation(data : JsonObject) {
         storeLocationDataUseCase(
             GeneralLocationEntity(
                 latitude = lat.toString(),
                 longitude = lon.toString(),
                 datetime = getCurrentDate(),
                 isSent = 0,
-                networkInfo = Json.encodeToString(JsonArray.serializer(),data)
+                networkInfo = Json.encodeToString(JsonObject.serializer(),data)
             )
         ).collect {
             when (it.status) {
@@ -354,7 +354,7 @@ internal actual class BackgroundServiceApp : Service(), KoinComponent {
         val alarmManager3 = getSystemService(ALARM_SERVICE) as AlarmManager
 
         val currentTimeMillis = SystemClock.elapsedRealtime()
-        val intervalMillis1 = TimeUnit.MILLISECONDS.toMillis(1000)
+        val intervalMillis1 = TimeUnit.MILLISECONDS.toMillis(10)
         val intervalMillis2 = TimeUnit.MILLISECONDS.toMillis(15000)
         val intervalMillis3 = TimeUnit.MILLISECONDS.toMillis(60000)
 
