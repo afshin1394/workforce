@@ -15,6 +15,8 @@ import android.os.Build
 import android.os.IBinder
 import android.os.SystemClock
 import android.util.Log
+import androidx.compose.runtime.*
+import androidx.compose.runtime.remember
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import database.entity.GeneralLocationEntity
@@ -66,6 +68,7 @@ internal actual class BackgroundServiceApp : Service(), KoinComponent {
     private val REQUEST_CODE_1 = 1
     private val REQUEST_CODE_2 = 2
     private val REQUEST_CODE_3 = 3
+
 
 
     actual companion object {
@@ -126,14 +129,14 @@ internal actual class BackgroundServiceApp : Service(), KoinComponent {
         val notification =
             createNotification(applicationContext, "Gps Tracking On", "retrieving gps data")
         val intent1 = Intent(this, BackgroundServiceApp::class.java)
-        intent1.setAction(AlarmAction.UPDATE)
+        intent1.setAction(AlarmAction.UPDATE.title)
 
         val intent2 = Intent(this, BackgroundServiceApp::class.java)
-        intent2.setAction(AlarmAction.STORE_LOCATION)
+        intent2.setAction(AlarmAction.STORE_LOCATION.title)
 
 
         val intent3 = Intent(this, BackgroundServiceApp::class.java)
-        intent3.setAction(AlarmAction.SEND_LOCATION)
+        intent3.setAction(AlarmAction.SEND_LOCATION.title)
 
 
         startForeground(Notification_ID, notification);
@@ -152,6 +155,7 @@ internal actual class BackgroundServiceApp : Service(), KoinComponent {
             PendingIntent.getService(this, REQUEST_CODE_2, intent2, PendingIntent.FLAG_IMMUTABLE)
         pendingIntentSendLocation =
             PendingIntent.getService(this, REQUEST_CODE_3, intent3, PendingIntent.FLAG_IMMUTABLE)
+        startAlarm()
     }
 
 
@@ -169,36 +173,34 @@ internal actual class BackgroundServiceApp : Service(), KoinComponent {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         var scope = CoroutineScope(Dispatchers.Main)
 
-        println("checkGpsPer${isLocationEnabled()}")
-        println("checkGpsPerAction${intent?.action}")
+
 
         val telephonyData = TelephonyDataImpl(this)
         val data = telephonyData.getTelephonyData()
 
-        println("checkGpsPerAction$data")
 
 
 
         try {
             scope.launch(Dispatchers.Main) {
-                println("checkGpsPerAction in${intent?.action}")
+                println("service action${intent?.action}")
 
                 when (intent?.action) {
 
 
-                    AlarmAction.SEND_LOCATION -> {
-
+                    AlarmAction.SEND_LOCATION.title -> {
+                        startAlarm()
                         sendLocationToServer()
 
                     }
 
-                    AlarmAction.STORE_LOCATION -> {
+                    AlarmAction.STORE_LOCATION.title -> {
 
                         storeLocation(data)
 
                     }
 
-                    AlarmAction.UPDATE -> {
+                    AlarmAction.UPDATE.title  -> {
 
                         if (_serviceState.value != ServiceState.Suspend) {
                             updateTask()
@@ -207,8 +209,6 @@ internal actual class BackgroundServiceApp : Service(), KoinComponent {
                 }
 
 
-                startAlarm()
-
             }
 
         } catch (e: Exception) {
@@ -216,17 +216,18 @@ internal actual class BackgroundServiceApp : Service(), KoinComponent {
         }
 
 
+
         return START_STICKY
     }
 
-    private suspend fun BackgroundServiceApp.storeLocation(data : JsonObject) {
+    private suspend fun BackgroundServiceApp.storeLocation(data: JsonObject) {
         storeLocationDataUseCase(
             GeneralLocationEntity(
                 latitude = lat.toString(),
                 longitude = lon.toString(),
                 datetime = getCurrentDate(),
                 isSent = 0,
-                networkInfo = Json.encodeToString(JsonObject.serializer(),data)
+                networkInfo = Json.encodeToString(JsonObject.serializer(), data)
             )
         ).collect {
             when (it.status) {
@@ -349,27 +350,26 @@ internal actual class BackgroundServiceApp : Service(), KoinComponent {
     @SuppressLint("ScheduleExactAlarm")
     private fun startAlarm() {
 
-        val alarmManager1 = getSystemService(ALARM_SERVICE) as AlarmManager
-        val alarmManager2 = getSystemService(ALARM_SERVICE) as AlarmManager
-        val alarmManager3 = getSystemService(ALARM_SERVICE) as AlarmManager
+        val alarmManager = getSystemService(ALARM_SERVICE) as AlarmManager
+
 
         val currentTimeMillis = SystemClock.elapsedRealtime()
-        val intervalMillis1 = TimeUnit.MILLISECONDS.toMillis(10)
-        val intervalMillis2 = TimeUnit.MILLISECONDS.toMillis(15000)
-        val intervalMillis3 = TimeUnit.MILLISECONDS.toMillis(60000)
+        val intervalMillis1 = TimeUnit.MILLISECONDS.toMillis(AlarmAction.UPDATE.interval)
+        val intervalMillis2 = TimeUnit.MILLISECONDS.toMillis(AlarmAction.STORE_LOCATION.interval)
+        val intervalMillis3 = TimeUnit.MILLISECONDS.toMillis(AlarmAction.SEND_LOCATION.interval)
 
 
-        alarmManager1.setExact(
+        alarmManager.setExact(
             AlarmManager.ELAPSED_REALTIME_WAKEUP,
             currentTimeMillis + intervalMillis1,
             pendingIntentUpdate,
         )
-        alarmManager2.setExact(
+        alarmManager.setExact(
             AlarmManager.ELAPSED_REALTIME_WAKEUP,
             currentTimeMillis + intervalMillis2,
             pendingIntentStoreLocation,
         )
-        alarmManager3.setExact(
+        alarmManager.setExact(
             AlarmManager.ELAPSED_REALTIME_WAKEUP,
             currentTimeMillis + intervalMillis3,
             pendingIntentSendLocation,

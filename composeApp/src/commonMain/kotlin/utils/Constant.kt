@@ -27,9 +27,19 @@ sealed interface ServiceState{
 }
 
 object AlarmAction{
-    const val UPDATE = "ALARM_UPDATE"
-    const val STORE_LOCATION = "STORE_LOCATION"
-    const val SEND_LOCATION = "SEND_LOCATION"
+    object UPDATE{
+        const val title = "UPDATE"
+        const val interval = 10L
+    }
+    object STORE_LOCATION{
+        const val title = "STORE_LOCATION"
+        const val interval = 30000L
+    }
+    object SEND_LOCATION{
+        const val title = "SEND_LOCATION"
+        const val interval = 90000L
+    }
+
 }
 object ErrorCode {
     const val NETWORK_NOT_AVAILABLE = 1001
