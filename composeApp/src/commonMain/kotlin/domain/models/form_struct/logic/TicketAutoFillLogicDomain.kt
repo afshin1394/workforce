@@ -1,5 +1,8 @@
 package data.network.response.task.logic
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class TicketAutoFillLogicDomain(
     val phaseName : String?,
     val phase : String?,

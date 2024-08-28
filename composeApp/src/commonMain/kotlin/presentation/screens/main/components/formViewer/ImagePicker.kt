@@ -40,12 +40,13 @@ import presentation.theme.textSecondary
 
 @Composable
 fun ImagePicker(
+    itemIndex : Int,
     item : ComponentDomain,
     componentId: String,
     errorMessage: ResourceFormattedStringDesc,
     photoDomainList: List<PhotoDomain>,
     onTakePhoto: (resultTakePhoto: String) -> Unit,
-    onCameraClick : (item : ComponentDomain) -> Unit,
+    onCameraClick : (itemIndex : Int) -> Unit,
     onImageClick: (index: Int) -> Unit
 ) {
 
@@ -67,8 +68,8 @@ fun ImagePicker(
 
     var openCamera by remember { mutableStateOf(false) }
 
-    Camera.onResult {
-        onTakePhoto(it.toString())
+    Camera.onResult {uri->
+        onTakePhoto(uri.toString())
     }
 
     if (openCamera) {
@@ -126,7 +127,7 @@ fun ImagePicker(
 
                 if(!(disableLogic || readOnlyLogic)) {
                     openCamera = true
-                    onCameraClick(item)
+                    onCameraClick(itemIndex)
                 }
 
             }) {

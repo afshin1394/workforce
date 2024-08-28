@@ -3,6 +3,7 @@ package utils
 
 
 const val Availability = "Availability"
+
 const val AvailabilityObjectId = "AvailabilityObjectId"
 const val SessionId = "SessionId"
 const val UserName = "UserName"

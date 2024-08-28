@@ -50,12 +50,13 @@ import presentation.theme.textSecondary
 
 @Composable
 fun UploadFileComponent(
+    index : Int,
     item : ComponentDomain,
     label : String,
     errorMessage: ResourceFormattedStringDesc,
     modifier: Modifier,
     uploadList: List<ValueDomain>,
-    onClickUpload : (item : ComponentDomain) -> Unit,
+    onClickUpload : (index : Int) -> Unit,
     onChooseFileFromDevice: (MutableList<ValueDomain>) -> Unit,
     onRemoveFile: (ValueDomain) -> Unit
 ) {
@@ -158,7 +159,7 @@ fun UploadFileComponent(
                 onAttachClick = {
                     if (!(disableLogic || readOnlyLogic)) {
                         openFilePic = true
-                        onClickUpload(item)
+                        onClickUpload(index)
                     }
 
                 })

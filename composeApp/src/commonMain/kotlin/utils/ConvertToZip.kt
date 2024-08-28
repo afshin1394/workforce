@@ -21,7 +21,7 @@ fun convertToZip(list: List<String>,name:String,ticketNumber:String): UploadRequ
         extraInfo = createJsonWithTicketNumber(ticketNumber),
         totalPart = 1,
         currentPart = 1,
-        name =name,
+        name = name,
         customId = uuid4().toString(),
         file = File(zipFileData!!.path).readBytes()
     )

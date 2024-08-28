@@ -13,6 +13,7 @@ import androidx.compose.runtime.Composable
 
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -51,6 +52,7 @@ import presentation.screens.main.components.formViewer.groupComponent
 @OptIn(FlowPreview::class)
 @Composable
 fun initialize(
+    savedIndex : Int,
     taskID: String,
     modifier: Modifier,
     photoDomainList: MutableList<PhotoDomain>,
@@ -60,11 +62,11 @@ fun initialize(
     onRemoveItem: (componentDomain:ComponentDomain, listValueDomain: List<ValueDomain>?, indexParent: List<Int>, indexChild: Int) -> Unit,
     onFixChange: (text: MutableStateFlow<String>) -> Unit,
     onClickImage: (indexPhotoSelected: Int, componentKey: String) -> Unit,
-    currentParentIndex: List<Int> = listOf()
+    currentParentIndex: List<Int> = listOf(),
 ) {
+    Napier.log(LogLevel.ASSERT, tag = "indexFile", message = "indexFile${savedIndex}")
 
-    val selectedComponent = remember { mutableStateOf<ComponentDomain?>(null) }
-    val indexFile = remember { mutableStateOf<Int>(0) }
+    val indexFile = rememberSaveable { mutableStateOf(savedIndex) }
     val uploadDomainLists = remember { mutableStateMapOf<String, MutableState<List<ValueDomain>>>() }
 
 
@@ -88,6 +90,7 @@ fun initialize(
 
 
                         groupComponent(
+                            savedIndex= savedIndex,
                             taskID,
                             modifier.heightIn(0.dp, 1000.dp),
                             photoDomainList,
@@ -496,75 +499,89 @@ fun initialize(
 
 
                     FormViewerTypes.FileUpload -> {
-                        // Ensure there is an upload list for this item key
-                        if (!uploadDomainLists.containsKey(item.key)) {
-                            uploadDomainLists[item.key!!] = mutableStateOf(selectedComponent.value?.values  ?: item.values ?: emptyList())
-                        }
+                           var selectedComponentObject = components[index]
+                            // Ensure there is an upload list for this item key
+                            if (!uploadDomainLists.containsKey(item.key)) {
+                                uploadDomainLists[item.key!!] = mutableStateOf(
+                                    components[index].values ?: item.values ?: emptyList()
+                                )
 
-                        val uploadDomainList = uploadDomainLists[item.key!!]!!
+                            }
 
-                        val initialMessageError: ResourceFormattedStringDesc =
-                            item.validate?.messageError ?: ResourceFormattedStringDesc(
-                                MR.strings.empty_error_message,
-                                emptyList()
-                            )
 
-                        val errorMessage = remember { mutableStateOf(initialMessageError) }
+                            val uploadDomainList = uploadDomainLists[item.key!!]!!
 
-                        UploadFileComponent(
-                            item = item,
-                            label = item.key ?: "",
-                            errorMessage = if (errorMessage.value == initialMessageError) errorMessage.value else initialMessageError,
-                            modifier = Modifier,
-                            uploadList = uploadDomainList.value,
-                            onChooseFileFromDevice = { list ->
-                                selectedComponent.value?.let {
-                                    val oldList = uploadDomainList.value.toMutableList()
-                                    val newValues = mutableListOf<ValueDomain>()
+                            val initialMessageError: ResourceFormattedStringDesc =
+                                item.validate?.messageError ?: ResourceFormattedStringDesc(
+                                    MR.strings.empty_error_message,
+                                    emptyList()
+                                )
 
-                                    updateFileUploadValidationError(
-                                        it,
-                                        list,
-                                        errorMessage,
-                                        newValues
+                            val errorMessage = remember { mutableStateOf(initialMessageError) }
+
+                            UploadFileComponent(
+                                index = index,
+                                item = item,
+                                label = item.key ?: "",
+                                errorMessage = if (errorMessage.value == initialMessageError) errorMessage.value else initialMessageError,
+                                modifier = Modifier,
+                                uploadList = uploadDomainList.value,
+                                onChooseFileFromDevice = { list ->
+                                        val oldList = uploadDomainList.value.toMutableList()
+                                        val newValues = mutableListOf<ValueDomain>()
+
+                                        updateFileUploadValidationError(
+                                            selectedComponentObject,
+                                            list,
+                                            errorMessage,
+                                            newValues
+                                        )
+
+                                        // Update the list and remove duplicates
+                                        oldList.addAll(newValues)
+                                        val newList = oldList.distinct()
+
+                                        uploadDomainList.value = newList
+                                        components[indexFile.value].values = newList
+
+                                        onChanges(
+                                            components,
+                                            selectedComponentObject.values,
+                                            currentParentIndex,
+                                            indexFile.value
+                                        )
+                                    Napier.log(LogLevel.ASSERT,tag = "UploadFileComponent onClickUpload",message = components[indexFile.value].toString())
+
+
+                                },
+                                onClickUpload = {indexClick->
+                                    indexFile.value = indexClick
+                                    Napier.log(
+                                        LogLevel.ASSERT,
+                                        tag = "UploadFileComponent",
+                                        message = index.toString()
                                     )
+                                    Napier.log(LogLevel.ASSERT,tag = "UploadFileComponent onClickUpload",message = components[indexFile.value].toString())
 
-                                    // Update the list and remove duplicates
-                                    oldList.addAll(newValues)
-                                    val newList = oldList.distinct()
+                                },
+                                onRemoveFile = { fileToRemove ->
 
+                                    val newList = uploadDomainList.value.toMutableList()
+                                    newList.remove(fileToRemove)
                                     uploadDomainList.value = newList
-                                    it.values = newList
+                                    item.values = newList
+                                    Napier.log(LogLevel.ASSERT,tag = "UploadFileComponent onClickUpload",message = item.toString())
 
                                     onChanges(
                                         components,
-                                        it.values,
+                                        item.values,
                                         currentParentIndex,
                                         indexFile.value
                                     )
                                 }
-                            },
-                            onClickUpload = {
-                                selectedComponent.value = it
-                                indexFile.value = index
-                                Napier.log(LogLevel.ASSERT, tag = "UploadFileComponent", message = index.toString())
-                            },
-                            onRemoveFile = { fileToRemove ->
 
-                                val newList = uploadDomainList.value.toMutableList()
-                                newList.remove(fileToRemove)
-                                uploadDomainList.value = newList
-                                item.values = newList
+                            )
 
-                                onChanges(
-                                    components,
-                                    item.values,
-                                    currentParentIndex,
-                                    indexFile.value
-                                )
-                            }
-
-                        )
                     }
 
 
@@ -577,20 +594,20 @@ fun initialize(
 
                         val errorMessageState = remember { mutableStateOf(initialMessageError) }
                         ImagePicker(
+                            index,
                             item,
                             taskID,
                             if (errorMessageState.value == initialMessageError) errorMessageState.value else initialMessageError,
                             findPhotosByComponentId(photoDomainList, item.key),
                             onTakePhoto = { resultTakePhoto ->
-                                Napier.log(LogLevel.ASSERT,tag = "componentDomainForImage",message =selectedComponent.value.toString())
-                                Napier.log(LogLevel.ASSERT,tag = "componentDomainForImage indexCamera",message =indexFile.value.toString())
-                                Napier.log(LogLevel.ASSERT,tag = "componentDomainForImage index",message =index.toString())
-                                selectedComponent.value?.let {
-                                Napier.log(LogLevel.ASSERT,tag = "componentDomainForImage",message =it.toString())
-                                val newValues =
+
+                                components[indexFile.value].let {
+                                    Napier.log(LogLevel.ASSERT,tag = "takePhoto onTakePhoto",message =it.toString())
+
+                                    val newValues =
                                     listOf(ValueDomain("${it.type}:${it.key}", "${resultTakePhoto}"))
                                     it.values = newValues
-
+                                    Napier.log(LogLevel.ASSERT,tag = "takePhoto onTakePhoto",message =it.toString())
                                 updateImageViewValidationError(it, errorMessageState)
 
                                 onChanges( components, newValues, currentParentIndex, indexFile.value)
@@ -599,11 +616,11 @@ fun initialize(
                             },
                             onImageClick = {
                                 onClickImage(it, item.key ?: "")
-                            }, onCameraClick = { item ->
+                            }, onCameraClick = { index ->
 
-                                Napier.log(LogLevel.ASSERT,tag = "componentDomainForImage",message =item.toString())
-                                selectedComponent.value = item
                                 indexFile.value = index
+                                Napier.log(LogLevel.ASSERT,tag = "takePhoto onCameraClick",message =components[index].toString())
+
                             })
                     }
 

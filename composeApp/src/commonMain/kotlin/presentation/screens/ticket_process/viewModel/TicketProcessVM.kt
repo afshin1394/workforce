@@ -1,6 +1,7 @@
 package presentation.screens.ticket_process.viewModel
 
 
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import arrow.core.Tuple4
@@ -43,6 +44,8 @@ class TicketProcessVM(
     private val insertPhotoUseCase: InsertPhotoUseCase,
     private val sendStepsOfTicketToServerUseCase: SendStepsOfTicketToServerUseCase
 ) : BaseViewModel() {
+
+
     private val _currentLevel = MutableStateFlow(0)
     val currentLevel = _currentLevel.asStateFlow()
 
@@ -78,6 +81,13 @@ class TicketProcessVM(
 
     fun updateTicketFlowState(completed : Boolean){
         _ticketFlowCompleted.update { completed }
+    }
+
+    private val _savedIndex = MutableStateFlow<Int>(0)
+    var savedIndex =  _savedIndex.asStateFlow()
+
+    fun updateSavedIndex(index : Int){
+        _savedIndex.update { index }
     }
     val logicCalculation: LogicCalculation = LogicCalculation(tempComponentList)
 
@@ -465,9 +475,6 @@ class TicketProcessVM(
     fun updateImageUriForDeletePhoto(po: Int, key: String) {
         val itemIndex = findPhotoIndexByIdAndPosition(key, po)
         itemIndex?.let {
-            val values = tempComponentList.findComponentByKey(key)?.values?.toMutableList()
-            values?.removeAt(itemIndex)
-            tempComponentList.findComponentByKey(key)?.values = values
             photoDomainList.removeAt(it)
             events.value = TicketProcessEvent.Default
         }

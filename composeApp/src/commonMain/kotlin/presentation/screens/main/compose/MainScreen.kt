@@ -120,9 +120,7 @@ class MainScreen(
         val cancelItems by lazy {
             viewModel.cancelItems
         }
-        Camera.onResult {
-            viewModel.updateSuspendTicketImageUri(it.toString())
-        }
+
 
         val underDevelopment = stringResource(MR.strings.under_development)
 
@@ -194,6 +192,10 @@ class MainScreen(
 
 
             }
+
+        Camera.onResult {uri->
+            viewModel.updateSuspendTicketImageUri(uri.toString())
+        }
 
 
         BaseScreen(
@@ -812,6 +814,7 @@ class MainScreen(
                         },
                         tasks = ArrayList(viewModel.tasks.toList()), onAccept = {
                             if (isClickable) {
+                                BackgroundServiceApp.updateServiceState(ServiceState.Suspend)
                                 isClickable = false
                                 viewModel.checkIfTicketIsEdited()
                                 viewModel.selectedTask.value = it
@@ -824,7 +827,6 @@ class MainScreen(
                         }
                     )
                     if (viewModel.showAcceptDialog.value) {
-                        BackgroundServiceApp.updateServiceState(ServiceState.Suspend)
 
                         if (isTicketEditedState) {
                             viewModel.selectedTask.value?.let {

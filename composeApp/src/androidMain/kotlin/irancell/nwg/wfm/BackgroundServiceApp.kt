@@ -155,7 +155,9 @@ internal actual class BackgroundServiceApp : Service(), KoinComponent {
             PendingIntent.getService(this, REQUEST_CODE_2, intent2, PendingIntent.FLAG_IMMUTABLE)
         pendingIntentSendLocation =
             PendingIntent.getService(this, REQUEST_CODE_3, intent3, PendingIntent.FLAG_IMMUTABLE)
-        startAlarm()
+        startUpdateAlarm()
+        startStoreLocationAlarm()
+        startSendLocationAlarm()
     }
 
 
@@ -189,18 +191,20 @@ internal actual class BackgroundServiceApp : Service(), KoinComponent {
 
 
                     AlarmAction.SEND_LOCATION.title -> {
-                        startAlarm()
+                        startSendLocationAlarm()
                         sendLocationToServer()
 
                     }
 
                     AlarmAction.STORE_LOCATION.title -> {
-
+                        startStoreLocationAlarm()
                         storeLocation(data)
 
                     }
 
                     AlarmAction.UPDATE.title  -> {
+                        print("serviceStateSuspend ${_serviceState.value}")
+                        startUpdateAlarm()
 
                         if (_serviceState.value != ServiceState.Suspend) {
                             updateTask()
@@ -326,7 +330,6 @@ internal actual class BackgroundServiceApp : Service(), KoinComponent {
                 }
 
                 AsyncStatus.SUCCESS -> {
-                    _serviceState.update { ServiceState.Normal }
 
 
                     Napier.log(
@@ -345,36 +348,41 @@ internal actual class BackgroundServiceApp : Service(), KoinComponent {
 
 
     }
-
-
-    @SuppressLint("ScheduleExactAlarm")
-    private fun startAlarm() {
-
+    private fun startUpdateAlarm(){
         val alarmManager = getSystemService(ALARM_SERVICE) as AlarmManager
-
-
         val currentTimeMillis = SystemClock.elapsedRealtime()
-        val intervalMillis1 = TimeUnit.MILLISECONDS.toMillis(AlarmAction.UPDATE.interval)
-        val intervalMillis2 = TimeUnit.MILLISECONDS.toMillis(AlarmAction.STORE_LOCATION.interval)
-        val intervalMillis3 = TimeUnit.MILLISECONDS.toMillis(AlarmAction.SEND_LOCATION.interval)
-
-
+        val intervalMillis = TimeUnit.MILLISECONDS.toMillis(AlarmAction.UPDATE.interval)
         alarmManager.setExact(
             AlarmManager.ELAPSED_REALTIME_WAKEUP,
-            currentTimeMillis + intervalMillis1,
+            currentTimeMillis + intervalMillis,
             pendingIntentUpdate,
         )
+    }
+
+    private fun startStoreLocationAlarm(){
+        val alarmManager = getSystemService(ALARM_SERVICE) as AlarmManager
+        val currentTimeMillis = SystemClock.elapsedRealtime()
+        val intervalMillis = TimeUnit.MILLISECONDS.toMillis(AlarmAction.STORE_LOCATION.interval)
         alarmManager.setExact(
             AlarmManager.ELAPSED_REALTIME_WAKEUP,
-            currentTimeMillis + intervalMillis2,
+            currentTimeMillis + intervalMillis,
             pendingIntentStoreLocation,
         )
+    }
+
+    private fun startSendLocationAlarm(){
+        val alarmManager = getSystemService(ALARM_SERVICE) as AlarmManager
+        val currentTimeMillis = SystemClock.elapsedRealtime()
+        val intervalMillis = TimeUnit.MILLISECONDS.toMillis(AlarmAction.SEND_LOCATION.interval)
         alarmManager.setExact(
             AlarmManager.ELAPSED_REALTIME_WAKEUP,
-            currentTimeMillis + intervalMillis3,
+            currentTimeMillis + intervalMillis,
             pendingIntentSendLocation,
         )
     }
+
+
+
 
 
     private fun cancelAlarm() {

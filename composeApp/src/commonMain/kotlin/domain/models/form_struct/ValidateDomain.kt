@@ -2,7 +2,7 @@ package domain.models.form_struct
 
 import data.network.response.task.Layout
 import dev.icerock.moko.resources.desc.ResourceFormattedStringDesc
-
+import kotlinx.serialization.Serializable
 
 data class ValidateDomain(
     val id : String?=null,

@@ -1,8 +1,6 @@
 package domain.models.form_struct
 
 import data.network.response.task.logic.LogicDomain
-
-
 data class ComponentDomain(
     val id: String?= null,
     val key: String?=null,
@@ -25,7 +23,7 @@ data class ComponentDomain(
     var processLogicDomain : ProcessLogicDomain=ProcessLogicDomain().copy(),
 
 
-    ){
+    ) {
 
 
     fun ComponentDomain.copy() : ComponentDomain{

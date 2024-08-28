@@ -1,6 +1,7 @@
 package data.network.response.task.logic
 
 import domain.models.form_struct.logic.ExpressionDomain
+import kotlinx.serialization.Serializable
 
 data class LogicDomain(
     val feild: String?=null,

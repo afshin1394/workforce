@@ -83,11 +83,16 @@ class TicketProcessScreen(
         val stepEvent by viewModel.stepEvent.collectAsState()
         val reloadState by viewModel.reloadState.collectAsState()
         val state by viewModel.state.collectAsState()
+        val savedIndex by viewModel.savedIndex.collectAsState()
 
         var isClickable by remember { mutableStateOf(true) }
         val mainScreen = rememberScreen(Menu.MyTickets)
 
         val ticketFlowCompletedState = viewModel.ticketFlowCompleted.collectAsState()
+
+
+
+
 
         LaunchedEffect(Unit) {
             viewModel.updateTicketNumber(ticketNumber)
@@ -360,6 +365,7 @@ class TicketProcessScreen(
                     processBar(stepDetails, currentLevelState)
                     if (reloadState) {
                         initialize(
+                            savedIndex = savedIndex,
                             taskID = currentLevelState.toString(),
                             modifier = Modifier,
                             photoDomainList = viewModel.photoDomainList,
@@ -379,12 +385,16 @@ class TicketProcessScreen(
 
                                 viewModel.handleLogics()
 
-
+                                Napier.log(LogLevel.ASSERT,tag = "takePhoto onChanges",message =viewModel.tempComponentList[indexChild].toString())
                                 listValueDomain?.let { it1 ->
+                                    Napier.log(LogLevel.ASSERT,tag = "takePhoto listValueDomain",message =it.toString())
+
                                     viewModel.updateUriPhotoComponent(
                                         viewModel.tempComponentList, listIndexParent, indexChild,
                                         it1
                                     )
+                                    Napier.log(LogLevel.ASSERT,tag = "takePhoto updateUriPhotoComponent",message =viewModel.tempComponentList[indexChild].toString())
+
                                 }
                             },
                             onAddItem = { listComponent, listValueDomain, listIndexParent, indexChild ->
@@ -399,6 +409,7 @@ class TicketProcessScreen(
                                     indexChild
                                 )
                             },
+
                         )
                     }
                 }

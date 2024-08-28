@@ -45,8 +45,9 @@ class SendStepsOfTicketToServerUseCase(
                 Napier.log(LogLevel.ASSERT, tag = "listOfString", message = e.toString())
             }
         }
-        val data = iUploadRepository.fetchUpload(convertToZip(list = listOfString.toSet().toList(), "testt", params))
-            .toUploadDomainList()
+
+        val data = if(listOfString.toSet().isNotEmpty()) iUploadRepository.fetchUpload(convertToZip(list = listOfString.toSet().toList(), "testt", params))
+            .toUploadDomainList() else emptyList()
         val formattedList = formatUploadDomainList(data)
 
         val imageMap = listToMap(formattedList)

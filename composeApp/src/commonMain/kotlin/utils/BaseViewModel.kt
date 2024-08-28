@@ -57,12 +57,15 @@ open class BaseViewModel : ViewModel() {
     val gpsState = _gpsState.asStateFlow()
     val konnectivity: Konnectivity = Konnectivity()
 
+
     init {
 
         traceNetwork()
         traceLocation()
         collectServiceState()
     }
+
+
 
     private fun collectServiceState() {
         viewModelScope.launch {

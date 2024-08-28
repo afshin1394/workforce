@@ -52,16 +52,6 @@
             </intent-filter>
         </receiver>
 
-        <receiver android:name=".receivers.SendLocationReceiver"
-            android:exported="true">
-        </receiver>
-        <receiver android:name=".receivers.StoreLocationReceiver"
-            android:exported="true">
-
-        </receiver>
-        <receiver android:name=".receivers.UpdateReceiver"
-            android:exported="true">
-        </receiver>
         <receiver
             android:name=".SMSBroadcastReceiver"
             android:exported="true"

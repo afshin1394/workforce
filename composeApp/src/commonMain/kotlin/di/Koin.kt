@@ -93,6 +93,7 @@ import presentation.screens.main.viewmodel.GpsTrackingReportScreenVM
 import presentation.screens.main.viewmodel.MapVM
 import presentation.screens.main.viewmodel.NotificationScreenVM
 import presentation.screens.ticket_process.viewModel.TicketInfoVM
+import utils.DeploymentBASEURL
 import utils.DevelopmentBASEURL
 import utils.ProductionBASEURL
 import utils.Token
@@ -168,7 +169,7 @@ fun httpModule() = module {
             }
             configure()
             defaultRequest {
-                url(DevelopmentBASEURL)
+                url(DeploymentBASEURL)
                 contentType(ContentType.Application.Json)
                 headers {
                     append(
@@ -206,7 +207,7 @@ fun httpModule() = module {
             }
             configure()
             defaultRequest {
-                url(DevelopmentBASEURL)
+                url(DeploymentBASEURL)
                 contentType(ContentType.Application.Json)
                 headers {
 

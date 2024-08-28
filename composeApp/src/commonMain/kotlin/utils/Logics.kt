@@ -1,6 +1,8 @@
 package utils
 
+import androidx.compose.runtime.Composable
 import data.network.response.task.logic.LogicDomain
+import dev.icerock.moko.resources.compose.localized
 import dev.icerock.moko.resources.desc.ResourceFormatted
 import dev.icerock.moko.resources.desc.ResourceFormattedStringDesc
 import dev.icerock.moko.resources.desc.StringDesc
