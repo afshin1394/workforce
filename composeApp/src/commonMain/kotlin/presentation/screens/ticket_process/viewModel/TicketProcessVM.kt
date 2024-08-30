@@ -6,6 +6,7 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import arrow.core.Tuple4
 import arrow.core.Tuple5
+import data.network.response.task.Value
 import domain.models.PhotoDomain
 import domain.models.form_struct.ComponentDomain
 import domain.models.form_struct.ValueDomain
@@ -83,12 +84,13 @@ class TicketProcessVM(
         _ticketFlowCompleted.update { completed }
     }
 
-    private val _savedIndex = MutableStateFlow<Int>(0)
+    private val _savedIndex = MutableStateFlow(0)
     var savedIndex =  _savedIndex.asStateFlow()
 
-    fun updateSavedIndex(index : Int){
-        _savedIndex.update { index }
-    }
+    private val _savedParentIndex = MutableStateFlow(0)
+    var savedParentIndex =  _savedParentIndex.asStateFlow()
+
+
     val logicCalculation: LogicCalculation = LogicCalculation(tempComponentList)
 
      fun getMokStepsForm(proceed: String) {
@@ -217,8 +219,6 @@ class TicketProcessVM(
 
                     AsyncStatus.SUCCESS -> {
                         sendToServer()
-
-
                     }
                 }
             }
@@ -377,7 +377,7 @@ class TicketProcessVM(
 
     private val photoDomain = MutableStateFlow<PhotoDomain>(
         PhotoDomain(
-            ticketNumber.value ?: "0",
+            ticketNumber.value ?: "0","0",
             "0",
             0,
             "",
@@ -387,10 +387,10 @@ class TicketProcessVM(
     )
 
 
-    fun findPhotosByComponentId(id: String?): MutableList<PhotoDomain> {
+    fun findPhotosByComponentId(id: String?,key: String?): MutableList<PhotoDomain> {
         val list: MutableList<PhotoDomain> = arrayListOf()
         photoDomainList.forEach {
-            if (it.component_key == id) {
+            if (it.component_key == key && it.componentId == id) {
                 list.add(it)
             }
         }
@@ -427,6 +427,7 @@ class TicketProcessVM(
                                 photoDomain.value =
                                     PhotoDomain(
                                         ticket_number = ticketNumber.value,
+                                        it1[i].componentId,
                                         it1[i].component_key,
                                         i.toLong(),
                                         it1[i].origin_uri,
@@ -448,19 +449,19 @@ class TicketProcessVM(
 
     }
 
-    fun updatePhotoDomain(key: String, imgUri: String) {
+   private fun updatePhotoDomain(id: String,key: String, imgUri: String) {
 
         photoDomain.value = PhotoDomain(
-            ticket_number = ticketNumber.value, key, (photoDomainList.size + 1L), imgUri, "", "0"
+            ticket_number = ticketNumber.value, id,key, (photoDomainList.size + 1L), imgUri, "", "0"
         )
         photoDomainList.add(photoDomain.value)
 
     }
 
 
-    fun findPhotoIndexByIdAndPosition(key: String, position: Int): Int? {
+    fun findPhotoIndexByIdAndPosition(key: String,id : String, position: Int): Int? {
 
-        val filteredList = photoDomainList.filter { it.component_key == key }
+        val filteredList = photoDomainList.filter { it.component_key == key && it.componentId == id }
 
 
         if (filteredList.isNotEmpty()) {
@@ -472,8 +473,8 @@ class TicketProcessVM(
         return null
     }
 
-    fun updateImageUriForDeletePhoto(po: Int, key: String) {
-        val itemIndex = findPhotoIndexByIdAndPosition(key, po)
+    fun updateImageUriForDeletePhoto(po: Int, key: String,id: String) {
+        val itemIndex = findPhotoIndexByIdAndPosition(key, id ,po)
         itemIndex?.let {
             photoDomainList.removeAt(it)
             events.value = TicketProcessEvent.Default
@@ -481,10 +482,10 @@ class TicketProcessVM(
     }
 
 
-    fun updateImageUriForEditPhoto(editUri: String, po: Int, key: String) {
+    fun updateImageUriForEditPhoto(editUri: String, po: Int, key: String,id : String) {
 
 
-        val itemIndex = findPhotoIndexByIdAndPosition(key, po)
+        val itemIndex = findPhotoIndexByIdAndPosition(key,id,po)
         itemIndex?.let { index ->
 
 
@@ -501,59 +502,17 @@ class TicketProcessVM(
     fun updatePositionSelected(position: Int) {
         _positionSelected.update { position }
     }
-
-
-    fun updateUriPhotoComponent(
-        components: List<ComponentDomain>,
-        indexParent: List<Int>,
-        indexChild: Int,
-        newValue: List<ValueDomain>
-    ): List<ComponentDomain> {
-        if (indexParent.isEmpty()) {
-            val updatedComponents = components.mapIndexed { idx, component ->
-                if (idx == indexChild) {
-                    if (component.type == FormViewerTypes.ImageView) {
-                        val imgUri =
-                            newValue.find { it.label == "${component.type}:${component.key}" }?.value
-                                ?: ""
-                        Napier.log(
-                            LogLevel.ASSERT,
-                            tag = "componettttt",
-                            message = component.toString()
-                        )
-                        updatePhotoDomain(component.key ?: "", imgUri)
-
-                        Napier.log(
-                            LogLevel.ASSERT,
-                            tag = "componettttt",
-                            message = component.toString()
-                        )
-                    }
-                    component.copy(values = newValue)
-
-                } else {
-                    component
-                }
-
+    fun updateUriPhotoComponent(component : ComponentDomain,newValue : List<ValueDomain>){
+        val imgUri =
+            newValue.find { it.label == "${component.type}:${component.key}" }?.value?:""
+        component.key?.let {
+            component.id?.let {
+                updatePhotoDomain(component.id, component.key, imgUri)
             }
-            return updatedComponents
-        } else {
-            val parentIndex = indexParent[0]
-            val remainingIndexes = indexParent.drop(1)
-            val updatedComponents = components.mapIndexed { idx, component ->
-                if (idx == parentIndex && component.components != null) {
-                    component.copy(
-                        components = updateUriPhotoComponent(
-                            component.components!!, remainingIndexes, indexChild, newValue
-                        )
-                    )
-                } else {
-                    component
-                }
-            }
-            return updatedComponents
         }
     }
+
+
 
 
     suspend fun saveAndDeletePhotoByComponentKey() {
@@ -596,6 +555,7 @@ class TicketProcessVM(
             insertPhotoUseCase(
                 PhotoDomain(
                     ticketNumber.value,
+                    photoDomainList[i].componentId,
                     photoDomainList[i].component_key,
                     photoDomainList[i].index_row,
                     photoDomainList[i].origin_uri,
@@ -644,6 +604,16 @@ class TicketProcessVM(
             if (found != null) {
                 return found
             }
+        }
+        return null
+    }
+
+    private fun List<ComponentDomain>.findComponentById(id: String?): ComponentDomain? {
+        for (component in this) {
+            if (component.id == id) {
+                return component
+            }
+            component.components?.findComponentById(id)?.let { return it }
         }
         return null
     }

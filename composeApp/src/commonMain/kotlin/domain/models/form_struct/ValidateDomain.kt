@@ -1,9 +1,12 @@
 package domain.models.form_struct
 
+import cafe.adriel.voyager.core.lifecycle.JavaSerializable
 import data.network.response.task.Layout
 import dev.icerock.moko.resources.desc.ResourceFormattedStringDesc
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.Transient
 
+@Serializable
 data class ValidateDomain(
     val id : String?=null,
     val key : String?=null,
@@ -24,5 +27,6 @@ data class ValidateDomain(
     val domainType:String?=null,
     val domainList:String?=null,
     val validationType:String?=null,
+    @Transient
     val messageError: ResourceFormattedStringDesc? = null
-)
+) 

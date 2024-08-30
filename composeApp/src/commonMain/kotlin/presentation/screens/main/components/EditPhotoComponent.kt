@@ -56,6 +56,7 @@ import presentation.theme.surfaceDefault
 @Composable
 fun EditPhotoComponent(
     angle: Float,
+    id : String,
     key : String,
     path : String,
     photoDomain: PhotoDomain,

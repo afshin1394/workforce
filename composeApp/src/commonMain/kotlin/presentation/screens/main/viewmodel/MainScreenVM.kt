@@ -99,7 +99,8 @@ class MainScreenVM(
     var ticketIsEdited = _ticketIsEdited.asStateFlow()
 
 
-    private val _ticketNumber = MutableStateFlow<String>(getSharedPref().getString(TicketNumber).orEmpty())
+    private val _ticketNumber =
+        MutableStateFlow<String>(getSharedPref().getString(TicketNumber).orEmpty())
     var ticketNumber = _ticketNumber.asStateFlow()
     var selectedTask: MutableState<TaskDomain?> = mutableStateOf(null)
 
@@ -137,12 +138,13 @@ class MainScreenVM(
             sendLocationForServer()
         }
     }
-    fun updateReloadState(isLoading : Boolean){
+
+    fun updateReloadState(isLoading: Boolean) {
         _reload.update { true }
     }
 
 
-    private fun getGeneralUnSendLocationList() : List<LiveLocationDomain> {
+    private fun getGeneralUnSendLocationList(): List<LiveLocationDomain> {
 
         viewModelScope.launch {
             generalLocationListUseCase(
@@ -180,15 +182,14 @@ class MainScreenVM(
                 longitude = location.longitude.toDouble(),
                 recorded_date = location.datetime,
                 site = 0,
-                attendance = getSharedPref().getString(AvailabilityObjectId)?.toLong()?:0,
-                ticket_num = getSharedPref().getString(TicketNumber)?:"",
-                network_info = Json.decodeFromString(JsonObject.serializer(),location.networkInfo)
+                attendance = getSharedPref().getString(AvailabilityObjectId)?.toLong() ?: 0,
+                ticket_num = getSharedPref().getString(TicketNumber) ?: "",
+                network_info = Json.decodeFromString(JsonObject.serializer(), location.networkInfo)
             )
         }
     }
 
     private fun sendLocationForServer() {
-
 
 
         viewModelScope.launch {
@@ -297,7 +298,8 @@ class MainScreenVM(
                         AsyncStatus.LOADING -> {
 
                         }
-                        AsyncStatus.EMPTY->{
+
+                        AsyncStatus.EMPTY -> {
 
                         }
 
@@ -363,7 +365,7 @@ class MainScreenVM(
         viewModelScope.launch(Dispatchers.IO) {
 
 
-            changeServerAvailabilityUseCase(Unit).collect {result->
+            changeServerAvailabilityUseCase(Unit).collect { result ->
                 when (result) {
                     is AsyncResult.Error -> {
                         handleError(result.resultStatus)
@@ -373,12 +375,12 @@ class MainScreenVM(
                         updateState(ViewStates.Loading)
                     }
 
-                    is AsyncResult.Empty->{
+                    is AsyncResult.Empty -> {
 
                     }
 
                     is AsyncResult.Success -> {
-                        _availability.update { result.data?:false}
+                        _availability.update { result.data ?: false }
                         updateState(ViewStates.Success())
                         events.value = MainEvent.Default
                         Napier.log(
@@ -563,7 +565,7 @@ class MainScreenVM(
 
     fun updateTicketNumber(ticketNum: String) {
         _ticketNumber.update { ticketNum }
-        getSharedPref().put(TicketNumber,ticketNumber.value)
+        getSharedPref().put(TicketNumber, ticketNumber.value)
 
 
     }
@@ -593,7 +595,7 @@ class MainScreenVM(
 
                     }
 
-                    AsyncStatus.EMPTY->{
+                    AsyncStatus.EMPTY -> {
                         Napier.log(
                             LogLevel.ASSERT,
                             "getAllWorksUseCase",
@@ -663,7 +665,7 @@ class MainScreenVM(
 
                         }
 
-                        AsyncStatus.EMPTY->{
+                        AsyncStatus.EMPTY -> {
 
                         }
 
@@ -703,9 +705,10 @@ class MainScreenVM(
 
                         }
 
-                        AsyncStatus.EMPTY->{
+                        AsyncStatus.EMPTY -> {
 
                         }
+
                         AsyncStatus.SUCCESS -> {
 
                             storeSuspendTask()
@@ -751,7 +754,7 @@ class MainScreenVM(
 
                     }
 
-                    AsyncStatus.EMPTY->{
+                    AsyncStatus.EMPTY -> {
 
                     }
 
@@ -824,7 +827,7 @@ class MainScreenVM(
 
     private val photoDomain = MutableStateFlow<PhotoDomain>(
         PhotoDomain(
-            selectedTask.value?.basic_info?.ticket_number ?: "0",
+            selectedTask.value?.basic_info?.ticket_number ?: "0", "0",
             "0",
             0,
             "",
@@ -853,7 +856,7 @@ class MainScreenVM(
 
                     }
 
-                    AsyncStatus.EMPTY->{
+                    AsyncStatus.EMPTY -> {
 
                     }
 
@@ -867,6 +870,7 @@ class MainScreenVM(
                                 photoDomain.value =
                                     PhotoDomain(
                                         selectedTask.value?.basic_info?.ticket_number ?: "0",
+                                        "0",
                                         "0",
                                         i.toLong(),
                                         it1[i].origin_uri,
@@ -894,6 +898,7 @@ class MainScreenVM(
             PhotoDomain(
                 selectedTask.value?.basic_info?.ticket_number ?: "0",
                 "0",
+                "0",
                 0,
                 imgUri,
                 "",
@@ -912,6 +917,7 @@ class MainScreenVM(
                     PhotoDomain(
                         selectedTask.value?.basic_info?.ticket_number ?: "0",
                         "0",
+                        "0",
                         photoDomainList[i].index_row,
                         photoDomainList[i].origin_uri,
                         photoDomainList[i].edited_uri,
@@ -929,7 +935,8 @@ class MainScreenVM(
                             updateState(ViewStates.Loading)
 
                         }
-                        AsyncStatus.EMPTY->{
+
+                        AsyncStatus.EMPTY -> {
 
                         }
 
@@ -995,19 +1002,19 @@ class MainScreenVM(
 
                     }
 
-                    AsyncStatus.EMPTY->{
+                    AsyncStatus.EMPTY -> {
 
                     }
 
                     AsyncStatus.SUCCESS -> {
                         it.data?.let { isEdited ->
                             _ticketIsEdited.update { isEdited }
-                            if(!isEdited)
+                            if (!isEdited)
                                 updateShowAcceptDialog(true)
 
                         }
                         updateState(ViewStates.Success())
-                        updateTicketNumber(selectedTask.value?.basic_info?.ticket_number ?:"")
+                        updateTicketNumber(selectedTask.value?.basic_info?.ticket_number ?: "")
 
                     }
 
@@ -1033,7 +1040,8 @@ class MainScreenVM(
                             updateState(ViewStates.Loading)
 
                         }
-                        AsyncStatus.EMPTY->{
+
+                        AsyncStatus.EMPTY -> {
 
                         }
 
@@ -1068,7 +1076,7 @@ class MainScreenVM(
                         updateState(ViewStates.Loading)
                     }
 
-                    AsyncStatus.EMPTY->{
+                    AsyncStatus.EMPTY -> {
 
                     }
 
@@ -1094,7 +1102,8 @@ class MainScreenVM(
                     AsyncStatus.LOADING -> {
 
                     }
-                    AsyncStatus.EMPTY->{
+
+                    AsyncStatus.EMPTY -> {
 
                     }
 

@@ -8,6 +8,7 @@ fun PhotoDomain.toPhotoEntity() : PhotoEntity {
     return PhotoEntity(
         pk=this.pk,
         ticket_number = this.ticket_number,
+        componentId = this.componentId,
         component_key=this.component_key,
         index_row=this.index_row,
         origin_uri=this.origin_uri,
@@ -27,6 +28,7 @@ fun List<PhotoEntity>.toPhotoDomainList():List<PhotoDomain>{
 fun PhotoEntity.toPhotoDomain() : PhotoDomain {
     return PhotoDomain(
         ticket_number = this.ticket_number,
+        componentId = this.componentId,
         component_key=this.component_key,
         index_row=this.index_row,
         origin_uri=this.origin_uri,

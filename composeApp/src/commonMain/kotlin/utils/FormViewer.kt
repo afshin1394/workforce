@@ -13,6 +13,7 @@ import androidx.compose.runtime.Composable
 
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.ImeAction
@@ -53,20 +54,22 @@ import presentation.screens.main.components.formViewer.groupComponent
 @Composable
 fun initialize(
     savedIndex : Int,
+    savedParentIndex : Int,
     taskID: String,
     modifier: Modifier,
     photoDomainList: MutableList<PhotoDomain>,
     components: List<ComponentDomain>,
-    onChanges: (list: List<ComponentDomain>, listValueDomain: List<ValueDomain>?, indexParent: List<Int>, indexChild: Int) -> Unit,
+    onChanges: (componentDomain : ComponentDomain, listValueDomain: List<ValueDomain>?, indexParent: List<Int>, indexChild: Int) -> Unit,
     onAddItem: (componentDomain: ComponentDomain, listValueDomain: List<ValueDomain>?, indexParent: List<Int>, indexChild: Int) -> Unit,
     onRemoveItem: (componentDomain:ComponentDomain, listValueDomain: List<ValueDomain>?, indexParent: List<Int>, indexChild: Int) -> Unit,
     onFixChange: (text: MutableStateFlow<String>) -> Unit,
-    onClickImage: (indexPhotoSelected: Int, componentKey: String) -> Unit,
+    onClickImage: (indexPhotoSelected: Int, componentKey: String,componentId : String) -> Unit,
     currentParentIndex: List<Int> = listOf(),
 ) {
     Napier.log(LogLevel.ASSERT, tag = "indexFile", message = "indexFile${savedIndex}")
-
-    val indexFile = rememberSaveable { mutableStateOf(savedIndex) }
+    val indexChildSaveable = rememberSaveable { mutableStateOf(savedIndex) }
+    val indexParentSaveable = rememberSaveable{ mutableStateOf<Int?>(null) }
+    val itemState = remember { mutableStateOf(ComponentDomain()) }
     val uploadDomainLists = remember { mutableStateMapOf<String, MutableState<List<ValueDomain>>>() }
 
 
@@ -82,14 +85,15 @@ fun initialize(
 
             val updatedParentIndex = currentParentIndex + index
 
-
             Column(modifier = Modifier.padding(8.dp)) {
 
                 when (item.type) {
                     FormViewerTypes.Group -> {
+                        indexParentSaveable.value = index
 
 
                         groupComponent(
+                            parentIndex = savedParentIndex,
                             savedIndex= savedIndex,
                             taskID,
                             modifier.heightIn(0.dp, 1000.dp),
@@ -166,7 +170,7 @@ fun initialize(
 //                                )
 
                                 onChanges(
-                                    components,
+                                    item,
                                     listOf(updatedValueDomain),
                                     currentParentIndex,
                                     index
@@ -207,7 +211,7 @@ fun initialize(
 
 
                                 onChanges(
-                                    components,
+                                    item,
                                     listOf(updatedValueDomain),
                                     currentParentIndex,
                                     index
@@ -249,7 +253,7 @@ fun initialize(
 
 
                                 onChanges(
-                                    components,
+                                    item,
                                     listOf(updatedValueDomain),
                                     currentParentIndex,
                                     index
@@ -291,7 +295,7 @@ fun initialize(
                                 updateLatLongValidationError(item, errorMessageState)
 
                                 onChanges(
-                                    components,
+                                    item,
                                     listOf(updatedValueDomain),
                                     currentParentIndex,
                                     index
@@ -335,7 +339,7 @@ fun initialize(
 
 
                                 onChanges(
-                                    components,
+                                    item,
                                     listOf(updatedValueDomain),
                                     currentParentIndex,
                                     index
@@ -380,7 +384,7 @@ fun initialize(
 
 
                                 onChanges(
-                                    components,
+                                    item,
                                     listOf(updatedValueDomain),
                                     currentParentIndex,
                                     index
@@ -421,7 +425,7 @@ fun initialize(
 
                             updateDateTimeValidationError(item, errorMessageState)
 
-                            onChanges( components, newValues, currentParentIndex, index)
+                            onChanges( item, newValues, currentParentIndex, index)
                         }
                     }
 
@@ -453,7 +457,7 @@ fun initialize(
 
                             updateDateTimeValidationError(item, errorMessageState)
 
-                            onChanges( components, newValues, currentParentIndex, index)
+                            onChanges( item, newValues, currentParentIndex, index)
 
 
                         }
@@ -490,7 +494,7 @@ fun initialize(
 
                             updateDateTimeValidationError(item, errorMessageState)
 
-                            onChanges( components, newValues, currentParentIndex, index)
+                            onChanges( item, newValues, currentParentIndex, index)
 
 
                         }
@@ -542,26 +546,26 @@ fun initialize(
                                         val newList = oldList.distinct()
 
                                         uploadDomainList.value = newList
-                                        components[indexFile.value].values = newList
+                                        components[indexChildSaveable.value].values = newList
 
                                         onChanges(
-                                            components,
+                                            item,
                                             selectedComponentObject.values,
                                             currentParentIndex,
-                                            indexFile.value
+                                            indexChildSaveable.value
                                         )
-                                    Napier.log(LogLevel.ASSERT,tag = "UploadFileComponent onClickUpload",message = components[indexFile.value].toString())
+                                    Napier.log(LogLevel.ASSERT,tag = "UploadFileComponent onClickUpload",message = components[indexChildSaveable.value].toString())
 
 
                                 },
                                 onClickUpload = {indexClick->
-                                    indexFile.value = indexClick
+                                    indexChildSaveable.value = indexClick
                                     Napier.log(
                                         LogLevel.ASSERT,
                                         tag = "UploadFileComponent",
                                         message = index.toString()
                                     )
-                                    Napier.log(LogLevel.ASSERT,tag = "UploadFileComponent onClickUpload",message = components[indexFile.value].toString())
+                                    Napier.log(LogLevel.ASSERT,tag = "UploadFileComponent onClickUpload",message = components[indexChildSaveable.value].toString())
 
                                 },
                                 onRemoveFile = { fileToRemove ->
@@ -573,10 +577,10 @@ fun initialize(
                                     Napier.log(LogLevel.ASSERT,tag = "UploadFileComponent onClickUpload",message = item.toString())
 
                                     onChanges(
-                                        components,
+                                        item,
                                         item.values,
                                         currentParentIndex,
-                                        indexFile.value
+                                        indexChildSaveable.value
                                     )
                                 }
 
@@ -598,27 +602,26 @@ fun initialize(
                             item,
                             taskID,
                             if (errorMessageState.value == initialMessageError) errorMessageState.value else initialMessageError,
-                            findPhotosByComponentId(photoDomainList, item.key),
-                            onTakePhoto = { resultTakePhoto ->
-
-                                components[indexFile.value].let {
+                            findPhotosByComponentId(photoDomainList,item.id, item.key),
+                            onTakePhoto = { obj ,resultTakePhoto ->
+                                (obj as ComponentDomain? )?.let {
                                     Napier.log(LogLevel.ASSERT,tag = "takePhoto onTakePhoto",message =it.toString())
 
                                     val newValues =
                                     listOf(ValueDomain("${it.type}:${it.key}", "${resultTakePhoto}"))
                                     it.values = newValues
-                                    Napier.log(LogLevel.ASSERT,tag = "takePhoto onTakePhoto",message =it.toString())
                                 updateImageViewValidationError(it, errorMessageState)
-
-                                onChanges( components, newValues, currentParentIndex, indexFile.value)
+                                val listOfIndexParent = indexParentSaveable.value?.let { parent->
+                                    listOf(parent)
+                                }?: emptyList()
+                                onChanges( it, newValues, listOfIndexParent, savedIndex)
                                 }
 
                             },
                             onImageClick = {
-                                onClickImage(it, item.key ?: "")
-                            }, onCameraClick = { index ->
-
-                                indexFile.value = index
+                                onClickImage(it, item.key ?: "",item.id?:"")
+                            }, onCameraClick = { item ->
+                                itemState.value = item
                                 Napier.log(LogLevel.ASSERT,tag = "takePhoto onCameraClick",message =components[index].toString())
 
                             })
@@ -660,7 +663,7 @@ fun initialize(
 
 
 
-                            onChanges( components, valuesState, currentParentIndex, index)
+                            onChanges( item, valuesState, currentParentIndex, index)
                         }
                     }
 
@@ -699,7 +702,7 @@ fun initialize(
                                         message = valuesState.value
                                     )
                                     onChanges(
-                                        components,
+                                        item,
                                         listOf(valueDomain),
                                         currentParentIndex,
                                         index
@@ -743,7 +746,7 @@ fun initialize(
                                         )
 
                                         onChanges(
-                                            components,
+                                            item,
                                             item.values,
                                             currentParentIndex,
                                             index
@@ -792,7 +795,7 @@ fun initialize(
 
                                 updateSelectedComponentValidationError(item, errorMessageState)
 
-                                onChanges( components, valuesState, currentParentIndex, index)
+                                onChanges( item, valuesState, currentParentIndex, index)
                             },
                             {}
                         )
@@ -864,10 +867,10 @@ fun removeComponentById(components: List<ComponentDomain>, id: String): Componen
 
 
 
-fun findPhotosByComponentId(components: List<PhotoDomain>, key: String?): MutableList<PhotoDomain> {
+fun findPhotosByComponentId(components: List<PhotoDomain>,id: String?, key: String?): MutableList<PhotoDomain> {
     val list: MutableList<PhotoDomain> = arrayListOf()
     components.forEach {
-        if (it.component_key == key) {
+        if (it.component_key == key && it.componentId == id) {
             list.add(it)
         }
     }

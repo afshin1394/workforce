@@ -6,11 +6,11 @@ expect class Camera{
 
      companion object {
           @Composable
-           fun onResult( onSuccess: (uri: Any) -> Unit)
+           fun onResult(onSuccess: (uri: Any,obj : Any?) -> Unit)
 
 
           @Composable
-          fun launchCamera(savePath: String,key:String)
+          fun launchCamera(obj: Any?=null,savePath: String,key:String)
 
 
      }

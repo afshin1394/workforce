@@ -1,6 +1,7 @@
 package irancell.nwg.wfm
 
 
+import android.app.ActivityOptions
 import android.content.Context
 import android.net.Uri
 import android.util.Log
@@ -19,33 +20,37 @@ actual class Camera {
 
         lateinit var cameraLauncher: ManagedActivityResultLauncher<Uri, Boolean>
         lateinit var uri: Uri
+        var obj : Any? = null
 
         @Composable
-        actual fun onResult(onSuccess: (uri: Any) -> Unit) {
-
+        actual fun onResult(onSuccess: (uri: Any,obj : Any?) -> Unit) {
             cameraLauncher = rememberLauncherForActivityResult(
                 contract = ActivityResultContracts.TakePicture(),
                 onResult = { success ->
                     Log.i("cameraLauncher", "success: $success")
                     if (success) {
 
-                        onSuccess(uri.toString())
+                        onSuccess(uri.toString(), obj)
                     }
                 }
             )
         }
 
         @Composable
-        actual fun launchCamera(savePath: String, key: String) {
+        actual fun launchCamera(obj: Any?,savePath: String, key: String) {
+              this.obj = obj
+              val context = LocalContext.current
+              val file = createImageFile(savePath, key)
+              Log.i("ImagePicker", "file.path: ${file.path}")
 
-            val context = LocalContext.current
-            val file = createImageFile(savePath, key)
-            Log.i("ImagePicker", "file.path: ${file.path}")
-
-            uri = InternalStorage.getUriForFile(context, file)
-            LaunchedEffect(cameraLauncher) {
-                cameraLauncher.launch(uri)
-            }
+              uri = InternalStorage.getUriForFile(context, file)
+              LaunchedEffect(cameraLauncher) {
+                  try {
+                      cameraLauncher.launch(uri)
+                  }catch (_:Exception) {
+                      Log.i("ImagePicker", "exception open camera:")
+                  }
+              }
 
         }
 

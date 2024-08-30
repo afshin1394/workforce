@@ -29,15 +29,16 @@ import utils.initialize
 
 @Composable
 fun groupComponent(
+    parentIndex : Int,
     savedIndex : Int,
     taskID:String,
     modifier: Modifier,
     photoDomainList: MutableList<PhotoDomain>,
-    onChanges: (list:List<ComponentDomain>, listValueDomain:List<ValueDomain>, indexParent: List<Int>, indexChild: Int) -> Unit,
+    onChanges: (componentDomain: ComponentDomain, listValueDomain:List<ValueDomain>, indexParent: List<Int>, indexChild: Int) -> Unit,
     onAddItem: (componentDomain:ComponentDomain, listValueDomain:List<ValueDomain>, indexParent: List<Int>, indexChild: Int) -> Unit,
     onRemoveItem: (componentDomain:ComponentDomain, listValueDomain:List<ValueDomain>, indexParent: List<Int>, indexChild: Int) -> Unit,
     onFixChanges: (text : MutableStateFlow<String>) -> Unit,
-    onClickImage:(indexPhotoSelected:Int,componentId:String)->Unit,
+    onClickImage:(indexPhotoSelected:Int,componentKey:String,componentId:String)->Unit,
     currentParentIndex: List<Int> = listOf(),
     item : ComponentDomain,
     onAddClick: () -> Unit,
@@ -72,9 +73,9 @@ fun groupComponent(
             }
         }
         item.components?.let {
-            initialize(savedIndex = savedIndex,taskID,modifier.heightIn(0.dp, 1000.dp),photoDomainList,
+            initialize( parentIndex ,savedIndex,taskID,modifier.heightIn(0.dp, 1000.dp),photoDomainList,
                 it,
-                onChanges as (List<ComponentDomain>, List<ValueDomain>?, List<Int>, Int) -> Unit,
+                onChanges as (ComponentDomain, List<ValueDomain>?, List<Int>, Int) -> Unit,
                 onAddItem  as (ComponentDomain, List<ValueDomain>?, List<Int>, Int) -> Unit,
                 onRemoveItem  as (ComponentDomain, List<ValueDomain>?, List<Int>, Int) -> Unit,
                 onFixChanges,

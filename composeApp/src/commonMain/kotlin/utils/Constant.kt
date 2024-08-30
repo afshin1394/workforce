@@ -27,6 +27,11 @@ sealed interface ServiceState{
     data object Suspend : ServiceState
 }
 
+object BASE_USECASE{
+    const val MAX_RETRY_COUNT = 3
+    const val INITIAL_RETRY_DELAY = 500L
+}
+
 object AlarmAction{
     object UPDATE{
         const val title = "UPDATE"

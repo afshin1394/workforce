@@ -45,8 +45,8 @@ fun ImagePicker(
     componentId: String,
     errorMessage: ResourceFormattedStringDesc,
     photoDomainList: List<PhotoDomain>,
-    onTakePhoto: (resultTakePhoto: String) -> Unit,
-    onCameraClick : (itemIndex : Int) -> Unit,
+    onTakePhoto: (obj : Any?,resultTakePhoto: String) -> Unit,
+    onCameraClick : (item : ComponentDomain) -> Unit,
     onImageClick: (index: Int) -> Unit
 ) {
 
@@ -68,8 +68,8 @@ fun ImagePicker(
 
     var openCamera by remember { mutableStateOf(false) }
 
-    Camera.onResult {uri->
-        onTakePhoto(uri.toString())
+    Camera.onResult {uri,obj->
+        onTakePhoto(obj,uri.toString())
     }
 
     if (openCamera) {
@@ -81,6 +81,7 @@ fun ImagePicker(
         )
         item.key?.let {
             Camera.launchCamera(
+                item,
                 InternalStorage.getProcessRouteOriginal(
                     provideAppContext()
                 ) , it
@@ -127,7 +128,7 @@ fun ImagePicker(
 
                 if(!(disableLogic || readOnlyLogic)) {
                     openCamera = true
-                    onCameraClick(itemIndex)
+                    onCameraClick(item)
                 }
 
             }) {

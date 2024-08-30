@@ -8,7 +8,7 @@ data class FormStructDomain (
     var components: List<ComponentDomain>?= null,
     val conditional : ConditionalDomain?= null,
     val schemaVersion : Int?= null,
-){
+) {
     override fun toString(): String {
         return "FormStructDomain(id=$id, hide=$hide, type=$type, components=$components, conditional=$conditional, schemaVersion=$schemaVersion)"
     }

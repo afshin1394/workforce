@@ -193,7 +193,7 @@ class MainScreen(
 
             }
 
-        Camera.onResult {uri->
+        Camera.onResult {obj,uri->
             viewModel.updateSuspendTicketImageUri(uri.toString())
         }
 
@@ -631,6 +631,7 @@ class MainScreen(
 
                         EditPhotoComponent(
                             angle = 0.0F,
+                            id = "Suspend",
                             key = "Suspend",
                             path = InternalStorage.getSuspendRouteEdited(provideAppContext()),
                             photoDomain = viewModel.photoDomainList[positionSelectedPhotoForEdit],
@@ -779,6 +780,7 @@ class MainScreen(
                         )
 
                         Camera.launchCamera(
+                            null,
                             InternalStorage.getSuspendRouteOriginal(
                                 provideAppContext()
                             ),

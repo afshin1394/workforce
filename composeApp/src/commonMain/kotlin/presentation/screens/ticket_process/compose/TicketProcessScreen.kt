@@ -75,6 +75,7 @@ class TicketProcessScreen(
         val currentLevelState by viewModel.currentLevel.collectAsState()
         var indexPhotoSelected by remember { mutableStateOf(0) }
         var componentKey by remember { mutableStateOf("0") }
+        var componentId by remember { mutableStateOf("0") }
         val positionSelectedPhotoForEdit by viewModel.positionSelected.collectAsState()
         var isBottomSheetOpen by remember { mutableStateOf(true) }
         val events by viewModel.events
@@ -84,6 +85,7 @@ class TicketProcessScreen(
         val reloadState by viewModel.reloadState.collectAsState()
         val state by viewModel.state.collectAsState()
         val savedIndex by viewModel.savedIndex.collectAsState()
+        val savedParentIndex by viewModel.savedParentIndex.collectAsState()
 
         var isClickable by remember { mutableStateOf(true) }
         val mainScreen = rememberScreen(Menu.MyTickets)
@@ -232,7 +234,8 @@ class TicketProcessScreen(
                             }, onSecondButtonClick = {
                                 viewModel.updateImageUriForDeletePhoto(
                                     positionSelectedPhotoForEdit,
-                                    componentKey
+                                    componentKey,
+                                    componentId
                                 )
 
 
@@ -287,7 +290,7 @@ class TicketProcessScreen(
                 when (events) {
 
                     TicketProcessEvent.PhotoPreview -> {
-                        PhotoPreviewComponent(viewModel.findPhotosByComponentId(componentKey),
+                        PhotoPreviewComponent(viewModel.findPhotosByComponentId(componentId,componentKey),
                             indexPhotoSelected,
                             onEditPhotoClick = { position ->
                                 indexPhotoSelected = position
@@ -317,17 +320,20 @@ class TicketProcessScreen(
 
                         EditPhotoComponent(
                             angle = 0.0F,
+                            id = componentId,
                             key = componentKey,
                             path = InternalStorage.getProcessRouteEdited(provideAppContext()),
                             photoDomain = viewModel.photoDomainList[viewModel.findPhotoIndexByIdAndPosition(
                                 componentKey,
+                                componentId,
                                 positionSelectedPhotoForEdit
                             ) ?: 0],
                             onEditUri = { editUri, originUri ->
                                 viewModel.updateImageUriForEditPhoto(
                                     editUri,
                                     positionSelectedPhotoForEdit,
-                                    componentKey
+                                    componentKey,
+                                    componentId
                                 )
 
                             })
@@ -366,12 +372,14 @@ class TicketProcessScreen(
                     if (reloadState) {
                         initialize(
                             savedIndex = savedIndex,
+                            savedParentIndex = savedParentIndex,
                             taskID = currentLevelState.toString(),
                             modifier = Modifier,
                             photoDomainList = viewModel.photoDomainList,
                             components = viewModel.tempComponentList,
-                            onClickImage = { index, id ->
-                                componentKey = id
+                            onClickImage = { index, key,id ->
+                                componentKey = key
+                                componentId = id
                                 indexPhotoSelected = index
                                 viewModel.events.value = TicketProcessEvent.PhotoPreview
 
@@ -381,20 +389,12 @@ class TicketProcessScreen(
 
                             },
 
-                            onChanges = { listComponent, listValueDomain, listIndexParent, indexChild ->
+                            onChanges = { component, listValueDomain, listIndexParent, indexChild ->
 
                                 viewModel.handleLogics()
 
-                                Napier.log(LogLevel.ASSERT,tag = "takePhoto onChanges",message =viewModel.tempComponentList[indexChild].toString())
-                                listValueDomain?.let { it1 ->
-                                    Napier.log(LogLevel.ASSERT,tag = "takePhoto listValueDomain",message =it.toString())
-
-                                    viewModel.updateUriPhotoComponent(
-                                        viewModel.tempComponentList, listIndexParent, indexChild,
-                                        it1
-                                    )
-                                    Napier.log(LogLevel.ASSERT,tag = "takePhoto updateUriPhotoComponent",message =viewModel.tempComponentList[indexChild].toString())
-
+                                listValueDomain?.let { listValues ->
+                                    viewModel.updateUriPhotoComponent(component,listValues)
                                 }
                             },
                             onAddItem = { listComponent, listValueDomain, listIndexParent, indexChild ->

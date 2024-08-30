@@ -159,7 +159,7 @@ class UpdateStepFormUseCase(
     }
 
     fun ComponentDomain.isSelectable() =
-        this.type == FormViewerTypes.Checklist || this.type == FormViewerTypes.Radio || this.type == FormViewerTypes.Select
+        this.type == FormViewerTypes.Checklist || this.type == FormViewerTypes.Radio || this.type == FormViewerTypes.Select || this.type == FormViewerTypes.Multi
 
 
     fun ComponentDomain.addSelectableItems(dict : MutableMap<String,Any>) {
@@ -234,6 +234,16 @@ class UpdateStepFormUseCase(
             }
         }
         return null
+    }
+    private fun   List<ComponentDomain>.hasRemovableObject(component : ComponentDomain) : Boolean{
+        this.forEach { componentIterable ->
+            if (componentIterable.key == component.key && componentIterable.removable)  return true
+
+
+            // Recursively search in the children
+            return component.components?.hasRemovableObject(component)?:false
+        }
+        return false
     }
 
     fun  List<ComponentDomain>.findComponentsByType( type: String): List<ComponentDomain> {

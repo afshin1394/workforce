@@ -26,33 +26,56 @@ import io.ktor.http.HttpStatusCode.Companion.Unauthorized
 import io.ktor.util.reflect.Type
 import io.ktor.utils.io.errors.IOException
 import irancell.nwg.wfm.SentryLog
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.flow
 import utils.AsyncResult
+import utils.BASE_USECASE
 
 abstract class BaseUseCase<out Type, in Params> {
+    private var retryAttempt = 0
+    private var retryDelay = BASE_USECASE.INITIAL_RETRY_DELAY
     abstract suspend fun run(params: Params): Type
     suspend operator fun invoke(params: Params) = flow {
+
         emit(AsyncResult.Loading(null, isLoading = true))
-        try {
-            val result = run(params)
-            if ( result is List<*> && result.isEmpty()){
-                emit(AsyncResult.Empty(null, false))
-            }else{
-                emit(AsyncResult.Success(result, ResultStatus.SUCCESS))
-            }
+        while (retryAttempt <= BASE_USECASE.MAX_RETRY_COUNT) {
 
-        } catch (exception: Exception) {
-            exception.message?.let {
+            try {
+                val result = run(params)
+                if (result is List<*> && result.isEmpty()) {
+                    emit(AsyncResult.Empty(null, false))
+                } else {
+                    emit(AsyncResult.Success(result, ResultStatus.SUCCESS))
+                }
+                return@flow
 
-                val resultStatus = exception.handleError()
-                Napier.log(LogLevel.ASSERT,"BaseUseCaseResultStatus", message = resultStatus.toString())
-                emit(AsyncResult.Error(it, resultStatus))
-                SentryLog(exception.stackTraceToString())
-            } ?: run {
-                emit(AsyncResult.Error("no message", exception.handleError()))
+            } catch (exception: Exception) {
+                if (retryAttempt <= BASE_USECASE.MAX_RETRY_COUNT) {
+                    delay(retryDelay)
+                    retryAttempt++
+                    retryDelay *= 2
+                } else {
+                    exception.message?.let {
+
+                        val resultStatus = exception.handleError()
+                        Napier.log(
+                            LogLevel.ASSERT,
+                            "BaseUseCaseResultStatus",
+                            message = resultStatus.toString()
+                        )
+                        emit(AsyncResult.Error(it, resultStatus))
+                        SentryLog(exception.stackTraceToString())
+                    } ?: run {
+                        emit(AsyncResult.Error("no message", exception.handleError()))
+                    }
+                }
+                return@flow // Exit after maximum retries reached
+
             }
         }
     }
+
+
 
     private fun Exception.handleError(): ResultStatus {
         when (this) {

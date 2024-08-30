@@ -7,6 +7,7 @@ import androidx.room.PrimaryKey
  data class PhotoEntity(
     @PrimaryKey(autoGenerate = true) val pk: Long,
      val ticket_number: String,
+     val componentId : String,
      val component_key: String,
      val index_row: Long,
      val origin_uri: String,

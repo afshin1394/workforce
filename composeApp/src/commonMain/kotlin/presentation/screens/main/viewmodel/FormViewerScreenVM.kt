@@ -62,6 +62,7 @@ class FormViewerScreenVM(
         PhotoDomain(
             "--workorder_13-20240731-00002",
             "0",
+            "0",
             0,
             "",
             "",
@@ -97,6 +98,7 @@ class FormViewerScreenVM(
                             for (i in it1.indices) {
                                 photoDomain.value = PhotoDomain(
                                     "--workorder_13-20240731-00002",
+                                    "0",
                                     "0",
                                     i.toLong(),
                                     it1[i].origin_uri,
