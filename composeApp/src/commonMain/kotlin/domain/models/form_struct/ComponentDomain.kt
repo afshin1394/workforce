@@ -22,7 +22,7 @@ data class ComponentDomain(
     var components : List<ComponentDomain>?= null,
     val logics : List<LogicDomain>?= null,
     val repeatable:Boolean=false,
-    val removable:Boolean=false,
+    val removable:Boolean?=null,
     val isMulti:Boolean=false,
     val readOnly : Boolean = false,
 

@@ -25,5 +25,9 @@ data class PhotoDomain(
                     edited_uri: String,
                     angle: String):this(0,ticket_number,componentId,component_key,index_row,origin_uri,edited_uri,angle)
 
+    override fun toString(): String {
+        return "PhotoDomain(pk=$pk, ticket_number='$ticket_number', componentId='$componentId', component_key='$component_key', index_row=$index_row, origin_uri='$origin_uri', edited_uri='$edited_uri', angle='$angle')"
+    }
+
 
 }

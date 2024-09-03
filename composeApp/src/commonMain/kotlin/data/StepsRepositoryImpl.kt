@@ -66,9 +66,8 @@ class StepsRepositoryImpl(
         ticketNumber: String,
         activityId: Long,
         formStructure: String,
-        photoList : String
     ) {
-        db.stepDao().updateFormStructure(ticketNumber,activityId, formStructure,photoList)
+        db.stepDao().updateFormStructure(ticketNumber,activityId, formStructure)
     }
 
 }

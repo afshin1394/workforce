@@ -134,14 +134,9 @@ class TicketProcessVM(
                             tempComponentList.addAll(it.toList())
 
                         }
-                        Napier.log(
-                            LogLevel.ASSERT,
-                            "data.stepCounter",
-                            message = it.data.activityDomain.photoDomainList.toString()
-                        )
 
-                        photoDomainList.clear()
-                        photoDomainList.addAll(data.activityDomain.photoDomainList)
+
+
 
                         Napier.log(
                             LogLevel.ASSERT,
@@ -357,7 +352,7 @@ class TicketProcessVM(
         indexChild: Int
     ) {
       //  if (listComponent[0].type == FormViewerTypes.Group) {
-            if (compD.removable) {
+            if (compD.removable == true) {
                 val newComponents = tempComponentList.apply {
                     add(indexChild + 1, compD)
                 }
@@ -450,7 +445,7 @@ class TicketProcessVM(
     }
 
    private fun updatePhotoDomain(id: String,key: String, imgUri: String) {
-
+        Napier.log(LogLevel.ASSERT,"updatePhotoDomain", message = key)
         photoDomain.value = PhotoDomain(
             ticket_number = ticketNumber.value, id,key, (photoDomainList.size + 1L), imgUri, "", "0"
         )
@@ -504,7 +499,8 @@ class TicketProcessVM(
     }
     fun updateUriPhotoComponent(component : ComponentDomain,newValue : List<ValueDomain>){
         val imgUri =
-            newValue.find { it.label == "${component.type}:${component.key}" }?.value?:""
+            newValue.find { it.label == "${component.type}:${component.id}" }?.value?:""
+
         component.key?.let {
             component.id?.let {
                 updatePhotoDomain(component.id, component.key, imgUri)

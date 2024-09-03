@@ -7,7 +7,7 @@ data class ValueDomain(
     val label : String?= null,var value : String?=null, var valueDate : ValueDate = ValueDate("",""),   var isSelected: Boolean = false
 ) {
     override fun toString(): String {
-        return "ValueDomain(label=$label, value='$value')"
+        return "ValueDomain(label=$label, value=$value, valueDate=$valueDate, isSelected=$isSelected)"
     }
 }
 @Serializable

@@ -34,10 +34,9 @@ fun groupComponent(
     taskID:String,
     modifier: Modifier,
     photoDomainList: MutableList<PhotoDomain>,
-    onChanges: (componentDomain: ComponentDomain, listValueDomain:List<ValueDomain>, indexParent: List<Int>, indexChild: Int) -> Unit,
+    onChanges: (componentDomain: ComponentDomain, listValueDomain:List<ValueDomain>) -> Unit,
     onAddItem: (componentDomain:ComponentDomain, listValueDomain:List<ValueDomain>, indexParent: List<Int>, indexChild: Int) -> Unit,
     onRemoveItem: (componentDomain:ComponentDomain, listValueDomain:List<ValueDomain>, indexParent: List<Int>, indexChild: Int) -> Unit,
-    onFixChanges: (text : MutableStateFlow<String>) -> Unit,
     onClickImage:(indexPhotoSelected:Int,componentKey:String,componentId:String)->Unit,
     currentParentIndex: List<Int> = listOf(),
     item : ComponentDomain,
@@ -58,7 +57,7 @@ fun groupComponent(
             modifier = Modifier.fillMaxWidth()
         ) {
             if (item.repeatable) {
-                if (!item.removable) {
+                if (item.removable == false) {
                     IconButton(onClick = onAddClick) {
                         Icon(painter = painterResource(MR.images.add), contentDescription = "Add")
                     }
@@ -75,10 +74,9 @@ fun groupComponent(
         item.components?.let {
             initialize( parentIndex ,savedIndex,taskID,modifier.heightIn(0.dp, 1000.dp),photoDomainList,
                 it,
-                onChanges as (ComponentDomain, List<ValueDomain>?, List<Int>, Int) -> Unit,
+                onChanges as (ComponentDomain, List<ValueDomain>?) -> Unit,
                 onAddItem  as (ComponentDomain, List<ValueDomain>?, List<Int>, Int) -> Unit,
                 onRemoveItem  as (ComponentDomain, List<ValueDomain>?, List<Int>, Int) -> Unit,
-                onFixChanges,
                 onClickImage, currentParentIndex)
         }
     }

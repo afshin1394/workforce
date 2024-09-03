@@ -29,11 +29,17 @@ fun Map<String, Any>.mutableToJson(): String {
                 is Long -> put(key, JsonPrimitive(valuee))
                 is List<*> -> {
                     val jsonArray = JsonArray(valuee.map { element ->
-                        var elementt = element
-                        if(elementt is JsonPrimitive)
-                            elementt  = elementt.content
-                        when (elementt) {
-                            is String -> JsonPrimitive(elementt)
+                        when (element) {
+                            is String -> JsonPrimitive(element)
+                            is List<*> -> {
+                                val nestedJsonArray = JsonArray(element.map { nestedElement ->
+                                    when (nestedElement) {
+                                        is String -> JsonPrimitive(nestedElement)
+                                        else -> throw IllegalArgumentException("Unsupported nested list element type")
+                                    }
+                                })
+                                nestedJsonArray
+                            }
                             else -> throw IllegalArgumentException("Unsupported list element type")
                         }
                     })
@@ -45,7 +51,6 @@ fun Map<String, Any>.mutableToJson(): String {
     }
     return Json.encodeToString(jsonObject)
 }
-
 
 
 
@@ -63,6 +68,15 @@ fun Map<String, Any>.toJson(): String {
                     val jsonArray = JsonArray(value.map { element ->
                         when (element) {
                             is String -> JsonPrimitive(element)
+                            is List<*> -> {
+                                val nestedJsonArray = JsonArray(element.map { nestedElement ->
+                                    when (nestedElement) {
+                                        is String -> JsonPrimitive(nestedElement)
+                                        else -> throw IllegalArgumentException("Unsupported nested list element type")
+                                    }
+                                })
+                                nestedJsonArray
+                            }
                             else -> throw IllegalArgumentException("Unsupported list element type")
                         }
                     })

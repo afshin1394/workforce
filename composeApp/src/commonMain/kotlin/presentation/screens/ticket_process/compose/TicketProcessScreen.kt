@@ -54,6 +54,7 @@ import presentation.theme.surfaceBrandDefault
 import presentation.theme.surfaceDefault
 import presentation.theme.textInverse
 import presentation.theme.textPrimary
+import utils.FormViewerTypes
 import utils.PROCEED
 import utils.ServiceState
 import utils.ViewStates
@@ -290,7 +291,10 @@ class TicketProcessScreen(
                 when (events) {
 
                     TicketProcessEvent.PhotoPreview -> {
-                        PhotoPreviewComponent(viewModel.findPhotosByComponentId(componentId,componentKey),
+                        PhotoPreviewComponent(viewModel.findPhotosByComponentId(
+                            componentId,
+                            componentKey
+                        ),
                             indexPhotoSelected,
                             onEditPhotoClick = { position ->
                                 indexPhotoSelected = position
@@ -377,24 +381,23 @@ class TicketProcessScreen(
                             modifier = Modifier,
                             photoDomainList = viewModel.photoDomainList,
                             components = viewModel.tempComponentList,
-                            onClickImage = { index, key,id ->
+                            onClickImage = { index, key, id ->
                                 componentKey = key
                                 componentId = id
                                 indexPhotoSelected = index
                                 viewModel.events.value = TicketProcessEvent.PhotoPreview
 
                             },
-                            onFixChange = { text ->
-                                changeState.update { Random.nextInt() }
 
-                            },
 
-                            onChanges = { component, listValueDomain, listIndexParent, indexChild ->
+                            onChanges = { component, listValueDomain ->
 
                                 viewModel.handleLogics()
 
                                 listValueDomain?.let { listValues ->
-                                    viewModel.updateUriPhotoComponent(component,listValues)
+                                    if (component.type == FormViewerTypes.ImageView) {
+                                        viewModel.updateUriPhotoComponent(component, listValues)
+                                    }
                                 }
                             },
                             onAddItem = { listComponent, listValueDomain, listIndexParent, indexChild ->
@@ -410,18 +413,23 @@ class TicketProcessScreen(
                                 )
                             },
 
-                        )
+                            )
                     }
                 }
-                   CompleteFlowDialog(showDialog =  ticketFlowCompletedState.value, message =  MR.strings.data_sent_complete, titleButton =  MR.strings.submit, onDismiss = {
-                       viewModel.updateTicketFlowState(false)
-                       navigator.popAll()
-                       navigator.push(mainScreen)
-                   }, onConfirm = {
-                       viewModel.updateTicketFlowState(false)
-                       navigator.popAll()
-                       navigator.push(mainScreen)
-                   })
+                CompleteFlowDialog(
+                    showDialog = ticketFlowCompletedState.value,
+                    message = MR.strings.data_sent_complete,
+                    titleButton = MR.strings.submit,
+                    onDismiss = {
+                        viewModel.updateTicketFlowState(false)
+                        navigator.popAll()
+                        navigator.push(mainScreen)
+                    },
+                    onConfirm = {
+                        viewModel.updateTicketFlowState(false)
+                        navigator.popAll()
+                        navigator.push(mainScreen)
+                    })
 
             }, onCloseBottomSheet = {
                 when (viewModel.events.value) {
@@ -462,10 +470,10 @@ class TicketProcessScreen(
                 }
 
 
-})
+            })
 
 
-}
+    }
 
 
 }

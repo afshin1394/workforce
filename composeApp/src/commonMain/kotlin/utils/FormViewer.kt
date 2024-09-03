@@ -59,10 +59,9 @@ fun initialize(
     modifier: Modifier,
     photoDomainList: MutableList<PhotoDomain>,
     components: List<ComponentDomain>,
-    onChanges: (componentDomain : ComponentDomain, listValueDomain: List<ValueDomain>?, indexParent: List<Int>, indexChild: Int) -> Unit,
+    onChanges: (componentDomain : ComponentDomain, listValueDomain: List<ValueDomain>?) -> Unit,
     onAddItem: (componentDomain: ComponentDomain, listValueDomain: List<ValueDomain>?, indexParent: List<Int>, indexChild: Int) -> Unit,
     onRemoveItem: (componentDomain:ComponentDomain, listValueDomain: List<ValueDomain>?, indexParent: List<Int>, indexChild: Int) -> Unit,
-    onFixChange: (text: MutableStateFlow<String>) -> Unit,
     onClickImage: (indexPhotoSelected: Int, componentKey: String,componentId : String) -> Unit,
     currentParentIndex: List<Int> = listOf(),
 ) {
@@ -101,7 +100,6 @@ fun initialize(
                             onChanges,
                             onAddItem,
                             onRemoveItem,
-                            onFixChange,
                             onClickImage,
                             updatedParentIndex,
                             item,
@@ -165,15 +163,11 @@ fun initialize(
                                 updateNumberValidationError(item, errorMessageState)
 
 
-//                                onFixChange(
-//                                    textEmit,
-//                                )
+
 
                                 onChanges(
                                     item,
-                                    listOf(updatedValueDomain),
-                                    currentParentIndex,
-                                    index
+                                    listOf(updatedValueDomain)
                                 )
 
                             }
@@ -212,9 +206,7 @@ fun initialize(
 
                                 onChanges(
                                     item,
-                                    listOf(updatedValueDomain),
-                                    currentParentIndex,
-                                    index
+                                    listOf(updatedValueDomain)
                                 )
                             }
                         )
@@ -254,9 +246,7 @@ fun initialize(
 
                                 onChanges(
                                     item,
-                                    listOf(updatedValueDomain),
-                                    currentParentIndex,
-                                    index
+                                    listOf(updatedValueDomain)
                                 )
                             }
                         )
@@ -296,9 +286,7 @@ fun initialize(
 
                                 onChanges(
                                     item,
-                                    listOf(updatedValueDomain),
-                                    currentParentIndex,
-                                    index
+                                    listOf(updatedValueDomain)
                                 )
                             }
                         )
@@ -340,9 +328,7 @@ fun initialize(
 
                                 onChanges(
                                     item,
-                                    listOf(updatedValueDomain),
-                                    currentParentIndex,
-                                    index
+                                    listOf(updatedValueDomain)
                                 )
                             }
                         )
@@ -385,9 +371,7 @@ fun initialize(
 
                                 onChanges(
                                     item,
-                                    listOf(updatedValueDomain),
-                                    currentParentIndex,
-                                    index
+                                    listOf(updatedValueDomain)
                                 )
 
                             }
@@ -425,7 +409,7 @@ fun initialize(
 
                             updateDateTimeValidationError(item, errorMessageState)
 
-                            onChanges( item, newValues, currentParentIndex, index)
+                            onChanges( item, newValues)
                         }
                     }
 
@@ -457,7 +441,7 @@ fun initialize(
 
                             updateDateTimeValidationError(item, errorMessageState)
 
-                            onChanges( item, newValues, currentParentIndex, index)
+                            onChanges( item, newValues)
 
 
                         }
@@ -494,7 +478,7 @@ fun initialize(
 
                             updateDateTimeValidationError(item, errorMessageState)
 
-                            onChanges( item, newValues, currentParentIndex, index)
+                            onChanges( item, newValues)
 
 
                         }
@@ -550,9 +534,7 @@ fun initialize(
 
                                         onChanges(
                                             item,
-                                            selectedComponentObject.values,
-                                            currentParentIndex,
-                                            indexChildSaveable.value
+                                            selectedComponentObject.values
                                         )
                                     Napier.log(LogLevel.ASSERT,tag = "UploadFileComponent onClickUpload",message = components[indexChildSaveable.value].toString())
 
@@ -578,9 +560,7 @@ fun initialize(
 
                                     onChanges(
                                         item,
-                                        item.values,
-                                        currentParentIndex,
-                                        indexChildSaveable.value
+                                        item.values
                                     )
                                 }
 
@@ -608,13 +588,11 @@ fun initialize(
                                     Napier.log(LogLevel.ASSERT,tag = "takePhoto onTakePhoto",message =it.toString())
 
                                     val newValues =
-                                    listOf(ValueDomain("${it.type}:${it.key}", "${resultTakePhoto}"))
+                                    listOf(ValueDomain("${obj?.type}:${obj?.id}", "${resultTakePhoto}"))
                                     it.values = newValues
                                 updateImageViewValidationError(it, errorMessageState)
-                                val listOfIndexParent = indexParentSaveable.value?.let { parent->
-                                    listOf(parent)
-                                }?: emptyList()
-                                onChanges( it, newValues, listOfIndexParent, savedIndex)
+
+                                onChanges( it, newValues)
                                 }
 
                             },
@@ -663,7 +641,7 @@ fun initialize(
 
 
 
-                            onChanges( item, valuesState, currentParentIndex, index)
+                            onChanges( item, valuesState)
                         }
                     }
 
@@ -703,9 +681,7 @@ fun initialize(
                                     )
                                     onChanges(
                                         item,
-                                        listOf(valueDomain),
-                                        currentParentIndex,
-                                        index
+                                        listOf(valueDomain)
                                     )
                                 }
                             )
@@ -747,9 +723,7 @@ fun initialize(
 
                                         onChanges(
                                             item,
-                                            item.values,
-                                            currentParentIndex,
-                                            index
+                                            item.values
                                         )
                                     },
                                     onSearchButtonClicked = {}
@@ -795,7 +769,7 @@ fun initialize(
 
                                 updateSelectedComponentValidationError(item, errorMessageState)
 
-                                onChanges( item, valuesState, currentParentIndex, index)
+                                onChanges( item, valuesState)
                             },
                             {}
                         )
@@ -831,7 +805,7 @@ fun copyComponentWithValues(
     )
 
     val values =
-        if (component.type == FormViewerTypes.Select || component.type == FormViewerTypes.Checklist || component.type == FormViewerTypes.Radio) {
+        if (component.type == FormViewerTypes.Select || component.type == FormViewerTypes.Multi || component.type == FormViewerTypes.Checklist || component.type == FormViewerTypes.Radio) {
             component.values?.map { value ->
                 value.copy(isSelected = false)
             }

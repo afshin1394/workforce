@@ -46,6 +46,7 @@ class UpdateStepFormUseCase(
 
     override suspend fun run(params: Tuple5<String, String,List<ComponentDomain>,List<PhotoDomain>,Int>): StructureActivity {
         Location.start {  }
+        val removablesWithParent: ArrayList<ComponentDomain> = arrayListOf()
         val dict = mutableMapOf<String, Any>()
         val dictImages = mutableMapOf<String, Any>()
         Napier.log(LogLevel.ASSERT,tag="processType", message = params.second)
@@ -63,7 +64,6 @@ class UpdateStepFormUseCase(
                     FormStruct.serializer(),
                     FormStruct(components = (params.third.toComponent()))
                 ),
-                photoList = Json.encodeToString(params.fourth)
             )
 
         }
@@ -94,7 +94,7 @@ class UpdateStepFormUseCase(
             } else {
                 index
             }
-         Napier.log(LogLevel.ASSERT,tag="nextIndex", message = nextIndex.toString())
+        Napier.log(LogLevel.ASSERT,tag="nextIndex", message = nextIndex.toString())
 
         iStepPointerRepository.updateActiveActivity(
             ticketNumber = stepPointerDomain.ticketNumber,
@@ -131,6 +131,7 @@ class UpdateStepFormUseCase(
         }catch (_:Exception){
 
         }
+        params.third.createRepeatableSectionStructure(ticketNumber = params.first,removablesWithParent, dict, dictImages)
         params.third.findImageComponents(params.first).getKeysAndValues(dictImages)
         params.third.findComponentsByType(FormViewerTypes.FileUpload).getKeysAndValues(dictImages)
         params.third.getKeysAndValues(dict)
@@ -149,10 +150,157 @@ class UpdateStepFormUseCase(
 
 
 
+    private suspend fun  List<ComponentDomain>.createRepeatableSectionStructure(ticketNumber : String, removablesWithParent: ArrayList<ComponentDomain>, dict: MutableMap<String, Any>, dictImages: MutableMap<String,Any>){
+        //find removables with their parents
+        Napier.log(LogLevel.ASSERT, tag = "createRepeatableSectionStructure all", message =  this.toString())
+
+        this.findRemovables(removablesWithParent)
+        removablesWithParent.findParentsOfRemovables(this)
+        Napier.log(LogLevel.ASSERT, tag = "createRepeatableSectionStructure", message =  removablesWithParent.toString())
+        removablesWithParent.findImageComponents(ticketNumber)
+            .getKeysAndValuesForRepeatableSections(dictImages)
+        removablesWithParent.findComponentsByType(FormViewerTypes.FileUpload)
+            .getKeysAndValuesForRepeatableSections(dictImages)
+        removablesWithParent.getKeysAndValuesForRepeatableSections(dict)
+    }
+
+    fun List<ComponentDomain>.findRemovables(removableWithParent: ArrayList<ComponentDomain>) {
+        this.forEach {
+            if (it.removable == true && it.type != FormViewerTypes.Group)
+                removableWithParent.add(it)
+
+            it.components?.findRemovables(removableWithParent)
+        }
+    }
+
+    fun ArrayList<ComponentDomain>.findParentsOfRemovables(allComponents: List<ComponentDomain>) {
+        this.groupBy { it.key }.forEach {
+            allComponents.findComponentParentByKeys(it.key ?: "")?.let { parent ->
+                this.add(0,parent)
+            }
+        }
+    }
+    private fun List<ComponentDomain>.findComponentParentByKeys(key: String): ComponentDomain? {
+        this.forEach { component ->
+            if (component.key == key && component.removable == false) {
+                return component
+            }
+
+            // Recursively search in the children
+            val found = component.components?.findComponentByKey(key)
+            if (found != null) {
+                return found
+            }
+        }
+        return null
+    }
+
+    fun List<ComponentDomain>.getKeysAndValuesForRepeatableSections(dict: MutableMap<String, Any>) {
+        this.forEach { componentDomain ->
+            if (this.isNotEmpty()) {
+                if (componentDomain.isSelectable()) {
+                    if (componentDomain.shouldBeArray()) {
+                        componentDomain.addSelectableItemsArrayFromRemovables(
+                            this.filter { it.key == componentDomain.key },
+                            dict
+                        )
+                    } else {
+                        componentDomain.addSelectableItemFromRemovables(
+                            this.filter { it.key == componentDomain.key },
+                            dict
+                        )
+
+                    }
+                } else {
+                    if (componentDomain.shouldBeArray()) {
+                        componentDomain.addItemsArrayFromRemovables(
+                            this.filter { it.key == componentDomain.key },
+                            dict
+                        )
+
+                    } else {
+                        componentDomain.addItemsFromRemovables(
+                            this.filter { it.key == componentDomain.key },
+                            dict
+                        )
+
+                    }
+                }
+            }
+        }
+    }
+
+    fun ComponentDomain.addSelectableItemsArrayFromRemovables(
+        list: List<ComponentDomain>,
+        dict: MutableMap<String, Any>
+    ) {
+        dict[this.key ?: ""] = arrayListOf<List<String>>()
+        dict[this.key] as ArrayList<ArrayList<String>>
+        list.groupBy { it.id }.toList().map {
+            it.second.map {
+                it.values?.let { nonNullValues ->
+                    nonNullValues.filter { it.isSelected }.map { it.value ?: "" }
+                } ?: run {
+                    listOf()
+                }
+            }.forEach { listOflistOfString ->
+                (dict[this.key] as ArrayList<List<String>>).add(listOflistOfString)
+            }
+        }
+    }
+
+
+    fun ComponentDomain.addItemsArrayFromRemovables(
+        list: List<ComponentDomain>,
+        dict: MutableMap<String, Any>
+    ) {
+        dict[this.key ?: ""] = arrayListOf<List<String>>()
+        dict[this.key] as ArrayList<ArrayList<String>>
+        list.groupBy { it.id }.toList().map {
+            it.second.map {
+                it.values?.let { nonoNullValues ->
+                    nonoNullValues.map { it.value ?: "" }
+                } ?: run {
+                    listOf()
+                }
+            }.forEach { listOflistOfString ->
+                (dict[this.key] as ArrayList<List<String>>).add(listOflistOfString)
+            }
+        }
+
+    }
+
+    fun ComponentDomain.addItemsFromRemovables(
+        list: List<ComponentDomain>,
+        dict: MutableMap<String, Any>
+    ) {
+        dict[this.key ?: ""] = arrayListOf<String>()
+        list.map {
+            it.values?.map { it.value ?: "" }?.forEach { listOfString ->
+                (dict[this.key] as ArrayList<String>).add(
+                    listOfString
+                )
+            }
+        }
+    }
+
+    fun ComponentDomain.addSelectableItemFromRemovables(
+        list: List<ComponentDomain>,
+        dict: MutableMap<String, Any>
+    ) {
+        dict[this.key ?: ""] = arrayListOf<String>()
+        (dict[this.key] as ArrayList<String>).addAll(list.map {
+            it.values?.firstOrNull { it.isSelected }?.let { selectedValue ->
+                selectedValue.value ?: ""
+            }?:run{
+                ""
+            }
+        })
+    }
+
     fun ComponentDomain.shouldBeArray(): Boolean {
         return when (type) {
-            FormViewerTypes.Select -> isMulti
-            FormViewerTypes.Multi-> isMulti
+            FormViewerTypes.Select, FormViewerTypes.Multi -> isMulti
             FormViewerTypes.Checklist, FormViewerTypes.FileUpload, FormViewerTypes.ImageView -> true
             else -> false
         }
@@ -161,40 +309,49 @@ class UpdateStepFormUseCase(
     fun ComponentDomain.isSelectable() =
         this.type == FormViewerTypes.Checklist || this.type == FormViewerTypes.Radio || this.type == FormViewerTypes.Select || this.type == FormViewerTypes.Multi
 
-
-    fun ComponentDomain.addSelectableItems(dict : MutableMap<String,Any>) {
+    fun ComponentDomain.addSelectableItems(dict: MutableMap<String, Any>) {
         if (this.values?.filter { it.isSelected }?.isNotEmpty() == true) {
-            dict[this.key ?: ""] = arrayListOf<String>()
-            this.values?.forEach { value ->
-                if (value.isSelected)
-                    (dict[this.key] as ArrayList<String>).add(
-                        value.value ?: ""
-                    )
+            if (dict[this.key] == null) {
+                dict[this.key ?: ""] = arrayListOf<String>()
+                this.values?.forEach { value ->
+                    if (value.isSelected)
+                        (dict[this.key] as ArrayList<String>).add(
+                            value.value ?: ""
+                        )
+                }
             }
         }
     }
 
-    fun ComponentDomain.addSelectableItem(dict: MutableMap<String,Any>) {
+    fun ComponentDomain.addSelectableItem(dict: MutableMap<String, Any>) {
         Napier.log(LogLevel.ASSERT, tag = "addSelectableItem", message = this.key.toString())
-        this.values?.forEach {
-            if(it.isSelected)
-                dict[this.key ?: ""] =
-                    it.value.toString()
+        if (dict[this.key] == null) {
+            this.values?.forEach {
+                if (it.isSelected)
+                    dict[this.key ?: ""] =
+                        it.value.toString()
+            }
+        }
+
+    }
+
+    fun ComponentDomain.addItems(dict: MutableMap<String, Any>) {
+        if (dict[this.key] == null) {
+
+            dict[this.key ?: ""] = arrayListOf<String>()
+            this.values?.forEach { value ->
+                (dict[this.key] as ArrayList<String>).add(
+                    value.value ?: ""
+                )
+            }
         }
     }
 
-    fun ComponentDomain.addItems(dict: MutableMap<String,Any>) {
-        dict[this.key ?: ""] = arrayListOf<String>()
-        this.values?.forEach { value ->
-            (dict[this.key] as ArrayList<String>).add(
-                value.value ?: ""
-            )
+    fun ComponentDomain.addItem(dict: MutableMap<String, Any>) {
+        if (dict[this.key] == null) {
+            dict[this.key ?: ""] =
+                this.values?.get(0)?.value.toString()
         }
-    }
-
-    fun ComponentDomain.addItem(dict: MutableMap<String,Any>) {
-        dict[this.key ?: ""] =
-            this.values?.get(0)?.value.toString()
     }
 
     fun List<ComponentDomain>.getKeysAndValues(dict: MutableMap<String,Any>)  {
@@ -237,7 +394,7 @@ class UpdateStepFormUseCase(
     }
     private fun   List<ComponentDomain>.hasRemovableObject(component : ComponentDomain) : Boolean{
         this.forEach { componentIterable ->
-            if (componentIterable.key == component.key && componentIterable.removable)  return true
+            if (componentIterable.key == component.key && componentIterable.removable == true)  return true
 
 
             // Recursively search in the children
@@ -261,7 +418,7 @@ class UpdateStepFormUseCase(
             val newValues =  mutableListOf<ValueDomain>()
             photoDomainList.forEach {
                     photoDomain ->
-                if (component.key == photoDomain.component_key){
+                if (component.key == photoDomain.component_key && component.id == photoDomain.componentId){
                     if(photoDomain.origin_uri.isNotEmpty())
                         newValues.add(ValueDomain(value =  photoDomain.origin_uri))
                     if(photoDomain.edited_uri.isNotEmpty())

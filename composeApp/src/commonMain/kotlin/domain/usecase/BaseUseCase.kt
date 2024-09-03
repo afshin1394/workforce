@@ -23,7 +23,6 @@ import io.ktor.http.HttpStatusCode.Companion.PaymentRequired
 import io.ktor.http.HttpStatusCode.Companion.ServiceUnavailable
 import io.ktor.http.HttpStatusCode.Companion.TooManyRequests
 import io.ktor.http.HttpStatusCode.Companion.Unauthorized
-import io.ktor.util.reflect.Type
 import io.ktor.utils.io.errors.IOException
 import irancell.nwg.wfm.SentryLog
 import kotlinx.coroutines.delay
@@ -38,7 +37,7 @@ abstract class BaseUseCase<out Type, in Params> {
     suspend operator fun invoke(params: Params) = flow {
 
         emit(AsyncResult.Loading(null, isLoading = true))
-        while (retryAttempt <= BASE_USECASE.MAX_RETRY_COUNT) {
+        while (retryAttempt <= BASE_USECASE.MAX_RETRY_COUNT + 1) {
 
             try {
                 val result = run(params)
@@ -54,24 +53,24 @@ abstract class BaseUseCase<out Type, in Params> {
                     delay(retryDelay)
                     retryAttempt++
                     retryDelay *= 2
-                } else {
-                    exception.message?.let {
+                }else{
+                exception.message?.let {
 
-                        val resultStatus = exception.handleError()
-                        Napier.log(
-                            LogLevel.ASSERT,
-                            "BaseUseCaseResultStatus",
-                            message = resultStatus.toString()
-                        )
-                        emit(AsyncResult.Error(it, resultStatus))
-                        SentryLog(exception.stackTraceToString())
-                    } ?: run {
-                        emit(AsyncResult.Error("no message", exception.handleError()))
-                    }
+                    val resultStatus = exception.handleError()
+                    Napier.log(
+                        LogLevel.ASSERT,
+                        "BaseUseCaseResultStatus",
+                        message = resultStatus.toString()
+                    )
+                    emit(AsyncResult.Error(it, resultStatus))
+                    SentryLog(exception.stackTraceToString())
+                } ?: run {
+                    emit(AsyncResult.Error("no message", exception.handleError()))
                 }
                 return@flow // Exit after maximum retries reached
-
             }
+            }
+
         }
     }
 
