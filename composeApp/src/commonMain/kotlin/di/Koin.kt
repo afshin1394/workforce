@@ -19,6 +19,7 @@ import data.StepsRepositoryImpl
 import data.SuspendTaskRepositoryImpl
 import data.TaskRepositoryImpl
 import data.UploadRepositoryImpl
+import data.VersionRepositoryImpl
 import domain.repository.IAuthRepository
 import domain.repository.IAvailabilityRepository
 import domain.repository.IGeneralLocationRepository
@@ -31,6 +32,7 @@ import domain.repository.IStepsRepository
 import domain.repository.ISuspendTaskRepository
 import domain.repository.ITaskRepository
 import domain.repository.IUploadRepository
+import domain.repository.IVersionRepository
 import domain.usecase.usecase.auth.LoginUseCase
 import domain.usecase.usecase.auth.LogoutUseCase
 import domain.usecase.usecase.auth.ResendUseCase
@@ -64,6 +66,8 @@ import domain.usecase.usecase.suspendTask.StoreSuspendTaskUseCase
 import domain.usecase.usecase.ticket.UpdateTaskUseCase
 import domain.usecase.usecase.ticket.GetTasksUseCase
 import domain.usecase.usecase.upload.SendFileToServerUseCase
+import domain.usecase.usecase.version.GetVersionOfServerUseCase
+import domain.usecase.usecase.version.SendVersionToServerUseCase
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.addDefaultResponseValidation
@@ -92,6 +96,7 @@ import presentation.screens.main.viewmodel.FormViewerScreenVM
 import presentation.screens.main.viewmodel.GpsTrackingReportScreenVM
 import presentation.screens.main.viewmodel.MapVM
 import presentation.screens.main.viewmodel.NotificationScreenVM
+import presentation.screens.splash.viewmodel.SplashScreenVM
 import presentation.screens.ticket_process.viewModel.TicketInfoVM
 import utils.DeploymentBASEURL
 import utils.DevelopmentBASEURL
@@ -113,6 +118,7 @@ fun repositoryModule() = module {
     single<IStepPointerRepository>{ StepPointerRepositoryImpl(get()) }
     single<ISendStepsRepository>{ SendStepRepositoryImpl(get(),get(named("tokenized"))) }
     single<IUploadRepository>{ UploadRepositoryImpl(get(named("tokenized"))) }
+    single<IVersionRepository>{ VersionRepositoryImpl(get(named("noToken")),get(named("tokenized"))) }
 }
 
 fun useCaseModule() = module {
@@ -151,6 +157,8 @@ fun useCaseModule() = module {
     single { UpdateIsEditedTicketUseCase(get())}
     single { UpdateUnSendLocationUseCase(get())}
     single { DeleteSendLocationUseCase(get())}
+    single { SendVersionToServerUseCase(get())}
+    single { GetVersionOfServerUseCase(get())}
 }
 
 fun httpModule() = module {
@@ -237,12 +245,13 @@ internal fun HttpClientConfig<*>.configure() {
 }
 
 fun viewModelModule() = module {
-    viewModelDefinition { AboutScreenVM() }
+    viewModelDefinition { AboutScreenVM(get()) }
     viewModelDefinition { MainScreenVM(get(), get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get()) }
     viewModelDefinition { SettingScreenVM() }
     viewModelDefinition { GpsTrackingReportScreenVM(get()) }
     viewModelDefinition { LoginScreenVM(get()) }
-    viewModelDefinition { VerifyScreenVM(get(),get(),get()) }
+    viewModelDefinition { VerifyScreenVM(get(),get(),get(),get(),get()) }
+    viewModelDefinition { SplashScreenVM(get()) }
     viewModelDefinition { TicketInfoVM(get()) }
     viewModelDefinition { TicketProcessVM(get(),get(),get(),get(),get(),get()) }
     viewModelDefinition { FormViewerScreenVM(get(),get()) }

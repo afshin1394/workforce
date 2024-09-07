@@ -20,7 +20,12 @@ const val TicketNumber = "TicketNumber"
 const val DeploymentBASEURL = "http://mobile.ios.mtnirancell.ir/api/"
 const val ProductionBASEURL = "https://ios.mtnirancell.ir/api/"
 const val DevelopmentBASEURL = "https://uat.ios.mtnirancell.ir/api/"
+const val ProductionBASEURLForVersionFile = "https://ios.mtnirancell.ir/"
+const val DevelopmentBASEURLForVersionFile = "https://uat.ios.mtnirancell.ir/"
 
+
+
+const val FileApk = "fileApk"
 sealed interface ServiceState{
     data object Normal : ServiceState
     data object Faulty : ServiceState

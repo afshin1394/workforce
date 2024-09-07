@@ -278,10 +278,10 @@ class MainScreen(
 
                             when (it) {
                                 Menu.About -> {
-                                    scope.launch {
-                                        scaffoldState.snackbarHostState.showSnackbar(message = underDevelopment )
-                                    }
-//                                navigator.push(aboutScreen)
+//                                    scope.launch {
+//                                        scaffoldState.snackbarHostState.showSnackbar(message = underDevelopment )
+//                                    }
+                                navigator.push(aboutScreen)
                                 }
 
                                 Menu.Logout -> {

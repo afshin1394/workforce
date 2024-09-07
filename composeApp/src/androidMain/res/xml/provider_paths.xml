@@ -2,4 +2,5 @@
 <paths>
     <files-path name="wfmImages" path="wfmImages/"/>
     <files-path name="wfmFiles" path="wfmFiles/"/>
+    <files-path name="internal_files" path="." />
 </paths>

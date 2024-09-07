@@ -40,17 +40,29 @@ import irancell.nwg.wfm.getSharedPref
 import irancell.nwg.wfm.openAppSettings
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import org.koin.compose.koinInject
 import org.koin.core.component.KoinComponent
+import presentation.components.ButtonState
+import presentation.components.CustomDialog
+import presentation.components.CustomDialogDoubleAction
+import presentation.components.CustomDialogDoubleActionWithLoading
+
+import presentation.components.CustomDialogWithLoading
+import presentation.screens.auth.viewmodel.VerifyScreenVM
 import presentation.screens.main.compose.BaseScreen
+import presentation.screens.main.events.MainEvent
+import presentation.screens.splash.events.CheckVersionEvent
 import presentation.screens.splash.events.PermissionEvent
 import presentation.screens.splash.viewmodel.SplashScreenVM
 import presentation.theme.body_small
+import utils.ServiceState
 
 import utils.Token
 import utils.ViewStates
+import utils.startDownloadFileApk
 
 
-class SplashScreen() : Screen, KoinComponent {
+class SplashScreen() : Screen {
 
 
     @OptIn(ExperimentalMaterialApi::class)
@@ -63,13 +75,13 @@ class SplashScreen() : Screen, KoinComponent {
         val navigator = LocalNavigator.currentOrThrow
         val loginScreen = rememberScreen(presentation.nav.Screen.Auth.Login)
         val mainScreen = rememberScreen(presentation.nav.Screen.Main.Menu.MyTickets)
-
-        val viewModel = remember { SplashScreenVM() }
-
+        val viewModel: SplashScreenVM = koinInject()
+        var showVersionDialog by remember { mutableStateOf(false) }
+        var buttonState by remember { mutableStateOf(ButtonState.IDLE) }
         val permissionState by viewModel.permissionState.collectAsState()
         val lifecycleEvent by viewModel.lifeCycleEvent.collectAsState()
         val state by viewModel.state.collectAsState()
-
+        val events by viewModel.eventsVersion
         if (lifecycleEvent == LifecycleEvent.ON_RESUME) {
             viewModel.updateLifeCycleEventState(LifecycleEvent.ON_ANY)
 
@@ -90,7 +102,11 @@ class SplashScreen() : Screen, KoinComponent {
             title = "notStartService",
             scaffoldState = scaffoldState,
             content = {
-                Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.background
+                ) {
+
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
@@ -122,12 +138,68 @@ class SplashScreen() : Screen, KoinComponent {
                     }
 
 
+
+
+                    if (showVersionDialog) {
+                        val errorMessage = stringResource(MR.strings.download_failed)
+                        if (events == CheckVersionEvent.NormalUpdate) {
+                            CustomDialogDoubleActionWithLoading(
+                                showDialog = showVersionDialog,
+                                message = viewModel.versionData.value?.description ?: "",
+                                title = viewModel.versionData.value?.title ?: "",
+                                titleButton = MR.strings.download,
+                                buttonState = buttonState,
+                                onDismiss = {
+                                    showVersionDialog = false
+                                    navigator.popAll()
+                                    navigator.push(mainScreen)
+                                },
+                                onConfirm = {
+                                    buttonState = ButtonState.LOADING
+                                    scope.launch {
+                                        val isSuccess = startDownloadFileApk(viewModel.versionData.value?.apk_file ?: "")
+                                        if (isSuccess) {
+                                            buttonState = ButtonState.COMPLETED
+                                        } else {
+                                            buttonState = ButtonState.IDLE
+                                            scaffoldState.snackbarHostState.showSnackbar(message = errorMessage )
+                                        }
+                                    }
+                                }
+                            )
+                        } else {
+                            CustomDialogWithLoading(
+                                showDialog = showVersionDialog,
+                                message = viewModel.versionData.value?.description ?: "",
+                                title = viewModel.versionData.value?.title ?: "",
+                                titleButton = MR.strings.download,
+                                buttonState = buttonState,
+                                onDismiss = { },
+                                onConfirm = {
+                                    buttonState = ButtonState.LOADING
+                                    scope.launch {
+                                        val isSuccess = startDownloadFileApk(viewModel.versionData.value?.apk_file ?: "")
+                                        if (isSuccess) {
+                                            buttonState = ButtonState.COMPLETED
+                                        } else {
+                                            buttonState = ButtonState.IDLE
+                                            scaffoldState.snackbarHostState.showSnackbar(message = errorMessage )
+
+                                        }
+                                    }
+                                }
+                            )
+                        }
+                    }
+
+
+
                     if (permissionState == PermissionEvent.DeniedPermission) {
                         val message = stringResource(MR.strings.please_authorize_permissions)
                         val approve = stringResource(MR.strings.approve)
                         scope.launch {
 
-                            val userAction =it.showSnackbar(
+                            val userAction = it.showSnackbar(
                                 message = message,
                                 actionLabel = approve,
                                 duration = SnackbarDuration.Long,
@@ -144,6 +216,7 @@ class SplashScreen() : Screen, KoinComponent {
 
                                 SnackbarResult.Dismissed -> {
 
+
                                 }
                             }
                         }
@@ -151,16 +224,57 @@ class SplashScreen() : Screen, KoinComponent {
 
                     if (permissionState == PermissionEvent.IsGranted) {
 
+
+
+
                         scope.launch {
+
                             delay(1000)
-                            if (getSharedPref().getString(Token).toString().length > 6) {
-                                navigator.popAll()
-                                navigator.push(mainScreen)
+
+
+                            when (events) {
+                                CheckVersionEvent.Default -> {
+                                    navigator.popAll()
+                                    navigator.push(mainScreen)
+
+
+                                }
+
+                                CheckVersionEvent.ForceUpdate -> {
+                                    showVersionDialog = true
+
+                                }
+
+                                CheckVersionEvent.NormalUpdate -> {
+                                    showVersionDialog = true
+                                }
+
+                                CheckVersionEvent.InvalidToken -> {
+                                    navigator.popAll()
+                                    navigator.push(loginScreen)
+
+                                }
+
+                                CheckVersionEvent.OkVersion -> {
+                                    navigator.popAll()
+                                    navigator.push(mainScreen)
+
+
+                                }
+
                             }
-                            else {
-                                navigator.popAll()
-                                navigator.push(loginScreen)
-                            }
+
+
+
+
+                            /*      if (getSharedPref().getString(Token).toString().length > 6) {
+                                      navigator.popAll()
+                                      navigator.push(mainScreen)
+                                  }
+                                  else {
+                                      navigator.popAll()
+                                      navigator.push(loginScreen)
+                                  }*/
                         }
                     }
 

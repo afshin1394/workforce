@@ -28,15 +28,23 @@ import dev.icerock.moko.resources.compose.stringResource
 import io.github.aakira.napier.LogLevel
 import io.github.aakira.napier.Napier
 import irancell.nwg.wfm.MR
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
+import presentation.components.ButtonState
+
+import presentation.components.CustomDialogDoubleActionWithLoading
+import presentation.components.CustomDialogWithLoading
 import presentation.screens.auth.components.AuthAlertText
 import presentation.screens.auth.components.AuthAlertTextItem
 import presentation.screens.auth.viewmodel.VerifyScreenVM
 import presentation.screens.main.compose.BaseScreen
 import presentation.screens.splash.compose.SplashScreen
+import presentation.screens.splash.events.CheckVersionEvent
 import presentation.theme.backgroundBackground3
 import presentation.theme.textBrand
 import utils.ViewStates
+import utils.startDownloadFileApk
 
 class VerifyScreen(private val phoneNumber: String = "") : Screen {
     @OptIn(ExperimentalMaterialApi::class)
@@ -51,8 +59,10 @@ class VerifyScreen(private val phoneNumber: String = "") : Screen {
         val smsCode by viewModel.otpCode.collectAsState()
         val mainScreen = rememberScreen(presentation.nav.Screen.Main.Menu.MyTickets)
         val phoneNumberState by remember { mutableStateOf(phoneNumber) }
-
-
+        val events by viewModel.eventsVersion
+        var showVersionDialog by remember { mutableStateOf(false) }
+        var buttonState by remember { mutableStateOf(ButtonState.IDLE) }
+        val scope = rememberCoroutineScope()
 
 
 
@@ -87,6 +97,61 @@ class VerifyScreen(private val phoneNumber: String = "") : Screen {
                                 .padding(spacing2X)
                         ) {
 
+
+                            if (showVersionDialog) {
+                                val errorMessage = stringResource(MR.strings.download_failed)
+                                if (events == CheckVersionEvent.NormalUpdate) {
+                                    CustomDialogDoubleActionWithLoading(
+                                        showDialog = showVersionDialog,
+                                        message = viewModel.versionData.value?.description ?: "",
+                                        title = viewModel.versionData.value?.title ?: "",
+                                        titleButton = MR.strings.download,
+                                        buttonState = buttonState,
+                                        onDismiss = {
+                                            showVersionDialog = false
+                                            navigator.popAll()
+                                            navigator.push(mainScreen)
+                                        },
+                                        onConfirm = {
+                                            buttonState = ButtonState.LOADING
+                                            scope.launch {
+                                                val isSuccess = startDownloadFileApk(viewModel.versionData.value?.apk_file ?: "")
+                                                if (isSuccess) {
+                                                    buttonState = ButtonState.COMPLETED
+                                                } else {
+                                                    buttonState = ButtonState.IDLE
+                                                    scaffoldState.snackbarHostState.showSnackbar(message = errorMessage )
+                                                }
+                                            }
+                                        }
+                                    )
+                                } else {
+                                    CustomDialogWithLoading(
+                                        showDialog = showVersionDialog,
+                                        message = viewModel.versionData.value?.description ?: "",
+                                        title = viewModel.versionData.value?.title ?: "",
+                                        titleButton = MR.strings.download,
+                                        buttonState = buttonState,
+                                        onDismiss = { },
+                                        onConfirm = {
+                                            buttonState = ButtonState.LOADING
+                                            scope.launch {
+                                                val isSuccess = startDownloadFileApk(viewModel.versionData.value?.apk_file ?: "")
+                                                if (isSuccess) {
+                                                    buttonState = ButtonState.COMPLETED
+                                                } else {
+                                                    buttonState = ButtonState.IDLE
+                                                        scaffoldState.snackbarHostState.showSnackbar(message = errorMessage )
+
+                                                }
+                                            }
+                                        }
+                                    )
+                                }
+                            }
+
+
+
                             when (state) {
                                 is ViewStates.Error -> {
                                 }
@@ -106,9 +171,45 @@ class VerifyScreen(private val phoneNumber: String = "") : Screen {
 
                                 }
                                 is ViewStates.Success -> {
-                                    viewModel.disableSMSListener()
-                                    navigator.popAll()
-                                    navigator.push(mainScreen)
+
+                                    scope.launch {
+
+                                        delay(1000)
+
+                                        when (events) {
+                                            CheckVersionEvent.Default -> {
+
+
+                                            }
+
+                                            CheckVersionEvent.ForceUpdate -> {
+                                                showVersionDialog = true
+
+                                            }
+
+                                            CheckVersionEvent.NormalUpdate -> {
+                                                showVersionDialog = true
+                                            }
+
+                                            CheckVersionEvent.InvalidToken -> {
+
+                                            }
+                                            CheckVersionEvent.OkVersion -> {
+                                                viewModel.disableSMSListener()
+                                                navigator.popAll()
+                                                navigator.push(mainScreen)
+
+
+                                            }
+
+                                        }
+
+                                        println("eventttttii ${events}")
+                                    }
+
+
+
+
                                 }
 
                                 is ViewStates.UnAuthorized -> {

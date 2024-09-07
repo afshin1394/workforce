@@ -165,4 +165,6 @@
     <string name="empty_list" > لیست خالی است</string>
     <string name="data_sent_complete" >اطلاعات با موفقیت ارسال شد!</string>
     <string name="under_development" >در حال توسعه می باشد!</string>
+    <string name="download" >دانلود</string>
+    <string name="download_failed" >دانلود یا نصب موفق نبود، لطفاً دوباره تلاش کنید.</string>
 </resources>

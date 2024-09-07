@@ -48,11 +48,8 @@ kotlin {
             export("dev.icerock.moko:resources:0.22.3")
             export("dev.icerock.moko:graphics:0.9.0")
             export("com.mohamedrejeb.calf:calf-ui:0.3.1")
-            linkerOpts("-framework", "CoreTelephony")
-
         }
     }
-
 
     sourceSets {
         all {
@@ -94,6 +91,8 @@ kotlin {
                 implementation(libs.room.runtime)
                 implementation(libs.sqlite.bundled)
                 implementation("com.github.skydoves:landscapist-coil3:2.3.2")
+
+
             }
         }
 
@@ -145,7 +144,9 @@ kotlin {
             dependsOn(commonMain)
 
             dependencies {
+
                 implementation(libs.ktor.client.darwin)
+
             }
         }
         val iosSimulatorArm64Main by getting {
@@ -172,7 +173,7 @@ android {
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
         versionCode = 1
-        versionName = "1.0.0"
+        versionName = "0.0.1"
     }
     packaging {
         resources {
@@ -187,9 +188,6 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
-    }
-    lintOptions{
-        isAbortOnError = false
     }
 
 

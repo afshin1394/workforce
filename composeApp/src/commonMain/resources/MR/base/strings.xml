@@ -166,5 +166,7 @@
     <string name="empty_list" > List is empty</string>
     <string name="data_sent_complete" >Information has been send successfully!</string>
     <string name="under_development" >Feature under development!</string>
+    <string name="download" >Download</string>
+    <string name="download_failed" >Download or installation failed, please try again.</string>
 
 </resources>

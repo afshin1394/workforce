@@ -9,10 +9,12 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
+import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.DismissDirection
 import androidx.compose.material.DismissValue
 import androidx.compose.material.ExperimentalMaterialApi
@@ -43,6 +45,12 @@ import presentation.theme.surfaceBrandDisabled
 import presentation.theme.surfaceDefault
 import presentation.theme.surfaceSuccessWeak
 
+
+
+
+enum class ButtonState {
+    IDLE, LOADING, COMPLETED
+}
 @Composable
 fun CustomDialog(
     showDialog: Boolean,
@@ -87,6 +95,59 @@ fun CustomDialog(
     }
 }
 
+
+@Composable
+fun CustomDialogWithLoading(
+    showDialog: Boolean,
+    message: String,
+    title: String,
+    titleButton: StringResource,
+    buttonState: ButtonState,
+    onDismiss: () -> Unit,
+    onConfirm: () -> Unit
+) {
+    if (showDialog) {
+        Dialog(onDismissRequest = onDismiss) {
+            Surface(
+                modifier = Modifier
+                    .width(300.dp)
+                    .height(200.dp)
+                    .clip(shape = RoundedCornerShape(16.dp)),
+                color = Color.White,
+                elevation = 8.dp
+            ) {
+                Column(
+                    modifier = Modifier.padding(16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.SpaceAround
+                ) {
+
+                    Text(text = title, fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                    Text(text = message, fontSize = 14.sp)
+                    Button(
+                        colors = ButtonDefaults.buttonColors(
+                            backgroundColor = surfaceBrandDefault,
+                            contentColor = Color.White
+                        ),
+                        onClick = {
+                            onConfirm()
+                        },
+                        enabled = buttonState != ButtonState.LOADING
+                    ) {
+                        if (buttonState == ButtonState.LOADING) {
+                            CircularProgressIndicator(
+                                color = Color.White,
+                                modifier = Modifier.size(24.dp)
+                            )
+                        } else {
+                            Text(text = stringResource(titleButton))
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
 
 @Composable
 fun CustomDialogDoubleAction(
@@ -146,6 +207,78 @@ fun CustomDialogDoubleAction(
 
                     }
 
+                }
+            }
+        }
+    }
+}
+
+
+@Composable
+fun CustomDialogDoubleActionWithLoading(
+    showDialog: Boolean,
+    message: String,
+    title: String,
+    titleButton: StringResource,
+    buttonState: ButtonState,
+    onDismiss: () -> Unit,
+    onConfirm: () -> Unit
+) {
+    if (showDialog) {
+        Dialog(onDismissRequest = onDismiss) {
+            Surface(
+                modifier = Modifier
+                    .width(300.dp)
+                    .height(200.dp)
+                    .clip(shape = RoundedCornerShape(16.dp)),
+                color = Color.White,
+                elevation = 8.dp
+            ) {
+                Column(
+                    modifier = Modifier.padding(16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.SpaceAround
+                ) {
+                    Text(text = title, fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                    Text(text = message, fontSize = 14.sp)
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .align(Alignment.CenterHorizontally),
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        Button(
+                            colors = ButtonDefaults.buttonColors(
+                                backgroundColor = surfaceDefault,
+                                contentColor = Color.Black
+                            ),
+                            onClick = {
+                                onDismiss()
+                            }
+                        ) {
+                            Text(text = stringResource(MR.strings.cancel))
+                        }
+                        Spacer(modifier = Modifier.width(spacing25X))
+                        Button(
+                            colors = ButtonDefaults.buttonColors(
+                                backgroundColor = surfaceBrandDefault,
+                                contentColor = Color.White
+                            ),
+                            onClick = {
+                                onConfirm()
+                            },
+                            enabled = buttonState != ButtonState.LOADING
+                        ) {
+                            if (buttonState == ButtonState.LOADING) {
+                                CircularProgressIndicator(
+                                    color = Color.White,
+                                    modifier = Modifier.size(24.dp)
+                                )
+                            } else {
+                                Text(text = stringResource(titleButton))
+                            }
+                        }
+                    }
                 }
             }
         }
