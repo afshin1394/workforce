@@ -52,7 +52,7 @@ fun Editable(
     onValueChange: (value: String) -> Unit
 ) {
     Napier.log(LogLevel.ASSERT, tag = "Editablevalue", message = value)
-    var valueChange by remember { mutableStateOf(value) }
+    var valueChange  by   mutableStateOf(value)
     processLogicDomain.calculatedValue?.let {
         if (it.isNotEmpty())
             valueChange = it

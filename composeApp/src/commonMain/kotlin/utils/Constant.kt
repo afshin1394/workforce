@@ -20,6 +20,8 @@ const val TicketNumber = "TicketNumber"
 const val DeploymentBASEURL = "http://mobile.ios.mtnirancell.ir/api/"
 const val ProductionBASEURL = "https://ios.mtnirancell.ir/api/"
 const val DevelopmentBASEURL = "https://uat.ios.mtnirancell.ir/api/"
+
+const val DeploymentBASEURLForVersionFile = "http://mobile.ios.mtnirancell.ir"
 const val ProductionBASEURLForVersionFile = "https://ios.mtnirancell.ir/"
 const val DevelopmentBASEURLForVersionFile = "https://uat.ios.mtnirancell.ir/"
 
@@ -40,7 +42,7 @@ object BASE_USECASE{
 object AlarmAction{
     object UPDATE{
         const val title = "UPDATE"
-        const val interval = 10L
+        const val interval = 1000L
     }
     object STORE_LOCATION{
         const val title = "STORE_LOCATION"

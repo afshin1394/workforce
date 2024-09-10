@@ -13,7 +13,7 @@ actual class DeviceInfo() {
         }
 
         actual fun getOSVersion(): String {
-            return Build.VERSION.RELEASE ?: "Unknown"
+            return Build.VERSION.RELEASE ?: "0"
         }
 
         actual fun getDeviceModel(): String {
@@ -35,7 +35,7 @@ actual class DeviceInfo() {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
                     packageInfo.longVersionCode.toString()
                 } else {
-                    TODO("VERSION.SDK_INT < P")
+                    packageInfo.versionCode.toString()
                 }
             } catch (e: PackageManager.NameNotFoundException) {
                 "Unknown"

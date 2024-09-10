@@ -362,7 +362,7 @@ internal actual class BackgroundServiceApp : Service(), KoinComponent {
     private fun startStoreLocationAlarm(){
         val alarmManager = getSystemService(ALARM_SERVICE) as AlarmManager
         val currentTimeMillis = SystemClock.elapsedRealtime()
-        val intervalMillis = TimeUnit.MILLISECONDS.toMillis(AlarmAction.STORE_LOCATION.interval)
+        val intervalMillis = TimeUnit.MILLISECONDS.toMillis(2000L)
         alarmManager.setExact(
             AlarmManager.ELAPSED_REALTIME_WAKEUP,
             currentTimeMillis + intervalMillis,
@@ -373,7 +373,7 @@ internal actual class BackgroundServiceApp : Service(), KoinComponent {
     private fun startSendLocationAlarm(){
         val alarmManager = getSystemService(ALARM_SERVICE) as AlarmManager
         val currentTimeMillis = SystemClock.elapsedRealtime()
-        val intervalMillis = TimeUnit.MILLISECONDS.toMillis(AlarmAction.SEND_LOCATION.interval)
+        val intervalMillis = TimeUnit.MILLISECONDS.toMillis(5000L)
         alarmManager.setExact(
             AlarmManager.ELAPSED_REALTIME_WAKEUP,
             currentTimeMillis + intervalMillis,
@@ -402,7 +402,7 @@ internal actual class BackgroundServiceApp : Service(), KoinComponent {
 
         createNotificationChannel(title, content)
         val builder = NotificationCompat.Builder(context, CHANNEL_ID)
-            .setSmallIcon(R.drawable.ic_sdm)
+            .setSmallIcon(R.drawable.ic_i_ticket)
             .setContentTitle(title)
             .setContentText(content)
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)

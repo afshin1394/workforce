@@ -7,6 +7,7 @@ import domain.models.steps.StepPointerDomain
 interface IStepPointerRepository {
     suspend fun insertAll(pointers : List<StepPointerEntity>)
     suspend fun deleteAll(editedAvailableTickets : List<String>)
+    suspend fun deleteAllStepPointers(tickets : List<String>)
     suspend fun getEditedTickets() : List<String>
     suspend fun getActiveActivityByTicketNumber(ticketNumber : String) : StepPointerDomain
     suspend fun checkIfTicketIsEdited(ticketNumber: String) : Boolean

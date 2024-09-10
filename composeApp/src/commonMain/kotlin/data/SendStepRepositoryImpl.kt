@@ -24,6 +24,10 @@ class SendStepRepositoryImpl(private val db : AppDatabase,private val httpClient
         db.sendStepsDao().deleteAll(ticketNumbers)
     }
 
+    override suspend fun deleteAllSendSteps(ticketNumbers: List<String>) {
+        db.sendStepsDao().deleteAllSendSteps(ticketNumbers)
+    }
+
     override suspend fun getStepsByTicketNumber(ticketNumber: String): List<SendStepsEntity> {
        return db.sendStepsDao().selectSendStepsByTicketNumber(ticketNumber)
     }

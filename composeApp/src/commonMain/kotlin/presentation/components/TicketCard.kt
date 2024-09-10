@@ -22,6 +22,7 @@ import androidx.compose.ui.unit.sp
 
 import com.irancell.nwg.wfm.presentation.theme.*
 import dev.icerock.moko.resources.compose.painterResource
+import dev.icerock.moko.resources.compose.stringResource
 import domain.models.task.TaskDomain
 import irancell.nwg.wfm.MR
 
@@ -52,16 +53,7 @@ fun ticketCard(
         colors = CardDefaults.cardColors(surfaceDefault),
         modifier = modifier
             .fillMaxWidth()
-            .shadow(
-                elevation = 4.dp,
-                spotColor = Color(0x0D000000),
-                ambientColor = Color(0x0D000000)
-            )
-            .shadow(
-                elevation = 1.dp,
-                spotColor = Color(0x0D000000),
-                ambientColor = Color(0x0D000000)
-            )
+
             .padding(top = spacing15X)
 
 
@@ -191,7 +183,7 @@ fun ticketCard(
 
                     ) {
                         androidx.compose.material3.Text(
-                            text = "More Options",
+                            text = stringResource(MR.strings.more_options),
                             color = textPrimary,
                             style = body_large,
                             fontSize = 16.sp,
@@ -236,7 +228,7 @@ fun ticketCard(
 
                     ) {
                         androidx.compose.material3.Text(
-                            text = "Accept",
+                            text = stringResource(MR.strings.accept),
                             color = textInverse,
                             style = body_large,
                             maxLines = 1,

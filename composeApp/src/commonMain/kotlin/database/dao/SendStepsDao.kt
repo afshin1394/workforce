@@ -18,16 +18,19 @@ interface SendStepsDao {
     @Query("DELETE FROM SendStepsEntity WHERE  ticketNumber NOT IN (:ticketNumbers)")
     suspend fun deleteAll(ticketNumbers : List<String>)
 
+    @Query("DELETE FROM SendStepsEntity WHERE  ticketNumber  IN (:ticketNumbers)")
+    suspend fun deleteAllSendSteps(ticketNumbers : List<String>)
+
     @Query("SELECT * FROM SendStepsEntity")
     suspend fun selectAll(): List<SendStepsEntity>
 
     @Query("SELECT * FROM SendStepsEntity WHERE ticketNumber = :ticketNumber  ORDER BY activityId")
     suspend fun selectSendStepsByTicketNumber(ticketNumber: String) : List<SendStepsEntity>
 
-    @Query("SELECT ticketNumber FROM SendStepsEntity WHERE edited = true")
+    @Query("SELECT ticketNumber FROM SendStepsEntity WHERE edited = 1")
     suspend fun selectEditedTickets() : List<String>
 
-    @Query("UPDATE SendStepsEntity SET key_value_structure = :keyValueStructure , key_value_image_structure = :keyValueImageStructure , edited = true WHERE ticketNumber = :ticketNumber AND activityId = :activityId")
+    @Query("UPDATE SendStepsEntity SET key_value_structure = :keyValueStructure , key_value_image_structure = :keyValueImageStructure , edited = 1 WHERE ticketNumber = :ticketNumber AND activityId = :activityId")
     suspend fun updateKeyValueStructure(ticketNumber: String,activityId : Long, keyValueStructure: String,keyValueImageStructure: String)
 
 

@@ -129,7 +129,6 @@ class StoreStepFormUseCase(
 
     fun ComponentDomain.addItems(dict: MutableMap<String, Any>) {
         if (dict[this.key] == null) {
-
             dict[this.key ?: ""] = arrayListOf<String>()
             this.values?.forEach { value ->
                 (dict[this.key] as ArrayList<String>).add(

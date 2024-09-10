@@ -27,4 +27,9 @@ data class LiveLocationRequest(
     @SerialName("network_info")
     val network_info : JsonObject
 
-)
+){
+
+    override fun toString(): String {
+        return "LiveLocationRequest(longitude=$longitude, latitude=$latitude, recorded_date='$recorded_date', site=$site, attendance=$attendance, ticket_num='$ticket_num', network_info=$network_info)"
+    }
+}

@@ -11,8 +11,8 @@
     <string name="about_application">درباره اپلیکیشن</string>
     <string name="current_version">ورژن فعلی شما</string>
     <string name="latest_version">آخرین ورژن</string>
-    <string name="description_for_update">شما در حال استفاده از ورژن قدیمی اپلیکیشن هستید لطفا برنامه خود را به اخرین ورژن آبدیت نمایید.</string>
-    <string name="update">آبدیت</string>
+    <string name="description_for_update">شما در حال استفاده از ورژن قدیمی اپلیکیشن هستید لطفا برنامه خود را به اخرین ورژن به روز رسانی نمایید.</string>
+    <string name="update">به روز رسانی</string>
     <string name="account_info">اطلاعات حساب کاربری</string>
     <string name="name">نام</string>
     <string name="expertise">تخصص</string>
@@ -52,11 +52,11 @@
     <string name="verify">تایید</string>
     <string name="english">انگلیسی</string>
     <string name="farsi">فارسی</string>
-    <string name="ticket_list">لیست تسک ها</string>
+    <string name="ticket_list">لیست کار ها</string>
     <string name="tap_update_availability">جهت به روز رسانی وضعیت در دسترس بودن روی دکمه زیر کلیک کنید.</string>
     <string name="available">در دسترس بودن</string>
     <string name="unAvailable">عدم دسترسی</string>
-    <string name="ticket_info">اطلاعات تسک</string>
+    <string name="ticket_info">اطلاعات تیکت</string>
     <string name="resume">ادامه</string>
     <string name="general_information">اطلاعات کلی</string>
     <string name="resource_information">اطلاعات منبع</string>
@@ -76,7 +76,6 @@
     <string name="read">خوانده شده</string>
     <string name="notification">پیام</string>
     <string name="search">جستجو</string>
-    <string name="aaccept">تایید</string>
     <string name="selected_date">تاریخ را انتخاب کنید</string>
     <string name="selected_time">زمان را انتخاب کنید</string>
     <string name="selected_date_time">زمان و تاریخ را انتخاب کنید</string>
@@ -167,4 +166,7 @@
     <string name="under_development" >در حال توسعه می باشد!</string>
     <string name="download" >دانلود</string>
     <string name="download_failed" >دانلود یا نصب موفق نبود، لطفاً دوباره تلاش کنید.</string>
+    <string name="accept" >پذیرفتن</string>
+    <string name="more_options">گزینه های بیشتر</string>
+
 </resources>

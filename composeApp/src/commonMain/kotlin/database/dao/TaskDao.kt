@@ -8,6 +8,7 @@ import database.entity.TaskEntity
 
 @Dao
 interface TaskDao {
+
     @Query("UPDATE sqlite_sequence SET seq = 0 WHERE name = 'TaskEntity'")
     suspend fun resetSequence()
 
@@ -22,4 +23,5 @@ interface TaskDao {
 
     @Query("UPDATE TaskEntity SET ticket_state = :ticketState WHERE ticket_number = :ticketNumber")
     suspend fun updateStatus(ticketNumber: String, ticketState: String)
+
 }

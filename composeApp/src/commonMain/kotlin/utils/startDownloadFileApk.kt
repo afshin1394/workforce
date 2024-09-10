@@ -1,6 +1,7 @@
 package utils
 
 
+import io.github.aakira.napier.Napier
 import irancell.nwg.wfm.InstallApk
 import irancell.nwg.wfm.PerformDownload
 import irancell.nwg.wfm.Unzip
@@ -8,7 +9,7 @@ import irancell.nwg.wfm.getSharedPref
 
 
 suspend fun startDownloadFileApk(url: String): Boolean {
-    val url = ProductionBASEURLForVersionFile + url
+    val url = DeploymentBASEURLForVersionFile + url
 
 
     if (getSharedPref().getString(FileApk).isNullOrEmpty()) {
@@ -17,6 +18,7 @@ suspend fun startDownloadFileApk(url: String): Boolean {
 
         val result = downloadResult!!.getOrNull()
         if (result != null) {
+            Napier.i(tag = "targetDire", message =  "startDownloadFileApk: result.targetDirectoryPath "+result.targetDirectoryPath)
             val apkFilePath = Unzip(result.zipFilePath, result.targetDirectoryPath)
             getSharedPref().put(FileApk, apkFilePath ?: "")
 

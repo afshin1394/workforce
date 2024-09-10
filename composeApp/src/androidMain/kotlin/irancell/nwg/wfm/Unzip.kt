@@ -1,5 +1,6 @@
 package irancell.nwg.wfm
 
+import android.util.Log
 import java.io.File
 import java.util.zip.ZipInputStream
 
@@ -11,7 +12,8 @@ actual fun Unzip(zipFilePath: String, targetDirectoryPath: String): String? {
 
     ZipInputStream(zipFile.inputStream()).use { zipInputStream ->
         var entry = zipInputStream.nextEntry
-        while (entry != null) {
+        Log.d("entries","entry" + entry.name)
+        while (entry != null && entry.name != "__MACOSX/._WFM.apk") {
             val file = File(targetDirectory, entry.name)
             if (entry.isDirectory) {
                 file.mkdirs()
@@ -20,7 +22,7 @@ actual fun Unzip(zipFilePath: String, targetDirectoryPath: String): String? {
                     zipInputStream.copyTo(outputStream)
                 }
 
-                if (entry.name.endsWith(".apk")) {
+                if (entry.name.equals("WFM.apk")) {
                     apkFilePath = file.absolutePath
                 }
             }

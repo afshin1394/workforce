@@ -23,7 +23,7 @@ fun GetVersionNetworkResponse.toGetVersionDomain(): GetVersionDomain {
         id=id,
         version_name=version_name,
         version_code=version_code,
-        os=os,
+        os=os?:"",
         apk_file=apk_file,
         ipa_link=ipa_link?:"",
         title=title,

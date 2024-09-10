@@ -9,9 +9,8 @@ plugins {
 
 buildscript {
     repositories {
-        mavenLocal()
+        google()
         mavenCentral()
-
     }
 
     dependencies {

@@ -11,7 +11,6 @@ actual fun ZipFiles(fileDataList: List<String>, zipFilePath: String): FileData? 
     return try {
         val zipFile = File(zipFilePath)
         val zipOut = ZipOutputStream(FileOutputStream(zipFile))
-        zipOut.setLevel(2)
 
         fileDataList.forEach { fileData ->
             val fileToZip = File(fileData)

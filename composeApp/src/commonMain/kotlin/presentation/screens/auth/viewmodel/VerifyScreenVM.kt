@@ -138,7 +138,7 @@ class VerifyScreenVM(
                     AsyncStatus.SUCCESS -> {
                         updateState(ViewStates.Success())
                         countdownTimer.stop()
-                        Napier.log(LogLevel.ASSERT, tag = "serviice", message = "SUCCESS${it.data}")
+                        Napier.log(LogLevel.ASSERT, tag = "getProfile", message = "SUCCESS${it.data}")
 
                     }
                 }
@@ -185,7 +185,7 @@ class VerifyScreenVM(
                 current_version_name = DeviceInfo.getAppVersionName(),
                 device_model = DeviceInfo.getDeviceModel(),
                 os = DeviceInfo.getPlatformName(),
-                os_version = DeviceInfo.getOSVersion().toDouble()
+                os_version = DeviceInfo.getOSVersion().toDoubleOrNull()?:0.0
             )
             ).collect {
                 when (it.status) {

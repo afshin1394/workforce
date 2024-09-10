@@ -81,7 +81,7 @@ class SplashScreen() : Screen {
         val permissionState by viewModel.permissionState.collectAsState()
         val lifecycleEvent by viewModel.lifeCycleEvent.collectAsState()
         val state by viewModel.state.collectAsState()
-        val events by viewModel.eventsVersion
+        var events by viewModel.eventsVersion
         if (lifecycleEvent == LifecycleEvent.ON_RESUME) {
             viewModel.updateLifeCycleEventState(LifecycleEvent.ON_ANY)
 
@@ -151,8 +151,10 @@ class SplashScreen() : Screen {
                                 buttonState = buttonState,
                                 onDismiss = {
                                     showVersionDialog = false
+                                    events=CheckVersionEvent.Default
                                     navigator.popAll()
                                     navigator.push(mainScreen)
+
                                 },
                                 onConfirm = {
                                     buttonState = ButtonState.LOADING
@@ -184,7 +186,6 @@ class SplashScreen() : Screen {
                                         } else {
                                             buttonState = ButtonState.IDLE
                                             scaffoldState.snackbarHostState.showSnackbar(message = errorMessage )
-
                                         }
                                     }
                                 }
@@ -194,91 +195,170 @@ class SplashScreen() : Screen {
 
 
 
-                    if (permissionState == PermissionEvent.DeniedPermission) {
-                        val message = stringResource(MR.strings.please_authorize_permissions)
-                        val approve = stringResource(MR.strings.approve)
-                        scope.launch {
-
-                            val userAction = it.showSnackbar(
-                                message = message,
-                                actionLabel = approve,
-                                duration = SnackbarDuration.Long,
-
-                                )
-
-                            viewModel.updatePermissionState(PermissionEvent.CheckPermission)
-                            when (userAction) {
-                                SnackbarResult.ActionPerformed -> {
-                                    openAppSettings()
-                                    delay(2000)
-                                    viewModel.changeStateDenied()
-                                }
-
-                                SnackbarResult.Dismissed -> {
 
 
+
+                    when (events) {
+                        CheckVersionEvent.Default -> {
+
+
+
+                        }
+
+                        CheckVersionEvent.ForceUpdate -> {
+                            if (permissionState == PermissionEvent.IsGranted) {
+                                showVersionDialog = true
+
+                            }else{
+                                if (permissionState == PermissionEvent.DeniedPermission) {
+                                    val message = stringResource(MR.strings.please_authorize_permissions)
+                                    val approve = stringResource(MR.strings.approve)
+                                    scope.launch {
+
+                                        val userAction = it.showSnackbar(
+                                            message = message,
+                                            actionLabel = approve,
+                                            duration = SnackbarDuration.Long,
+
+                                            )
+
+                                        viewModel.updatePermissionState(PermissionEvent.CheckPermission)
+                                        when (userAction) {
+                                            SnackbarResult.ActionPerformed -> {
+                                                openAppSettings()
+                                                delay(2000)
+                                                viewModel.changeStateDenied()
+                                            }
+
+                                            SnackbarResult.Dismissed -> {
+
+
+                                            }
+                                        }
+                                    }
                                 }
                             }
+
                         }
-                    }
 
-                    if (permissionState == PermissionEvent.IsGranted) {
+                        CheckVersionEvent.NormalUpdate -> {
+                            if (permissionState == PermissionEvent.IsGranted) {
+                                showVersionDialog = true
+
+                            }else{
+                                if (permissionState == PermissionEvent.DeniedPermission) {
+                                    val message = stringResource(MR.strings.please_authorize_permissions)
+                                    val approve = stringResource(MR.strings.approve)
+                                    scope.launch {
+
+                                        val userAction = it.showSnackbar(
+                                            message = message,
+                                            actionLabel = approve,
+                                            duration = SnackbarDuration.Long,
+
+                                            )
+
+                                        viewModel.updatePermissionState(PermissionEvent.CheckPermission)
+                                        when (userAction) {
+                                            SnackbarResult.ActionPerformed -> {
+                                                openAppSettings()
+                                                delay(2000)
+                                                viewModel.changeStateDenied()
+                                            }
+
+                                            SnackbarResult.Dismissed -> {
 
 
-
-
-                        scope.launch {
-
-                            delay(1000)
-
-
-                            when (events) {
-                                CheckVersionEvent.Default -> {
-                                    navigator.popAll()
-                                    navigator.push(mainScreen)
-
-
+                                            }
+                                        }
+                                    }
                                 }
+                            }
 
-                                CheckVersionEvent.ForceUpdate -> {
-                                    showVersionDialog = true
+                        }
 
+                        CheckVersionEvent.InvalidToken -> {
+                            if (permissionState == PermissionEvent.IsGranted) {
+                                navigator.popAll()
+                                navigator.push(loginScreen)
+
+                            }else{
+                                if (permissionState == PermissionEvent.DeniedPermission) {
+                                    val message = stringResource(MR.strings.please_authorize_permissions)
+                                    val approve = stringResource(MR.strings.approve)
+                                    scope.launch {
+
+                                        val userAction = it.showSnackbar(
+                                            message = message,
+                                            actionLabel = approve,
+                                            duration = SnackbarDuration.Long,
+
+                                            )
+
+                                        viewModel.updatePermissionState(PermissionEvent.CheckPermission)
+                                        when (userAction) {
+                                            SnackbarResult.ActionPerformed -> {
+                                                openAppSettings()
+                                                delay(2000)
+                                                viewModel.changeStateDenied()
+                                            }
+
+                                            SnackbarResult.Dismissed -> {
+
+
+                                            }
+                                        }
+                                    }
                                 }
+                            }
 
-                                CheckVersionEvent.NormalUpdate -> {
-                                    showVersionDialog = true
+
+                        }
+
+                        CheckVersionEvent.OkVersion -> {
+                            if (permissionState == PermissionEvent.IsGranted) {
+                                navigator.popAll()
+                                navigator.push(mainScreen)
+
+                            }else{
+                                if (permissionState == PermissionEvent.DeniedPermission) {
+                                    val message = stringResource(MR.strings.please_authorize_permissions)
+                                    val approve = stringResource(MR.strings.approve)
+                                    scope.launch {
+
+                                        val userAction = it.showSnackbar(
+                                            message = message,
+                                            actionLabel = approve,
+                                            duration = SnackbarDuration.Long,
+
+                                            )
+
+                                        viewModel.updatePermissionState(PermissionEvent.CheckPermission)
+                                        when (userAction) {
+                                            SnackbarResult.ActionPerformed -> {
+                                                openAppSettings()
+                                                delay(2000)
+                                                viewModel.changeStateDenied()
+                                            }
+
+                                            SnackbarResult.Dismissed -> {
+
+
+                                            }
+                                        }
+                                    }
                                 }
-
-                                CheckVersionEvent.InvalidToken -> {
-                                    navigator.popAll()
-                                    navigator.push(loginScreen)
-
-                                }
-
-                                CheckVersionEvent.OkVersion -> {
-                                    navigator.popAll()
-                                    navigator.push(mainScreen)
-
-
-                                }
-
                             }
 
 
 
-
-                            /*      if (getSharedPref().getString(Token).toString().length > 6) {
-                                      navigator.popAll()
-                                      navigator.push(mainScreen)
-                                  }
-                                  else {
-                                      navigator.popAll()
-                                      navigator.push(loginScreen)
-                                  }*/
                         }
+
                     }
 
-                }
+                    }
+
+
 
             }
 

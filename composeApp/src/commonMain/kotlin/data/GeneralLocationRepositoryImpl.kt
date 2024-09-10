@@ -4,6 +4,8 @@ import data.network.request.live_location.LiveLocationRequest
 import database.AppDatabase
 import database.entity.GeneralLocationEntity
 import domain.repository.IGeneralLocationRepository
+import io.github.aakira.napier.LogLevel
+import io.github.aakira.napier.Napier
 import io.ktor.client.HttpClient
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
@@ -48,7 +50,7 @@ class GeneralLocationRepositoryImpl(
 
     override suspend fun sendLocationToServer(liveLocationRequest: List<LiveLocationRequest>) {
 
-
+        Napier.log(LogLevel.ASSERT, tag = "sendLocationToServer", message = liveLocationRequest.toString())
         httpClient.post("workforce_management/user/live-location/") {
             setBody(
                liveLocationRequest

@@ -45,19 +45,21 @@ class SplashScreenVM(
     private val _lifeCycleEvent = MutableStateFlow(LifecycleEvent.ON_ANY)
     val lifeCycleEvent = _lifeCycleEvent.asStateFlow()
 
-
-
     var eventsVersion = mutableStateOf<CheckVersionEvent>(CheckVersionEvent.Default)
+
+
 
     private val _versionData = mutableStateOf<GetVersionDomain?>(null)
     val versionData: State<GetVersionDomain?> = _versionData
 
 
     init {
+        checkVersionOfServer()
         InternalStorage.initWFMImages(provideAppContext())
         InternalStorage.initProcessImages(provideAppContext())
         InternalStorage.initSuspendImages(provideAppContext())
-        checkVersionOfServer()
+
+
     }
 
 
@@ -66,14 +68,15 @@ class SplashScreenVM(
             getVersionOfServerUseCase(Unit).collect {
                 when (it.status) {
                     AsyncStatus.ERROR -> {
-                        eventsVersion.value = CheckVersionEvent.InvalidToken
 
+                        eventsVersion.value = CheckVersionEvent.InvalidToken
 
                         Napier.log(
                             LogLevel.ASSERT,
                             tag = "get version of Server",
                             message = "ERROR" + it.message
                         )
+
                     }
 
                     AsyncStatus.LOADING -> {

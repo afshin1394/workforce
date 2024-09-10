@@ -29,12 +29,19 @@ fun Map<String, Any>.mutableToJson(): String {
                 is Long -> put(key, JsonPrimitive(valuee))
                 is List<*> -> {
                     val jsonArray = JsonArray(valuee.map { element ->
-                        when (element) {
-                            is String -> JsonPrimitive(element)
+                        var elementt = element
+                        if(element is JsonPrimitive)
+                            elementt = element.content
+                        when (elementt) {
+                            is String -> JsonPrimitive(elementt)
                             is List<*> -> {
-                                val nestedJsonArray = JsonArray(element.map { nestedElement ->
-                                    when (nestedElement) {
-                                        is String -> JsonPrimitive(nestedElement)
+                                val nestedJsonArray = JsonArray(elementt.map { nestedElement ->
+                                    var nestedElementt = nestedElement
+
+                                    if(nestedElement is JsonPrimitive)
+                                        nestedElementt = nestedElement.content
+                                    when (nestedElementt) {
+                                        is String -> JsonPrimitive(nestedElementt)
                                         else -> throw IllegalArgumentException("Unsupported nested list element type")
                                     }
                                 })

@@ -12,6 +12,6 @@ fun getAppDatabase(): AppDatabase {
         name = dbFile,
         factory = { AppDatabase::class.instantiateImpl() }
     )
-        .fallbackToDestructiveMigration(true)
+        .fallbackToDestructiveMigration(false)
         .build()
 }

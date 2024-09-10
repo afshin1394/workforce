@@ -45,6 +45,10 @@ class StepsRepositoryImpl(
         db.stepDao().deleteAll(ticketNumbers)
     }
 
+    override suspend fun deleteAllSteps(ticketNumbers: List<String>) {
+        db.stepDao().deleteAllSteps(ticketNumbers)
+    }
+
     override suspend fun getStepsByTicketNumber(ticketNumber: String) : List<StepsEntity> {
        return db.stepDao().selectStepsByTicketNumber(ticketNumber)
     }

@@ -218,7 +218,7 @@ fun <T : BaseViewModel> BaseScreen(
                                 Box(
                                     modifier = Modifier
                                         .fillMaxSize()
-                                        .background(Color.Transparent)
+                                        .background(Color(0X00000080))
                                         .pointerInput(Unit) {
                                             awaitPointerEventScope {
                                                 while (true) {

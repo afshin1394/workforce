@@ -13,6 +13,9 @@ import domain.repository.IUploadRepository
 import domain.usecase.BaseUseCase
 import io.github.aakira.napier.LogLevel
 import io.github.aakira.napier.Napier
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.jsonObject
@@ -45,10 +48,22 @@ class SendStepsOfTicketToServerUseCase(
                 Napier.log(LogLevel.ASSERT, tag = "listOfString", message = e.toString())
             }
         }
+       val uploadDomains  = listOfString.windowed(2,2, partialWindows = true){group->
+                    runBlocking {
+                        iUploadRepository.fetchUpload(
+                            convertToZip(
+                                list = group.distinct(),
+                                "testt",
+                                params
+                            )
+                        )
+                            .toUploadDomainList()
+                    }
+        }.flatten()
+        Napier.log(LogLevel.ASSERT, tag = "uploadDomains", message = "uploadDomains size" + uploadDomains.size)
 
-        val data = if(listOfString.toSet().isNotEmpty()) iUploadRepository.fetchUpload(convertToZip(list = listOfString.toSet().toList(), "testt", params))
-            .toUploadDomainList() else emptyList()
-        val formattedList = formatUploadDomainList(data)
+
+        val formattedList = formatUploadDomainList(uploadDomains)
 
         val imageMap = listToMap(formattedList)
         Napier.log(LogLevel.ASSERT, tag = "imageMap", message = imageMap.toString())
@@ -105,17 +120,17 @@ class SendStepsOfTicketToServerUseCase(
                 .replace("}\"", "}").replace("\"{", "{").replace("\\", "")
         )
 
-        iSendStepsRepository.sendData(
-            Json.encodeToString(
-                SubmitAllRequest.serializer(),
-                submitAllRequest
-            ).replace("}\"", "}").replace("\"{", "{").replace("\\", "")
-        )
+       iSendStepsRepository.sendData(
+           Json.encodeToString(
+               SubmitAllRequest.serializer(),
+               submitAllRequest
+           ).replace("}\"", "}").replace("\"{", "{").replace("\\", "")
+       )
 
-       iSendStepsRepository.deleteAll(arrayListOf())
-       iStepsRepository.deleteAll(arrayListOf())
-       iStepPointerRepository.deleteAll(arrayListOf())
-       iPhotoRepository.deleteProcessImages(params)
+      iSendStepsRepository.deleteAllSendSteps(arrayListOf(params))
+      iStepsRepository.deleteAllSteps(arrayListOf(params))
+      iStepPointerRepository.deleteAllStepPointers(arrayListOf(params))
+      iPhotoRepository.deleteProcessImages(params)
     }
 
     fun jsonToMap(jsonString: String): MutableMap<String, Any> {

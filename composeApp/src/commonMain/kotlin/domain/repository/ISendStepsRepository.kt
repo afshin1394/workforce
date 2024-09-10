@@ -10,6 +10,7 @@ interface ISendStepsRepository {
     suspend fun sendData(json: String)
     suspend fun insertAll(tasks : List<SendStepsEntity>)
     suspend fun deleteAll(ticketNumbers : List<String>)
+    suspend fun deleteAllSendSteps(ticketNumbers : List<String>)
     suspend fun getStepsByTicketNumber(ticketNumber : String) : List<SendStepsEntity>
     suspend fun getDataByTicketNumberAndStep(ticketNumber : String,activityId : Long) : SendStepsEntity
     suspend fun getEditedTickets(): List<String>

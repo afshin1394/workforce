@@ -10,6 +10,7 @@ interface IStepsRepository {
     suspend fun fetch(query : String) : TaskStepResponse
     suspend fun insertAll(tasks : List<StepsEntity>)
     suspend fun deleteAll(ticketNumbers : List<String>)
+    suspend fun deleteAllSteps(ticketNumbers : List<String>)
     suspend fun getStepsByTicketNumber(ticketNumber : String) : List<StepsEntity>
     suspend fun getDataByTicketNumberAndStep(ticketNumber : String,activityId : Long) : StepsEntity
     suspend fun getEditedTickets(): List<String>

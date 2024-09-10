@@ -37,10 +37,10 @@ fun List<LiveLocationRequest>.toLiveLocationDomainList() : List<LiveLocationDoma
 }
 
 fun GeneralLocationEntity.toLiveLocationRequest() : LiveLocationRequest{
-    return LiveLocationRequest(this.latitude.toDouble(),this.longitude.toDouble(), getCurrentDate(),0,  getSharedPref().getString(
+    return LiveLocationRequest(latitude = this.latitude.toDouble(), longitude =  this.longitude.toDouble(), recorded_date =  getCurrentDate(), site =  0, attendance =   getSharedPref().getString(
         AvailabilityObjectId
     )?.toLong() ?: 0,
-        getSharedPref().getString(TicketNumber) ?: "", network_info = Json.decodeFromString(JsonObject.serializer(), this.networkInfo))
+      ticket_num =   getSharedPref().getString(TicketNumber) ?: "", network_info = Json.decodeFromString(JsonObject.serializer(), this.networkInfo))
 
 }
 

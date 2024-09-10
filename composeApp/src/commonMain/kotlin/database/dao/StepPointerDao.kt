@@ -17,20 +17,24 @@ interface  StepPointerDao {
     @Query("DELETE FROM StepPointerEntity WHERE  ticketNumber NOT IN (:editedAvailableTickets)")
     suspend fun deleteAll(editedAvailableTickets : List<String>)
 
+    @Query("DELETE FROM StepPointerEntity WHERE  ticketNumber  IN (:editedAvailableTickets)")
+    suspend fun deleteAllStepPointers(editedAvailableTickets : List<String>)
+
+
     @Query("SELECT * FROM StepPointerEntity")
     suspend fun selectAll(): List<StepPointerEntity>
 
     @Query("SELECT * FROM StepPointerEntity WHERE ticketNumber = :ticketNumber LIMIT 1")
     suspend fun selectActiveActivityByTicketNumber(ticketNumber: String) : StepPointerEntity
 
-    @Query("UPDATE StepPointerEntity SET activeActivity = :activeActivity , edited = true WHERE ticketNumber = :ticketNumber")
+    @Query("UPDATE StepPointerEntity SET activeActivity = :activeActivity , edited = 1 WHERE ticketNumber = :ticketNumber")
     suspend fun updateActiveActivity(ticketNumber : String ,activeActivity: Long)
 
     @Query("UPDATE StepPointerEntity SET edited = :isEdited WHERE ticketNumber = :ticketNumber")
     suspend fun updateIsEdited(ticketNumber : String,isEdited : Boolean )
 
 
-    @Query("SELECT * FROM StepPointerEntity WHERE Edited = true")
+    @Query("SELECT * FROM StepPointerEntity WHERE edited = 1")
     suspend fun selectEditedTickets() : List<StepPointerEntity>
 
 

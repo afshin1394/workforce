@@ -351,20 +351,23 @@ class TicketProcessVM(
         compD:ComponentDomain,
         indexChild: Int
     ) {
-      //  if (listComponent[0].type == FormViewerTypes.Group) {
-            if (compD.removable == true) {
-                val newComponents = tempComponentList.apply {
-                    add(indexChild + 1, compD)
-                }
-                tempComponentList = newComponents
-            } else {
-                val newComponents = tempComponentList.apply {
-                    removeAt(indexChild)
-                }
-                tempComponentList = newComponents
 
-           // }
-        }
+        val tempComponent = arrayListOf<ComponentDomain>()
+            if (compD.removable == true) {
+
+                tempComponent.addAll(tempComponentList.apply {
+                    add(indexChild + 1, compD)
+                })
+                tempComponentList.clear()
+                tempComponentList.addAll(tempComponent)
+            } else {
+                tempComponent.addAll( tempComponentList.apply {
+                    removeAt(indexChild)
+                })
+                tempComponentList.clear()
+                tempComponentList.addAll(tempComponent)
+
+            }
     }
 
     /////////////////////////////photo//////////////////////////////////////////////////////////

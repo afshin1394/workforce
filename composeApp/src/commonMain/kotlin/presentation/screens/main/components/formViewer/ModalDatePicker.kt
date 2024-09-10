@@ -381,7 +381,7 @@ fun BottomSheet(
                                 .weight(1f)
                         ) {
                             Text(
-                                text = stringResource(MR.strings.aaccept),
+                                text = stringResource(MR.strings.accept),
                                 color = Color.White,
                                 style = MaterialTheme.typography.bodyMedium,
                                 fontSize = 14.sp

@@ -13,7 +13,7 @@ plugins {
 
     id("dev.icerock.mobile.multiplatform-resources")
 
-    id ("io.sentry.android.gradle") version "3.12.0"
+    id("io.sentry.android.gradle") version "3.12.0"
 
 
 }
@@ -30,6 +30,7 @@ kotlin {
         kotlin.srcDir("build/generated/ksp/metadata")
     }
     androidTarget {
+
         compilations.all {
             kotlinOptions {
                 jvmTarget = "1.8"
@@ -91,8 +92,6 @@ kotlin {
                 implementation(libs.room.runtime)
                 implementation(libs.sqlite.bundled)
                 implementation("com.github.skydoves:landscapist-coil3:2.3.2")
-
-
             }
         }
 
@@ -113,11 +112,10 @@ kotlin {
                 implementation(libs.ktor.client.okhttp)
                 implementation(libs.ktor.client.logging)
                 implementation(libs.accompanist.permission)
-                implementation (libs.android.database.sqlcipher)
+                implementation(libs.android.database.sqlcipher)
 
                 implementation("org.osmdroid:osmdroid-android:6.1.6")
                 implementation(libs.kotlin.reflect)
-//                implementation(libs.androidx.work.runtime.ktx)
 
 
             }
@@ -189,6 +187,9 @@ android {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
     }
+    lintOptions {
+      isCheckReleaseBuilds = false
+    }
 
 
 }
@@ -209,7 +210,7 @@ dependencies {
 }
 
 tasks.withType<org.jetbrains.kotlin.gradle.dsl.KotlinCompile<*>>().configureEach {
-    if (name != "kspCommonMainKotlinMetadata" ) {
+    if (name != "kspCommonMainKotlinMetadata") {
         dependsOn("kspCommonMainKotlinMetadata")
     }
 }

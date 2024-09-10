@@ -852,7 +852,7 @@ class MainScreen(
                                     showDialog = showAcceptDialog,
                                     message = MR.strings.continue_flow_message,
                                     title = MR.strings.continue_flow_title,
-                                    titleButton = MR.strings.aaccept,
+                                    titleButton = MR.strings.accept,
                                     onDismiss = {
                                         viewModel.updateShowAcceptDialog(false)
                                         BackgroundServiceApp.updateServiceState(ServiceState.Normal)
