@@ -14,5 +14,5 @@ data class SendVersionNetworkResponse (
     @SerialName("os")
     val os : String,
     @SerialName("os_version")
-    val os_version : Double,
+    val os_version : String,
 )

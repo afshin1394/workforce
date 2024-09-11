@@ -101,10 +101,10 @@ class SplashScreenVM(
                        it. data?.let { versionData ->
                            _versionData.value = versionData
                             when {
-                               versionData.force_update && versionData.version_code > DeviceInfo.getAppVersionCode().toDouble() -> {
+                               versionData.force_update && versionData.version_code.toDouble() > DeviceInfo.getAppVersionCode().toDouble() -> {
                                     eventsVersion.value = CheckVersionEvent.ForceUpdate
                                 }
-                                versionData.version_code > DeviceInfo.getAppVersionCode().toDouble() -> {
+                                versionData.version_code.toDouble() > DeviceInfo.getAppVersionCode().toDouble() -> {
                                     eventsVersion.value = CheckVersionEvent.NormalUpdate
                                 }
                                 else -> {

@@ -112,7 +112,6 @@ kotlin {
                 implementation(libs.ktor.client.okhttp)
                 implementation(libs.ktor.client.logging)
                 implementation(libs.accompanist.permission)
-                implementation(libs.android.database.sqlcipher)
 
                 implementation("org.osmdroid:osmdroid-android:6.1.6")
                 implementation(libs.kotlin.reflect)
@@ -190,6 +189,7 @@ android {
     lintOptions {
       isCheckReleaseBuilds = false
     }
+
 
 
 }

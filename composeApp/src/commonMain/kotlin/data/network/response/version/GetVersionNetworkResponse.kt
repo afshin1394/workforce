@@ -10,7 +10,7 @@ data class GetVersionNetworkResponse(
     @SerialName("version_name")
     val version_name : String,
     @SerialName("version_code")
-    val version_code : Double,
+    val version_code : String,
     @SerialName("os")
     val os : String?,
     @SerialName("apk_file")

@@ -4,6 +4,7 @@ package presentation.screens.auth.viewmodel
 
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
+import com.irancell.nwg.wfm.presentation.model.View
 import data.network.request.version.VersionRequest
 import domain.models.version.GetVersionDomain
 import domain.usecase.usecase.auth.ResendUseCase
@@ -109,7 +110,6 @@ class VerifyScreenVM(
                     AsyncStatus.SUCCESS -> {
                         getSharedPref().put(Token, authToken)
                         getProfile()
-                        sendVersionToServer()
 
 
                     }
@@ -136,9 +136,8 @@ class VerifyScreenVM(
 
                     }
                     AsyncStatus.SUCCESS -> {
-                        updateState(ViewStates.Success())
-                        countdownTimer.stop()
                         Napier.log(LogLevel.ASSERT, tag = "getProfile", message = "SUCCESS${it.data}")
+                        sendVersionToServer()
 
                     }
                 }
@@ -185,7 +184,7 @@ class VerifyScreenVM(
                 current_version_name = DeviceInfo.getAppVersionName(),
                 device_model = DeviceInfo.getDeviceModel(),
                 os = DeviceInfo.getPlatformName(),
-                os_version = DeviceInfo.getOSVersion().toDoubleOrNull()?:0.0
+                os_version = DeviceInfo.getOSVersion()
             )
             ).collect {
                 when (it.status) {
@@ -203,7 +202,6 @@ class VerifyScreenVM(
                     }
 
                     AsyncStatus.SUCCESS -> {
-                        //updateState(ViewStates.Success())
                         checkVersionOfServer()
                         Napier.log(LogLevel.ASSERT, tag = "versionToServer", message = "SUCCESS${it.data}")
                     }
@@ -251,21 +249,27 @@ class VerifyScreenVM(
                         it. data?.let { versionData ->
                             _versionData.value = versionData
                             when {
-                                versionData.force_update && versionData.version_code > DeviceInfo.getAppVersionCode().toDouble()-> {
+                                versionData.force_update && versionData.version_code.toDouble() > DeviceInfo.getAppVersionCode().toDouble() -> {
                                     eventsVersion.value = CheckVersionEvent.ForceUpdate
                                 }
-                                versionData.version_code > DeviceInfo.getAppVersionCode().toDouble() -> {
+                                versionData.version_code.toDouble() > DeviceInfo.getAppVersionCode().toDouble() -> {
                                     eventsVersion.value = CheckVersionEvent.NormalUpdate
                                 }
                                 else -> {
                                     getSharedPref().put(FileApk,"")
                                     eventsVersion.value = CheckVersionEvent.OkVersion
                                 }
+
                             }
+
                         } ?: run {
                             getSharedPref().put(FileApk,"")
                             eventsVersion.value = CheckVersionEvent.OkVersion
+
                         }
+                        updateState(ViewStates.Success())
+                        countdownTimer.stop()
+
                     }
                 }
             }
