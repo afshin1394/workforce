@@ -7,9 +7,11 @@ import database.entity.GeneralLocationEntity
 interface IGeneralLocationRepository {
    suspend fun insert(generalLocation: GeneralLocationEntity)
    suspend fun selectAll(): List<GeneralLocationEntity>
+   suspend fun selectOldestRecord() : GeneralLocationEntity?
+   suspend fun selectNumberOfRecords() : Int
    suspend fun selectUnSend(): List<GeneralLocationEntity>
    suspend fun updateUnSend()
    suspend fun deleteSent()
-
+   suspend fun delete(generalLocation: GeneralLocationEntity)
    suspend fun sendLocationToServer(liveLocationRequest: List<LiveLocationRequest>)
 }

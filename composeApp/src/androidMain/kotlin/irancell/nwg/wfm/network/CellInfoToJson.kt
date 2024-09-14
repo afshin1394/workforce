@@ -1,6 +1,9 @@
 package irancell.nwg.wfm.network
 
 import android.os.Build
+import android.telephony.CellIdentityGsm
+import android.telephony.CellIdentityLte
+import android.telephony.CellIdentityWcdma
 import android.telephony.CellInfoCdma
 import android.telephony.CellInfoGsm
 import android.telephony.CellInfoLte
@@ -38,9 +41,9 @@ fun List<android.telephony.CellInfo>.toJson(): JsonObject {
                 CellInfoGSM(
                     cellId = cellInfo.cellIdentity.cid,
                     arfcn = cellInfo.cellIdentity.arfcn,
-                    mcc = cellInfo.cellIdentity.mcc,
-                    mnc = cellInfo.cellIdentity.mnc,
-                    psc = cellInfo.cellIdentity.psc,
+                    mcc = (cellInfo.cellIdentity as? CellIdentityGsm)?.mccString.toString(),
+                    mnc = (cellInfo.cellIdentity as? CellIdentityGsm)?.mncString.toString(),
+                    psc = null,
                     bsic = cellInfo.cellIdentity.bsic,
                     cellSignalStrengthGSM = CellSignalStrengthGSM(
                         rssi = cellInfo.cellSignalStrength.rssi,
@@ -56,9 +59,9 @@ fun List<android.telephony.CellInfo>.toJson(): JsonObject {
                     CellInfoGSM(
                         cellId = cellInfo.cellIdentity.cid,
                         arfcn = cellInfo.cellIdentity.arfcn,
-                        mcc = cellInfo.cellIdentity.mcc,
-                        mnc = cellInfo.cellIdentity.mnc,
-                        psc = cellInfo.cellIdentity.psc,
+                        mcc = (cellInfo.cellIdentity as? CellIdentityGsm)?.mccString.toString(),
+                        mnc = (cellInfo.cellIdentity as? CellIdentityGsm)?.mncString.toString(),
+                        psc = null,
                         bsic = cellInfo.cellIdentity.bsic,
                         cellSignalStrengthGSM = CellSignalStrengthGSM(
                             null,
@@ -73,9 +76,9 @@ fun List<android.telephony.CellInfo>.toJson(): JsonObject {
                     CellInfoGSM(
                         cellId = cellInfo.cellIdentity.cid,
                         arfcn = cellInfo.cellIdentity.arfcn,
-                        mcc = cellInfo.cellIdentity.mcc,
-                        mnc = cellInfo.cellIdentity.mnc,
-                        psc = cellInfo.cellIdentity.psc,
+                        mcc = null,
+                        mnc = null,
+                        psc = null,
                         bsic = cellInfo.cellIdentity.bsic,
                         cellSignalStrengthGSM = CellSignalStrengthGSM(
                             rssi = null,
@@ -116,8 +119,8 @@ fun List<android.telephony.CellInfo>.toJson(): JsonObject {
                         ci = cellInfo.cellIdentity.ci,
                         pci = cellInfo.cellIdentity.pci,
                         tac = cellInfo.cellIdentity.tac,
-                        mcc = cellInfo.cellIdentity.mcc,
-                        mnc = cellInfo.cellIdentity.mnc,
+                        mcc = (cellInfo.cellIdentity as? CellIdentityLte)?.mccString.toString(),
+                        mnc = (cellInfo.cellIdentity as? CellIdentityLte)?.mncString.toString(),
                         erfcn = cellInfo.cellIdentity.earfcn,
                         bandwidth = cellInfo.cellIdentity.bandwidth,
                         mobileNetworkOperator = cellInfo.cellIdentity.mobileNetworkOperator ?: "",
@@ -138,8 +141,8 @@ fun List<android.telephony.CellInfo>.toJson(): JsonObject {
                         ci = cellInfo.cellIdentity.ci,
                         pci = cellInfo.cellIdentity.pci,
                         tac = cellInfo.cellIdentity.tac,
-                        mcc = cellInfo.cellIdentity.mcc,
-                        mnc = cellInfo.cellIdentity.mnc,
+                        mcc = (cellInfo.cellIdentity as? CellIdentityLte)?.mccString.toString(),
+                        mnc = (cellInfo.cellIdentity as? CellIdentityLte)?.mncString.toString(),
                         erfcn = cellInfo.cellIdentity.earfcn,
                         bandwidth = cellInfo.cellIdentity.bandwidth,
                         mobileNetworkOperator = cellInfo.cellIdentity.mobileNetworkOperator ?: "",
@@ -162,8 +165,8 @@ fun List<android.telephony.CellInfo>.toJson(): JsonObject {
                         ci = cellInfo.cellIdentity.ci,
                         pci = cellInfo.cellIdentity.pci,
                         tac = cellInfo.cellIdentity.tac,
-                        mcc = cellInfo.cellIdentity.mcc,
-                        mnc = cellInfo.cellIdentity.mnc,
+                        mcc = (cellInfo.cellIdentity as? CellIdentityLte)?.mccString.toString(),
+                        mnc = (cellInfo.cellIdentity as? CellIdentityLte)?.mncString.toString(),
                         erfcn = cellInfo.cellIdentity.earfcn,
                         bandwidth = cellInfo.cellIdentity.bandwidth,
                         mobileNetworkOperator = cellInfo.cellIdentity.mobileNetworkOperator ?: "",
@@ -186,8 +189,8 @@ fun List<android.telephony.CellInfo>.toJson(): JsonObject {
                             ci = cellInfo.cellIdentity.ci,
                             pci = cellInfo.cellIdentity.pci,
                             tac = cellInfo.cellIdentity.tac,
-                            mcc = cellInfo.cellIdentity.mcc,
-                            mnc = cellInfo.cellIdentity.mnc,
+                            mcc = (cellInfo.cellIdentity as? CellIdentityLte)?.mccString.toString(),
+                            mnc = (cellInfo.cellIdentity as? CellIdentityLte)?.mncString.toString(),
                             erfcn = cellInfo.cellIdentity.earfcn,
                             bandwidth = cellInfo.cellIdentity.bandwidth,
                             mobileNetworkOperator = cellInfo.cellIdentity.mobileNetworkOperator
@@ -209,8 +212,8 @@ fun List<android.telephony.CellInfo>.toJson(): JsonObject {
                             ci = cellInfo.cellIdentity.ci,
                             pci = cellInfo.cellIdentity.pci,
                             tac = cellInfo.cellIdentity.tac,
-                            mcc = cellInfo.cellIdentity.mcc,
-                            mnc = cellInfo.cellIdentity.mnc,
+                            mcc = null,
+                            mnc = null,
                             erfcn = cellInfo.cellIdentity.earfcn,
                             bandwidth = null,
                             mobileNetworkOperator = "",
@@ -234,8 +237,8 @@ fun List<android.telephony.CellInfo>.toJson(): JsonObject {
                 CellInfoWCDMA(
                     cid = cellInfo.cellIdentity.cid,
                     lac = cellInfo.cellIdentity.lac,
-                    mcc = cellInfo.cellIdentity.mcc,
-                    mnc = cellInfo.cellIdentity.mnc,
+                    mcc = (cellInfo.cellIdentity as? CellIdentityWcdma)?.mccString.toString(),
+                    mnc = (cellInfo.cellIdentity as? CellIdentityWcdma)?.mncString.toString(),
                     psc = cellInfo.cellIdentity.psc,
                     urfcn = cellInfo.cellIdentity.uarfcn,
                     cellSignalStrengthWCDMA = CellSignalStrengthWCDMA(
@@ -249,8 +252,8 @@ fun List<android.telephony.CellInfo>.toJson(): JsonObject {
                 CellInfoWCDMA(
                     cid = cellInfo.cellIdentity.cid,
                     lac = cellInfo.cellIdentity.lac,
-                    mcc = cellInfo.cellIdentity.mcc,
-                    mnc = cellInfo.cellIdentity.mnc,
+                    mcc = null,
+                    mnc = null,
                     psc = cellInfo.cellIdentity.psc,
                     urfcn = cellInfo.cellIdentity.uarfcn,
                     cellSignalStrengthWCDMA = CellSignalStrengthWCDMA(

@@ -17,7 +17,7 @@ data class Activity(
     val kind : String?,
     @SerialName("form")
     val form : Form?,
-    @SerialName("tag")
+    @SerialName("tags")
     val tag : Long?,
     @SerialName("form_id")
     val form_id : Int?,

@@ -19,6 +19,8 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.remember
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import com.plusmobileapps.konnectivity.Konnectivity
+import com.plusmobileapps.konnectivity.NetworkConnection
 import database.entity.GeneralLocationEntity
 import domain.models.LiveLocationDomain
 import domain.usecase.ResultStatus
@@ -36,16 +38,20 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.serializer
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import utils.AlarmAction
 import utils.AsyncStatus
 import utils.AvailabilityObjectId
+import utils.NetworkStates
 import utils.ServiceState
 import utils.TicketNumber
 import utils.ViewStates
@@ -69,6 +75,9 @@ internal actual class BackgroundServiceApp : Service(), KoinComponent {
     private val REQUEST_CODE_2 = 2
     private val REQUEST_CODE_3 = 3
 
+
+    val konnectivity: Konnectivity = Konnectivity()
+    private val _networkState = MutableStateFlow(false)
 
 
     actual companion object {
@@ -125,6 +134,11 @@ internal actual class BackgroundServiceApp : Service(), KoinComponent {
     @OptIn(DelicateCoroutinesApi::class)
     override fun onCreate() {
         super.onCreate()
+        var scope = CoroutineScope(Dispatchers.Main)
+        scope.launch {
+            traceNetwork()
+        }
+
         /*getSharedPref().put(isRunningGPS, true)*/
         val notification =
             createNotification(applicationContext, "Gps Tracking On", "retrieving gps data")
@@ -142,7 +156,7 @@ internal actual class BackgroundServiceApp : Service(), KoinComponent {
         startForeground(Notification_ID, notification);
 
         Location.start() {
-            GlobalScope.launch {
+            scope.launch {
                 lat = it.latitude.toDouble()
                 lon = it.longitude.toDouble()
             }
@@ -174,17 +188,16 @@ internal actual class BackgroundServiceApp : Service(), KoinComponent {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         var scope = CoroutineScope(Dispatchers.Main)
-
-
-
         val telephonyData = TelephonyDataImpl(this)
-        val data = telephonyData.getTelephonyData()
-
-
-
 
         try {
             scope.launch(Dispatchers.Main) {
+                val data = telephonyData.getTelephonyData()
+
+
+
+
+
                 println("service action${intent?.action}")
 
                 when (intent?.action) {
@@ -202,7 +215,7 @@ internal actual class BackgroundServiceApp : Service(), KoinComponent {
 
                     }
 
-                    AlarmAction.UPDATE.title  -> {
+                    AlarmAction.UPDATE.title -> {
                         print("serviceStateSuspend ${_serviceState.value}")
                         startUpdateAlarm()
 
@@ -225,13 +238,28 @@ internal actual class BackgroundServiceApp : Service(), KoinComponent {
     }
 
     private suspend fun BackgroundServiceApp.storeLocation(data: JsonObject) {
+
+        Log.i("networkState", "storeLocation: "+_networkState.value)
+
+        val networkInfo: String = when (_networkState.value) {
+            true -> {
+                Json.encodeToString(JsonObject.serializer(), data)
+            }
+
+            false -> {
+                Json.encodeToString(JsonObject.serializer(), createEmptyTelephonyData())
+            }
+        }
+
+
+
         storeLocationDataUseCase(
             GeneralLocationEntity(
                 latitude = lat.toString(),
                 longitude = lon.toString(),
                 datetime = getCurrentDate(),
                 isSent = 0,
-                networkInfo = Json.encodeToString(JsonObject.serializer(), data)
+                networkInfo = networkInfo
             )
         ).collect {
             when (it.status) {
@@ -277,6 +305,32 @@ internal actual class BackgroundServiceApp : Service(), KoinComponent {
 
                 }
             }
+        }
+    }
+
+    private suspend fun traceNetwork() {
+        konnectivity.currentNetworkConnectionState.collect { connection ->
+            when (connection) {
+                NetworkConnection.NONE -> {
+
+                    _networkState.update { false }
+
+                }
+
+                NetworkConnection.WIFI -> {
+
+                    _networkState.update { true }
+
+                }
+
+                NetworkConnection.CELLULAR -> {
+
+                    _networkState.update { true }
+
+                }
+            }
+
+
         }
     }
 
@@ -348,7 +402,8 @@ internal actual class BackgroundServiceApp : Service(), KoinComponent {
 
 
     }
-    private fun startUpdateAlarm(){
+
+    private fun startUpdateAlarm() {
         val alarmManager = getSystemService(ALARM_SERVICE) as AlarmManager
         val currentTimeMillis = SystemClock.elapsedRealtime()
         val intervalMillis = TimeUnit.MILLISECONDS.toMillis(AlarmAction.UPDATE.interval)
@@ -359,7 +414,7 @@ internal actual class BackgroundServiceApp : Service(), KoinComponent {
         )
     }
 
-    private fun startStoreLocationAlarm(){
+    private fun startStoreLocationAlarm() {
         val alarmManager = getSystemService(ALARM_SERVICE) as AlarmManager
         val currentTimeMillis = SystemClock.elapsedRealtime()
         val intervalMillis = TimeUnit.MILLISECONDS.toMillis(AlarmAction.STORE_LOCATION.interval)
@@ -370,7 +425,7 @@ internal actual class BackgroundServiceApp : Service(), KoinComponent {
         )
     }
 
-    private fun startSendLocationAlarm(){
+    private fun startSendLocationAlarm() {
         val alarmManager = getSystemService(ALARM_SERVICE) as AlarmManager
         val currentTimeMillis = SystemClock.elapsedRealtime()
         val intervalMillis = TimeUnit.MILLISECONDS.toMillis(AlarmAction.SEND_LOCATION.interval)
@@ -380,9 +435,6 @@ internal actual class BackgroundServiceApp : Service(), KoinComponent {
             pendingIntentSendLocation,
         )
     }
-
-
-
 
 
     private fun cancelAlarm() {
@@ -434,6 +486,15 @@ internal actual class BackgroundServiceApp : Service(), KoinComponent {
         super.onDestroy()
         cancelAlarm()
         stopSelf()
+    }
+
+    private fun createEmptyTelephonyData(): JsonObject {
+        val jsonArray = Json.decodeFromString<JsonArray>("[]")
+        val jsonObject = JsonObject(mapOf("info" to jsonArray))
+
+        val wrappedJsonString = Json.encodeToString(JsonObject.serializer(), jsonObject)
+
+        return Json.parseToJsonElement(wrappedJsonString).jsonObject
     }
 
 }

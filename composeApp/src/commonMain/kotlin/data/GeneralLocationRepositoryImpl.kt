@@ -29,6 +29,14 @@ class GeneralLocationRepositoryImpl(
 
     }
 
+    override suspend fun selectOldestRecord(): GeneralLocationEntity? {
+        return db.generalLocationDao().selectOldestRecord()
+    }
+
+    override suspend fun selectNumberOfRecords(): Int {
+        return db.generalLocationDao().selectNumberOfRecords()
+    }
+
     override suspend fun selectUnSend(): List<GeneralLocationEntity> {
 
 
@@ -46,6 +54,10 @@ class GeneralLocationRepositoryImpl(
 
         db.generalLocationDao().deleteAllSent()
 
+    }
+
+    override suspend fun delete(generalLocation: GeneralLocationEntity) {
+        db.generalLocationDao().deleteRecord(generalLocation)
     }
 
     override suspend fun sendLocationToServer(liveLocationRequest: List<LiveLocationRequest>) {

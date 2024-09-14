@@ -77,6 +77,7 @@ class TicketProcessScreen(
         var indexPhotoSelected by remember { mutableStateOf(0) }
         var componentKey by remember { mutableStateOf("0") }
         var componentId by remember { mutableStateOf("0") }
+
         val positionSelectedPhotoForEdit by viewModel.positionSelected.collectAsState()
         var isBottomSheetOpen by remember { mutableStateOf(true) }
         val events by viewModel.events

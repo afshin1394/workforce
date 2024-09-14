@@ -33,6 +33,9 @@ sealed interface ServiceState{
     data object Faulty : ServiceState
     data object Suspend : ServiceState
 }
+object LOCATION_RECORDS{
+    const val MAX_NUMBER_OF_LOCATION_RECORDS = 50
+}
 
 object BASE_USECASE{
     const val MAX_RETRY_COUNT = 3
@@ -46,7 +49,7 @@ object AlarmAction{
     }
     object STORE_LOCATION{
         const val title = "STORE_LOCATION"
-        const val interval = 30000L
+        const val interval = 3000L
     }
     object SEND_LOCATION{
         const val title = "SEND_LOCATION"
