@@ -18,15 +18,14 @@ import presentation.theme.surfaceBrandDefault
 
 
 @Composable
-fun CustomCheckbox(stateFilter: StateFilter = StateFilter(1,"Level 1",false), updateStateFilter : (stateFilter : StateFilter)-> Unit={})
-{
+fun CustomCheckbox(stateFilter: StateFilter = StateFilter(1, "Level 1", false), updateStateFilter: (stateFilter: StateFilter) -> Unit = {}) {
     Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(start = spacing05X)) {
         Checkbox(
             checked = stateFilter.isActiveState,
-            colors = CheckboxDefaults.colors(checkedColor = surfaceBrandDefault, uncheckedColor = strokeDefaultDark ),
-            onCheckedChange = { checked_ ->
-                stateFilter.isActiveState = checked_
-                stateFilter.isActive = checked_
+            colors = CheckboxDefaults.colors(checkedColor = surfaceBrandDefault, uncheckedColor = strokeDefaultDark),
+            onCheckedChange = { checked ->
+                stateFilter.isActiveState = checked
+                stateFilter.isActive = checked
                 updateStateFilter(stateFilter)
             }
         )
@@ -37,5 +36,7 @@ fun CustomCheckbox(stateFilter: StateFilter = StateFilter(1,"Level 1",false), up
         )
     }
 }
+
+
 
 

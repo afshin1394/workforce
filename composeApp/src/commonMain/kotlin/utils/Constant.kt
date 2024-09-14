@@ -1,7 +1,6 @@
 package utils
 
 
-
 const val Availability = "Availability"
 
 const val AvailabilityObjectId = "AvailabilityObjectId"
@@ -26,37 +25,41 @@ const val ProductionBASEURLForVersionFile = "https://ios.mtnirancell.ir/"
 const val DevelopmentBASEURLForVersionFile = "https://uat.ios.mtnirancell.ir/"
 
 
-
 const val FileApk = "fileApk"
-sealed interface ServiceState{
+
+sealed interface ServiceState {
     data object Normal : ServiceState
     data object Faulty : ServiceState
     data object Suspend : ServiceState
 }
-object LOCATION_RECORDS{
+
+object LOCATION_RECORDS {
     const val MAX_NUMBER_OF_LOCATION_RECORDS = 50
 }
 
-object BASE_USECASE{
+object BASE_USECASE {
     const val MAX_RETRY_COUNT = 3
     const val INITIAL_RETRY_DELAY = 500L
 }
 
-object AlarmAction{
-    object UPDATE{
+object AlarmAction {
+    object UPDATE {
         const val title = "UPDATE"
         const val interval = 3000L
     }
-    object STORE_LOCATION{
+
+    object STORE_LOCATION {
         const val title = "STORE_LOCATION"
         const val interval = 3000L
     }
-    object SEND_LOCATION{
+
+    object SEND_LOCATION {
         const val title = "SEND_LOCATION"
         const val interval = 90000L
     }
 
 }
+
 object ErrorCode {
     const val NETWORK_NOT_AVAILABLE = 1001
     const val NETWORK_CONNECTION_FAILED = 1002
@@ -83,7 +86,6 @@ object FormViewerTypes {
     const val Time = "time"
     const val Multi = "multi"
 }
-
 
 
 object LogicType {
@@ -116,16 +118,18 @@ object OperatorType {
 
 }
 
-object NotificationState{
-    object All{
+object NotificationState {
+    object All {
         const val title = "All"
         const val id = 0
     }
-    object Read{
+
+    object Read {
         const val title = "Read"
         const val id = 1
     }
-    object UnRead{
+
+    object UnRead {
         const val title = "UnRead"
         const val id = 2
     }
@@ -133,35 +137,42 @@ object NotificationState{
 }
 
 object TaskState {
-    object All{
+    object All {
         const val title = "All"
         const val id = 0
     }
-    object Draft{
-      const val title = "Draft"
-      const val id = 1
+
+    object Draft {
+        const val title = "Draft"
+        const val id = 1
     }
-    object Running{
+
+    object Running {
         const val title = "Running"
         const val id = 2
     }
-    object Completed{
+
+    object Completed {
         const val title = "Completed"
         const val id = 3
     }
-    object Cancelled{
+
+    object Cancelled {
         const val title = "Cancelled"
         const val id = 4
     }
-    object FPA_RollBack{
+
+    object FPA_RollBack {
         const val title = "FPA_RollBack"
         const val id = 5
     }
-    object Suspended{
+
+    object Suspended {
         const val title = "Suspended"
         const val id = 6
     }
-    object Parked{
+
+    object Parked {
         const val title = "Parked"
         const val id = 7
     }
@@ -169,9 +180,9 @@ object TaskState {
 }
 
 object PROCEED {
-     const val INITIAL = "INITIAL"
-     const val NEXT = "NEXT"
-     const val PREVIOUS = "PREVIOUS"
+    const val INITIAL = "INITIAL"
+    const val NEXT = "NEXT"
+    const val PREVIOUS = "PREVIOUS"
 }
 
 
