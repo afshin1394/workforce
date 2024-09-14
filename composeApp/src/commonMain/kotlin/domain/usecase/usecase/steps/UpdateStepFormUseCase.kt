@@ -44,19 +44,19 @@ class UpdateStepFormUseCase(
     private val iPhotoRepository: IPhotoRepository,
 ) : BaseUseCase<StructureActivity, Tuple5<String, String, List<ComponentDomain>, List<PhotoDomain>, Int>>() {
 
-    override suspend fun run(params: Tuple5<String, String,List<ComponentDomain>,List<PhotoDomain>,Int>): StructureActivity {
-        Location.start {  }
+    override suspend fun run(params: Tuple5<String, String, List<ComponentDomain>, List<PhotoDomain>, Int>): StructureActivity {
+        Location.start { }
         val removablesWithParent: ArrayList<ComponentDomain> = arrayListOf()
         val dict = mutableMapOf<String, Any>()
         val dictImages = mutableMapOf<String, Any>()
-        Napier.log(LogLevel.ASSERT,tag="processType", message = params.second)
+        Napier.log(LogLevel.ASSERT, tag = "processType", message = params.second)
         val stepList: List<ActivityDomain> =
             iStepsRepository.getStepsByTicketNumber(params.first).toActivityDomainList()
 
         val stepListSorted = stepList.sortedBy { it.id }
         val stepPointerDomain = iStepPointerRepository.getActiveActivityByTicketNumber(params.first)
 
-        if(params.second != PROCEED.INITIAL) {
+        if (params.second != PROCEED.INITIAL) {
             iStepsRepository.updateFormStructure(
                 params.first,
                 stepPointerDomain.activeActivity,
@@ -71,8 +71,8 @@ class UpdateStepFormUseCase(
         val stepDetails = stepListSorted.mapIndexed { int, step ->
             StepDetail(int, step.title)
         }
-        var index =  stepListSorted.indexOfFirst { it.id == stepPointerDomain.activeActivity }
-        if(index == -1) index = 0
+        var index = stepListSorted.indexOfFirst { it.id == stepPointerDomain.activeActivity }
+        if (index == -1) index = 0
 
         val nextIndex =
             if (params.second == PROCEED.INITIAL) {
@@ -80,21 +80,20 @@ class UpdateStepFormUseCase(
             } else if (params.second == PROCEED.NEXT) {
                 if (index <= stepListSorted.size) {
                     index + 1
-                }
-                else {
+                } else {
                     index
                 }
             } else if (params.second == PROCEED.PREVIOUS) {
                 if (index > 0) {
 
                     index - 1
-                }else {
+                } else {
                     index
                 }
             } else {
                 index
             }
-        Napier.log(LogLevel.ASSERT,tag="nextIndex", message = nextIndex.toString())
+        Napier.log(LogLevel.ASSERT, tag = "nextIndex", message = nextIndex.toString())
 
         iStepPointerRepository.updateActiveActivity(
             ticketNumber = stepPointerDomain.ticketNumber,
@@ -102,17 +101,17 @@ class UpdateStepFormUseCase(
         )
 
 
-       val data = iStepsRepository.getDataByTicketNumberAndStep(
-                stepPointerDomain.ticketNumber,
-        stepListSorted.get(nextIndex).id
+        val data = iStepsRepository.getDataByTicketNumberAndStep(
+            stepPointerDomain.ticketNumber,
+            stepListSorted.get(nextIndex).id
         ).toActivityDomain()
 
 
         try {
 
             val location = Location.getLastLocation()
-            Napier.log(LogLevel.ASSERT,tag="gpsssss", message = location.latitude)
-            Napier.log(LogLevel.ASSERT,tag="gpsssss", message = location.longitude)
+            Napier.log(LogLevel.ASSERT, tag = "gpsssss", message = location.latitude)
+            Napier.log(LogLevel.ASSERT, tag = "gpsssss", message = location.longitude)
 
             data.form.form_structure.components?.findComponentByKey("submitted_latitude")?.values =
                 arrayListOf(ValueDomain("submitted_latitude", location.latitude))
@@ -128,17 +127,31 @@ class UpdateStepFormUseCase(
             params.third.findComponentByKey("submitted_date")?.values =
                 arrayListOf(ValueDomain("submitted_date", location.datetime.parsGpsDateTime()))
 
-        }catch (_:Exception){
+        } catch (_: Exception) {
 
         }
-        params.third.createRepeatableSectionStructure(ticketNumber = params.first,removablesWithParent, dict, dictImages)
+        params.third.createRepeatableSectionStructure(
+            ticketNumber = params.first,
+            removablesWithParent,
+            dict,
+            dictImages
+        )
         params.third.findImageComponents(params.first).getKeysAndValues(dictImages)
         params.third.findComponentsByType(FormViewerTypes.FileUpload).getKeysAndValues(dictImages)
         params.third.getKeysAndValues(dict)
-        iSendStepsRepository.updateKeyValueStructure(stepPointerDomain.ticketNumber,stepPointerDomain.activeActivity,dict.toJson(),dictImages.toJson())
+        iSendStepsRepository.updateKeyValueStructure(
+            stepPointerDomain.ticketNumber,
+            stepPointerDomain.activeActivity,
+            dict.toJson(),
+            dictImages.toJson()
+        )
 
-        Napier.log(LogLevel.ASSERT,tag="params.fifth", message = stepPointerDomain.activeActivity.toString())
-        Napier.log(LogLevel.ASSERT,tag="dict", message = dict.toJson())
+        Napier.log(
+            LogLevel.ASSERT,
+            tag = "params.fifth",
+            message = stepPointerDomain.activeActivity.toString()
+        )
+        Napier.log(LogLevel.ASSERT, tag = "dict", message = dict.toJson())
         Location.stop()
         return StructureActivity(
             nextIndex,
@@ -149,14 +162,26 @@ class UpdateStepFormUseCase(
     }
 
 
-
-    private suspend fun  List<ComponentDomain>.createRepeatableSectionStructure(ticketNumber : String, removablesWithParent: ArrayList<ComponentDomain>, dict: MutableMap<String, Any>, dictImages: MutableMap<String,Any>){
+    private suspend fun List<ComponentDomain>.createRepeatableSectionStructure(
+        ticketNumber: String,
+        removablesWithParent: ArrayList<ComponentDomain>,
+        dict: MutableMap<String, Any>,
+        dictImages: MutableMap<String, Any>
+    ) {
         //find removables with their parents
-        Napier.log(LogLevel.ASSERT, tag = "createRepeatableSectionStructure all", message =  this.toString())
+        Napier.log(
+            LogLevel.ASSERT,
+            tag = "createRepeatableSectionStructure all",
+            message = this.toString()
+        )
 
         this.findRemovables(removablesWithParent)
         removablesWithParent.findParentsOfRemovables(this)
-        Napier.log(LogLevel.ASSERT, tag = "createRepeatableSectionStructure", message =  removablesWithParent.toString())
+        Napier.log(
+            LogLevel.ASSERT,
+            tag = "createRepeatableSectionStructure",
+            message = removablesWithParent.toString()
+        )
         removablesWithParent.findImageComponents(ticketNumber)
             .getKeysAndValuesForRepeatableSections(dictImages)
         removablesWithParent.findComponentsByType(FormViewerTypes.FileUpload)
@@ -176,10 +201,11 @@ class UpdateStepFormUseCase(
     fun ArrayList<ComponentDomain>.findParentsOfRemovables(allComponents: List<ComponentDomain>) {
         this.groupBy { it.key }.forEach {
             allComponents.findComponentParentByKeys(it.key ?: "")?.let { parent ->
-                this.add(0,parent)
+                this.add(0, parent)
             }
         }
     }
+
     private fun List<ComponentDomain>.findComponentParentByKeys(key: String): ComponentDomain? {
         this.forEach { component ->
             if (component.key == key && component.removable == false) {
@@ -292,7 +318,7 @@ class UpdateStepFormUseCase(
         (dict[this.key] as ArrayList<String>).addAll(list.map {
             it.values?.firstOrNull { it.isSelected }?.let { selectedValue ->
                 selectedValue.value ?: ""
-            }?:run{
+            } ?: run {
                 ""
             }
         })
@@ -354,19 +380,19 @@ class UpdateStepFormUseCase(
         }
     }
 
-    fun List<ComponentDomain>.getKeysAndValues(dict: MutableMap<String,Any>)  {
+    fun List<ComponentDomain>.getKeysAndValues(dict: MutableMap<String, Any>) {
         this.forEach { componentDomain ->
             componentDomain.values?.let { values ->
                 if (values.isNotEmpty()) {
-                    if(componentDomain.isSelectable()){
-                        if(componentDomain.shouldBeArray())
+                    if (componentDomain.isSelectable()) {
+                        if (componentDomain.shouldBeArray())
                             componentDomain.addSelectableItems(dict)
                         else
                             componentDomain.addSelectableItem(dict)
 
 
-                    }else{
-                        if(componentDomain.shouldBeArray())
+                    } else {
+                        if (componentDomain.shouldBeArray())
                             componentDomain.addItems(dict)
                         else
                             componentDomain.addItem(dict)
@@ -392,37 +418,38 @@ class UpdateStepFormUseCase(
         }
         return null
     }
-    private fun   List<ComponentDomain>.hasRemovableObject(component : ComponentDomain) : Boolean{
+
+    private fun List<ComponentDomain>.hasRemovableObject(component: ComponentDomain): Boolean {
         this.forEach { componentIterable ->
-            if (componentIterable.key == component.key && componentIterable.removable == true)  return true
+            if (componentIterable.key == component.key && componentIterable.removable == true) return true
 
 
             // Recursively search in the children
-            return component.components?.hasRemovableObject(component)?:false
+            return component.components?.hasRemovableObject(component) ?: false
         }
         return false
     }
 
-    fun  List<ComponentDomain>.findComponentsByType( type: String): List<ComponentDomain> {
+    fun List<ComponentDomain>.findComponentsByType(type: String): List<ComponentDomain> {
         return this.flatMap { component ->
-            listOf(component).plus(component.components?.let {it.findComponentsByType(type) } ?: emptyList())
+            listOf(component).plus(component.components?.findComponentsByType(type) ?: emptyList())
         }.filter { it.type == type }
     }
 
-    private suspend fun List<ComponentDomain>.findImageComponents(ticket_number : String) : List<ComponentDomain> {
+    private suspend fun List<ComponentDomain>.findImageComponents(ticket_number: String): List<ComponentDomain> {
         val imageComponents = this.findComponentsByType(FormViewerTypes.ImageView)
-        val photoDomainList  = iPhotoRepository.getTicketProcessPhotos(ticket_number,imageComponents.mapNotNull { it.key }).toPhotoDomainList()
+        val photoDomainList = iPhotoRepository.getTicketProcessPhotos(
+            ticket_number,
+            imageComponents.mapNotNull { it.key }).toPhotoDomainList()
 
-        imageComponents.forEach {
-                component->
-            val newValues =  mutableListOf<ValueDomain>()
-            photoDomainList.forEach {
-                    photoDomain ->
-                if (component.key == photoDomain.component_key && component.id == photoDomain.componentId){
-                    if(photoDomain.origin_uri.isNotEmpty())
-                        newValues.add(ValueDomain(value =  photoDomain.origin_uri))
-                    if(photoDomain.edited_uri.isNotEmpty())
-                        newValues.add(ValueDomain(value =  photoDomain.edited_uri))
+        imageComponents.forEach { component ->
+            val newValues = mutableListOf<ValueDomain>()
+            photoDomainList.forEach { photoDomain ->
+                if (component.key == photoDomain.component_key && component.id == photoDomain.componentId) {
+                    if (photoDomain.origin_uri.isNotEmpty())
+                        newValues.add(ValueDomain(value = photoDomain.origin_uri))
+                    if (photoDomain.edited_uri.isNotEmpty())
+                        newValues.add(ValueDomain(value = photoDomain.edited_uri))
                 }
             }
             component.values = newValues

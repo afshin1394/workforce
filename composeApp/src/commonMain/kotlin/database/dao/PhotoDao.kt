@@ -24,6 +24,9 @@ interface PhotoDao {
     @Query("DELETE FROM PhotoEntity WHERE ticket_number = :ticketNumber AND component_key != 'Suspend'")
     suspend fun deleteProcessPhotoByTicketNumber(ticketNumber: String)
 
+    @Query("SELECT * FROM PhotoEntity WHERE ticket_number = :ticketNumber AND component_key != 'Suspend'")
+    suspend fun getProcessPhotoByTicketNumber(ticketNumber: String): List<PhotoEntity>
+
     @Query("SELECT * FROM PhotoEntity WHERE ticket_number = :ticketNumber")
     suspend fun selectByComponentKey(ticketNumber: String): List<PhotoEntity>
 
@@ -34,7 +37,9 @@ interface PhotoDao {
     suspend fun updateEditUri(originUri: String, editedUri: String)
 
     @Query("select * from PhotoEntity where component_key in (:componentKeyList) AND ticket_number = :ticketNumber order by component_key")
-    suspend fun getPhotosByComponentKeyList(ticketNumber: String,componentKeyList : List<String>) : List<PhotoEntity>
+    suspend fun getPhotosByComponentKeyList(
+        ticketNumber: String, componentKeyList: List<String>
+    ): List<PhotoEntity>
 
 
 }

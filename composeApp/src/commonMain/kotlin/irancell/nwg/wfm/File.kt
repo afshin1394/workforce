@@ -4,4 +4,5 @@ expect class File(path: String) {
     fun sizeInMB(): Int
     fun readBytes(): ByteArray
     fun extension(): String
+    fun exists(): Boolean
 }
