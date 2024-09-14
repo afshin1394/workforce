@@ -438,7 +438,6 @@ class MainScreenVM(
 
     val items = FilterSectionItem(
         "Severity Level",
-
         arrayListOf(
             StateFilter(1, "Level 1", false, FilterType.SEVERITY_LEVEL),
             StateFilter(2, "Level 2", false, FilterType.SEVERITY_LEVEL),
@@ -449,94 +448,80 @@ class MainScreenVM(
     )
 
     val items2 = FilterSectionItem(
-        "Current step",
-
+        "Region",
         arrayListOf(
-            StateFilter(1, "HSE pre-checked", false, FilterType.CURRENT_STEP),
-            StateFilter(2, "Departed", false, FilterType.CURRENT_STEP),
-            StateFilter(3, "HSE checked", false, FilterType.CURRENT_STEP),
-            StateFilter(4, "Job done", false, FilterType.CURRENT_STEP),
-            StateFilter(5, "Waiting for approval", false, FilterType.CURRENT_STEP),
-            StateFilter(5, "Approved", false, FilterType.CURRENT_STEP)
+            StateFilter(1, "R1", false, FilterType.REGION),
+            StateFilter(2, "R2", false, FilterType.REGION),
+            StateFilter(3, "R3", false, FilterType.REGION),
+            StateFilter(4, "R4", false, FilterType.REGION),
+            StateFilter(5, "R5", false, FilterType.REGION),
+            StateFilter(6, "R6", false, FilterType.REGION),
+            StateFilter(7, "R7", false, FilterType.REGION),
+            StateFilter(8, "R8", false, FilterType.REGION),
+            StateFilter(9, "R9", false, FilterType.REGION),
+            StateFilter(10, "R10", false, FilterType.REGION)
         )
     )
 
     val items3 = FilterSectionItem(
-        "SLA status",
-
+        "State",
         arrayListOf(
-            StateFilter(1, "Overdue", false, FilterType.SLA_STATUS),
-            StateFilter(2, "Uptime", false, FilterType.SLA_STATUS),
-            StateFilter(3, "On track", false, FilterType.SLA_STATUS),
-
-            )
+            StateFilter(1, "Running", false, FilterType.STATE),
+            StateFilter(2, "Draft", false, FilterType.STATE),
+            StateFilter(3, "Cancel", false, FilterType.STATE),
+            StateFilter(4, "Suspended", false, FilterType.STATE),
+            StateFilter(5, "Completed", false, FilterType.STATE)
+        )
     )
 
-    val items4 = FilterSectionItem(
-        "Ticket type",
-
-        arrayListOf(
-            StateFilter(1, "TT", false, FilterType.TICKET_TYPE),
-            StateFilter(2, "CR", false, FilterType.TICKET_TYPE),
-            StateFilter(3, "DG", false, FilterType.TICKET_TYPE),
-            StateFilter(3, "PM", false, FilterType.TICKET_TYPE),
-
-            )
-    )
-
-
-    val filterSectionItems: MutableList<FilterSectionItem> =
-        mutableListOf(items, items2, items3, items4)
+    val filterSectionItems: MutableList<FilterSectionItem> = mutableListOf(items, items2, items3)
 
     data class FilterModel(val type: FilterType, val filter: StateFilter)
 
     fun getActiveFilterItems() {
         val filterMaps: ArrayList<FilterModel> = arrayListOf()
 
-        val filteredList = arrayListOf<TaskDomain>()
-
-        filterSectionItems.forEach {
-            it.filterStates.forEach {
-                if (it.isActive)
-                    filterMaps.add(FilterModel(it.type, it))
+        filterSectionItems.forEach { section ->
+            section.filterStates.forEach { filterState ->
+                if (filterState.isActive) {
+                    filterMaps.add(FilterModel(filterState.type, filterState))
+                }
             }
-
-
         }
-        val tasksList: ArrayList<TaskDomain> = arrayListOf()
-        tasksList.addAll(tasks)
+
+        println("Active filters: $filterMaps")
+        println("Original tasks: $tasks")
+
+        var tasksList: List<TaskDomain> = tasks.toList()
+
         for (key in filterMaps) {
-            when (key.type) {
-                FilterType.CURRENT_STEP -> {
-
-
+            tasksList = when (key.type) {
+                FilterType.REGION -> {
+                    val filteredByRegion = tasksList.filter { it.basic_info.region == key.filter.title }
+                    println("Filtering by region (${key.filter.title}): $filteredByRegion")
+                    filteredByRegion
                 }
-
-                FilterType.DEFAULT -> {
-
+                FilterType.STATE -> {
+                    val filteredByState = tasksList.filter { it.basic_info.ticket_state == key.filter.title }
+                    println("Filtering by state (${key.filter.title}): $filteredByState")
+                    filteredByState
                 }
-
                 FilterType.SEVERITY_LEVEL -> {
-
+                    val filteredBySeverity = tasksList.filter { it.basic_info.level == key.filter.title }
+                    println("Filtering by severity (${key.filter.title}): $filteredBySeverity")
+                    filteredBySeverity
                 }
-
-                FilterType.SLA_STATUS -> {
-
-                }
-
-                FilterType.TICKET_TYPE -> {
-                    val ix =
-                        tasksList.filter { it.basic_info.ticket_state?.trim() == key.filter.title.trim() }
-                    tasksList.clear()
-                    tasksList.addAll(ix)
-                    filteredList.addAll(ix)
-                }
+                else -> tasksList
             }
-
-            tasks.clear()
-            tasks.addAll(tasksList)
+            println("TasksList after applying ${key.type}: $tasksList")
         }
+
+        tasks.clear()
+        tasks.addAll(tasksList)
+
+        println("Final filtered tasks: $tasks")
     }
+
 
 
     fun removeAllFilters() {
@@ -617,6 +602,7 @@ class MainScreenVM(
                         it.data?.let { it1 ->
                             tasks.addAll(it1)
                             _reload.update { true }
+                            getActiveFilterItems()
 
                         }
 

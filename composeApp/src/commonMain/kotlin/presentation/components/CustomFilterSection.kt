@@ -26,7 +26,6 @@ fun CustomFilterSection(
 ) {
     var expanded by remember { mutableStateOf(false) }
 
-
     val chevronIcon = if (expanded) MR.images.chevron_up else MR.images.chevron_down
     Column(modifier = modifier) {
         Row(
@@ -36,7 +35,6 @@ fun CustomFilterSection(
                 .clickable {
                     expanded = !expanded
                 }
-
         ) {
             androidx.compose.material3.Text(
                 text = filterSectionItem.title,
@@ -44,7 +42,7 @@ fun CustomFilterSection(
                 modifier = modifier.weight(.9f)
             )
             Image(
-                painter = painterResource( chevronIcon),
+                painter = painterResource(chevronIcon),
                 contentDescription = "chevron_up",
                 modifier = modifier.weight(.1f)
             )
@@ -52,8 +50,6 @@ fun CustomFilterSection(
         AnimatedVisibility(
             visible = expanded,
         ) {
-            // you child content here
-
             LazyColumn(
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.Start,
@@ -61,16 +57,17 @@ fun CustomFilterSection(
                     .fillMaxWidth()
                     .heightIn(0.dp, 500.dp)
             ) {
-                items(filterSectionItem.filterStates) { it ->
-                    CustomCheckbox(it) { filter ->
-                        onSelect(filter)
+                items(filterSectionItem.filterStates) { filter ->
+                    CustomCheckbox(filter) { updatedFilter ->
+                        onSelect(updatedFilter)
                     }
                 }
             }
         }
     }
-
 }
+
+
 
 @Composable
 fun CustomFilterSectionPreview(filterSectionItems: MutableList<FilterSectionItem>) {
@@ -89,9 +86,6 @@ fun CustomFilterSectionPreview(filterSectionItems: MutableList<FilterSectionItem
                     if (it.id != stateFilter.id) {
                         it.isActive = false
                         it.isActiveState = false
-                    }else{
-//                        Log.i("isActiveee", "CustomFilterSectionPreview: "+it.isActiveState)
-//                        Log.i("isActiveee", "CustomFilterSectionPreview: "+it.isActive)
                     }
                 }
 

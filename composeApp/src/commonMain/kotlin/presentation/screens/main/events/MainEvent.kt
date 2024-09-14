@@ -17,9 +17,5 @@ sealed interface MainEvent : Event {
    data object DeletePhoto:MainEvent
    data object EditPhoto:MainEvent
    data object DiscardSuspendTicket:MainEvent
-
-
-
-
 }
 
