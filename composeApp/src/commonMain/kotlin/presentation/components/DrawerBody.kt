@@ -17,7 +17,7 @@ fun DrawerBody( onItemClick: (navRoute : Screen.Main.Menu) -> Unit={}) {
     Column(modifier = Modifier.padding(end =  spacing1X)) {
         DrawerMenuItem(modifier = Modifier
             .fillMaxWidth()
-            .padding(start = spacing2X),MR.images.home, stringResource(MR.strings.my_tickets)
+            .padding(start = spacing2X),MR.images.home, stringResource(MR.strings.ticket_list)
         ) {
             onItemClick(Screen.Main.Menu.MyTickets)
         }
@@ -34,23 +34,23 @@ fun DrawerBody( onItemClick: (navRoute : Screen.Main.Menu) -> Unit={}) {
             onItemClick(Screen.Main.Menu.About)
 
         }
-        DrawerMenuItem(modifier = Modifier
-            .fillMaxWidth()
-            .padding(start = spacing2X),MR.images.location, stringResource(MR.strings.gps_tracker)) {
-            onItemClick(Screen.Main.Menu.GpsTrackingReport)
-        }
+//        DrawerMenuItem(modifier = Modifier
+//            .fillMaxWidth()
+//            .padding(start = spacing2X),MR.images.location, stringResource(MR.strings.gps_tracker)) {
+//            onItemClick(Screen.Main.Menu.GpsTrackingReport)
+//        }
         DrawerMenuItem(modifier = Modifier
             .fillMaxWidth()
             .padding(start = spacing2X),MR.images.logout, stringResource(MR.strings.logout)) {
             onItemClick(Screen.Main.Menu.Logout)
 
         }
-        DrawerMenuItem(modifier = Modifier
-            .fillMaxWidth()
-            .padding(start = spacing2X),MR.images.form, stringResource(MR.strings.form)) {
-            onItemClick(Screen.Main.Menu.FormViewer)
-
-        }
+//        DrawerMenuItem(modifier = Modifier
+//            .fillMaxWidth()
+//            .padding(start = spacing2X),MR.images.form, stringResource(MR.strings.form)) {
+//            onItemClick(Screen.Main.Menu.FormViewer)
+//
+//        }
     }
 
 }

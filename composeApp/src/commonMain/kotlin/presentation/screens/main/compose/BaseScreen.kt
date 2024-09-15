@@ -56,6 +56,7 @@ import irancell.nwg.wfm.BackButtonHandler
 import irancell.nwg.wfm.MR
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import presentation.theme.surfaceBrandDefault
 
 import utils.GpsState
 
@@ -195,7 +196,10 @@ fun <T : BaseViewModel> BaseScreen(
                                     Spacer(modifier = Modifier.height(16.dp))
                                     Text(
                                         text = stringResource(MR.strings.empty_list),
-                                        style = TextStyle(fontSize = 16.sp,    fontWeight = FontWeight.Bold ),
+                                        style = TextStyle(
+                                            fontSize = 16.sp,
+                                            fontWeight = FontWeight.Bold
+                                        ),
                                         modifier = Modifier.wrapContentSize()
                                     )
                                 }
@@ -214,11 +218,11 @@ fun <T : BaseViewModel> BaseScreen(
                                 }
                             }
 
-                           is ViewStates.Loading -> {
+                            is ViewStates.Loading -> {
                                 Box(
                                     modifier = Modifier
                                         .fillMaxSize()
-                                        .background(Color.White.copy(alpha = 0.3f))
+                                        .background(Color.LightGray.copy(alpha = 0.5f))
                                         .pointerInput(Unit) {
                                             awaitPointerEventScope {
                                                 while (true) {
@@ -227,7 +231,10 @@ fun <T : BaseViewModel> BaseScreen(
                                             }
                                         }
                                 ) {
-                                    CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                                    CircularProgressIndicator(
+                                        modifier = Modifier.align(Alignment.Center),
+                                        color = surfaceBrandDefault
+                                    )
                                 }
                             }
 
@@ -342,7 +349,10 @@ fun <T : BaseViewModel> BaseScreen(
                                 Spacer(modifier = Modifier.height(12.dp))
                                 Text(
                                     text = stringResource(MR.strings.empty_list),
-                                    style = TextStyle(fontSize = 16.sp , fontWeight = FontWeight.Bold),
+                                    style = TextStyle(
+                                        fontSize = 16.sp,
+                                        fontWeight = FontWeight.Bold
+                                    ),
                                     modifier = Modifier.wrapContentSize()
                                 )
                             }
@@ -362,11 +372,11 @@ fun <T : BaseViewModel> BaseScreen(
                             )
                         }
 
-                       is ViewStates.Loading -> {
+                        is ViewStates.Loading -> {
                             Box(
                                 modifier = Modifier
                                     .fillMaxSize()
-                                    .background(Color.White.copy(alpha = 0.3f))
+                                    .background(Color.LightGray.copy(alpha = 0.5f))
                                     .pointerInput(Unit) {
                                         awaitPointerEventScope {
                                             while (true) {
@@ -375,7 +385,10 @@ fun <T : BaseViewModel> BaseScreen(
                                         }
                                     }
                             ) {
-                                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                                CircularProgressIndicator(
+                                    modifier = Modifier.align(Alignment.Center),
+                                    color = surfaceBrandDefault
+                                )
                             }
                         }
 

@@ -7,6 +7,7 @@ import domain.usecase.BaseUseCase
 import io.github.aakira.napier.LogLevel
 import io.github.aakira.napier.Napier
 import io.ktor.http.HttpStatusCode
+import irancell.nwg.wfm.BackgroundServiceApp
 import irancell.nwg.wfm.InternalStorage
 import irancell.nwg.wfm.getSharedPref
 import irancell.nwg.wfm.provideAppContext
@@ -30,6 +31,7 @@ class LogoutUseCase(
             )
 
             if (pair.first == HttpStatusCode.OK) {
+                BackgroundServiceApp.stopBackgroundService()
                 val pairLogout = iAuthRepository.logout()
                 if (pairLogout in HttpStatusCode.OK..HttpStatusCode.MultiStatus || pairLogout == HttpStatusCode.Forbidden) {
                     getSharedPref().deleteAll()

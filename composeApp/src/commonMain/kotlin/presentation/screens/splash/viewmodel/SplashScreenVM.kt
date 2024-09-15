@@ -23,6 +23,7 @@ import utils.BaseViewModel
 import utils.ViewStates
 import androidx.compose.runtime.State
 import domain.models.version.GetVersionDomain
+import domain.usecase.usecase.profile.StoreProfileUseCase
 import irancell.nwg.wfm.InstallApk
 import irancell.nwg.wfm.PerformDownload
 import irancell.nwg.wfm.Unzip
@@ -32,7 +33,8 @@ import utils.FileApk
 
 
 class SplashScreenVM(
-    private val getVersionOfServerUseCase: GetVersionOfServerUseCase
+    private val getVersionOfServerUseCase: GetVersionOfServerUseCase,
+    private val storeProfileUseCase: StoreProfileUseCase
 
 ) : BaseViewModel() {
 
@@ -92,7 +94,7 @@ class SplashScreenVM(
                     }
 
                     AsyncStatus.SUCCESS -> {
-
+                        getProfile()
                         Napier.log(
                             LogLevel.ASSERT,
                             tag = "get version of Server",
@@ -120,6 +122,32 @@ class SplashScreenVM(
                 }
             }
 
+        }
+    }
+
+    private fun getProfile(){
+        viewModelScope.launch {
+            storeProfileUseCase(Unit).collect {
+                when(it.status){
+                    AsyncStatus.ERROR -> {
+                        handleError(it.resultStatus)
+                        Napier.log(LogLevel.ASSERT, tag = "getProfile", message = "ERROR")
+
+                    }
+                    AsyncStatus.LOADING -> {
+
+                        Napier.log(LogLevel.ASSERT, tag = "getProfile", message = "LOADING")
+
+                    }
+                    AsyncStatus.EMPTY->{
+
+                    }
+                    AsyncStatus.SUCCESS -> {
+                        Napier.log(LogLevel.ASSERT, tag = "getProfile", message = "SUCCESS${it.data}")
+
+                    }
+                }
+            }
         }
     }
 

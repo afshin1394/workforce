@@ -8,6 +8,7 @@ import androidx.compose.runtime.mutableStateOf
 import com.irancell.nwg.wfm.presentation.components.FilterSectionItem
 import presentation.model.FilterType
 import com.irancell.nwg.wfm.presentation.model.SelectableItem
+import com.irancell.nwg.wfm.presentation.model.View
 import database.entity.GeneralLocationEntity
 import domain.models.LiveLocationDomain
 import domain.models.PhotoDomain
@@ -581,18 +582,22 @@ class MainScreenVM(
                     }
 
                     AsyncStatus.EMPTY -> {
+                        if(_availability.value)
+                        updateState(ViewStates.Loading)
+
                         Napier.log(
                             LogLevel.ASSERT,
                             "getAllWorksUseCase",
                             message = "EMPTY: "
                         )
+
                         _reload.update { true }
 
                     }
 
                     AsyncStatus.SUCCESS -> {
                         tasks.clear()
-
+                        updateState(ViewStates.Success())
 
                         Napier.log(
                             LogLevel.ASSERT,

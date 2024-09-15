@@ -131,7 +131,6 @@ internal actual class BackgroundServiceApp : Service(), KoinComponent {
     }
 
 
-    @OptIn(DelicateCoroutinesApi::class)
     override fun onCreate() {
         super.onCreate()
         var scope = CoroutineScope(Dispatchers.Main)
@@ -141,7 +140,7 @@ internal actual class BackgroundServiceApp : Service(), KoinComponent {
 
         /*getSharedPref().put(isRunningGPS, true)*/
         val notification =
-            createNotification(applicationContext, "Gps Tracking On", "retrieving gps data")
+            createNotification(applicationContext, "Ready to work", "iTicket is running on you device")
         val intent1 = Intent(this, BackgroundServiceApp::class.java)
         intent1.setAction(AlarmAction.UPDATE.title)
 
