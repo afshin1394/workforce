@@ -94,6 +94,8 @@ class TicketProcessScreen(
 
         val ticketFlowCompletedState = viewModel.ticketFlowCompleted.collectAsState()
 
+        val updateTaskCompleteState = viewModel.updateTasksComplete.collectAsState()
+
 
 
 
@@ -372,6 +374,12 @@ class TicketProcessScreen(
 
             },
             content = {
+                LaunchedEffect(updateTaskCompleteState.value){
+                    if(updateTaskCompleteState.value) {
+                        navigator.popAll()
+                        navigator.push(mainScreen)
+                    }
+                }
                 Column {
                     processBar(stepDetails, currentLevelState)
                     if (reloadState) {
@@ -428,8 +436,7 @@ class TicketProcessScreen(
                     },
                     onConfirm = {
                         viewModel.updateTicketFlowState(false)
-                        navigator.popAll()
-                        navigator.push(mainScreen)
+                        viewModel.updateTasks()
                     })
 
             }, onCloseBottomSheet = {

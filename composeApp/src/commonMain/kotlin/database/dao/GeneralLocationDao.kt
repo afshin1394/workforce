@@ -20,6 +20,10 @@ interface GeneralLocationDao {
     @Query("DELETE FROM GeneralLocationEntity WHERE isSent = 1")
     suspend fun deleteAllSent()
 
+    @Query("DELETE FROM GeneralLocationEntity")
+    suspend fun deleteAll()
+
+
     @Query("UPDATE GeneralLocationEntity SET isSent = 1")
     suspend fun updateAllAsSent()
 

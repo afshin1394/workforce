@@ -12,6 +12,7 @@ interface IGeneralLocationRepository {
    suspend fun selectUnSend(): List<GeneralLocationEntity>
    suspend fun updateUnSend()
    suspend fun deleteSent()
+   suspend fun deleteAll()
    suspend fun delete(generalLocation: GeneralLocationEntity)
    suspend fun sendLocationToServer(liveLocationRequest: List<LiveLocationRequest>)
 }

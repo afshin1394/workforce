@@ -10,6 +10,7 @@ import data.network.response.task.Value
 import domain.models.PhotoDomain
 import domain.models.form_struct.ComponentDomain
 import domain.models.form_struct.ValueDomain
+import domain.usecase.ResultStatus
 import domain.usecase.usecase.photo.DeleteByComponentKeyUseCase
 import domain.usecase.usecase.steps.UpdateStepFormUseCase
 import domain.usecase.usecase.steps.StepDetail
@@ -17,6 +18,8 @@ import domain.usecase.usecase.steps.StoreStepFormUseCase
 import domain.usecase.usecase.photo.GetPhotoByComponentKeyUseCase
 import domain.usecase.usecase.photo.InsertPhotoUseCase
 import domain.usecase.usecase.steps.SendStepsOfTicketToServerUseCase
+import domain.usecase.usecase.steps.UpdateStepsUseCase
+import domain.usecase.usecase.ticket.UpdateTaskUseCase
 import io.github.aakira.napier.LogLevel
 import io.github.aakira.napier.Napier
 import irancell.nwg.wfm.Location
@@ -35,6 +38,7 @@ import utils.BaseViewModel
 import utils.FormViewerTypes
 import utils.LogicCalculation
 import utils.PROCEED
+import utils.ServiceState
 import utils.ViewStates
 
 class TicketProcessVM(
@@ -43,7 +47,9 @@ class TicketProcessVM(
     private val storeStepFormUseCase: StoreStepFormUseCase,
     private val deleteByComponentKeyUseCase: DeleteByComponentKeyUseCase,
     private val insertPhotoUseCase: InsertPhotoUseCase,
-    private val sendStepsOfTicketToServerUseCase: SendStepsOfTicketToServerUseCase
+    private val sendStepsOfTicketToServerUseCase: SendStepsOfTicketToServerUseCase,
+    private val updateTaskUseCase: UpdateTaskUseCase,
+    private val updateStepUseCase : UpdateStepsUseCase
 ) : BaseViewModel() {
 
 
@@ -89,6 +95,9 @@ class TicketProcessVM(
 
     private val _savedParentIndex = MutableStateFlow(0)
     var savedParentIndex =  _savedParentIndex.asStateFlow()
+
+    private val _updateTasksComplete = MutableStateFlow(false)
+    var updateTasksComplete = _updateTasksComplete.asStateFlow()
 
 
     val logicCalculation: LogicCalculation = LogicCalculation(tempComponentList)
@@ -617,7 +626,81 @@ class TicketProcessVM(
         return null
     }
 
+    fun updateTasks() {
+       viewModelScope.launch{
+           updateTask()
+       }
+    }
 
+    private suspend fun updateTask() {
+        updateTaskUseCase(Unit)
+            .collect {
+                when (it.status) {
+                    AsyncStatus.ERROR -> {
+                        handleError(it.resultStatus)
+                        println("TaskCallApi${"ERROR"}")
+                    }
+
+                    AsyncStatus.LOADING -> {
+                        updateState(ViewStates.Loading)
+                    }
+
+                    AsyncStatus.EMPTY -> {
+
+                    }
+
+                    AsyncStatus.SUCCESS -> {
+                        updateSteps()
+                        println("TaskCallApi${"SUCCESS"}")
+                    }
+                }
+            }
+    }
+
+    private suspend fun updateSteps() {
+        updateStepUseCase(Unit).collect {
+            when (it.status) {
+                AsyncStatus.ERROR -> {
+
+                    handleError(it.resultStatus)
+                    Napier.log(
+                        LogLevel.ASSERT,
+                        "updateSteps",
+                        message = "ERROR: " + it.message
+                    )
+
+                }
+
+                AsyncStatus.EMPTY -> {
+
+                }
+
+                AsyncStatus.LOADING -> {
+                    Napier.log(LogLevel.ASSERT, "updateSteps", message = "LOADING: ")
+
+                }
+
+                AsyncStatus.SUCCESS -> {
+
+                    _updateTasksComplete.update { true }
+                    updateState(ViewStates.Success())
+
+                    Napier.log(
+                        LogLevel.ASSERT,
+                        "" +
+                                "",
+                        message = "SUCCESS: " + it.data
+                    )
+
+
+                }
+
+
+            }
+        }
+
+
+    }
 }
 
 

@@ -439,11 +439,11 @@ class MainScreenVM(
     val items = FilterSectionItem(
         "Severity Level",
         arrayListOf(
-            StateFilter(1, "Level 1", false, FilterType.SEVERITY_LEVEL),
-            StateFilter(2, "Level 2", false, FilterType.SEVERITY_LEVEL),
-            StateFilter(3, "Level 3", false, FilterType.SEVERITY_LEVEL),
-            StateFilter(4, "Level 4", false, FilterType.SEVERITY_LEVEL),
-            StateFilter(5, "Level 5", false, FilterType.SEVERITY_LEVEL)
+            StateFilter(1, "1", false, FilterType.SEVERITY_LEVEL),
+            StateFilter(2, "2", false, FilterType.SEVERITY_LEVEL),
+            StateFilter(3, "3", false, FilterType.SEVERITY_LEVEL),
+            StateFilter(4, "4", false, FilterType.SEVERITY_LEVEL),
+            StateFilter(5, "5", false, FilterType.SEVERITY_LEVEL)
         )
     )
 

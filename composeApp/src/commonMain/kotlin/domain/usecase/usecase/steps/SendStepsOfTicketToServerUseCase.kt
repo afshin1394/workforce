@@ -143,7 +143,6 @@ class SendStepsOfTicketToServerUseCase(
                     InternalStorage.removeFiles(component.values)
                 }
         }
-        val zipFilePath = InternalStorage.getWFMRoute(provideAppContext()) + "files.zip"
 
         iSendStepsRepository.deleteAllSendSteps(arrayListOf(params))
         iStepsRepository.deleteAllSteps(arrayListOf(params))

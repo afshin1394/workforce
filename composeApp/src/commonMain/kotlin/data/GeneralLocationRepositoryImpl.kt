@@ -56,6 +56,10 @@ class GeneralLocationRepositoryImpl(
 
     }
 
+    override suspend fun deleteAll() {
+        db.generalLocationDao().deleteAll()
+    }
+
     override suspend fun delete(generalLocation: GeneralLocationEntity) {
         db.generalLocationDao().deleteRecord(generalLocation)
     }

@@ -34,7 +34,8 @@ sealed interface ServiceState {
 }
 
 object LOCATION_RECORDS {
-    const val MAX_NUMBER_OF_LOCATION_RECORDS = 50
+    const val RED_NUMBER_OF_LOCATION_RECORDS = 500
+    const val MAX_NUMBER_OF_LOCATION_RECORDS = 100
 }
 
 object BASE_USECASE {
@@ -45,17 +46,17 @@ object BASE_USECASE {
 object AlarmAction {
     object UPDATE {
         const val title = "UPDATE"
-        const val interval = 3000L
+        const val interval = 5000L
     }
 
     object STORE_LOCATION {
         const val title = "STORE_LOCATION"
-        const val interval = 3000L
+        const val interval = 60000L
     }
 
     object SEND_LOCATION {
         const val title = "SEND_LOCATION"
-        const val interval = 90000L
+        const val interval = 120000L
     }
 
 }
