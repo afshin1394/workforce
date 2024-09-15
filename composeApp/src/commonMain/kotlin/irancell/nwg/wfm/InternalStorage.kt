@@ -1,7 +1,5 @@
 package irancell.nwg.wfm
 
-import domain.models.PhotoDomain
-
 expect class InternalStorage {
     companion object {
 
@@ -24,6 +22,7 @@ expect class InternalStorage {
 
         fun removeFiles(paths: List<Any>?)
 
+        fun clearCache(context: Any)
 
     }
 }

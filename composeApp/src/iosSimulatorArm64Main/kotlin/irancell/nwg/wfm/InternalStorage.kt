@@ -2,7 +2,7 @@ package irancell.nwg.wfm
 
 import domain.models.PhotoDomain
 
-actual class InternalStorage{
+actual class InternalStorage {
     actual companion object {
 
         actual fun getWFMRoute(context: Any): String {
@@ -16,7 +16,6 @@ actual class InternalStorage{
         actual fun getProcessRoute(context: Any): String {
             TODO("Not yet implemented")
         }
-
 
 
         actual fun createWorkItemImages(
@@ -62,7 +61,10 @@ actual class InternalStorage{
             TODO("Not yet implemented")
         }
 
-        actual fun removeFiles(paths: List<PhotoDomain>) {
+        actual fun removeFiles(paths: List<Any>?) {
+        }
+
+        actual fun clearCache(context: Any) {
         }
 
     }

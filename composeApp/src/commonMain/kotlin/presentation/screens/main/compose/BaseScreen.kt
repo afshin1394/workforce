@@ -218,7 +218,7 @@ fun <T : BaseViewModel> BaseScreen(
                                 Box(
                                     modifier = Modifier
                                         .fillMaxSize()
-                                        .background(Color(0X00000080))
+                                        .background(Color.White.copy(alpha = 0.3f))
                                         .pointerInput(Unit) {
                                             awaitPointerEventScope {
                                                 while (true) {
@@ -366,7 +366,7 @@ fun <T : BaseViewModel> BaseScreen(
                             Box(
                                 modifier = Modifier
                                     .fillMaxSize()
-                                    .background(Color.Transparent)
+                                    .background(Color.White.copy(alpha = 0.3f))
                                     .pointerInput(Unit) {
                                         awaitPointerEventScope {
                                             while (true) {

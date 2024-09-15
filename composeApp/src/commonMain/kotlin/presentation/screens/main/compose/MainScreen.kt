@@ -1,12 +1,20 @@
 package presentation.screens.main.compose
 
-import androidx.compose.foundation.background
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.key.Key.Companion.R
+import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.registry.rememberScreen
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
@@ -17,32 +25,27 @@ import presentation.model.BottomSheetDoubleActionModel
 import presentation.screens.main.events.MainEvent
 import presentation.screens.main.viewmodel.MainScreenVM
 import com.irancell.nwg.wfm.presentation.theme.*
+import dev.icerock.moko.resources.compose.painterResource
 import presentation.screens.main.components.TicketListScreen
 
 import dev.icerock.moko.resources.compose.stringResource
-import domain.models.PhotoDomain
-import domain.models.form_struct.ComponentDomain
+
 import domain.models.task.TaskDomain
 import io.github.aakira.napier.LogLevel
 import io.github.aakira.napier.Napier
-import irancell.nwg.wfm.BackButtonHandler
 import irancell.nwg.wfm.BackgroundServiceApp
 import irancell.nwg.wfm.Camera
 import irancell.nwg.wfm.DrawController
 import irancell.nwg.wfm.ExitApp
 import irancell.nwg.wfm.InternalStorage
 import irancell.nwg.wfm.MR
-import irancell.nwg.wfm.checkConnectivity
-import irancell.nwg.wfm.getSharedPref
+
 import irancell.nwg.wfm.provideAppContext
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.json.Json
+
 import org.koin.compose.koinInject
-import presentation.components.CompleteFlowDialog
-import presentation.components.CustomDialog
+
 import presentation.components.CustomDialogDoubleAction
 import presentation.components.CustomTopAppBar
 import presentation.components.DrawerBody
@@ -57,17 +60,14 @@ import presentation.screens.main.components.PhotoPreviewComponent
 import presentation.screens.main.components.SuspendTicketBottomBarComponent
 import presentation.screens.main.components.SuspendTicketContentComponent
 import presentation.screens.ticket_process.compose.TicketInfoScreen
-import presentation.theme.backgroundBackground3
 import presentation.theme.body_large
+import presentation.theme.body_small
 import presentation.theme.surfaceBrandDefault
 import presentation.theme.surfaceDefault
 import presentation.theme.textInverse
 import presentation.theme.textInverseDisabled
 import presentation.theme.textPrimary
-import utils.Availability
-import utils.PhoneNumber
 import utils.ServiceState
-import utils.Token
 
 class MainScreen(
 
@@ -116,7 +116,7 @@ class MainScreen(
 
         LaunchedEffect(true) {
 
-            showContent=true
+            showContent = true
 
 
         }
@@ -202,13 +202,13 @@ class MainScreen(
 
             }
 
-        Camera.onResult {obj,uri->
+        Camera.onResult { obj, uri ->
             viewModel.updateSuspendTicketImageUri(uri.toString())
         }
 
 
-        if (showContent){
-            hasDrawer=true
+        if (showContent) {
+            hasDrawer = true
             BaseScreen(
                 viewModel = viewModel,
                 scaffoldState = scaffoldState,
@@ -239,7 +239,7 @@ class MainScreen(
                         },
                         onNotificationClick = {
                             scope.launch {
-                                scaffoldState.snackbarHostState.showSnackbar(message = underDevelopment )
+                                scaffoldState.snackbarHostState.showSnackbar(message = underDevelopment)
                             }
 //                        navigator.push(notificationScreen)
                         })
@@ -281,7 +281,7 @@ class MainScreen(
 //                                    scope.launch {
 //                                        scaffoldState.snackbarHostState.showSnackbar(message = underDevelopment )
 //                                    }
-                                navigator.push(aboutScreen)
+                                    navigator.push(aboutScreen)
                                 }
 
                                 Menu.Logout -> {
@@ -299,14 +299,14 @@ class MainScreen(
 
                                 Menu.GpsTrackingReport -> {
                                     scope.launch {
-                                        scaffoldState.snackbarHostState.showSnackbar(message = underDevelopment )
+                                        scaffoldState.snackbarHostState.showSnackbar(message = underDevelopment)
                                     }
 //                                navigator.push(gpsTrackingReportScreen)
                                 }
 
                                 Menu.FormViewer -> {
                                     scope.launch {
-                                        scaffoldState.snackbarHostState.showSnackbar(message = underDevelopment )
+                                        scaffoldState.snackbarHostState.showSnackbar(message = underDevelopment)
                                     }
 //                                navigator.push(formViewerScreen)
 
@@ -323,7 +323,11 @@ class MainScreen(
                 bottomBarBottomSheetContent = {
                     when (events) {
                         MainEvent.ActionFilter -> {
-                            Napier.log(LogLevel.ASSERT, tag = "ActionFilter", message = "ActionFilter")
+                            Napier.log(
+                                LogLevel.ASSERT,
+                                tag = "ActionFilter",
+                                message = "ActionFilter"
+                            )
 
                             bottomSheetDoubleActionBottomBar(
                                 BottomSheetDoubleActionModel(
@@ -426,7 +430,7 @@ class MainScreen(
                         MainEvent.CancelTicket -> {
                             CancelTicketBottomBarComponent(viewModel.enableCancelSubmit.value) {
                                 scope.launch {
-                                    scaffoldState.snackbarHostState.showSnackbar(message = underDevelopment )
+                                    scaffoldState.snackbarHostState.showSnackbar(message = underDevelopment)
                                 }
                                 viewModel.events.value = MainEvent.Default
                             }
@@ -441,7 +445,7 @@ class MainScreen(
                             SuspendTicketBottomBarComponent(true) {
 
                                 scope.launch {
-                                    scaffoldState.snackbarHostState.showSnackbar(message = underDevelopment )
+                                    scaffoldState.snackbarHostState.showSnackbar(message = underDevelopment)
                                 }
 //                            viewModel.saveSuspendTask()
                                 viewModel.events.value = MainEvent.Default
@@ -539,11 +543,36 @@ class MainScreen(
                         }
 
                         MainEvent.Logout -> {
-                            Text(
-                                text = stringResource(MR.strings.are_you_logout),
-                                style = body_large,
-                                modifier = Modifier.padding(start = spacing2X)
-                            )
+                            Column(
+                                modifier = Modifier.padding(
+                                    vertical = spacing2X,
+                                    horizontal = spacing2X
+                                )
+                            ) {
+                                Text(
+                                    text = stringResource(MR.strings.are_you_logout),
+                                    style = body_large,
+                                    modifier = Modifier.padding(bottom = spacing2X)
+                                )
+
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Image(
+                                        painter = painterResource(MR.images.warning),
+                                        contentDescription = "warning",
+                                        modifier = Modifier.size(24.dp)
+                                    )
+                                    Spacer(modifier = Modifier.width(spacing1X))
+                                    Text(
+                                        text = stringResource(MR.strings.logout_warning),
+                                        style = body_small,
+                                        color = Color.Gray,
+                                        modifier = Modifier.padding(start = spacing1X)
+                                    )
+                                }
+                            }
+
                             scope.launch {
                                 scaffoldState.bottomSheetState.expand()
                             }
@@ -561,7 +590,8 @@ class MainScreen(
                         MainEvent.CancelTicket -> {
                             CancelTicketComponent(viewModel.cancelReason.value, onSelectReason = {
                                 viewModel.events.value = MainEvent.CancelReason
-                            }, onCompleted = { viewModel.enableCancelSubmit.value = it
+                            }, onCompleted = {
+                                viewModel.enableCancelSubmit.value = it
                             })
                         }
 
@@ -698,20 +728,23 @@ class MainScreen(
                         }
 
                         MainEvent.CancelReason -> {
-                            SelectableComponentPreview(viewModel.cancelItems, { index, selectableItem ->
-                                cancelItems[index] = selectableItem
-                                cancelItems.filter { it.id != selectableItem.id }.map {
-                                    it.isSelected = false
-                                    it.isSelectedState.value = false
-                                }
-                                viewModel.cancelReason.value = selectableItem.text
-                                viewModel.events.value = MainEvent.CancelTicket
-                            }, onSearch = { searchQuery ->
-                                cancelItems.clear()
-                                cancelItems.addAll(viewModel.cancelItems.filter {
-                                    it.text.lowercase().contains(searchQuery.lowercase())
+                            SelectableComponentPreview(
+                                viewModel.cancelItems,
+                                { index, selectableItem ->
+                                    cancelItems[index] = selectableItem
+                                    cancelItems.filter { it.id != selectableItem.id }.map {
+                                        it.isSelected = false
+                                        it.isSelectedState.value = false
+                                    }
+                                    viewModel.cancelReason.value = selectableItem.text
+                                    viewModel.events.value = MainEvent.CancelTicket
+                                },
+                                onSearch = { searchQuery ->
+                                    cancelItems.clear()
+                                    cancelItems.addAll(viewModel.cancelItems.filter {
+                                        it.text.lowercase().contains(searchQuery.lowercase())
+                                    })
                                 })
-                            })
                             scope.launch {
                                 scaffoldState.bottomSheetState.expand()
                             }

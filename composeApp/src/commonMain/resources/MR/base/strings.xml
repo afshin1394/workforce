@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <resources>
-    <string name= "none"> </string>
+    <string name="none"></string>
     <string name="password">Password</string>
     <string name="submit">Submit</string>
     <string name="why_canceled_ticket">Why are you canceling the ticket</string>
@@ -11,7 +11,9 @@
     <string name="about_application">About Application</string>
     <string name="current_version">Your current version</string>
     <string name="latest_version">Latest version</string>
-    <string name="description_for_update">You are using an old version of the app. Please update and enjoy the latest version.</string>
+    <string name="description_for_update">You are using an old version of the app. Please update and
+        enjoy the latest version.
+    </string>
     <string name="update">Update</string>
     <string name="account_info">Account Info</string>
     <string name="name">Name</string>
@@ -27,33 +29,39 @@
     <string name="more_options">More options</string>
     <string name="suspend_reason">Suspend reason</string>
     <string name="cancel_reason">Cancel Reason</string>
-    <string name="cancel">Cancel </string>
-    <string name="are_you_logout">Are you sure you want to logout? </string>
-    <string name="clear_all">Clear All </string>
-    <string name="settings">Settings </string>
-    <string name="language">Language </string>
-    <string name="help_support">Help and Support </string>
-    <string name="darkMode">Dark mode </string>
-    <string name="work_force_management">Work Force Management </string>
-    <string name="please_authorize_permissions">Please authorize needed permissions </string>
-    <string name="approve">Approve </string>
-    <string name="my_tickets">My Tickets </string>
+    <string name="cancel">Cancel</string>
+    <string name="are_you_logout">Are you sure you want to logout?</string>
+    <string name="logout_warning">All ticket data will be removed from your device after logout!
+    </string>
+    <string name="clear_all">Clear All</string>
+    <string name="settings">Settings</string>
+    <string name="language">Language</string>
+    <string name="help_support">Help and Support</string>
+    <string name="darkMode">Dark mode</string>
+    <string name="work_force_management">Work Force Management</string>
+    <string name="please_authorize_permissions">Please authorize needed permissions</string>
+    <string name="approve">Approve</string>
+    <string name="my_tickets">My Tickets</string>
     <string name="gps_tracker">GpsTracker</string>
     <string name="about">About</string>
     <string name="login_mtn_account">Login with your MTN account</string>
     <string name="company_email">Company email</string>
     <string name="email_required">Email is required</string>
     <string name="password_required">Password is required</string>
-    <string name="password_should_least_8_characters">Password should be at least 8 characters</string>
+    <string name="password_should_least_8_characters">Password should be at least 8 characters
+    </string>
     <string name="sign_in">Sign In</string>
-    <string name="enter_verification_code">Enter the verification code that is sent to your phone number</string>
+    <string name="enter_verification_code">Enter the verification code that is sent to your phone
+        number
+    </string>
     <string name="waiting_time_receive">Waiting time to receive</string>
     <string name="resend_code">Resend Code</string>
     <string name="verify">Verify</string>
     <string name="english">English</string>
     <string name="farsi">Farsi</string>
     <string name="ticket_list">TicketList</string>
-    <string name="tap_update_availability">Tap the button and update your availability status.</string>
+    <string name="tap_update_availability">Tap the button and update your availability status.
+    </string>
     <string name="available">Available</string>
     <string name="unAvailable">UnAvailable</string>
     <string name="ticket_info">Ticket Info</string>
@@ -71,7 +79,6 @@
     <string name="fpa_roll_back">FPA_RollBack</string>
     <string name="suspended">Suspended</string>
     <string name="parked">Parked</string>
-
 
 
     <string name="all">All</string>
@@ -109,7 +116,6 @@
     <string name="sure_exit_app">Are you sure exit the app?</string>
 
 
-
     //screens
     <string name="cr_management">CR Management</string>
     <string name="main">Main</string>
@@ -119,7 +125,9 @@
     <string name="splash_sc">splash</string>
     <string name="menu_sc">menu</string>
     <string name="GPS_Permission">GPSPermission</string>
-    <string name="disc_gps_permission">This app requires GPS to be enabled. Do you want to enable it now?</string>
+    <string name="disc_gps_permission">This app requires GPS to be enabled. Do you want to enable it
+        now?
+    </string>
     <string name="enable">Enable</string>
     <string name="error_receive_sms">Error receiving confirm sms</string>
     <string name="exit">Exit</string>
@@ -136,37 +144,40 @@
     <string name="Equal">Number must not be equal to %s</string>
     <string name="NotEqual">Number must be equal to %s</string>
     <string name="GreaterThan">Number must not be greater than %s</string>
-    <string name="GreaterOrEqualTo">Number must  be greater than or equal to %s</string>
+    <string name="GreaterOrEqualTo">Number must be greater than or equal to %s</string>
     <string name="NotGreaterOrEqualTo">Number must be greater than or equal to %s</string>
-    <string name="NotGreaterThan">Number must  be greater than %s</string>
-    <string name="LessThan">Number must  be less than %s</string>
-    <string name="LessThanOrEqualTo">Number must  be less than or equal to %s</string>
+    <string name="NotGreaterThan">Number must be greater than %s</string>
+    <string name="LessThan">Number must be less than %s</string>
+    <string name="LessThanOrEqualTo">Number must be less than or equal to %s</string>
 
     <string name="i_ticket">iTicket</string>
     <string name="field_required">This field is required.</string>
     <string name="invalid_email_format">Invalid email format.</string>
-    <string name="domain_error_message_black">Emails from the domain(s) %1$s are not allowed.</string>
-    <string name="domain_error_message_White">Only from the domain(s) %1$s are  allowed.</string>
+    <string name="domain_error_message_black">Emails from the domain(s) %1$s are not allowed.
+    </string>
+    <string name="domain_error_message_White">Only from the domain(s) %1$s are allowed.</string>
     <string name="invalid_phone_format">Invalid phone format.</string>
     <string name="invalid_number_format">Invalid number format.</string>
     <string name="maximum_value">Exceeds maximum value of %1$s</string>
     <string name="must_value">Must be at least %1$s</string>
     <string name="maximum_length">Exceeds maximum length of %1$s</string>
     <string name="must_length">Must be at least %1$s</string>
-    <string name="invalid_format">Invalid  format.</string>
+    <string name="invalid_format">Invalid format.</string>
     <string name="file_total_size">Total file size should not exceed %1$s MB.</string>
     <string name="file_total_count">You cannot upload more than %1$s files.</string>
     <string name="file_type_black">Files with extensions %1$s are not allowed.</string>
     <string name="file_type_white">Files with extensions other than %1$s are not allowed.</string>
     <string name="redirect_error">Redirect Exception happened</string>
     <string name="empty_error_message" />
-    <string name="continue_flow_title" >Continue ticket process</string>
-    <string name="continue_flow_message" >If you proceed you wont get updates for this ticket anymore during the process</string>
-    <string name="empty_list" > List is empty</string>
-    <string name="data_sent_complete" >Information has been send successfully!</string>
-    <string name="under_development" >Feature under development!</string>
-    <string name="download" >Download</string>
-    <string name="download_failed" >Download or installation failed, please try again.</string>
-    <string name="accept" >Accept</string>
+    <string name="continue_flow_title">Continue ticket process</string>
+    <string name="continue_flow_message">If you proceed you wont get updates for this ticket anymore
+        during the process
+    </string>
+    <string name="empty_list">List is empty</string>
+    <string name="data_sent_complete">Information has been send successfully!</string>
+    <string name="under_development">Feature under development!</string>
+    <string name="download">Download</string>
+    <string name="download_failed">Download or installation failed, please try again.</string>
+    <string name="accept">Accept</string>
 
 </resources>

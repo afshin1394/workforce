@@ -58,7 +58,10 @@ actual class InternalStorage {
             TODO("Not yet implemented")
         }
 
-        actual fun removeFiles(paths: List<PhotoDomain>) {
+        actual fun removeFiles(paths: List<Any>?) {
+        }
+
+        actual fun clearCache(context: Any) {
         }
 
     }

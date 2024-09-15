@@ -29,6 +29,7 @@
     <string name="cancel_reason">دلیل کنسل کردن</string>
     <string name="cancel">لغو کردن</string>
     <string name="are_you_logout">آیا میخواهید از برنامه خارج شوید؟</string>
+    <string name="logout_warning">بعد از خروج، تمام اطلاعات تیکت ها از روی دستگاه پاک میشود! </string>
     <string name="clear_all">پاک کردن همه</string>
     <string name="settings">تنظیمات </string>
     <string name="language">زبان </string>
