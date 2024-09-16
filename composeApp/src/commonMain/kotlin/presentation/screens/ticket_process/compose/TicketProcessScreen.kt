@@ -27,20 +27,17 @@ import presentation.screens.ticket_process.components.processBar
 import dev.icerock.moko.resources.compose.stringResource
 import io.github.aakira.napier.LogLevel
 import io.github.aakira.napier.Napier
-import irancell.nwg.wfm.BackgroundServiceApp
 import irancell.nwg.wfm.DrawController
 import irancell.nwg.wfm.InternalStorage
 import irancell.nwg.wfm.MR
 import irancell.nwg.wfm.provideAppContext
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import presentation.components.CompleteFlowDialog
-import presentation.model.BottomSheetDoubleActionModel
+import presentation.model.BottomSheetActionModel
 import presentation.model.SingleButtonActionModel
 import presentation.nav.Screen.Main.Menu
 import presentation.screens.main.components.EditPhotoComponent
@@ -56,11 +53,9 @@ import presentation.theme.textInverse
 import presentation.theme.textPrimary
 import utils.FormViewerTypes
 import utils.PROCEED
-import utils.ServiceState
 import utils.ViewStates
 import utils.initialize
 import utils.validateComponents
-import kotlin.random.Random
 
 
 class TicketProcessScreen(
@@ -226,7 +221,7 @@ class TicketProcessScreen(
                     TicketProcessEvent.DeletePhoto -> {
 
                         bottomSheetDoubleActionBottomBar(
-                            BottomSheetDoubleActionModel(
+                            BottomSheetActionModel(
                                 stringResource(MR.strings.cancel),
                                 surfaceDefault,
                                 textPrimary,

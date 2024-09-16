@@ -12,7 +12,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 
-import presentation.model.BottomSheetDoubleActionModel
+import presentation.model.BottomSheetActionModel
 import com.irancell.nwg.wfm.presentation.theme.*
 import dev.icerock.moko.resources.compose.painterResource
 import io.github.aakira.napier.Napier
@@ -95,7 +95,7 @@ fun BottomSheetHead(
 
 @Composable
 fun bottomSheetDoubleActionBottomBar(
-    bottomSheetDoubleActionModel: BottomSheetDoubleActionModel,
+    bottomSheetActionModel: BottomSheetActionModel,
     onFirstButtonClick: () -> Unit = {},
     onSecondButtonClick: () -> Unit = {}
 ) {
@@ -109,9 +109,9 @@ fun bottomSheetDoubleActionBottomBar(
     ) {
         CustomButton(
             customButtonData = CustomButtonData(
-                title = bottomSheetDoubleActionModel.firstButtonText,
-                textColor = bottomSheetDoubleActionModel.firstButtonTextColor,
-                bottomSheetDoubleActionModel.firstButtonColor
+                title = bottomSheetActionModel.firstButtonText,
+                textColor = bottomSheetActionModel.firstButtonTextColor,
+                bottomSheetActionModel.firstButtonColor
             ),
             modifier = Modifier
                 .weight(1f).clickable {
@@ -121,9 +121,9 @@ fun bottomSheetDoubleActionBottomBar(
         Spacer(modifier = Modifier.padding(horizontal = spacing2X))
         CustomButton(
             customButtonData = CustomButtonData(
-                title = bottomSheetDoubleActionModel.secondButtonText,
-                textColor = bottomSheetDoubleActionModel.secondColorTextColor,
-                bottomSheetDoubleActionModel.secondButtonColor
+                title = bottomSheetActionModel.secondButtonText,
+                textColor = bottomSheetActionModel.secondColorTextColor,
+                bottomSheetActionModel.secondButtonColor
             ), modifier = Modifier
                 .weight(1f).clickable {
                     onSecondButtonClick()
@@ -137,7 +137,7 @@ fun bottomSheetDoubleActionBottomBar(
 
 @Composable
 fun bottomSheetSingleActionBottomBar(
-    bottomSheetDoubleActionModel: BottomSheetDoubleActionModel,
+    bottomSheetActionModel: BottomSheetActionModel,
     onFirstButtonClick: () -> Unit = {},
 ) {
     Row(
@@ -150,9 +150,9 @@ fun bottomSheetSingleActionBottomBar(
     ) {
         CustomButton(
             customButtonData = CustomButtonData(
-                title = bottomSheetDoubleActionModel.firstButtonText,
-                textColor = bottomSheetDoubleActionModel.firstButtonTextColor,
-                bottomSheetDoubleActionModel.firstButtonColor
+                title = bottomSheetActionModel.firstButtonText,
+                textColor = bottomSheetActionModel.firstButtonTextColor,
+                bottomSheetActionModel.firstButtonColor
             ),
             modifier = Modifier
                 .weight(1f).clickable {

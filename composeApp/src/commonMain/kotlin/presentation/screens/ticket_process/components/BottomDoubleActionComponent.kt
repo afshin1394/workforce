@@ -12,13 +12,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import presentation.components.CustomButton
 import presentation.components.CustomButtonData
-import presentation.model.BottomSheetDoubleActionModel
+import presentation.model.BottomSheetActionModel
 import com.irancell.nwg.wfm.presentation.theme.spacing2X
 import com.irancell.nwg.wfm.presentation.theme.spacing3X
 import presentation.theme.surfaceDefault
 
 @Composable
-fun bottomDoubleActionSheet(bottomSheetDoubleActionModel: BottomSheetDoubleActionModel, onFirstButtonClick : () -> Unit = {}, onSecondButtonClick : () -> Unit = {}) {
+fun bottomDoubleActionSheet(bottomSheetActionModel: BottomSheetActionModel, onFirstButtonClick : () -> Unit = {}, onSecondButtonClick : () -> Unit = {}) {
 
     Row(
         modifier = Modifier
@@ -30,9 +30,9 @@ fun bottomDoubleActionSheet(bottomSheetDoubleActionModel: BottomSheetDoubleActio
     ) {
         CustomButton(
             customButtonData = CustomButtonData(
-                title = bottomSheetDoubleActionModel.firstButtonText,
-                textColor = bottomSheetDoubleActionModel.firstButtonTextColor,
-                bottomSheetDoubleActionModel.firstButtonColor
+                title = bottomSheetActionModel.firstButtonText,
+                textColor = bottomSheetActionModel.firstButtonTextColor,
+                bottomSheetActionModel.firstButtonColor
             ),
             modifier = Modifier
                 .weight(1f).clickable {
@@ -42,9 +42,9 @@ fun bottomDoubleActionSheet(bottomSheetDoubleActionModel: BottomSheetDoubleActio
         Spacer(modifier = Modifier.padding(horizontal = spacing2X))
         CustomButton(
             customButtonData = CustomButtonData(
-                title = bottomSheetDoubleActionModel.secondButtonText,
-                textColor = bottomSheetDoubleActionModel.secondColorTextColor,
-                bottomSheetDoubleActionModel.secondButtonColor
+                title = bottomSheetActionModel.secondButtonText,
+                textColor = bottomSheetActionModel.secondColorTextColor,
+                bottomSheetActionModel.secondButtonColor
             ), modifier = Modifier
                 .weight(1f).clickable {
                     onSecondButtonClick()

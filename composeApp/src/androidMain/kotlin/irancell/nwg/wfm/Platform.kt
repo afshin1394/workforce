@@ -5,9 +5,6 @@ import android.content.Intent
 import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
 import android.net.Uri
 import android.provider.Settings
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalLifecycleOwner
 import irancell.nwg.wfm.Android.App
 import kotlin.reflect.full.memberProperties
 import kotlin.reflect.jvm.isAccessible
@@ -20,13 +17,16 @@ actual fun openAppSettings(){
     (provideAppContext() as Context).startActivity(intent)
 }
 
+actual fun openVpnSettings() {
+    val context = provideAppContext() as Context
+    val intent = Intent(Settings.ACTION_VPN_SETTINGS)
+    intent.addFlags(FLAG_ACTIVITY_NEW_TASK)
+    context.startActivity(intent)
+}
+
 
 actual fun provideAppContext() : Any{
     return App.INSTANCE
-}
-
-actual fun provideLifeCycleOwner() : Any{
-    return LocalLifecycleOwner
 }
 
 actual fun <T : Any> T.nullIfAllPropertiesNull(): T? {

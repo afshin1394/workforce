@@ -21,7 +21,6 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import presentation.nav.Screen.Main.*
 import com.irancell.nwg.wfm.presentation.components.*
-import presentation.model.BottomSheetDoubleActionModel
 import presentation.screens.main.events.MainEvent
 import presentation.screens.main.viewmodel.MainScreenVM
 import com.irancell.nwg.wfm.presentation.theme.*
@@ -50,6 +49,7 @@ import presentation.components.CustomDialogDoubleAction
 import presentation.components.CustomTopAppBar
 import presentation.components.DrawerBody
 import presentation.components.DrawerHeader
+import presentation.model.BottomSheetActionModel
 
 import presentation.screens.main.components.AvailabilityStatus
 import presentation.screens.main.components.CancelTicketBottomBarComponent
@@ -92,12 +92,9 @@ class MainScreen(
 
 
         val reloadState by viewModel.reload.collectAsState()
-        val notificationScreen =
-            rememberScreen(Notification)
-        val accountScreen =
-            rememberScreen(AccountInfo)
-        val settingsScreen =
-            rememberScreen(Menu.Settings)
+        val notificationScreen = rememberScreen(Notification)
+        val accountScreen = rememberScreen(AccountInfo)
+        val settingsScreen = rememberScreen(Menu.Settings)
         val formViewerScreen = rememberScreen(Menu.FormViewer)
 
         val aboutScreen = rememberScreen(Menu.About)
@@ -106,8 +103,7 @@ class MainScreen(
 
         val scope = rememberCoroutineScope()
         val scaffoldState = rememberBottomSheetScaffoldState();
-        val drawerState =
-            rememberDrawerState(initialValue = DrawerValue.Closed)
+        val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
         val events by viewModel.events
 
 
@@ -133,74 +129,73 @@ class MainScreen(
 
         val underDevelopment = stringResource(MR.strings.under_development)
 
-        val bottomSheetTitle: String =
-            when (events) {
-                MainEvent.ActionFilter -> {
-                    stringResource(MR.strings.filters)
-                }
+        val bottomSheetTitle: String = when (events) {
+            MainEvent.ActionFilter -> {
+                stringResource(MR.strings.filters)
+            }
 
-                MainEvent.Logout -> {
-                    stringResource(MR.strings.logout)
-                }
+            MainEvent.Logout -> {
+                stringResource(MR.strings.logout)
+            }
 
-                MainEvent.AvailabilityStatus -> {
-                    stringResource(MR.strings.availability_status)
-                }
+            MainEvent.AvailabilityStatus -> {
+                stringResource(MR.strings.availability_status)
+            }
 
-                MainEvent.CancelTicket -> {
-                    stringResource(MR.strings.cancel_ticket)
-                }
+            MainEvent.CancelTicket -> {
+                stringResource(MR.strings.cancel_ticket)
+            }
 
-                MainEvent.MoreOptions -> {
-                    stringResource(MR.strings.more_options)
-
-                }
-
-                MainEvent.SuspendTicket -> {
-                    stringResource(MR.strings.suspend_ticket)
-                }
-
-                MainEvent.SuspendReason -> {
-                    stringResource(MR.strings.suspend_reason)
-
-                }
-
-                MainEvent.CancelReason -> {
-                    stringResource(MR.strings.cancel_reason)
-                }
-
-                MainEvent.Default -> {
-                    ""
-                }
-
-
-                MainEvent.AcceptTicket -> {
-                    ""
-                }
-
-                MainEvent.Exit -> {
-                    stringResource(MR.strings.exit)
-                }
-
-                MainEvent.PhotoPreview -> {
-                    stringResource(MR.strings.photo_preview)
-
-                }
-
-                MainEvent.DeletePhoto -> {
-                    stringResource(MR.strings.delete_photo)
-                }
-
-                MainEvent.EditPhoto -> {
-                    stringResource(MR.strings.edit_photo)
-                }
-
-                MainEvent.DiscardSuspendTicket -> {
-                    stringResource(MR.strings.save_change)
-                }
-
+            MainEvent.MoreOptions -> {
+                stringResource(MR.strings.more_options)
 
             }
+
+            MainEvent.SuspendTicket -> {
+                stringResource(MR.strings.suspend_ticket)
+            }
+
+            MainEvent.SuspendReason -> {
+                stringResource(MR.strings.suspend_reason)
+
+            }
+
+            MainEvent.CancelReason -> {
+                stringResource(MR.strings.cancel_reason)
+            }
+
+            MainEvent.Default -> {
+                ""
+            }
+
+
+            MainEvent.AcceptTicket -> {
+                ""
+            }
+
+            MainEvent.Exit -> {
+                stringResource(MR.strings.exit)
+            }
+
+            MainEvent.PhotoPreview -> {
+                stringResource(MR.strings.photo_preview)
+
+            }
+
+            MainEvent.DeletePhoto -> {
+                stringResource(MR.strings.delete_photo)
+            }
+
+            MainEvent.EditPhoto -> {
+                stringResource(MR.strings.edit_photo)
+            }
+
+            MainEvent.DiscardSuspendTicket -> {
+                stringResource(MR.strings.save_change)
+            }
+
+
+        }
 
         Camera.onResult { obj, uri ->
             viewModel.updateSuspendTicketImageUri(uri.toString())
@@ -209,15 +204,13 @@ class MainScreen(
 
         if (showContent) {
             hasDrawer = true
-            BaseScreen(
-                viewModel = viewModel,
+            BaseScreen(viewModel = viewModel,
                 scaffoldState = scaffoldState,
                 drawerState = drawerState,
                 hasDrawer = hasDrawer,
                 hasSwipeDrawer = viewModel.events.value != MainEvent.PhotoPreview && viewModel.events.value != MainEvent.EditPhoto,
                 topBar = {
-                    CustomTopAppBar(
-                        availability,
+                    CustomTopAppBar(availability,
                         stringResource(MR.strings.ticket_list),
                         onNavigationItemClick = {
                             scope.launch {
@@ -228,10 +221,8 @@ class MainScreen(
                                     message = drawerState.isOpen.toString()
                                 )
 
-                                if (drawerState.isOpen)
-                                    drawerState.close()
-                                else
-                                    drawerState.open()
+                                if (drawerState.isOpen) drawerState.close()
+                                else drawerState.open()
                             }
                         },
                         onAvailabilityClick = {
@@ -253,10 +244,8 @@ class MainScreen(
                                 message = drawerState.isOpen.toString()
                             )
 
-                            if (drawerState.isOpen)
-                                drawerState.close()
-                            else
-                                drawerState.open()
+                            if (drawerState.isOpen) drawerState.close()
+                            else drawerState.open()
                         }
 
                         navigator.push(accountScreen)
@@ -271,10 +260,8 @@ class MainScreen(
                                 message = drawerState.isOpen.toString()
                             )
 
-                            if (drawerState.isOpen)
-                                drawerState.close()
-                            else
-                                drawerState.open()
+                            if (drawerState.isOpen) drawerState.close()
+                            else drawerState.open()
 
                             when (it) {
                                 Menu.About -> {
@@ -324,34 +311,32 @@ class MainScreen(
                     when (events) {
                         MainEvent.ActionFilter -> {
                             Napier.log(
-                                LogLevel.ASSERT,
-                                tag = "ActionFilter",
-                                message = "ActionFilter"
+                                LogLevel.ASSERT, tag = "ActionFilter", message = "ActionFilter"
                             )
 
                             bottomSheetDoubleActionBottomBar(
-                                BottomSheetDoubleActionModel(
-                                    stringResource(MR.strings.clear_all),
-                                    Color.Transparent,
-                                    textInverseDisabled,
-                                    stringResource(MR.strings.filters),
-                                    surfaceBrandDefault,
-                                    textInverse
-                                ), onFirstButtonClick = {
-                                    scope.launch {
-                                        viewModel.removeAllFilters()
-                                        scaffoldState.bottomSheetState.collapse()
-                                        viewModel.events.value = MainEvent.Default
-                                    }
+                                BottomSheetActionModel(
+                                stringResource(MR.strings.clear_all),
+                                Color.Transparent,
+                                textInverseDisabled,
+                                stringResource(MR.strings.filters),
+                                surfaceBrandDefault,
+                                textInverse
+                            ), onFirstButtonClick = {
+                                scope.launch {
+                                    viewModel.removeAllFilters()
+                                    scaffoldState.bottomSheetState.collapse()
+                                    viewModel.events.value = MainEvent.Default
+                                }
 
-                                }, onSecondButtonClick = {
-                                    scope.launch {
-                                        viewModel.getActiveFilterItems()
-                                        scaffoldState.bottomSheetState.collapse()
-                                        viewModel.events.value = MainEvent.Default
+                            }, onSecondButtonClick = {
+                                scope.launch {
+                                    viewModel.getActiveFilterItems()
+                                    scaffoldState.bottomSheetState.collapse()
+                                    viewModel.events.value = MainEvent.Default
 
-                                    }
-                                })
+                                }
+                            })
                             scope.launch {
                                 scaffoldState.bottomSheetState.expand()
                             }
@@ -365,23 +350,22 @@ class MainScreen(
                         }
 
                         MainEvent.Logout -> {
-                            bottomSheetDoubleActionBottomBar(
-                                BottomSheetDoubleActionModel(
-                                    stringResource(MR.strings.cancel),
-                                    surfaceDefault,
-                                    textPrimary,
-                                    stringResource(MR.strings.logout),
-                                    surfaceBrandDefault,
-                                    textInverse
-                                ), onFirstButtonClick = {
+                            bottomSheetDoubleActionBottomBar(BottomSheetActionModel(
+                                stringResource(MR.strings.cancel),
+                                surfaceDefault,
+                                textPrimary,
+                                stringResource(MR.strings.logout),
+                                surfaceBrandDefault,
+                                textInverse
+                            ), onFirstButtonClick = {
 
 
-                                }, onSecondButtonClick = {
-                                    viewModel.logoutCallApi()
-                                    navigator.popAll()
-                                    navigator.push(loginScreen)
+                            }, onSecondButtonClick = {
+                                viewModel.logoutCallApi()
+                                navigator.popAll()
+                                navigator.push(loginScreen)
 
-                                })
+                            })
                             scope.launch {
                                 scaffoldState.bottomSheetState.expand()
                             }
@@ -402,24 +386,23 @@ class MainScreen(
                         MainEvent.DeletePhoto -> {
 
 
-                            bottomSheetDoubleActionBottomBar(
-                                BottomSheetDoubleActionModel(
-                                    stringResource(MR.strings.cancel),
-                                    surfaceDefault,
-                                    textPrimary,
-                                    stringResource(MR.strings.delete),
-                                    Color.Red,
-                                    textInverse
-                                ), onFirstButtonClick = {
-                                    viewModel.events.value = MainEvent.PhotoPreview
-                                }, onSecondButtonClick = {
-                                    viewModel.updateSuspendTicketImageUriForDeletePhoto(
-                                        viewModel.photoDomainList[positionSelectedPhotoForEdit].origin_uri,
-                                        positionSelectedPhotoForEdit
-                                    )
+                            bottomSheetDoubleActionBottomBar(BottomSheetActionModel(
+                                stringResource(MR.strings.cancel),
+                                surfaceDefault,
+                                textPrimary,
+                                stringResource(MR.strings.delete),
+                                Color.Red,
+                                textInverse
+                            ), onFirstButtonClick = {
+                                viewModel.events.value = MainEvent.PhotoPreview
+                            }, onSecondButtonClick = {
+                                viewModel.updateSuspendTicketImageUriForDeletePhoto(
+                                    viewModel.photoDomainList[positionSelectedPhotoForEdit].origin_uri,
+                                    positionSelectedPhotoForEdit
+                                )
 
 
-                                })
+                            })
                             scope.launch {
                                 scaffoldState.bottomSheetState.expand()
                             }
@@ -462,27 +445,26 @@ class MainScreen(
 
                         MainEvent.DiscardSuspendTicket -> {
 
-                            bottomSheetDoubleActionBottomBar(
-                                BottomSheetDoubleActionModel(
-                                    stringResource(MR.strings.cancel),
-                                    surfaceDefault,
-                                    textPrimary,
-                                    stringResource(MR.strings.discard),
-                                    surfaceBrandDefault,
-                                    textInverse
-                                ), onFirstButtonClick = {
-                                    scope.launch {
-                                        viewModel.events.value = MainEvent.SuspendTicket
-                                    }
+                            bottomSheetDoubleActionBottomBar(BottomSheetActionModel(
+                                stringResource(MR.strings.cancel),
+                                surfaceDefault,
+                                textPrimary,
+                                stringResource(MR.strings.discard),
+                                surfaceBrandDefault,
+                                textInverse
+                            ), onFirstButtonClick = {
+                                scope.launch {
+                                    viewModel.events.value = MainEvent.SuspendTicket
+                                }
 
-                                }, onSecondButtonClick = {
+                            }, onSecondButtonClick = {
 
-                                    scope.launch {
-                                        viewModel.events.value = MainEvent.Default
-                                    }
+                                scope.launch {
+                                    viewModel.events.value = MainEvent.Default
+                                }
 
 
-                                })
+                            })
                             scope.launch {
                                 scaffoldState.bottomSheetState.expand()
                             }
@@ -497,24 +479,23 @@ class MainScreen(
 
                         MainEvent.Exit -> {
 
-                            bottomSheetDoubleActionBottomBar(
-                                BottomSheetDoubleActionModel(
-                                    stringResource(MR.strings.cancel),
-                                    surfaceDefault,
-                                    textPrimary,
-                                    stringResource(MR.strings.exit),
-                                    Color.Red,
-                                    textInverse
-                                ), onFirstButtonClick = {
-                                    viewModel.events.value = MainEvent.Default
-                                    scope.launch {
-                                        scaffoldState.bottomSheetState.collapse()
-                                    }
+                            bottomSheetDoubleActionBottomBar(BottomSheetActionModel(
+                                stringResource(MR.strings.cancel),
+                                surfaceDefault,
+                                textPrimary,
+                                stringResource(MR.strings.exit),
+                                Color.Red,
+                                textInverse
+                            ), onFirstButtonClick = {
+                                viewModel.events.value = MainEvent.Default
+                                scope.launch {
+                                    scaffoldState.bottomSheetState.collapse()
+                                }
 
-                                }, onSecondButtonClick = {
-                                    ExitApp()
+                            }, onSecondButtonClick = {
+                                ExitApp()
 
-                                })
+                            })
                             scope.launch {
                                 scaffoldState.bottomSheetState.expand()
                             }
@@ -545,8 +526,7 @@ class MainScreen(
                         MainEvent.Logout -> {
                             Column(
                                 modifier = Modifier.padding(
-                                    vertical = spacing2X,
-                                    horizontal = spacing2X
+                                    vertical = spacing2X, horizontal = spacing2X
                                 )
                             ) {
                                 Text(
@@ -615,27 +595,20 @@ class MainScreen(
                         MainEvent.SuspendTicket -> {
 
 
-                            SuspendTicketContentComponent(
-                                ticketNumber = viewModel.selectedTask.value!!.basic_info.ticket_number
-                                    ?: "0",
-                                photoDomainList = viewModel.photoDomainList,
+                            SuspendTicketContentComponent(ticketNumber = viewModel.selectedTask.value!!.basic_info.ticket_number
+                                ?: "0", photoDomainList = viewModel.photoDomainList,
 
-                                suspendTaskDomain = suspendTaskState,
-                                onSelectReason = {
+                                suspendTaskDomain = suspendTaskState, onSelectReason = {
                                     viewModel.events.value = MainEvent.SuspendReason
-                                },
-                                onDescription = { description ->
+                                }, onDescription = { description ->
                                     viewModel.updateSuspendTicketDescription(description)
-                                },
-                                onCameraClick = {
+                                }, onCameraClick = {
                                     viewModel.openCamera()
 
-                                },
-                                onImageClick = {
+                                }, onImageClick = {
                                     indexPhotoSelected = it
                                     viewModel.events.value = MainEvent.PhotoPreview
-                                }
-                            )
+                                })
 
 
                             scope.launch {
@@ -644,7 +617,8 @@ class MainScreen(
                         }
 
                         MainEvent.PhotoPreview -> {
-                            PhotoPreviewComponent(viewModel.photoDomainList, indexPhotoSelected,
+                            PhotoPreviewComponent(viewModel.photoDomainList,
+                                indexPhotoSelected,
                                 onEditPhotoClick = { position ->
                                     indexPhotoSelected = position
                                     viewModel.updatePositionSelected(position)
@@ -658,7 +632,8 @@ class MainScreen(
                                     viewModel.events.value = MainEvent.DeletePhoto
 
 
-                                }, onSaveChangeAngle = {
+                                },
+                                onSaveChangeAngle = {
 
                                     viewModel.events.value = MainEvent.SuspendTicket
 
@@ -671,8 +646,7 @@ class MainScreen(
 
                         MainEvent.EditPhoto -> {
 
-                            EditPhotoComponent(
-                                angle = 0.0F,
+                            EditPhotoComponent(angle = 0.0F,
                                 id = "Suspend",
                                 key = "Suspend",
                                 path = InternalStorage.getSuspendRouteEdited(provideAppContext()),
@@ -728,8 +702,7 @@ class MainScreen(
                         }
 
                         MainEvent.CancelReason -> {
-                            SelectableComponentPreview(
-                                viewModel.cancelItems,
+                            SelectableComponentPreview(viewModel.cancelItems,
                                 { index, selectableItem ->
                                     cancelItems[index] = selectableItem
                                     cancelItems.filter { it.id != selectableItem.id }.map {
@@ -819,17 +792,13 @@ class MainScreen(
                     if (openCamera) {
                         viewModel.selectedTask.value?.let {
                             InternalStorage.createWorkItemImages(
-                                provideAppContext(),
-                                "",
-                                ""
+                                provideAppContext(), "", ""
                             )
 
                             Camera.launchCamera(
-                                null,
-                                InternalStorage.getSuspendRouteOriginal(
+                                null, InternalStorage.getSuspendRouteOriginal(
                                     provideAppContext()
-                                ),
-                                "Suspend"
+                                ), "Suspend"
                             )
 
                             viewModel.updateCameraStatus(false)
@@ -843,8 +812,7 @@ class MainScreen(
 
 
 
-                        TicketListScreen(
-                            searchText = "",
+                        TicketListScreen(searchText = "",
                             onEvent = { mainEvent: MainEvent, task: TaskDomain? ->
                                 if (isClickable) {
                                     isClickable = false
@@ -859,7 +827,8 @@ class MainScreen(
                                 Napier.i("TicketListScreen")
 
                             },
-                            tasks = ArrayList(viewModel.tasks.toList()), onAccept = {
+                            tasks = ArrayList(viewModel.tasks.toList()),
+                            onAccept = {
                                 if (isClickable) {
                                     BackgroundServiceApp.updateServiceState(ServiceState.Suspend)
                                     isClickable = false
@@ -871,8 +840,7 @@ class MainScreen(
                                         isClickable = true
                                     }
                                 }
-                            }
-                        )
+                            })
                         if (viewModel.showAcceptDialog.value) {
 
                             if (isTicketEditedState) {
@@ -881,8 +849,7 @@ class MainScreen(
                                 }
                             } else {
 
-                                CustomDialogDoubleAction(
-                                    showDialog = showAcceptDialog,
+                                CustomDialogDoubleAction(showDialog = showAcceptDialog,
                                     message = MR.strings.continue_flow_message,
                                     title = MR.strings.continue_flow_title,
                                     titleButton = MR.strings.accept,
@@ -935,7 +902,8 @@ class MainScreen(
                         }
                     }
 
-                }, onBackPressed = {
+                },
+                onBackPressed = {
                     if (viewModel.events.value == MainEvent.Default) {
                         scope.launch {
                             Napier.log(
@@ -943,8 +911,7 @@ class MainScreen(
                                 tag = "drawerState",
                                 message = drawerState.isOpen.toString()
                             )
-                            if (drawerState.isOpen)
-                                drawerState.close()
+                            if (drawerState.isOpen) drawerState.close()
                             viewModel.events.value = MainEvent.Exit
                         }
 

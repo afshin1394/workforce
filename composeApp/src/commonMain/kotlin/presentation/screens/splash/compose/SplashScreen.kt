@@ -24,10 +24,10 @@ import cafe.adriel.voyager.core.registry.rememberScreen
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import com.irancell.nwg.wfm.presentation.components.bottomSheetSingleActionBottomBar
 
 
 import com.irancell.nwg.wfm.presentation.theme.spacing2X
-import dev.icerock.moko.resources.StringResource
 
 import dev.icerock.moko.resources.compose.painterResource
 import dev.icerock.moko.resources.compose.stringResource
@@ -36,29 +36,26 @@ import irancell.nwg.wfm.LifecycleEvent
 import irancell.nwg.wfm.MR
 import irancell.nwg.wfm.OnLifecycleEvent
 import irancell.nwg.wfm.checkPermission
-import irancell.nwg.wfm.getSharedPref
 import irancell.nwg.wfm.openAppSettings
+import irancell.nwg.wfm.openVpnSettings
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
-import org.koin.core.component.KoinComponent
 import presentation.components.ButtonState
-import presentation.components.CustomDialog
-import presentation.components.CustomDialogDoubleAction
 import presentation.components.CustomDialogDoubleActionWithLoading
 
 import presentation.components.CustomDialogWithLoading
-import presentation.screens.auth.viewmodel.VerifyScreenVM
+import presentation.model.BottomSheetActionModel
 import presentation.screens.main.compose.BaseScreen
-import presentation.screens.main.events.MainEvent
 import presentation.screens.splash.events.CheckVersionEvent
 import presentation.screens.splash.events.PermissionEvent
 import presentation.screens.splash.viewmodel.SplashScreenVM
 import presentation.theme.body_small
-import utils.ServiceState
+import presentation.theme.surfaceBrandDefault
+import presentation.theme.surfaceDefault
+import presentation.theme.textInverse
+import presentation.theme.textPrimary
 
-import utils.Token
-import utils.ViewStates
 import utils.startDownloadFileApk
 
 
@@ -82,6 +79,9 @@ class SplashScreen() : Screen {
         val lifecycleEvent by viewModel.lifeCycleEvent.collectAsState()
         val state by viewModel.state.collectAsState()
         var events by viewModel.eventsVersion
+        val showVpnBottomSheet by viewModel.showVpnBottomSheet.collectAsState()
+
+
         if (lifecycleEvent == LifecycleEvent.ON_RESUME) {
             viewModel.updateLifeCycleEventState(LifecycleEvent.ON_ANY)
 
@@ -101,6 +101,36 @@ class SplashScreen() : Screen {
             viewModel = viewModel,
             title = "notStartService",
             scaffoldState = scaffoldState,
+            bottomSheetTitle =
+            if (showVpnBottomSheet) {
+                "detect vpn"
+            } else {
+                ""
+            },
+            bottomSheetContent = {
+                if (showVpnBottomSheet) {
+
+                    bottomSheetSingleActionBottomBar(
+                        BottomSheetActionModel(
+                            stringResource(MR.strings.settings),
+                            surfaceDefault,
+                            textPrimary,
+                            "Open Settings",
+                            surfaceBrandDefault,
+                            textInverse
+                        ), onFirstButtonClick = {
+                            openVpnSettings()
+                        }
+                    )
+                    scope.launch {
+                        scaffoldState.bottomSheetState.expand()
+                    }
+                } else {
+                    scope.launch {
+                        scaffoldState.bottomSheetState.collapse()
+                    }
+                }
+            },
             content = {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
@@ -151,7 +181,7 @@ class SplashScreen() : Screen {
                                 buttonState = buttonState,
                                 onDismiss = {
                                     showVersionDialog = false
-                                    events=CheckVersionEvent.Default
+                                    events = CheckVersionEvent.Default
                                     navigator.popAll()
                                     navigator.push(mainScreen)
 
@@ -159,12 +189,14 @@ class SplashScreen() : Screen {
                                 onConfirm = {
                                     buttonState = ButtonState.LOADING
                                     scope.launch {
-                                        val isSuccess = startDownloadFileApk(viewModel.versionData.value?.apk_file ?: "")
+                                        val isSuccess = startDownloadFileApk(
+                                            viewModel.versionData.value?.apk_file ?: ""
+                                        )
                                         if (isSuccess) {
                                             buttonState = ButtonState.COMPLETED
                                         } else {
                                             buttonState = ButtonState.IDLE
-                                            scaffoldState.snackbarHostState.showSnackbar(message = errorMessage )
+                                            scaffoldState.snackbarHostState.showSnackbar(message = errorMessage)
                                         }
                                     }
                                 }
@@ -180,12 +212,14 @@ class SplashScreen() : Screen {
                                 onConfirm = {
                                     buttonState = ButtonState.LOADING
                                     scope.launch {
-                                        val isSuccess = startDownloadFileApk(viewModel.versionData.value?.apk_file ?: "")
+                                        val isSuccess = startDownloadFileApk(
+                                            viewModel.versionData.value?.apk_file ?: ""
+                                        )
                                         if (isSuccess) {
                                             buttonState = ButtonState.COMPLETED
                                         } else {
                                             buttonState = ButtonState.IDLE
-                                            scaffoldState.snackbarHostState.showSnackbar(message = errorMessage )
+                                            scaffoldState.snackbarHostState.showSnackbar(message = errorMessage)
                                         }
                                     }
                                 }
@@ -202,16 +236,16 @@ class SplashScreen() : Screen {
                         CheckVersionEvent.Default -> {
 
 
-
                         }
 
                         CheckVersionEvent.ForceUpdate -> {
                             if (permissionState == PermissionEvent.IsGranted) {
                                 showVersionDialog = true
 
-                            }else{
+                            } else {
                                 if (permissionState == PermissionEvent.DeniedPermission) {
-                                    val message = stringResource(MR.strings.please_authorize_permissions)
+                                    val message =
+                                        stringResource(MR.strings.please_authorize_permissions)
                                     val approve = stringResource(MR.strings.approve)
                                     scope.launch {
 
@@ -245,9 +279,10 @@ class SplashScreen() : Screen {
                             if (permissionState == PermissionEvent.IsGranted) {
                                 showVersionDialog = true
 
-                            }else{
+                            } else {
                                 if (permissionState == PermissionEvent.DeniedPermission) {
-                                    val message = stringResource(MR.strings.please_authorize_permissions)
+                                    val message =
+                                        stringResource(MR.strings.please_authorize_permissions)
                                     val approve = stringResource(MR.strings.approve)
                                     scope.launch {
 
@@ -282,9 +317,10 @@ class SplashScreen() : Screen {
                                 navigator.popAll()
                                 navigator.push(loginScreen)
 
-                            }else{
+                            } else {
                                 if (permissionState == PermissionEvent.DeniedPermission) {
-                                    val message = stringResource(MR.strings.please_authorize_permissions)
+                                    val message =
+                                        stringResource(MR.strings.please_authorize_permissions)
                                     val approve = stringResource(MR.strings.approve)
                                     scope.launch {
 
@@ -320,9 +356,10 @@ class SplashScreen() : Screen {
                                 navigator.popAll()
                                 navigator.push(mainScreen)
 
-                            }else{
+                            } else {
                                 if (permissionState == PermissionEvent.DeniedPermission) {
-                                    val message = stringResource(MR.strings.please_authorize_permissions)
+                                    val message =
+                                        stringResource(MR.strings.please_authorize_permissions)
                                     val approve = stringResource(MR.strings.approve)
                                     scope.launch {
 
@@ -351,13 +388,11 @@ class SplashScreen() : Screen {
                             }
 
 
-
                         }
 
                     }
 
-                    }
-
+                }
 
 
             }

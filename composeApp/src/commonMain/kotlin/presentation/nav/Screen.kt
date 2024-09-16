@@ -30,12 +30,13 @@ import irancell.nwg.wfm.MR
 //}
 
 
-sealed class Screen() : ScreenProvider{
+sealed class Screen() : ScreenProvider {
     data object Splash : Screen()
+    data object VpnDetection : Screen()
     data object CRScreen : Screen()
 
     sealed class Main() : Screen() {
-        sealed class Menu() : Main(){
+        sealed class Menu() : Main() {
             data object Settings : Menu()
             data object About : Menu()
             data object Logout : Menu()
@@ -43,21 +44,21 @@ sealed class Screen() : ScreenProvider{
             data object MyTickets : Menu()
             data object GpsTrackingReport : Menu()
         }
+
         data object AccountInfo : Main()
         data object Notification : Main()
     }
 
 
-    sealed class  Auth() : Screen() {
+    sealed class Auth() : Screen() {
         data object Login : Auth()
         data object Verify : Auth()
     }
 
-    sealed class  TicketProcess() : Screen(){
-        data class TicketInfo(val ticketNumber: String ) : TicketProcess()
-        data class TicketProcessScreen(val ticketNumber : String) : TicketProcess()
+    sealed class TicketProcess() : Screen() {
+        data class TicketInfo(val ticketNumber: String) : TicketProcess()
+        data class TicketProcessScreen(val ticketNumber: String) : TicketProcess()
     }
-
 
 
 }

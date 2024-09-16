@@ -19,8 +19,8 @@ class LoginUseCase(
 ) : BaseUseCase<Unit, LoginRequestDomain>() {
     override suspend fun run(params: LoginRequestDomain) {
         Napier.log(LogLevel.ASSERT, "email & password", message = params.toString())
-        getSharedPref().put(UserName,params.username)
-        getSharedPref().put(Password,params.password)
+        getSharedPref().put(UserName, params.username)
+        getSharedPref().put(Password, params.password)
 
         val loginDomain =
             iAuthRepository.login(params.toLoginNetworkRequest()).toLoginResponseDomain()

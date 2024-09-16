@@ -5,3 +5,6 @@ actual fun getPlatform(): Platform {
 
 actual fun <T : Any> T.nullIfAllPropertiesNull(): T? {
 }
+
+actual fun openVpnSettings() {
+}
