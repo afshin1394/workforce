@@ -11,12 +11,13 @@ import irancell.nwg.wfm.network.toJson
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
 
-actual class TelephonyDataImpl(context: Context) : TelephonyData {
-    private val telephonyManager = context.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
+actual class TelephonyDataImpl(private val context: Context) : TelephonyData {
 
     @SuppressLint("MissingPermission")
     override fun getTelephonyData(): JsonObject {
-      return  telephonyManager.allCellInfo.toJson()
+        val telephonyManager = context.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
+
+        return  telephonyManager.allCellInfo.toJson()
     }
 
     @SuppressLint("MissingPermission")

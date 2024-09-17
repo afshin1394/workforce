@@ -27,6 +27,7 @@ sealed class ViewStates() {
     data object EMPTY : ViewStates()
 
     data class UnAuthorized(val message: StringResource) : ViewStates()
+    data object VPNDetected : ViewStates()
 }
 
 sealed interface GpsState {

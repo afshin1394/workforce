@@ -98,6 +98,8 @@ class LoginScreen() : Screen {
                         is ViewStates.UnAuthorized -> {
 
                         }
+
+                        ViewStates.VPNDetected -> TODO()
                     }
 
                     Image(

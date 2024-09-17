@@ -215,6 +215,8 @@ class VerifyScreen(private val phoneNumber: String = "") : Screen {
                                 is ViewStates.UnAuthorized -> {
 
                                 }
+
+                                ViewStates.VPNDetected -> TODO()
                             }
 
                             Text(text =

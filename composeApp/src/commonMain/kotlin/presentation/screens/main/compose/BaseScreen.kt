@@ -262,6 +262,8 @@ fun <T : BaseViewModel> BaseScreen(
                                     }
                                 }
                             }
+
+                            ViewStates.VPNDetected -> TODO()
                         }
                     }
                 }
@@ -421,6 +423,8 @@ fun <T : BaseViewModel> BaseScreen(
 
                             }
                         }
+
+                        ViewStates.VPNDetected -> TODO()
                     }
 
 

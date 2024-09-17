@@ -78,6 +78,8 @@ internal actual class BackgroundServiceApp : Service(), KoinComponent {
 
     val konnectivity: Konnectivity = Konnectivity()
     private val _networkState = MutableStateFlow(false)
+    var scope = CoroutineScope(Dispatchers.Main)
+    val telephonyData = TelephonyDataImpl(this)
 
 
     actual companion object {
@@ -133,7 +135,6 @@ internal actual class BackgroundServiceApp : Service(), KoinComponent {
 
     override fun onCreate() {
         super.onCreate()
-        var scope = CoroutineScope(Dispatchers.Main)
         scope.launch {
             traceNetwork()
         }
@@ -175,7 +176,6 @@ internal actual class BackgroundServiceApp : Service(), KoinComponent {
 
 
     override fun onBind(intent: Intent?): IBinder? {
-
         return null
     }
 
@@ -186,16 +186,11 @@ internal actual class BackgroundServiceApp : Service(), KoinComponent {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        var scope = CoroutineScope(Dispatchers.Main)
-        val telephonyData = TelephonyDataImpl(this)
+
 
         try {
             scope.launch(Dispatchers.Main) {
                 val data = telephonyData.getTelephonyData()
-
-
-
-
 
                 println("service action${intent?.action}")
 
