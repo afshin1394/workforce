@@ -25,12 +25,15 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.irancell.nwg.wfm.presentation.components.bottomSheetSingleActionBottomBar
+import com.irancell.nwg.wfm.presentation.components.customBottomSheetWithImage
 
 
 import com.irancell.nwg.wfm.presentation.theme.spacing2X
 
 import dev.icerock.moko.resources.compose.painterResource
 import dev.icerock.moko.resources.compose.stringResource
+import io.github.aakira.napier.LogLevel
+import io.github.aakira.napier.Napier
 
 import irancell.nwg.wfm.LifecycleEvent
 import irancell.nwg.wfm.MR
@@ -59,7 +62,7 @@ import presentation.theme.textPrimary
 import utils.startDownloadFileApk
 
 
-class SplashScreen() : Screen {
+class SplashScreen : Screen {
 
 
     @OptIn(ExperimentalMaterialApi::class)
@@ -84,6 +87,7 @@ class SplashScreen() : Screen {
 
         if (lifecycleEvent == LifecycleEvent.ON_RESUME) {
             viewModel.updateLifeCycleEventState(LifecycleEvent.ON_ANY)
+            viewModel.restrictForeignIp()
 
             checkPermission({
                 viewModel.updatePermissionState(PermissionEvent.IsGranted)
@@ -97,30 +101,33 @@ class SplashScreen() : Screen {
         }
 
 
-        BaseScreen(
-            viewModel = viewModel,
+        BaseScreen(viewModel = viewModel,
             title = "notStartService",
             scaffoldState = scaffoldState,
-            bottomSheetTitle =
-            if (showVpnBottomSheet) {
-                "detect vpn"
-            } else {
-                ""
+            bottomSheetTitle = when {
+                showVpnBottomSheet -> stringResource(MR.strings.vpn_detected)
+                else -> ""
             },
+            bottomSheetHasHeader = false,
             bottomSheetContent = {
+                Napier.log(
+                    LogLevel.ASSERT,
+                    tag = "showVpnBottomSheet",
+                    message = "$showVpnBottomSheet"
+                )
                 if (showVpnBottomSheet) {
 
-                    bottomSheetSingleActionBottomBar(
+                    customBottomSheetWithImage(
                         BottomSheetActionModel(
-                            stringResource(MR.strings.settings),
-                            surfaceDefault,
-                            textPrimary,
-                            "Open Settings",
+                            stringResource(MR.strings.go_to_setting),
                             surfaceBrandDefault,
-                            textInverse
-                        ), onFirstButtonClick = {
+                            surfaceBrandDefault,
+                        ),
+                        description = stringResource(MR.strings.vpn_detected_description),
+                        imageResource = MR.images.disconnected,
+                        onButtonClick = {
                             openVpnSettings()
-                        }
+                        },
                     )
                     scope.launch {
                         scaffoldState.bottomSheetState.expand()
@@ -133,13 +140,11 @@ class SplashScreen() : Screen {
             },
             content = {
                 Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
+                    modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background
                 ) {
 
                     Box(
-                        modifier = Modifier
-                            .fillMaxSize()
+                        modifier = Modifier.fillMaxSize()
                     ) {
                         Image(
                             painter = painterResource(MR.images.bg_splash_screen),
@@ -152,29 +157,21 @@ class SplashScreen() : Screen {
                             painter = painterResource(MR.images.ic_i_ticket),
                             contentScale = ContentScale.FillBounds,
                             contentDescription = "",
-                            modifier = Modifier
-                                .width(72.dp)
-                                .height(72.dp)
-                                .wrapContentSize()
+                            modifier = Modifier.width(72.dp).height(72.dp).wrapContentSize()
                                 .align(Alignment.Center)
                         )
                         Text(
-                            modifier = Modifier
-                                .align(Alignment.BottomCenter)
+                            modifier = Modifier.align(Alignment.BottomCenter)
                                 .padding(bottom = spacing2X),
                             text = stringResource(MR.strings.i_ticket),
                             style = body_small
                         )
                     }
 
-
-
-
                     if (showVersionDialog) {
                         val errorMessage = stringResource(MR.strings.download_failed)
                         if (events == CheckVersionEvent.NormalUpdate) {
-                            CustomDialogDoubleActionWithLoading(
-                                showDialog = showVersionDialog,
+                            CustomDialogDoubleActionWithLoading(showDialog = showVersionDialog,
                                 message = viewModel.versionData.value?.description ?: "",
                                 title = viewModel.versionData.value?.title ?: "",
                                 titleButton = MR.strings.download,
@@ -199,11 +196,9 @@ class SplashScreen() : Screen {
                                             scaffoldState.snackbarHostState.showSnackbar(message = errorMessage)
                                         }
                                     }
-                                }
-                            )
+                                })
                         } else {
-                            CustomDialogWithLoading(
-                                showDialog = showVersionDialog,
+                            CustomDialogWithLoading(showDialog = showVersionDialog,
                                 message = viewModel.versionData.value?.description ?: "",
                                 title = viewModel.versionData.value?.title ?: "",
                                 titleButton = MR.strings.download,
@@ -222,15 +217,9 @@ class SplashScreen() : Screen {
                                             scaffoldState.snackbarHostState.showSnackbar(message = errorMessage)
                                         }
                                     }
-                                }
-                            )
+                                })
                         }
                     }
-
-
-
-
-
 
                     when (events) {
                         CheckVersionEvent.Default -> {

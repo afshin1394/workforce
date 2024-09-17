@@ -2,8 +2,10 @@ package presentation.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -20,11 +22,11 @@ fun CustomButton(
     customButtonData: CustomButtonData,
 ) {
     Row(
-        modifier = modifier
-            .background(customButtonData.backgroundColor, shape = RoundedCornerShape(radiusLarge))
-            .border(1.dp, color = strokeDefaultLight, shape = RoundedCornerShape(radiusLarge))
-            .fillMaxWidth()
-            .wrapContentHeight(),
+        modifier = modifier.background(
+            customButtonData.backgroundColor,
+            shape = RoundedCornerShape(radiusLarge)
+        ).border(1.dp, color = strokeDefaultLight, shape = RoundedCornerShape(radiusLarge))
+            .fillMaxWidth().wrapContentHeight(),
 
 
         horizontalArrangement = Arrangement.Center,
@@ -33,9 +35,7 @@ fun CustomButton(
 
         ) {
         Row(
-            modifier
-                .fillMaxWidth()
-                .padding(vertical = 13.dp, horizontal = spacing2X),
+            modifier.fillMaxWidth().padding(vertical = 13.dp, horizontal = spacing2X),
 
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically,
@@ -49,5 +49,19 @@ fun CustomButton(
     }
 }
 
-data class CustomButtonData(val title: String, val textColor: Color, val backgroundColor: Color)
+@Composable
+fun CustomTextButton(
+    customButtonData: CustomButtonData,
+    modifier: Modifier = Modifier,
+) {
+    Text(
+        text = customButtonData.title,
+        color = customButtonData.textColor,
+        modifier = modifier.padding(8.dp),
+    )
+}
+
+data class CustomButtonData(
+    val title: String, val textColor: Color, val backgroundColor: Color = Color(0x00FFFFFF)
+)
 

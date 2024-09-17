@@ -15,6 +15,9 @@
         enjoy the latest version.
     </string>
     <string name="update">Update</string>
+    <string name="go_to_setting">Go to setting</string>
+    <string name="vpn_detected">Vpn Detected</string>
+    <string name="vpn_detected_description">Disconnect your vpn to continue</string>
     <string name="account_info">Account Info</string>
     <string name="name">Name</string>
     <string name="expertise">Expertise</string>

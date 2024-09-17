@@ -11,15 +11,18 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
 
 import presentation.model.BottomSheetActionModel
 import com.irancell.nwg.wfm.presentation.theme.*
+import dev.icerock.moko.resources.ImageResource
 import dev.icerock.moko.resources.compose.painterResource
 import io.github.aakira.napier.Napier
 import irancell.nwg.wfm.MR
 import kotlinx.coroutines.launch
 import presentation.components.CustomButton
 import presentation.components.CustomButtonData
+import presentation.components.CustomTextButton
 import presentation.theme.h4
 import presentation.theme.surfaceDefault
 
@@ -36,10 +39,9 @@ fun CustomBottomSheet(
 ) {
     Column() {
         Column(modifier = Modifier.weight(1f, false)) {
-            if (hasHeader)
-                BottomSheetHead(bottomSheetState, title, onClose = {
-                    onClose()
-                })
+            if (hasHeader) BottomSheetHead(bottomSheetState, title, onClose = {
+                onClose()
+            })
             content()
         }
         Row(verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.Center) {
@@ -61,24 +63,20 @@ fun BottomSheetHead(
     val scope = rememberCoroutineScope()
 
     Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .wrapContentHeight()
-            .padding(spacing2X)
+        modifier = Modifier.fillMaxWidth().wrapContentHeight().padding(spacing2X)
     ) {
 
 
         Image(
             painter = painterResource(MR.images.close),
             contentDescription = "ic_close",
-            modifier = Modifier
-                .clickable {
-                    Napier.i("bottomSheetClick")
-                    scope.launch {
-                        bottomSheetState.collapse()
-                    }
-                    onClose()
-                }.padding(spacing1X)
+            modifier = Modifier.clickable {
+                Napier.i("bottomSheetClick")
+                scope.launch {
+                    bottomSheetState.collapse()
+                }
+                onClose()
+            }.padding(spacing1X)
         )
 
         androidx.compose.material.Text(
@@ -100,39 +98,29 @@ fun bottomSheetDoubleActionBottomBar(
     onSecondButtonClick: () -> Unit = {}
 ) {
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(surfaceDefault)
+        modifier = Modifier.fillMaxWidth().background(surfaceDefault)
             .padding(vertical = spacing3X, horizontal = spacing2X),
         verticalAlignment = Alignment.Bottom,
         horizontalArrangement = Arrangement.Center
     ) {
-        CustomButton(
-            customButtonData = CustomButtonData(
-                title = bottomSheetActionModel.firstButtonText,
-                textColor = bottomSheetActionModel.firstButtonTextColor,
-                bottomSheetActionModel.firstButtonColor
-            ),
-            modifier = Modifier
-                .weight(1f).clickable {
-                    onFirstButtonClick()
-                }
-        )
+        CustomButton(customButtonData = CustomButtonData(
+            title = bottomSheetActionModel.firstButtonText,
+            textColor = bottomSheetActionModel.firstButtonTextColor,
+            bottomSheetActionModel.firstButtonColor
+        ), modifier = Modifier.weight(1f).clickable {
+            onFirstButtonClick()
+        })
         Spacer(modifier = Modifier.padding(horizontal = spacing2X))
-        CustomButton(
-            customButtonData = CustomButtonData(
-                title = bottomSheetActionModel.secondButtonText,
-                textColor = bottomSheetActionModel.secondColorTextColor,
-                bottomSheetActionModel.secondButtonColor
-            ), modifier = Modifier
-                .weight(1f).clickable {
-                    onSecondButtonClick()
-                }
-        )
+        CustomButton(customButtonData = CustomButtonData(
+            title = bottomSheetActionModel.secondButtonText,
+            textColor = bottomSheetActionModel.secondColorTextColor,
+            bottomSheetActionModel.secondButtonColor
+        ), modifier = Modifier.weight(1f).clickable {
+            onSecondButtonClick()
+        })
 
     }
 }
-
 
 
 @Composable
@@ -141,25 +129,54 @@ fun bottomSheetSingleActionBottomBar(
     onFirstButtonClick: () -> Unit = {},
 ) {
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(surfaceDefault)
+        modifier = Modifier.fillMaxWidth().background(surfaceDefault)
             .padding(vertical = spacing3X, horizontal = spacing2X),
         verticalAlignment = Alignment.Bottom,
         horizontalArrangement = Arrangement.Center
     ) {
-        CustomButton(
-            customButtonData = CustomButtonData(
-                title = bottomSheetActionModel.firstButtonText,
-                textColor = bottomSheetActionModel.firstButtonTextColor,
-                bottomSheetActionModel.firstButtonColor
-            ),
-            modifier = Modifier
-                .weight(1f).clickable {
-                    onFirstButtonClick()
-                }
-        )
-
+        CustomButton(customButtonData = CustomButtonData(
+            title = bottomSheetActionModel.firstButtonText,
+            textColor = bottomSheetActionModel.firstButtonTextColor,
+            bottomSheetActionModel.firstButtonColor
+        ), modifier = Modifier.weight(1f).clickable {
+            onFirstButtonClick()
+        })
 
     }
 }
+
+@Composable
+fun customBottomSheetWithImage(
+    bottomSheetActionModel: BottomSheetActionModel,
+    imageResource: ImageResource,
+    description: String,
+    onButtonClick: () -> Unit = {},
+) {
+    Column(
+        modifier = Modifier.fillMaxWidth().fillMaxHeight().padding(16.dp),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Image(
+            painter = painterResource(imageResource),
+            contentDescription = null,
+            modifier = Modifier.size(160.dp).padding(bottom = 16.dp)
+        )
+
+        Text(
+            text = description,
+            style = MaterialTheme.typography.body1,
+            modifier = Modifier.padding(bottom = 16.dp)
+        )
+
+        CustomTextButton(customButtonData = CustomButtonData(
+            title = bottomSheetActionModel.firstButtonText,
+            textColor = bottomSheetActionModel.firstButtonTextColor,
+            backgroundColor = bottomSheetActionModel.firstButtonColor
+        ), modifier = Modifier.height(48.dp).clickable {
+            onButtonClick()
+        })
+    }
+}
+
+

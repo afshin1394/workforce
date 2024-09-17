@@ -25,21 +25,16 @@ import androidx.compose.runtime.State
 import domain.models.version.GetVersionDomain
 import domain.usecase.usecase.ipDetection.IpDetectionUseCase
 import domain.usecase.usecase.profile.StoreProfileUseCase
-import irancell.nwg.wfm.InstallApk
-import irancell.nwg.wfm.PerformDownload
-import irancell.nwg.wfm.Unzip
 import irancell.nwg.wfm.getSharedPref
 import kotlinx.coroutines.flow.StateFlow
 
 import utils.FileApk
 
-
 class SplashScreenVM(
     private val getVersionOfServerUseCase: GetVersionOfServerUseCase,
     private val storeProfileUseCase: StoreProfileUseCase,
     private val ipDetectionUseCase: IpDetectionUseCase,
-
-    ) : BaseViewModel() {
+) : BaseViewModel() {
 
     private val _permissionState =
         MutableStateFlow<PermissionEvent>(PermissionEvent.RequestPermission)
@@ -60,13 +55,13 @@ class SplashScreenVM(
 
 
     init {
-        restrictForeignIp()
+
         InternalStorage.initWFMImages(provideAppContext())
         InternalStorage.initProcessImages(provideAppContext())
         InternalStorage.initSuspendImages(provideAppContext())
     }
 
-    private fun restrictForeignIp() {
+    fun restrictForeignIp() {
         viewModelScope.launch {
             ipDetectionUseCase(Unit).collect {
                 when (it.status) {
@@ -85,12 +80,16 @@ class SplashScreenVM(
 
                     AsyncStatus.EMPTY -> {}
                     AsyncStatus.SUCCESS -> {
-                        //TODO(parsa): change it to != IR
-                        if (it.data == "IR") {
+                        if (it.data.toString() != "IR") {
                             _showVpnBottomSheet.update { true }
                         } else {
                             checkVersionOfServer()
                         }
+                        Napier.log(
+                            LogLevel.ASSERT,
+                            tag = "get country",
+                            message = it.data.toString()
+                        )
                     }
                 }
             }
