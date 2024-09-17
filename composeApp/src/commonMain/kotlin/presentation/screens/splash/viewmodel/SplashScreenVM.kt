@@ -66,7 +66,7 @@ class SplashScreenVM(
             ipDetectionUseCase(Unit).collect {
                 when (it.status) {
                     AsyncStatus.ERROR -> {
-                        handleError(it.resultStatus)
+                        checkVersionOfServer()
                         Napier.log(
                             LogLevel.ASSERT,
                             tag = "get country",
@@ -94,6 +94,10 @@ class SplashScreenVM(
                 }
             }
         }
+    }
+
+    fun updateBottomSheetState(show: Boolean) {
+        _showVpnBottomSheet.update { show }
     }
 
 

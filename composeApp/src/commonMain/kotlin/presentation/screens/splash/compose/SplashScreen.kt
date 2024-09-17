@@ -127,6 +127,7 @@ class SplashScreen : Screen {
                         imageResource = MR.images.disconnected,
                         onButtonClick = {
                             openVpnSettings()
+                            viewModel.updateBottomSheetState(false)
                         },
                     )
                     scope.launch {
