@@ -155,8 +155,6 @@ fun <T : BaseViewModel> BaseScreen(
                         BackButtonHandler.backPress(onBackPressed = {
                             println("checkkkkvalueeee")
                             onBackPressed()
-
-
                         })
                         when (gpsState) {
                             GpsState.Default -> {

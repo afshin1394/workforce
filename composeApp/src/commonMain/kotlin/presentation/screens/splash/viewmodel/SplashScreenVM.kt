@@ -43,13 +43,10 @@ class SplashScreenVM(
     val permissionState = _permissionState.asStateFlow()
 
 
-
     private val _lifeCycleEvent = MutableStateFlow(LifecycleEvent.ON_ANY)
     val lifeCycleEvent = _lifeCycleEvent.asStateFlow()
 
     var eventsVersion = mutableStateOf<CheckVersionEvent>(CheckVersionEvent.Default)
-
-
 
     private val _versionData = mutableStateOf<GetVersionDomain?>(null)
     val versionData: State<GetVersionDomain?> = _versionData
@@ -60,8 +57,6 @@ class SplashScreenVM(
         InternalStorage.initWFMImages(provideAppContext())
         InternalStorage.initProcessImages(provideAppContext())
         InternalStorage.initSuspendImages(provideAppContext())
-
-
     }
 
 
@@ -100,22 +95,26 @@ class SplashScreenVM(
                             tag = "get version of Server",
                             message = "SUCCESS${it.data}"
                         )
-                       it. data?.let { versionData ->
-                           _versionData.value = versionData
+                        it.data?.let { versionData ->
+                            _versionData.value = versionData
                             when {
-                               versionData.force_update && versionData.version_code.toDouble() > DeviceInfo.getAppVersionCode().toDouble() -> {
+                                versionData.force_update && versionData.version_code.toDouble() > DeviceInfo.getAppVersionCode()
+                                    .toDouble() -> {
                                     eventsVersion.value = CheckVersionEvent.ForceUpdate
                                 }
-                                versionData.version_code.toDouble() > DeviceInfo.getAppVersionCode().toDouble() -> {
+
+                                versionData.version_code.toDouble() > DeviceInfo.getAppVersionCode()
+                                    .toDouble() -> {
                                     eventsVersion.value = CheckVersionEvent.NormalUpdate
                                 }
+
                                 else -> {
-                                    getSharedPref().put(FileApk,"")
+                                    getSharedPref().put(FileApk, "")
                                     eventsVersion.value = CheckVersionEvent.OkVersion
                                 }
                             }
                         } ?: run {
-                           getSharedPref().put(FileApk,"")
+                            getSharedPref().put(FileApk, "")
                             eventsVersion.value = CheckVersionEvent.OkVersion
                         }
                     }
@@ -125,25 +124,32 @@ class SplashScreenVM(
         }
     }
 
-    private fun getProfile(){
+    private fun getProfile() {
         viewModelScope.launch {
             storeProfileUseCase(Unit).collect {
-                when(it.status){
+                when (it.status) {
                     AsyncStatus.ERROR -> {
                         handleError(it.resultStatus)
                         Napier.log(LogLevel.ASSERT, tag = "getProfile", message = "ERROR")
 
                     }
+
                     AsyncStatus.LOADING -> {
 
                         Napier.log(LogLevel.ASSERT, tag = "getProfile", message = "LOADING")
 
                     }
-                    AsyncStatus.EMPTY->{
+
+                    AsyncStatus.EMPTY -> {
 
                     }
+
                     AsyncStatus.SUCCESS -> {
-                        Napier.log(LogLevel.ASSERT, tag = "getProfile", message = "SUCCESS${it.data}")
+                        Napier.log(
+                            LogLevel.ASSERT,
+                            tag = "getProfile",
+                            message = "SUCCESS${it.data}"
+                        )
 
                     }
                 }
