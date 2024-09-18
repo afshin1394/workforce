@@ -1,4 +1,5 @@
 package di
+
 import io.ktor.client.*
 
 import io.ktor.client.*
@@ -106,19 +107,35 @@ import utils.Token
 
 fun repositoryModule() = module {
     //Repositories
-    single<IGeneralLocationRepository> { GeneralLocationRepositoryImpl(get(), get(named("tokenized"))) }
+    single<IGeneralLocationRepository> {
+        GeneralLocationRepositoryImpl(
+            get(),
+            get(named("tokenized"))
+        )
+    }
     single<IAvailabilityRepository> { AvailabilityRepositoryImpl(get(named("tokenized"))) }
     single<ISuspendTaskRepository> { SuspendTaskRepositoryImpl(get(), get(named("tokenized"))) }
-    single<IAuthRepository> { AuthRepositoryImpl(get(named("noToken")),get(named("tokenized")),get ()) }
-    single<ITaskRepository> { TaskRepositoryImpl(get(named("tokenized")),get()) }
-    single<IProfileRepository>{ ProfileRepositoryImpl(get(named("tokenized")),get()) }
-    single<IInitialFormRepository>{ InitialFormRepositoryImpl(get()) }
-    single<IPhotoRepository>{ PhotoRepositoryImpl(get()) }
-    single<IStepsRepository>{ StepsRepositoryImpl(get(named("tokenized")),get()) }
-    single<IStepPointerRepository>{ StepPointerRepositoryImpl(get()) }
-    single<ISendStepsRepository>{ SendStepRepositoryImpl(get(),get(named("tokenized"))) }
-    single<IUploadRepository>{ UploadRepositoryImpl(get(named("tokenized"))) }
-    single<IVersionRepository>{ VersionRepositoryImpl(get(named("noToken")),get(named("tokenized"))) }
+    single<IAuthRepository> {
+        AuthRepositoryImpl(
+            get(named("noToken")),
+            get(named("tokenized")),
+            get()
+        )
+    }
+    single<ITaskRepository> { TaskRepositoryImpl(get(named("tokenized")), get()) }
+    single<IProfileRepository> { ProfileRepositoryImpl(get(named("tokenized")), get()) }
+    single<IInitialFormRepository> { InitialFormRepositoryImpl(get()) }
+    single<IPhotoRepository> { PhotoRepositoryImpl(get()) }
+    single<IStepsRepository> { StepsRepositoryImpl(get(named("tokenized")), get()) }
+    single<IStepPointerRepository> { StepPointerRepositoryImpl(get()) }
+    single<ISendStepsRepository> { SendStepRepositoryImpl(get(), get(named("tokenized"))) }
+    single<IUploadRepository> { UploadRepositoryImpl(get(named("tokenized"))) }
+    single<IVersionRepository> {
+        VersionRepositoryImpl(
+            get(named("noToken")),
+            get(named("tokenized"))
+        )
+    }
 }
 
 fun useCaseModule() = module {
@@ -132,7 +149,7 @@ fun useCaseModule() = module {
     single { GetAvailabilityObjectIdUseCase() }
     single { LoginUseCase(get()) }
     single { GetTasksUseCase(get()) }
-    single { UpdateTaskUseCase(get(),get()) }
+    single { UpdateTaskUseCase(get(), get()) }
     single { LoginUseCase(get()) }
     single { VerifyUseCase(get()) }
     single { ResendUseCase(get()) }
@@ -141,24 +158,24 @@ fun useCaseModule() = module {
     single { StoreProfileUseCase(get()) }
     single { GetProfileUseCase(get()) }
     single { DeleteByTaskIdUseCase(get()) }
-    single { GetInitialFormByTask(get())}
-    single { LogoutUseCase(get(),get()) }
+    single { GetInitialFormByTask(get()) }
+    single { LogoutUseCase(get(), get()) }
     single { InsertPhotoUseCase(get()) }
     single { GetPhotoByComponentKeyUseCase(get()) }
     single { DeleteByComponentKeyUseCase(get()) }
-    single { UpdateStepsUseCase(get(),get(),get(),get()) }
-    single { UpdateStepFormUseCase(get(),get(),get(),get()) }
-    single { StoreStepFormUseCase(get(),get(),get(),get()) }
+    single { UpdateStepsUseCase(get(), get(), get(), get()) }
+    single { UpdateStepFormUseCase(get(), get(), get(), get()) }
+    single { StoreStepFormUseCase(get(), get(), get(), get()) }
     single { CheckForEditedTicketUseCase(get()) }
-    single { StoreKeyValueUseCase(get(),get(),get()) }
+    single { StoreKeyValueUseCase(get(), get(), get()) }
     single { SendFileToServerUseCase(get()) }
-    single { StoreKeyValueUseCase(get(),get(),get()) }
-    single { SendStepsOfTicketToServerUseCase(get(),get(),get(),get(),get()) }
-    single { UpdateIsEditedTicketUseCase(get())}
-    single { UpdateUnSendLocationUseCase(get())}
-    single { DeleteSendLocationUseCase(get())}
-    single { SendVersionToServerUseCase(get())}
-    single { GetVersionOfServerUseCase(get())}
+    single { StoreKeyValueUseCase(get(), get(), get()) }
+    single { SendStepsOfTicketToServerUseCase(get(), get(), get(), get(), get()) }
+    single { UpdateIsEditedTicketUseCase(get()) }
+    single { UpdateUnSendLocationUseCase(get()) }
+    single { DeleteSendLocationUseCase(get()) }
+    single { SendVersionToServerUseCase(get()) }
+    single { GetVersionOfServerUseCase(get()) }
 }
 
 fun httpModule() = module {
@@ -177,7 +194,7 @@ fun httpModule() = module {
             }
             configure()
             defaultRequest {
-                url(DevelopmentBASEURL)
+                url(ProductionBASEURL)
                 contentType(ContentType.Application.Json)
                 headers {
                     append(
@@ -215,7 +232,7 @@ fun httpModule() = module {
             }
             configure()
             defaultRequest {
-                url(DevelopmentBASEURL)
+                url(ProductionBASEURL)
                 contentType(ContentType.Application.Json)
                 headers {
 
@@ -239,6 +256,7 @@ fun httpModule() = module {
         }
     }
 }
+
 internal fun HttpClientConfig<*>.configure() {
 
     configureForPlatform()
@@ -246,15 +264,37 @@ internal fun HttpClientConfig<*>.configure() {
 
 fun viewModelModule() = module {
     viewModelDefinition { AboutScreenVM(get()) }
-    viewModelDefinition { MainScreenVM(get(), get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get(),get()) }
+    viewModelDefinition {
+        MainScreenVM(
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get(),
+        )
+    }
     viewModelDefinition { SettingScreenVM() }
     viewModelDefinition { GpsTrackingReportScreenVM(get()) }
     viewModelDefinition { LoginScreenVM(get()) }
-    viewModelDefinition { VerifyScreenVM(get(),get(),get(),get(),get()) }
-    viewModelDefinition { SplashScreenVM(get(),get()) }
+    viewModelDefinition { VerifyScreenVM(get(), get(), get(), get(), get()) }
+    viewModelDefinition { SplashScreenVM(get(), get()) }
     viewModelDefinition { TicketInfoVM(get()) }
-    viewModelDefinition { TicketProcessVM(get(),get(),get(),get(),get(),get(),get(),get()) }
-    viewModelDefinition { FormViewerScreenVM(get(),get()) }
+    viewModelDefinition { TicketProcessVM(get(), get(), get(), get(), get(), get(), get(), get()) }
+    viewModelDefinition { FormViewerScreenVM(get(), get()) }
     viewModelDefinition { MapVM() }
     viewModelDefinition { AccountScreenVM(get()) }
     viewModelDefinition { NotificationScreenVM() }

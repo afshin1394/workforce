@@ -27,8 +27,8 @@ import domain.models.task.TaskDomain
 import io.github.aakira.napier.LogLevel
 import io.github.aakira.napier.Napier
 import irancell.nwg.wfm.MR
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import presentation.screens.main.viewmodel.MainScreenVM
 import utils.TaskState
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -38,17 +38,16 @@ fun TicketListScreen(
     searchText: String = "",
     onEvent: (mainEvents: MainEvent, selectedTask: TaskDomain?) -> Unit = { _: MainEvent, _: TaskDomain? -> },
     onAccept: (item: TaskDomain) -> Unit,
+    viewModel: MainScreenVM
 ) {
 
     val refreshScope = rememberCoroutineScope()
     var refreshing by remember { mutableStateOf(false) }
-    var itemCount by remember { mutableStateOf(15) }
 
     fun refresh() =
         refreshScope.launch {
             refreshing = true
-            delay(1500)
-            itemCount += 5
+            viewModel.updateTask()
             refreshing = false
         }
 
@@ -102,10 +101,6 @@ fun TicketListScreen(
                     .padding(horizontal = spacing2X)
             ) {
 
-                if (!refreshing) {
-
-                }
-
                 val filteredList = tasks.filter {
 
                     it.basic_info.ticket_number?.lowercase()
@@ -130,7 +125,7 @@ fun TicketListScreen(
                 if (!refreshing) {
                     Napier.log(LogLevel.ASSERT, "refreshing", message = refreshing.toString())
 
-                    itemsIndexed(items = filteredList) { index: Int, item: TaskDomain ->
+                    itemsIndexed(items = filteredList) { _: Int, item: TaskDomain ->
                         ticketCard(modifier = Modifier.wrapContentHeight(),
                             task = item,
                             onActionClick = {

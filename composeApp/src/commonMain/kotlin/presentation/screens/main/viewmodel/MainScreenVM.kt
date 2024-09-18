@@ -16,6 +16,7 @@ import presentation.model.StateFilter
 import presentation.screens.main.events.MainEvent
 import domain.models.SuspendTaskDomain
 import domain.models.task.TaskDomain
+import domain.usecase.ResultStatus
 import domain.usecase.usecase.auth.LogoutUseCase
 import domain.usecase.usecase.availability.ChangeServerAvailabilityUseCase
 import domain.usecase.usecase.availability.GetAvailabilityUseCase
@@ -29,10 +30,12 @@ import domain.usecase.usecase.photo.GetPhotoByComponentKeyUseCase
 import domain.usecase.usecase.photo.InsertPhotoUseCase
 import domain.usecase.usecase.profile.GetProfileUseCase
 import domain.usecase.usecase.steps.UpdateIsEditedTicketUseCase
+import domain.usecase.usecase.steps.UpdateStepsUseCase
 import domain.usecase.usecase.suspendTask.DeleteByTaskIdUseCase
 import domain.usecase.usecase.suspendTask.GetSuspendTaskByIdUseCase
 import domain.usecase.usecase.suspendTask.StoreSuspendTaskUseCase
 import domain.usecase.usecase.ticket.GetTasksUseCase
+import domain.usecase.usecase.ticket.UpdateTaskUseCase
 import io.github.aakira.napier.LogLevel
 import io.github.aakira.napier.Napier
 import irancell.nwg.wfm.BackgroundServiceApp
@@ -76,8 +79,11 @@ class MainScreenVM(
     private val sendLocationToServerUseCase: SendLocationToServerUseCase,
     private val generalLocationListUseCase: GetGeneralLocationListUseCase,
     private val updateUnSendLocationUseCase: UpdateUnSendLocationUseCase,
-    private val deleteSendLocationUseCase: DeleteSendLocationUseCase
-) : BaseViewModel() {
+    private val deleteSendLocationUseCase: DeleteSendLocationUseCase,
+    private val updateTaskUseCase: UpdateTaskUseCase,
+    private val updateStepsUseCase: UpdateStepsUseCase,
+
+    ) : BaseViewModel() {
     private val _availability = MutableStateFlow(false)
     val availability = _availability.asStateFlow()
 
@@ -498,20 +504,26 @@ class MainScreenVM(
         for (key in filterMaps) {
             tasksList = when (key.type) {
                 FilterType.REGION -> {
-                    val filteredByRegion = tasksList.filter { it.basic_info.region == key.filter.title }
+                    val filteredByRegion =
+                        tasksList.filter { it.basic_info.region == key.filter.title }
                     println("Filtering by region (${key.filter.title}): $filteredByRegion")
                     filteredByRegion
                 }
+
                 FilterType.STATE -> {
-                    val filteredByState = tasksList.filter { it.basic_info.ticket_state == key.filter.title }
+                    val filteredByState =
+                        tasksList.filter { it.basic_info.ticket_state == key.filter.title }
                     println("Filtering by state (${key.filter.title}): $filteredByState")
                     filteredByState
                 }
+
                 FilterType.SEVERITY_LEVEL -> {
-                    val filteredBySeverity = tasksList.filter { it.basic_info.level == key.filter.title }
+                    val filteredBySeverity =
+                        tasksList.filter { it.basic_info.level == key.filter.title }
                     println("Filtering by severity (${key.filter.title}): $filteredBySeverity")
                     filteredBySeverity
                 }
+
                 else -> tasksList
             }
             println("TasksList after applying ${key.type}: $tasksList")
@@ -522,7 +534,6 @@ class MainScreenVM(
 
         println("Final filtered tasks: $tasks")
     }
-
 
 
     fun removeAllFilters() {
@@ -582,8 +593,8 @@ class MainScreenVM(
                     }
 
                     AsyncStatus.EMPTY -> {
-                        if(_availability.value)
-                        updateState(ViewStates.Loading)
+                        if (_availability.value)
+                            updateState(ViewStates.Loading)
 
                         Napier.log(
                             LogLevel.ASSERT,
@@ -1107,6 +1118,74 @@ class MainScreenVM(
                 }
             }
         }
+    }
+
+
+    suspend fun updateTask() {
+        updateTaskUseCase(Unit)
+            .collect {
+                when (it.status) {
+                    AsyncStatus.ERROR -> {
+
+                        println("TaskCallApi${"ERROR"}")
+                    }
+
+                    AsyncStatus.LOADING -> {
+                    }
+
+                    AsyncStatus.EMPTY -> {
+
+                    }
+
+                    AsyncStatus.SUCCESS -> {
+                        updateSteps()
+                        println("PullToRefreshCallApi${"SUCCESS"}")
+                    }
+                }
+            }
+    }
+
+    private suspend fun updateSteps() {
+        updateStepsUseCase(Unit).collect {
+            when (it.status) {
+                AsyncStatus.ERROR -> {
+
+
+                    Napier.log(
+                        LogLevel.ASSERT,
+                        "updateSteps",
+                        message = "ERROR: " + it.message
+                    )
+
+                }
+
+                AsyncStatus.EMPTY -> {
+
+                }
+
+                AsyncStatus.LOADING -> {
+                    Napier.log(LogLevel.ASSERT, "updateSteps", message = "LOADING: ")
+
+                }
+
+                AsyncStatus.SUCCESS -> {
+                    getTasks()
+
+                    Napier.log(
+                        LogLevel.ASSERT,
+                        "" +
+                                "",
+                        message = "SUCCESS: " + it.data
+                    )
+
+
+                }
+
+
+            }
+        }
+
+
     }
 
 

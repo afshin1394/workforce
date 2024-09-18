@@ -125,7 +125,6 @@ class MainScreen(
             viewModel.cancelItems
         }
 
-
         val underDevelopment = stringResource(MR.strings.under_development)
 
         val bottomSheetTitle: String =
@@ -194,13 +193,14 @@ class MainScreen(
                     stringResource(MR.strings.save_change)
                 }
 
-
+                else -> {
+                    ""
+                }
             }
 
         Camera.onResult { obj, uri ->
             viewModel.updateSuspendTicketImageUri(uri.toString())
         }
-
 
         if (showContent) {
             hasDrawer = true
@@ -516,6 +516,7 @@ class MainScreen(
                         }
 
 
+                        else -> {}
                     }
                 },
                 bottomSheetContent = {
@@ -782,6 +783,7 @@ class MainScreen(
                         }
 
 
+                        else -> {}
                     }
 
                 },
@@ -866,7 +868,8 @@ class MainScreen(
                                         isClickable = true
                                     }
                                 }
-                            }
+                            },
+                            viewModel = viewModel
                         )
                         if (viewModel.showAcceptDialog.value) {
 
