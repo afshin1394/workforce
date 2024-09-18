@@ -82,13 +82,10 @@ class SplashScreen : Screen {
         val lifecycleEvent by viewModel.lifeCycleEvent.collectAsState()
         val state by viewModel.state.collectAsState()
         var events by viewModel.eventsVersion
-        val showVpnBottomSheet by viewModel.showVpnBottomSheet.collectAsState()
 
 
         if (lifecycleEvent == LifecycleEvent.ON_RESUME) {
             viewModel.updateLifeCycleEventState(LifecycleEvent.ON_ANY)
-            viewModel.restrictForeignIp()
-
             checkPermission({
                 viewModel.updatePermissionState(PermissionEvent.IsGranted)
             }, {
@@ -96,7 +93,7 @@ class SplashScreen : Screen {
             })
         }
 
-        OnLifecycleEvent { owner, event ->
+        OnLifecycleEvent { _, event ->
             viewModel.updateLifeCycleEventState(event as LifecycleEvent)
         }
 
@@ -104,10 +101,7 @@ class SplashScreen : Screen {
         BaseScreen(viewModel = viewModel,
             title = "notStartService",
             scaffoldState = scaffoldState,
-            bottomSheetTitle = when {
-                showVpnBottomSheet -> stringResource(MR.strings.vpn_detected)
-                else -> ""
-            },
+            bottomSheetTitle =
             bottomSheetHasHeader = false,
             bottomSheetContent = {
                 Napier.log(

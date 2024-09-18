@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 
@@ -53,9 +52,13 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import dev.icerock.moko.resources.compose.painterResource
 import irancell.nwg.wfm.BackButtonHandler
+import irancell.nwg.wfm.LifecycleEvent
 import irancell.nwg.wfm.MR
+import irancell.nwg.wfm.OnLifecycleEvent
+import irancell.nwg.wfm.checkPermission
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import presentation.screens.splash.events.PermissionEvent
 import presentation.theme.surfaceBrandDefault
 
 import utils.GpsState
@@ -78,18 +81,28 @@ fun <T : BaseViewModel> BaseScreen(
     onCloseBottomSheet: () -> Unit = {},
     onBackPressed: () -> Unit = {},
     hasSwipeDrawer: Boolean = true,
-
-    ) {
+) {
     val navigator = LocalNavigator.currentOrThrow
     val loginScreen = rememberScreen(presentation.nav.Screen.Auth.Login)
     val verifyScreen = rememberScreen(presentation.nav.Screen.Auth.Verify)
     val splashScreen = rememberScreen(presentation.nav.Screen.Splash)
     val state by viewModel.state.collectAsState()
     val gpsState by viewModel.gpsState.collectAsState()
+    val lifecycleEvent by viewModel.lifeCycleEvent.collectAsState()
+    val showVpnBottomSheet by viewModel.showVpnBottomSheet.collectAsState()
 
     var isDrawerInitialized = remember { mutableStateOf(false) }
 
     val scope = rememberCoroutineScope()
+
+    if (lifecycleEvent == LifecycleEvent.ON_RESUME) {
+        viewModel.updateLifeCycleEventState(LifecycleEvent.ON_ANY)
+        viewModel.restrictForeignIp()
+    }
+
+    OnLifecycleEvent { _, event ->
+        viewModel.updateLifeCycleEventState(event as LifecycleEvent)
+    }
 
     Box(
         modifier = Modifier
@@ -99,14 +112,11 @@ fun <T : BaseViewModel> BaseScreen(
 
         if (hasDrawer) {
             ModalDrawer(
-
                 modifier = Modifier.background(color = backgroundBackground3),
                 gesturesEnabled = hasSwipeDrawer,
                 drawerState = drawerState,
                 drawerContent = {
-
                     drawerContent()
-
                 }) {
                 BottomSheetScaffold(
                     modifier = Modifier.onGloballyPositioned {
@@ -291,8 +301,6 @@ fun <T : BaseViewModel> BaseScreen(
                         })
                 }
             ) {
-
-
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
