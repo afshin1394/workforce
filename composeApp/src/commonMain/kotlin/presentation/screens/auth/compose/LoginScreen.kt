@@ -64,7 +64,7 @@ class LoginScreen() : Screen {
             viewModel = viewModel,
             scaffoldState = scaffoldState,
             title = "notStartService",
-            onBackPressed = { navigator.pop()},
+            onBackPressed = { navigator.pop() },
             content = {
                 Column(
                     modifier = Modifier
@@ -77,10 +77,13 @@ class LoginScreen() : Screen {
                     when (state) {
                         is ViewStates.Error -> {
                         }
+
                         ViewStates.Loading -> {
                         }
-                        ViewStates.EMPTY->{
+
+                        ViewStates.EMPTY -> {
                         }
+
                         is ViewStates.Success -> {
                             scope.launch {
                                 navigator.push(verifyScreen)
@@ -190,12 +193,12 @@ class LoginScreen() : Screen {
 
                             //onClick
 //                            if (viewModel.performLogin(email, password)) {
-                                Napier.log(
-                                    LogLevel.ASSERT,
-                                    "email & password",
-                                    message = "email ${email} password ${password}"
-                                )
-                                viewModel.login(email, password)
+                            Napier.log(
+                                LogLevel.ASSERT,
+                                "email & password",
+                                message = "email ${email} password ${password}"
+                            )
+                            viewModel.login(email, password)
 //                            }
                         }
                     }

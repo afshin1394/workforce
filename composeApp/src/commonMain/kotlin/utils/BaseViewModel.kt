@@ -9,13 +9,11 @@ import io.github.aakira.napier.LogLevel
 import io.github.aakira.napier.Napier
 import irancell.nwg.wfm.BackgroundServiceApp
 import irancell.nwg.wfm.GPS
-import irancell.nwg.wfm.LifecycleEvent
 import irancell.nwg.wfm.MR
 import irancell.nwg.wfm.getSharedPref
 import irancell.nwg.wfm.provideAppContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -27,8 +25,8 @@ sealed class ViewStates() {
     data class Success(val message: StringResource? = MR.strings.success) : ViewStates()
     data object Reload : ViewStates()
     data object EMPTY : ViewStates()
+
     data class UnAuthorized(val message: StringResource) : ViewStates()
-    data object VPNDetected : ViewStates()
 }
 
 sealed interface GpsState {
@@ -52,11 +50,7 @@ open class BaseViewModel : ViewModel() {
     private val _state = MutableStateFlow<ViewStates>(ViewStates.Default)
     private val _networkState = MutableStateFlow<NetworkStates>(NetworkStates.Default)
     private val _gpsState = MutableStateFlow<GpsState>(GpsState.Default)
-    private val _lifeCycleEvent = MutableStateFlow(LifecycleEvent.ON_ANY)
-    val lifeCycleEvent = _lifeCycleEvent.asStateFlow()
 
-    private val _showVpnBottomSheet = MutableStateFlow(false)
-    val showVpnBottomSheet: StateFlow<Boolean> = _showVpnBottomSheet.asStateFlow()
 
     val state = _state.asStateFlow()
     val networkState = _networkState.asStateFlow()
@@ -72,48 +66,6 @@ open class BaseViewModel : ViewModel() {
     }
 
 
-    fun updateLifeCycleEventState(event: LifecycleEvent) {
-        _lifeCycleEvent.update { event }
-    }
-
-    fun restrictForeignIp() {
-        viewModelScope.launch {
-            ipDetectionUseCase(Unit).collect {
-                when (it.status) {
-                    AsyncStatus.ERROR -> {
-                        checkVersionOfServer()
-                        Napier.log(
-                            LogLevel.ASSERT,
-                            tag = "get country",
-                            message = "ERROR" + it.message
-                        )
-                    }
-
-                    AsyncStatus.LOADING -> {
-                        Napier.log(LogLevel.ASSERT, tag = "get country", message = "LOADING")
-                    }
-
-                    AsyncStatus.EMPTY -> {}
-                    AsyncStatus.SUCCESS -> {
-                        if (it.data.toString() != "IR") {
-                            _showVpnBottomSheet.update { true }
-                        } else {
-                            checkVersionOfServer()
-                        }
-                        Napier.log(
-                            LogLevel.ASSERT,
-                            tag = "get country",
-                            message = it.data.toString()
-                        )
-                    }
-                }
-            }
-        }
-    }
-
-    fun updateBottomSheetState(show: Boolean) {
-        _showVpnBottomSheet.update { show }
-    }
 
     private fun collectServiceState() {
         viewModelScope.launch {

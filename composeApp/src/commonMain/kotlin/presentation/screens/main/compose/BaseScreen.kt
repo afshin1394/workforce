@@ -56,9 +56,13 @@ import irancell.nwg.wfm.LifecycleEvent
 import irancell.nwg.wfm.MR
 import irancell.nwg.wfm.OnLifecycleEvent
 import irancell.nwg.wfm.checkPermission
+import irancell.nwg.wfm.openVpnSettings
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import org.koin.compose.koinInject
+import presentation.model.BottomSheetActionModel
 import presentation.screens.splash.events.PermissionEvent
+import presentation.screens.splash.viewmodel.SplashScreenVM
 import presentation.theme.surfaceBrandDefault
 
 import utils.GpsState
@@ -88,46 +92,43 @@ fun <T : BaseViewModel> BaseScreen(
     val splashScreen = rememberScreen(presentation.nav.Screen.Splash)
     val state by viewModel.state.collectAsState()
     val gpsState by viewModel.gpsState.collectAsState()
-    val lifecycleEvent by viewModel.lifeCycleEvent.collectAsState()
-    val showVpnBottomSheet by viewModel.showVpnBottomSheet.collectAsState()
+    val splashViewModel: SplashScreenVM = koinInject()
+    val lifecycleEvent by splashViewModel.lifeCycleEvent.collectAsState()
+    val showVpnBottomSheet by splashViewModel.showVpnBottomSheet.collectAsState()
 
     var isDrawerInitialized = remember { mutableStateOf(false) }
 
     val scope = rememberCoroutineScope()
 
     if (lifecycleEvent == LifecycleEvent.ON_RESUME) {
-        viewModel.updateLifeCycleEventState(LifecycleEvent.ON_ANY)
-        viewModel.restrictForeignIp()
+        splashViewModel.updateLifeCycleEventState(LifecycleEvent.ON_ANY)
+        splashViewModel.restrictForeignIp()
     }
 
     OnLifecycleEvent { _, event ->
-        viewModel.updateLifeCycleEventState(event as LifecycleEvent)
+        splashViewModel.updateLifeCycleEventState(event as LifecycleEvent)
     }
 
     Box(
-        modifier = Modifier
-            .background(color = backgroundBackground3)
-            .fillMaxSize()
+        modifier = Modifier.background(color = backgroundBackground3).fillMaxSize()
     ) {
 
         if (hasDrawer) {
-            ModalDrawer(
-                modifier = Modifier.background(color = backgroundBackground3),
+            ModalDrawer(modifier = Modifier.background(color = backgroundBackground3),
                 gesturesEnabled = hasSwipeDrawer,
                 drawerState = drawerState,
                 drawerContent = {
                     drawerContent()
                 }) {
-                BottomSheetScaffold(
-                    modifier = Modifier.onGloballyPositioned {
-                        if (!isDrawerInitialized.value) {
-                            isDrawerInitialized.value = true
-                            scope.launch {
-                                drawerState.close()
-                            }
+                BottomSheetScaffold(modifier = Modifier.onGloballyPositioned {
+                    if (!isDrawerInitialized.value) {
+                        isDrawerInitialized.value = true
+                        scope.launch {
+                            drawerState.close()
                         }
+                    }
 
-                    },
+                },
                     scaffoldState = scaffoldState,
                     topBar = {
                         topBar()
@@ -138,8 +139,7 @@ fun <T : BaseViewModel> BaseScreen(
                     sheetGesturesEnabled = false,
                     sheetShape = RoundedCornerShape(topEnd = radius, topStart = radius),
                     sheetContent = {
-                        CustomBottomSheet(
-                            scaffoldState.bottomSheetState,
+                        CustomBottomSheet(scaffoldState.bottomSheetState,
                             hasHeader = bottomSheetHasHeader,
                             title = bottomSheetTitle,
                             content = {
@@ -151,13 +151,10 @@ fun <T : BaseViewModel> BaseScreen(
                             bottomBar = {
                                 bottomBarBottomSheetContent(scaffoldState.bottomSheetState)
                             })
-                    }
-                ) {
+                    }) {
 
                     Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .fillMaxHeight()
+                        modifier = Modifier.fillMaxWidth().fillMaxHeight()
                             .background(backgroundBackground3)
 
                     ) {
@@ -189,8 +186,7 @@ fun <T : BaseViewModel> BaseScreen(
                             ViewStates.EMPTY -> {
 
                                 Column(
-                                    modifier = Modifier
-                                        .fillMaxSize()
+                                    modifier = Modifier.fillMaxSize()
                                         .wrapContentSize(Alignment.Center),
                                     horizontalAlignment = Alignment.CenterHorizontally,
                                     verticalArrangement = Arrangement.Center
@@ -198,17 +194,14 @@ fun <T : BaseViewModel> BaseScreen(
                                     Image(
                                         painter = painterResource(MR.images.ic_empty),
                                         contentDescription = "empty",
-                                        modifier = Modifier
-                                            .width(150.dp)
-                                            .height(120.dp)
+                                        modifier = Modifier.width(150.dp).height(120.dp)
                                     )
 
                                     Spacer(modifier = Modifier.height(16.dp))
                                     Text(
                                         text = stringResource(MR.strings.empty_list),
                                         style = TextStyle(
-                                            fontSize = 16.sp,
-                                            fontWeight = FontWeight.Bold
+                                            fontSize = 16.sp, fontWeight = FontWeight.Bold
                                         ),
                                         modifier = Modifier.wrapContentSize()
                                     )
@@ -229,18 +222,15 @@ fun <T : BaseViewModel> BaseScreen(
                             }
 
                             is ViewStates.Loading -> {
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxSize()
-                                        .background(Color.LightGray.copy(alpha = 0.5f))
-                                        .pointerInput(Unit) {
-                                            awaitPointerEventScope {
-                                                while (true) {
-                                                    awaitPointerEvent()
-                                                }
+                                Box(modifier = Modifier.fillMaxSize()
+                                    .background(Color.LightGray.copy(alpha = 0.5f))
+                                    .pointerInput(Unit) {
+                                        awaitPointerEventScope {
+                                            while (true) {
+                                                awaitPointerEvent()
                                             }
                                         }
-                                ) {
+                                    }) {
                                     CircularProgressIndicator(
                                         modifier = Modifier.align(Alignment.Center),
                                         color = surfaceBrandDefault
@@ -272,10 +262,6 @@ fun <T : BaseViewModel> BaseScreen(
                                     }
                                 }
                             }
-
-                            else -> {
-                                //TODO show bottom sheet
-                            }
                         }
                     }
                 }
@@ -292,10 +278,37 @@ fun <T : BaseViewModel> BaseScreen(
                 sheetContent = {
                     CustomBottomSheet(
                         scaffoldState.bottomSheetState,
-                        hasHeader = bottomSheetHasHeader,
+                        hasHeader = if (showVpnBottomSheet) false else bottomSheetHasHeader,
                         title = bottomSheetTitle,
                         content = {
-                            bottomSheetContent(scaffoldState.bottomSheetState)
+                            Napier.log(
+                                LogLevel.ASSERT,
+                                tag = "showVpnBottomSheet",
+                                message = "$showVpnBottomSheet"
+                            )
+                            if (showVpnBottomSheet) {
+                                customBottomSheetWithImage(
+                                    BottomSheetActionModel(
+                                        stringResource(MR.strings.go_to_setting),
+                                        surfaceBrandDefault,
+                                        surfaceBrandDefault,
+                                    ),
+                                    description = stringResource(MR.strings.vpn_detected_description),
+                                    imageResource = MR.images.disconnected,
+                                    onButtonClick = {
+                                        openVpnSettings()
+                                        splashViewModel.updateBottomSheetState(false)
+                                    },
+                                )
+                                scope.launch {
+                                    scaffoldState.bottomSheetState.expand()
+                                }
+                            } else {
+                                scope.launch {
+                                    scaffoldState.bottomSheetState.collapse()
+                                }
+                                bottomSheetContent(scaffoldState.bottomSheetState)
+                            }
                         },
                         onClose = {
                             onCloseBottomSheet()
@@ -303,12 +316,9 @@ fun <T : BaseViewModel> BaseScreen(
                         bottomBar = {
                             bottomBarBottomSheetContent(scaffoldState.bottomSheetState)
                         })
-                }
-            ) {
+                }) {
                 Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .fillMaxHeight()
+                    modifier = Modifier.fillMaxWidth().fillMaxHeight()
                         .background(backgroundBackground3)
 
 
@@ -342,28 +352,21 @@ fun <T : BaseViewModel> BaseScreen(
 
                         ViewStates.EMPTY -> {
                             Column(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .wrapContentSize(Alignment.Center),
+                                modifier = Modifier.fillMaxSize().wrapContentSize(Alignment.Center),
                                 horizontalAlignment = Alignment.CenterHorizontally,
                                 verticalArrangement = Arrangement.Center
                             ) {
                                 Image(
                                     painter = painterResource(MR.images.ic_empty),
                                     contentDescription = "empty",
-                                    modifier = Modifier
-                                        .width(150.dp)
-                                        .height(120.dp)
+                                    modifier = Modifier.width(150.dp).height(120.dp)
                                 )
 
                                 Spacer(modifier = Modifier.height(12.dp))
                                 Text(
-                                    text = stringResource(MR.strings.empty_list),
-                                    style = TextStyle(
-                                        fontSize = 16.sp,
-                                        fontWeight = FontWeight.Bold
-                                    ),
-                                    modifier = Modifier.wrapContentSize()
+                                    text = stringResource(MR.strings.empty_list), style = TextStyle(
+                                        fontSize = 16.sp, fontWeight = FontWeight.Bold
+                                    ), modifier = Modifier.wrapContentSize()
                                 )
                             }
                         }
@@ -371,30 +374,24 @@ fun <T : BaseViewModel> BaseScreen(
                         is ViewStates.Error -> {
                             val errorMessage = stringResource((state as ViewStates.Error).message)
                             LaunchedEffect(Unit) {
-                                scaffoldState.snackbarHostState.showSnackbar(message = "$errorMessage")
+                                scaffoldState.snackbarHostState.showSnackbar(message = errorMessage)
                                 viewModel.updateState(ViewStates.Default)
 
                             }
                             Napier.log(
-                                LogLevel.INFO,
-                                tag = "fkpekfpw",
-                                message = errorMessage.toString()
+                                LogLevel.INFO, tag = "fkpekfpw", message = errorMessage.toString()
                             )
                         }
 
                         is ViewStates.Loading -> {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .background(Color.LightGray.copy(alpha = 0.5f))
-                                    .pointerInput(Unit) {
-                                        awaitPointerEventScope {
-                                            while (true) {
-                                                awaitPointerEvent()
-                                            }
+                            Box(modifier = Modifier.fillMaxSize()
+                                .background(Color.LightGray.copy(alpha = 0.5f)).pointerInput(Unit) {
+                                    awaitPointerEventScope {
+                                        while (true) {
+                                            awaitPointerEvent()
                                         }
                                     }
-                            ) {
+                                }) {
                                 CircularProgressIndicator(
                                     modifier = Modifier.align(Alignment.Center),
                                     color = surfaceBrandDefault
@@ -430,10 +427,6 @@ fun <T : BaseViewModel> BaseScreen(
                                 }
 
                             }
-                        }
-
-                        ViewStates.VPNDetected -> {
-                            //TODO show bottom sheet
                         }
                     }
 

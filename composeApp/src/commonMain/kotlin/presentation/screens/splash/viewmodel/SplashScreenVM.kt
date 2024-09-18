@@ -1,11 +1,9 @@
 package presentation.screens.splash.viewmodel
 
 import androidx.compose.runtime.mutableStateOf
-import data.network.request.version.VersionRequest
 import domain.usecase.usecase.version.GetVersionOfServerUseCase
 import io.github.aakira.napier.LogLevel
 import io.github.aakira.napier.Napier
-import io.ktor.http.HttpStatusCode
 import irancell.nwg.wfm.DeviceInfo
 import irancell.nwg.wfm.InternalStorage
 import irancell.nwg.wfm.LifecycleEvent
@@ -15,12 +13,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import presentation.screens.main.events.MainEvent
 import presentation.screens.splash.events.CheckVersionEvent
 import presentation.screens.splash.events.PermissionEvent
 import utils.AsyncStatus
 import utils.BaseViewModel
-import utils.ViewStates
 import androidx.compose.runtime.State
 import domain.models.version.GetVersionDomain
 import domain.usecase.usecase.ipDetection.IpDetectionUseCase
@@ -50,11 +46,52 @@ class SplashScreenVM(
     private val _versionData = mutableStateOf<GetVersionDomain?>(null)
     val versionData: State<GetVersionDomain?> = _versionData
 
-    init {
+    private val _showVpnBottomSheet = MutableStateFlow(false)
+    val showVpnBottomSheet: StateFlow<Boolean> = _showVpnBottomSheet.asStateFlow()
 
+
+    init {
+        checkVersionOfServer()
         InternalStorage.initWFMImages(provideAppContext())
         InternalStorage.initProcessImages(provideAppContext())
         InternalStorage.initSuspendImages(provideAppContext())
+    }
+
+    fun restrictForeignIp() {
+        viewModelScope.launch {
+            ipDetectionUseCase(Unit).collect {
+                when (it.status) {
+                    AsyncStatus.ERROR -> {
+                        checkVersionOfServer()
+                        Napier.log(
+                            LogLevel.ASSERT,
+                            tag = "get country",
+                            message = "ERROR" + it.message
+                        )
+                    }
+
+                    AsyncStatus.LOADING -> {
+                        Napier.log(LogLevel.ASSERT, tag = "get country", message = "LOADING")
+                    }
+
+                    AsyncStatus.EMPTY -> {}
+                    AsyncStatus.SUCCESS -> {
+                        if (it.data.toString() != "IR") {
+                            _showVpnBottomSheet.update { true }
+                        }
+                        Napier.log(
+                            LogLevel.ASSERT,
+                            tag = "get country",
+                            message = it.data.toString()
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+    fun updateBottomSheetState(show: Boolean) {
+        _showVpnBottomSheet.update { show }
     }
 
 

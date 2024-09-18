@@ -13,7 +13,7 @@ class IpDetectionRepositoryImpl(
     private val httpClient: HttpClient,
 ) : IIpDetectionRepository {
     override suspend fun detectIp(): IpDetectionResponse {
-        val response = httpClient.get("https://api.country.is/")
+        val response = httpClient.get("https://api.country.is")
             .body<IpDetectionResponse>()
         Napier.log(
             LogLevel.ASSERT,

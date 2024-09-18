@@ -64,11 +64,9 @@ import utils.startDownloadFileApk
 
 class SplashScreen : Screen {
 
-
     @OptIn(ExperimentalMaterialApi::class)
     @Composable
     override fun Content() {
-
 
         val scaffoldState: BottomSheetScaffoldState = rememberBottomSheetScaffoldState()
         val scope = rememberCoroutineScope()
@@ -101,38 +99,6 @@ class SplashScreen : Screen {
         BaseScreen(viewModel = viewModel,
             title = "notStartService",
             scaffoldState = scaffoldState,
-            bottomSheetTitle =
-            bottomSheetHasHeader = false,
-            bottomSheetContent = {
-                Napier.log(
-                    LogLevel.ASSERT,
-                    tag = "showVpnBottomSheet",
-                    message = "$showVpnBottomSheet"
-                )
-                if (showVpnBottomSheet) {
-
-                    customBottomSheetWithImage(
-                        BottomSheetActionModel(
-                            stringResource(MR.strings.go_to_setting),
-                            surfaceBrandDefault,
-                            surfaceBrandDefault,
-                        ),
-                        description = stringResource(MR.strings.vpn_detected_description),
-                        imageResource = MR.images.disconnected,
-                        onButtonClick = {
-                            openVpnSettings()
-                            viewModel.updateBottomSheetState(false)
-                        },
-                    )
-                    scope.launch {
-                        scaffoldState.bottomSheetState.expand()
-                    }
-                } else {
-                    scope.launch {
-                        scaffoldState.bottomSheetState.collapse()
-                    }
-                }
-            },
             content = {
                 Surface(
                     modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background
