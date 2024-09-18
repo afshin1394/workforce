@@ -272,6 +272,10 @@ fun <T : BaseViewModel> BaseScreen(
                                     }
                                 }
                             }
+
+                            else -> {
+                                //TODO show bottom sheet
+                            }
                         }
                     }
                 }
@@ -337,8 +341,6 @@ fun <T : BaseViewModel> BaseScreen(
                         }
 
                         ViewStates.EMPTY -> {
-
-
                             Column(
                                 modifier = Modifier
                                     .fillMaxSize()
@@ -428,6 +430,10 @@ fun <T : BaseViewModel> BaseScreen(
                                 }
 
                             }
+                        }
+
+                        ViewStates.VPNDetected -> {
+                            //TODO show bottom sheet
                         }
                     }
 
