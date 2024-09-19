@@ -57,11 +57,9 @@ abstract class BaseUseCase<out Type, in Params> {
                 exception.message?.let {
 
                     val resultStatus = exception.handleError()
-                    Napier.log(
-                        LogLevel.ASSERT,
-                        "BaseUseCaseResultStatus",
-                        message = resultStatus.toString()
-                    )
+
+                    Napier.log(LogLevel.ASSERT, tag = "UnitOfWork", message = "ERROR "+it)
+
                     emit(AsyncResult.Error(it, resultStatus))
                     SentryLog(exception.stackTraceToString())
                 } ?: run {

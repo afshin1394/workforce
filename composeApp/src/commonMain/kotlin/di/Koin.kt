@@ -177,7 +177,7 @@ fun httpModule() = module {
             }
             configure()
             defaultRequest {
-                url(DevelopmentBASEURL)
+                url(DeploymentBASEURL)
                 contentType(ContentType.Application.Json)
                 headers {
                     append(
@@ -215,7 +215,7 @@ fun httpModule() = module {
             }
             configure()
             defaultRequest {
-                url(DevelopmentBASEURL)
+                url(DeploymentBASEURL)
                 contentType(ContentType.Application.Json)
                 headers {
 

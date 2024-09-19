@@ -64,7 +64,6 @@ class LoginScreenVM(
                 when (it.status) {
                     AsyncStatus.ERROR -> {
                         handleError(it.resultStatus)
-                        Napier.log(LogLevel.ASSERT, tag = "serviice", message = "ERROR"+it.message)
                     }
 
                     AsyncStatus.LOADING -> {

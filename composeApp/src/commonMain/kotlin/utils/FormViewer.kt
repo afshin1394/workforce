@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -50,7 +51,6 @@ import presentation.screens.main.components.formViewer.UploadFileComponent
 import presentation.screens.main.components.formViewer.groupComponent
 
 
-@OptIn(FlowPreview::class)
 @Composable
 fun initialize(
     savedIndex : Int,
@@ -60,8 +60,8 @@ fun initialize(
     photoDomainList: MutableList<PhotoDomain>,
     components: List<ComponentDomain>,
     onChanges: (componentDomain : ComponentDomain, listValueDomain: List<ValueDomain>?) -> Unit,
-    onAddItem: (componentDomain: ComponentDomain, listValueDomain: List<ValueDomain>?, indexParent: List<Int>, indexChild: Int) -> Unit,
-    onRemoveItem: (componentDomain:ComponentDomain, listValueDomain: List<ValueDomain>?, indexParent: List<Int>, indexChild: Int) -> Unit,
+    onAddItem: (componentDomain: ComponentDomain, indexChild: Int,onComplete:(position : Int)->Unit) -> Unit,
+    onRemoveItem: (componentDomain:ComponentDomain,  indexChild: Int,onComplete:(position : Int)->Unit) -> Unit,
     onClickImage: (indexPhotoSelected: Int, componentKey: String,componentId : String) -> Unit,
     currentParentIndex: List<Int> = listOf(),
 ) {
@@ -107,11 +107,15 @@ fun initialize(
                             onAddClick = {
 
                                 val newComponents =
-                                    listOf(copyComponentWithValues(item, uuid4().toString()))
-                                onAddItem(copyComponentWithValues(item, uuid4().toString()), null, currentParentIndex, index)
-                                scope.launch {
-                                    listState.scrollToItem(index + 1)
+                                    copyComponentWithValues(item, uuid4().toString())
+                                onAddItem(newComponents,index){ position->
+                                    scope.launch {
+                                        listState.animateScrollToItem(index + position)
+                                    }
                                 }
+
+
+
 
 
                             },
@@ -119,10 +123,13 @@ fun initialize(
 
                                 val newComponents =
                                     item.id?.let { it1 -> removeComponentById(components, it1) }
-                                onRemoveItem(newComponents!!, null, currentParentIndex, index)
+                                newComponents?.let {
+                                    onRemoveItem(newComponents, index){
+                                        scope.launch {
+                                            listState.animateScrollToItem(index - 1)
+                                        }
+                                    }
 
-                                scope.launch {
-                                    listState.animateScrollToItem(index - 1)
                                 }
 
 
@@ -140,13 +147,13 @@ fun initialize(
 
                         val errorMessageState = remember { mutableStateOf(initialMessageError) }
 
-
+                        var valueState = remember { mutableStateOf(item.values?.get(0)?.value ?: "") }
 
 
                         Editable(
                             processLogicDomain = item.processLogicDomain,
                             type = TypeEditable.NUMBER,
-                            value = item.values?.get(0)?.value ?: "",
+                            value = valueState.value,
                             placeholder = item.label.toString(),
                             imeAction = ImeAction.None,
                             errorMessage = if (errorMessageState.value == initialMessageError) errorMessageState.value else initialMessageError,
@@ -154,6 +161,7 @@ fun initialize(
                             readOnly = item.readOnly,
                             maxLines = 1,
                             onValueChange = { newValue ->
+                                valueState.value = newValue
 
                                 val updatedValueDomain = updateValueDomain(
                                     item.values?.get(0) ?: ValueDomain(),
@@ -183,11 +191,12 @@ fun initialize(
                             )
 
                         val errorMessageState = remember { mutableStateOf(initialMessageError) }
+                        var valueState = remember { mutableStateOf(item.values?.get(0)?.value ?: "") }
 
                         Editable(
                             processLogicDomain = item.processLogicDomain,
                             type = TypeEditable.TEXTAREA,
-                            value = item.values?.get(0)?.value ?: "",
+                            value = valueState.value,
                             placeholder = item.label.toString(),
                             imeAction = ImeAction.None,
                             errorMessage = if (errorMessageState.value == initialMessageError) errorMessageState.value else initialMessageError,
@@ -195,6 +204,8 @@ fun initialize(
                             readOnly = item.readOnly,
                             maxLines = 1,
                             onValueChange = { newValue ->
+                                valueState.value = newValue
+
                                 val updatedValueDomain = updateValueDomain(
                                     item.values?.get(0) ?: ValueDomain(),
                                     newValue
@@ -221,11 +232,12 @@ fun initialize(
                             )
 
                         val errorMessageState = remember { mutableStateOf(initialMessageError) }
+                        var valueState = remember { mutableStateOf(item.values?.get(0)?.value ?: "") }
 
                         Editable(
                             processLogicDomain = item.processLogicDomain,
                             type = TypeEditable.SHORT_TEXT,
-                            value = item.values?.get(0)?.value ?: "",
+                            value = valueState.value,
                             placeholder = item.label.toString(),
                             imeAction = ImeAction.None,
                             errorMessage = if (errorMessageState.value == initialMessageError) errorMessageState.value else initialMessageError,
@@ -233,7 +245,7 @@ fun initialize(
                             readOnly = item.readOnly,
                             maxLines = 1,
                             onValueChange = { newValue ->
-
+                                valueState.value = newValue
                                 val updatedValueDomain = updateValueDomain(
                                     item.values?.get(0) ?: ValueDomain(), newValue
                                 )
@@ -262,12 +274,13 @@ fun initialize(
                             )
 
                         val errorMessageState = remember { mutableStateOf(initialMessageError) }
+                        var valueState = remember { mutableStateOf(item.values?.get(0)?.value ?: "") }
 
 
                         Editable(
                             processLogicDomain = item.processLogicDomain,
                             type = TypeEditable.LATLONG,
-                            value = item.values?.get(0)?.value ?: "",
+                            value = valueState.value,
                             placeholder = item.label.toString(),
                             imeAction = ImeAction.None,
                             errorMessage = if (errorMessageState.value == initialMessageError) errorMessageState.value else initialMessageError,
@@ -275,6 +288,7 @@ fun initialize(
                             readOnly = item.readOnly,
                             maxLines = 1,
                             onValueChange = { newValue ->
+                                valueState.value = newValue
 
                                 val updatedValueDomain = updateValueDomain(
                                     item.values?.get(0) ?: ValueDomain(), newValue
@@ -304,11 +318,12 @@ fun initialize(
                             )
 
                         val errorMessageState = remember { mutableStateOf(initialMessageError) }
+                        var valueState = remember { mutableStateOf(item.values?.get(0)?.value ?: "") }
 
                         Editable(
                             processLogicDomain = item.processLogicDomain,
                             type = TypeEditable.PHONE,
-                            value = item.values?.get(0)?.value ?: "",
+                            value = valueState.value,
                             placeholder = item.label.toString(),
                             imeAction = ImeAction.None,
                             errorMessage = if (errorMessageState.value == initialMessageError) errorMessageState.value else initialMessageError,
@@ -316,6 +331,7 @@ fun initialize(
                             readOnly = item.readOnly,
                             maxLines = 1,
                             onValueChange = { newValue ->
+                                valueState.value = newValue
 
                                 val updatedValueDomain = updateValueDomain(
                                     item.values?.get(0) ?: ValueDomain(), newValue
@@ -345,10 +361,12 @@ fun initialize(
                             )
 
                         val errorMessageState = remember { mutableStateOf(initialMessageError) }
+                        var valueState = remember { mutableStateOf(item.values?.get(0)?.value ?: "") }
+
                         Editable(
                             processLogicDomain = item.processLogicDomain,
                             type = TypeEditable.EMAIL,
-                            value = item.values?.get(0)?.value ?: "",
+                            value = valueState.value,
                             placeholder = item.label.toString(),
                             imeAction = ImeAction.None,
                             keyboardType = KeyboardType.Email,
@@ -356,6 +374,7 @@ fun initialize(
                             maxLines = 1,
                             errorMessage = if (errorMessageState.value == initialMessageError) errorMessageState.value else initialMessageError,
                             onValueChange = { newValue ->
+                                valueState.value = newValue
 
 
                                 val updatedValueDomain = updateValueDomain(

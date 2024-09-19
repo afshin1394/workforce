@@ -35,8 +35,8 @@ fun groupComponent(
     modifier: Modifier,
     photoDomainList: MutableList<PhotoDomain>,
     onChanges: (componentDomain: ComponentDomain, listValueDomain:List<ValueDomain>) -> Unit,
-    onAddItem: (componentDomain:ComponentDomain, listValueDomain:List<ValueDomain>, indexParent: List<Int>, indexChild: Int) -> Unit,
-    onRemoveItem: (componentDomain:ComponentDomain, listValueDomain:List<ValueDomain>, indexParent: List<Int>, indexChild: Int) -> Unit,
+    onAddItem: (componentDomain: ComponentDomain,indexChild: Int,onComplete:(position : Int)->Unit) -> Unit,
+    onRemoveItem: (componentDomain:ComponentDomain, indexChild: Int,onComplete:(position : Int)->Unit) -> Unit,
     onClickImage:(indexPhotoSelected:Int,componentKey:String,componentId:String)->Unit,
     currentParentIndex: List<Int> = listOf(),
     item : ComponentDomain,
@@ -75,8 +75,8 @@ fun groupComponent(
             initialize( parentIndex ,savedIndex,taskID,modifier.heightIn(0.dp, 1000.dp),photoDomainList,
                 it,
                 onChanges as (ComponentDomain, List<ValueDomain>?) -> Unit,
-                onAddItem  as (ComponentDomain, List<ValueDomain>?, List<Int>, Int) -> Unit,
-                onRemoveItem  as (ComponentDomain, List<ValueDomain>?, List<Int>, Int) -> Unit,
+                onAddItem  as (componentDomain: ComponentDomain,indexChild: Int,onComplete:(position : Int) -> Unit) -> Unit,
+                onRemoveItem  as (ComponentDomain, Int,onComplete:(position : Int)->Unit) -> Unit,
                 onClickImage, currentParentIndex)
         }
     }

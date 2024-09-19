@@ -52,10 +52,13 @@ fun Editable(
     onValueChange: (value: String) -> Unit
 ) {
     Napier.log(LogLevel.ASSERT, tag = "Editablevalue", message = value)
-    var valueChange  by   mutableStateOf(value)
-    processLogicDomain.calculatedValue?.let {
-        if (it.isNotEmpty())
-            valueChange = it
+    var valueChange  = mutableStateOf(value)
+    LaunchedEffect(processLogicDomain.calculatedValue) {
+        processLogicDomain.calculatedValue?.let {
+            if (it.isNotEmpty() && it != valueChange.value) {
+                valueChange.value = it
+            }
+        }
     }
     val disableLogic = processLogicDomain.disabled
     val hideLogic = processLogicDomain.shouldHide
@@ -106,13 +109,12 @@ fun Editable(
                     imeAction = imeAction
                 ),
                 maxLines = maxLines,
-                value = valueChange,
+                value = valueChange.value,
                 onValueChange = {
-                    if (!disableLogic && !readOnlyLogic) {
-                        valueChange = it
-                        onValueChange(valueChange)
+                    if (!disableLogic && !readOnlyLogic && it != valueChange.value) {
+                        valueChange.value = it
+                        onValueChange(valueChange.value)
                     }
-
                 },
                 modifier = Modifier
                     .fillMaxWidth()

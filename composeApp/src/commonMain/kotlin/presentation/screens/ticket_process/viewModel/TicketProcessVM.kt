@@ -6,6 +6,7 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import arrow.core.Tuple4
 import arrow.core.Tuple5
+import data.network.response.task.Component
 import data.network.response.task.Value
 import domain.models.PhotoDomain
 import domain.models.form_struct.ComponentDomain
@@ -358,26 +359,41 @@ class TicketProcessVM(
 
     fun addOrRemoveComponentDomainRepeatableToList(
         compD:ComponentDomain,
-        indexChild: Int
+        indexChild: Int,
+        scrollCallBack:(position:Int)->Unit
     ) {
 
-        val tempComponent = arrayListOf<ComponentDomain>()
-            if (compD.removable == true) {
+          val createdIndex = tempComponentList.findComponentsWithKey(compD).size
+          Napier.log(LogLevel.ASSERT, "createdIndex", message = createdIndex.toString())
+          val tempComponent = arrayListOf<ComponentDomain>()
+          if (compD.removable == true) {
 
-                tempComponent.addAll(tempComponentList.apply {
-                    add(indexChild + 1, compD)
-                })
-                tempComponentList.clear()
-                tempComponentList.addAll(tempComponent)
-            } else {
-                tempComponent.addAll( tempComponentList.apply {
-                    removeAt(indexChild)
-                })
-                tempComponentList.clear()
-                tempComponentList.addAll(tempComponent)
+              tempComponent.addAll(tempComponentList.apply {
+                  add(indexChild + createdIndex, compD)
+              })
+                  tempComponentList.clear()
+                  tempComponentList.addAll(tempComponent)
+              scrollCallBack(createdIndex)
 
-            }
+          } else {
+              tempComponent.addAll(tempComponentList.apply {
+                  removeAt(indexChild)
+              })
+                  tempComponentList.clear()
+                  tempComponentList.addAll(tempComponent)
+              scrollCallBack(indexChild)
+
+
+
+      }
+  }
+
+    private fun List<ComponentDomain>.findComponentsWithKey(componentDomain: ComponentDomain): List<ComponentDomain> {
+        return this.flatMap { component ->
+            listOf(component).plus(component.components?.findComponentsWithKey(componentDomain) ?: emptyList())
+        }.filter { it.key == componentDomain.key }
     }
+
 
     /////////////////////////////photo//////////////////////////////////////////////////////////
 
