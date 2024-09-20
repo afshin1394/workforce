@@ -29,22 +29,22 @@ import utils.initialize
 
 @Composable
 fun groupComponent(
-    parentIndex : Int,
-    savedIndex : Int,
-    taskID:String,
+    isChild:Boolean,
+    scrollingState : Pair<Int,Int>,
+    parentIndex: Int,
+    savedIndex: Int,
+    taskID: String,
     modifier: Modifier,
     photoDomainList: MutableList<PhotoDomain>,
-    onChanges: (componentDomain: ComponentDomain, listValueDomain:List<ValueDomain>) -> Unit,
-    onAddItem: (componentDomain: ComponentDomain,indexChild: Int,onComplete:(position : Int)->Unit) -> Unit,
-    onRemoveItem: (componentDomain:ComponentDomain, indexChild: Int,onComplete:(position : Int)->Unit) -> Unit,
-    onClickImage:(indexPhotoSelected:Int,componentKey:String,componentId:String)->Unit,
+    onChanges: (componentDomain: ComponentDomain, listValueDomain: List<ValueDomain>) -> Unit,
+    onAddItem: (componentDomain: ComponentDomain, indexChild: Int, onComplete: (position: Int) -> Unit) -> Unit,
+    onRemoveItem: (componentDomain: ComponentDomain, indexChild: Int, onComplete: (position: Int) -> Unit) -> Unit,
+    onClickImage: (indexPhotoSelected: Int, componentKey: String, componentId: String) -> Unit,
     currentParentIndex: List<Int> = listOf(),
-    item : ComponentDomain,
+    item: ComponentDomain,
     onAddClick: () -> Unit,
     onDeleteClick: () -> Unit,
-    ) {
-
-
+) {
 
 
     Column(
@@ -72,12 +72,21 @@ fun groupComponent(
             }
         }
         item.components?.let {
-            initialize( parentIndex ,savedIndex,taskID,modifier.heightIn(0.dp, 1000.dp),photoDomainList,
+            initialize(
+                isChild,
+                scrollingState,
+                parentIndex,
+                savedIndex,
+                taskID,
+                modifier.heightIn(0.dp, 1000.dp),
+                photoDomainList,
                 it,
                 onChanges as (ComponentDomain, List<ValueDomain>?) -> Unit,
-                onAddItem  as (componentDomain: ComponentDomain,indexChild: Int,onComplete:(position : Int) -> Unit) -> Unit,
-                onRemoveItem  as (ComponentDomain, Int,onComplete:(position : Int)->Unit) -> Unit,
-                onClickImage, currentParentIndex)
+                onAddItem as (componentDomain: ComponentDomain, indexChild: Int, onComplete: (position: Int) -> Unit) -> Unit,
+                onRemoveItem as (ComponentDomain, Int, onComplete: (position: Int) -> Unit) -> Unit,
+                onClickImage,
+                currentParentIndex,
+            )
         }
     }
 
