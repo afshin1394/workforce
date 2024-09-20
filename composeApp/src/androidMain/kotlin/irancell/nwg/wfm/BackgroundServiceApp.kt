@@ -369,6 +369,7 @@ internal actual class BackgroundServiceApp : Service(), KoinComponent {
                 }
 
                 AsyncStatus.EMPTY -> {
+                    Napier.log(LogLevel.ASSERT, "updateSteps", message = "EMPTY : ")
 
                 }
 
@@ -382,8 +383,7 @@ internal actual class BackgroundServiceApp : Service(), KoinComponent {
 
                     Napier.log(
                         LogLevel.ASSERT,
-                        "" +
-                                "",
+                        "updateSteps",
                         message = "SUCCESS: " + it.data
                     )
 

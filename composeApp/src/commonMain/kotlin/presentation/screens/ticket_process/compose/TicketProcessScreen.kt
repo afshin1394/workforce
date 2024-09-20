@@ -409,17 +409,26 @@ class TicketProcessScreen(
                                     }
                                 }
                             },
-                            onAddItem = { listComponent, listValueDomain, listIndexParent, indexChild ->
+                            onAddItem = { component,  indexChild,scrollCallback ->
+
                                 viewModel.addOrRemoveComponentDomainRepeatableToList(
-                                    listComponent,
-                                    indexChild
-                                )
+                                        component,
+                                        indexChild,
+                                    scrollCallback
+                                    )
+
+
+
                             },
-                            onRemoveItem = { listComponent, listValueDomain, listIndexParent, indexChild ->
-                                viewModel.addOrRemoveComponentDomainRepeatableToList(
-                                    listComponent,
-                                    indexChild
-                                )
+                            onRemoveItem = { component, indexChild,scrollCallBack ->
+                                    viewModel.addOrRemoveComponentDomainRepeatableToList(
+                                        component,
+                                        indexChild,
+                                        scrollCallBack
+                                    )
+
+
+
                             },
 
                             )

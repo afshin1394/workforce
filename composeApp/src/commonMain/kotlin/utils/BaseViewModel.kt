@@ -137,6 +137,7 @@ open class BaseViewModel : ViewModel() {
     }
 
     fun handleError(resultStatus: ResultStatus?) {
+
         when (resultStatus) {
             is ResultStatus.CLIENT_EXCEPTION.FORBIDDEN -> {
 
