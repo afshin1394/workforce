@@ -1,6 +1,7 @@
 package utils
 
 
+import androidx.compose.foundation.gestures.animateScrollBy
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.heightIn
@@ -53,34 +54,53 @@ import presentation.screens.main.components.formViewer.groupComponent
 
 @Composable
 fun initialize(
-    savedIndex : Int,
-    savedParentIndex : Int,
+    isChild: Boolean,
+    scrollingState: Pair<Int, Int>,
+    savedIndex: Int,
+    savedParentIndex: Int,
     taskID: String,
     modifier: Modifier,
     photoDomainList: MutableList<PhotoDomain>,
     components: List<ComponentDomain>,
-    onChanges: (componentDomain : ComponentDomain, listValueDomain: List<ValueDomain>?) -> Unit,
-    onAddItem: (componentDomain: ComponentDomain, indexChild: Int,onComplete:(position : Int)->Unit) -> Unit,
-    onRemoveItem: (componentDomain:ComponentDomain,  indexChild: Int,onComplete:(position : Int)->Unit) -> Unit,
-    onClickImage: (indexPhotoSelected: Int, componentKey: String,componentId : String) -> Unit,
+    onChanges: (componentDomain: ComponentDomain, listValueDomain: List<ValueDomain>?) -> Unit,
+    onAddItem: (componentDomain: ComponentDomain, indexChild: Int, onComplete: (position: Int) -> Unit) -> Unit,
+    onRemoveItem: (componentDomain: ComponentDomain, indexChild: Int, onComplete: (position: Int) -> Unit) -> Unit,
+    onClickImage: (indexPhotoSelected: Int, componentKey: String, componentId: String) -> Unit,
     currentParentIndex: List<Int> = listOf(),
 ) {
+
     Napier.log(LogLevel.ASSERT, tag = "indexFile", message = "indexFile${savedIndex}")
     val indexChildSaveable = rememberSaveable { mutableStateOf(savedIndex) }
-    val indexParentSaveable = rememberSaveable{ mutableStateOf<Int?>(null) }
+    val indexParentSaveable = rememberSaveable { mutableStateOf<Int?>(null) }
     val itemState = remember { mutableStateOf(ComponentDomain()) }
-    val uploadDomainLists = remember { mutableStateMapOf<String, MutableState<List<ValueDomain>>>() }
+    val uploadDomainLists =
+        remember { mutableStateMapOf<String, MutableState<List<ValueDomain>>>() }
 
 
     val listState = rememberLazyListState()
     val scope = rememberCoroutineScope()
+
+    LaunchedEffect(scrollingState) {
+        Napier.log(
+            LogLevel.ASSERT,
+            tag = "scrollingState",
+            message = "first-->${scrollingState.first} second-->${scrollingState.second}"
+        )
+        if (isChild) {
+            if (scrollingState.second != -1)
+                listState.animateScrollToItem(scrollingState.second)
+        } else {
+            if (scrollingState.first != -1)
+                listState.animateScrollToItem(scrollingState.first)
+        }
+    }
     Napier.log(LogLevel.ASSERT, tag = "initialize", message = "reinititt${components.toList()}")
     LazyColumn(
         state = listState,
         modifier = modifier,
         contentPadding = PaddingValues(bottom = 100.dp)
     ) {
-        itemsIndexed(components,key = { index, _ -> index }) { index, item ->
+        itemsIndexed(components, key = { index, _ -> index }) { index, item ->
 
             val updatedParentIndex = currentParentIndex + index
 
@@ -92,8 +112,10 @@ fun initialize(
 
 
                         groupComponent(
+                            true,
+                            scrollingState = scrollingState,
                             parentIndex = savedParentIndex,
-                            savedIndex= savedIndex,
+                            savedIndex = savedIndex,
                             taskID,
                             modifier.heightIn(0.dp, 1000.dp),
                             photoDomainList,
@@ -108,14 +130,11 @@ fun initialize(
 
                                 val newComponents =
                                     copyComponentWithValues(item, uuid4().toString())
-                                onAddItem(newComponents,index){ position->
+                                onAddItem(newComponents, index) { position ->
                                     scope.launch {
                                         listState.animateScrollToItem(index + position)
                                     }
                                 }
-
-
-
 
 
                             },
@@ -124,7 +143,7 @@ fun initialize(
                                 val newComponents =
                                     item.id?.let { it1 -> removeComponentById(components, it1) }
                                 newComponents?.let {
-                                    onRemoveItem(newComponents, index){
+                                    onRemoveItem(newComponents, index) {
                                         scope.launch {
                                             listState.animateScrollToItem(index - 1)
                                         }
@@ -147,7 +166,8 @@ fun initialize(
 
                         val errorMessageState = remember { mutableStateOf(initialMessageError) }
 
-                        var valueState = remember { mutableStateOf(item.values?.get(0)?.value ?: "") }
+                        var valueState =
+                            remember { mutableStateOf(item.values?.get(0)?.value ?: "") }
 
 
                         Editable(
@@ -191,7 +211,8 @@ fun initialize(
                             )
 
                         val errorMessageState = remember { mutableStateOf(initialMessageError) }
-                        var valueState = remember { mutableStateOf(item.values?.get(0)?.value ?: "") }
+                        var valueState =
+                            remember { mutableStateOf(item.values?.get(0)?.value ?: "") }
 
                         Editable(
                             processLogicDomain = item.processLogicDomain,
@@ -232,7 +253,8 @@ fun initialize(
                             )
 
                         val errorMessageState = remember { mutableStateOf(initialMessageError) }
-                        var valueState = remember { mutableStateOf(item.values?.get(0)?.value ?: "") }
+                        var valueState =
+                            remember { mutableStateOf(item.values?.get(0)?.value ?: "") }
 
                         Editable(
                             processLogicDomain = item.processLogicDomain,
@@ -274,7 +296,8 @@ fun initialize(
                             )
 
                         val errorMessageState = remember { mutableStateOf(initialMessageError) }
-                        var valueState = remember { mutableStateOf(item.values?.get(0)?.value ?: "") }
+                        var valueState =
+                            remember { mutableStateOf(item.values?.get(0)?.value ?: "") }
 
 
                         Editable(
@@ -318,7 +341,8 @@ fun initialize(
                             )
 
                         val errorMessageState = remember { mutableStateOf(initialMessageError) }
-                        var valueState = remember { mutableStateOf(item.values?.get(0)?.value ?: "") }
+                        var valueState =
+                            remember { mutableStateOf(item.values?.get(0)?.value ?: "") }
 
                         Editable(
                             processLogicDomain = item.processLogicDomain,
@@ -361,7 +385,8 @@ fun initialize(
                             )
 
                         val errorMessageState = remember { mutableStateOf(initialMessageError) }
-                        var valueState = remember { mutableStateOf(item.values?.get(0)?.value ?: "") }
+                        var valueState =
+                            remember { mutableStateOf(item.values?.get(0)?.value ?: "") }
 
                         Editable(
                             processLogicDomain = item.processLogicDomain,
@@ -428,7 +453,7 @@ fun initialize(
 
                             updateDateTimeValidationError(item, errorMessageState)
 
-                            onChanges( item, newValues)
+                            onChanges(item, newValues)
                         }
                     }
 
@@ -460,7 +485,7 @@ fun initialize(
 
                             updateDateTimeValidationError(item, errorMessageState)
 
-                            onChanges( item, newValues)
+                            onChanges(item, newValues)
 
 
                         }
@@ -497,7 +522,7 @@ fun initialize(
 
                             updateDateTimeValidationError(item, errorMessageState)
 
-                            onChanges( item, newValues)
+                            onChanges(item, newValues)
 
 
                         }
@@ -506,84 +531,96 @@ fun initialize(
 
 
                     FormViewerTypes.FileUpload -> {
-                           var selectedComponentObject = components[index]
-                            // Ensure there is an upload list for this item key
-                            if (!uploadDomainLists.containsKey(item.key)) {
-                                uploadDomainLists[item.key!!] = mutableStateOf(
-                                    components[index].values ?: item.values ?: emptyList()
+                        var selectedComponentObject = components[index]
+                        // Ensure there is an upload list for this item key
+                        if (!uploadDomainLists.containsKey(item.key)) {
+                            uploadDomainLists[item.key!!] = mutableStateOf(
+                                components[index].values ?: item.values ?: emptyList()
+                            )
+
+                        }
+
+
+                        val uploadDomainList = uploadDomainLists[item.key!!]!!
+
+                        val initialMessageError: ResourceFormattedStringDesc =
+                            item.validate?.messageError ?: ResourceFormattedStringDesc(
+                                MR.strings.empty_error_message,
+                                emptyList()
+                            )
+
+                        val errorMessage = remember { mutableStateOf(initialMessageError) }
+
+                        UploadFileComponent(
+                            index = index,
+                            item = item,
+                            label = item.key ?: "",
+                            errorMessage = if (errorMessage.value == initialMessageError) errorMessage.value else initialMessageError,
+                            modifier = Modifier,
+                            uploadList = uploadDomainList.value,
+                            onChooseFileFromDevice = { list ->
+                                val oldList = uploadDomainList.value.toMutableList()
+                                val newValues = mutableListOf<ValueDomain>()
+
+                                updateFileUploadValidationError(
+                                    selectedComponentObject,
+                                    list,
+                                    errorMessage,
+                                    newValues
                                 )
 
+                                // Update the list and remove duplicates
+                                oldList.addAll(newValues)
+                                val newList = oldList.distinct()
+
+                                uploadDomainList.value = newList
+                                components[indexChildSaveable.value].values = newList
+
+                                onChanges(
+                                    item,
+                                    selectedComponentObject.values
+                                )
+                                Napier.log(
+                                    LogLevel.ASSERT,
+                                    tag = "UploadFileComponent onClickUpload",
+                                    message = components[indexChildSaveable.value].toString()
+                                )
+
+
+                            },
+                            onClickUpload = { indexClick ->
+                                indexChildSaveable.value = indexClick
+                                Napier.log(
+                                    LogLevel.ASSERT,
+                                    tag = "UploadFileComponent",
+                                    message = index.toString()
+                                )
+                                Napier.log(
+                                    LogLevel.ASSERT,
+                                    tag = "UploadFileComponent onClickUpload",
+                                    message = components[indexChildSaveable.value].toString()
+                                )
+
+                            },
+                            onRemoveFile = { fileToRemove ->
+
+                                val newList = uploadDomainList.value.toMutableList()
+                                newList.remove(fileToRemove)
+                                uploadDomainList.value = newList
+                                item.values = newList
+                                Napier.log(
+                                    LogLevel.ASSERT,
+                                    tag = "UploadFileComponent onClickUpload",
+                                    message = item.toString()
+                                )
+
+                                onChanges(
+                                    item,
+                                    item.values
+                                )
                             }
 
-
-                            val uploadDomainList = uploadDomainLists[item.key!!]!!
-
-                            val initialMessageError: ResourceFormattedStringDesc =
-                                item.validate?.messageError ?: ResourceFormattedStringDesc(
-                                    MR.strings.empty_error_message,
-                                    emptyList()
-                                )
-
-                            val errorMessage = remember { mutableStateOf(initialMessageError) }
-
-                            UploadFileComponent(
-                                index = index,
-                                item = item,
-                                label = item.key ?: "",
-                                errorMessage = if (errorMessage.value == initialMessageError) errorMessage.value else initialMessageError,
-                                modifier = Modifier,
-                                uploadList = uploadDomainList.value,
-                                onChooseFileFromDevice = { list ->
-                                        val oldList = uploadDomainList.value.toMutableList()
-                                        val newValues = mutableListOf<ValueDomain>()
-
-                                        updateFileUploadValidationError(
-                                            selectedComponentObject,
-                                            list,
-                                            errorMessage,
-                                            newValues
-                                        )
-
-                                        // Update the list and remove duplicates
-                                        oldList.addAll(newValues)
-                                        val newList = oldList.distinct()
-
-                                        uploadDomainList.value = newList
-                                        components[indexChildSaveable.value].values = newList
-
-                                        onChanges(
-                                            item,
-                                            selectedComponentObject.values
-                                        )
-                                    Napier.log(LogLevel.ASSERT,tag = "UploadFileComponent onClickUpload",message = components[indexChildSaveable.value].toString())
-
-
-                                },
-                                onClickUpload = {indexClick->
-                                    indexChildSaveable.value = indexClick
-                                    Napier.log(
-                                        LogLevel.ASSERT,
-                                        tag = "UploadFileComponent",
-                                        message = index.toString()
-                                    )
-                                    Napier.log(LogLevel.ASSERT,tag = "UploadFileComponent onClickUpload",message = components[indexChildSaveable.value].toString())
-
-                                },
-                                onRemoveFile = { fileToRemove ->
-
-                                    val newList = uploadDomainList.value.toMutableList()
-                                    newList.remove(fileToRemove)
-                                    uploadDomainList.value = newList
-                                    item.values = newList
-                                    Napier.log(LogLevel.ASSERT,tag = "UploadFileComponent onClickUpload",message = item.toString())
-
-                                    onChanges(
-                                        item,
-                                        item.values
-                                    )
-                                }
-
-                            )
+                        )
 
                     }
 
@@ -601,25 +638,38 @@ fun initialize(
                             item,
                             taskID,
                             if (errorMessageState.value == initialMessageError) errorMessageState.value else initialMessageError,
-                            findPhotosByComponentId(photoDomainList,item.id, item.key),
-                            onTakePhoto = { obj ,resultTakePhoto ->
-                                (obj as ComponentDomain? )?.let {
-                                    Napier.log(LogLevel.ASSERT,tag = "takePhoto onTakePhoto",message =it.toString())
+                            findPhotosByComponentId(photoDomainList, item.id, item.key),
+                            onTakePhoto = { obj, resultTakePhoto ->
+                                (obj as ComponentDomain?)?.let {
+                                    Napier.log(
+                                        LogLevel.ASSERT,
+                                        tag = "takePhoto onTakePhoto",
+                                        message = it.toString()
+                                    )
 
                                     val newValues =
-                                    listOf(ValueDomain("${obj?.type}:${obj?.id}", "${resultTakePhoto}"))
+                                        listOf(
+                                            ValueDomain(
+                                                "${obj?.type}:${obj?.id}",
+                                                "${resultTakePhoto}"
+                                            )
+                                        )
                                     it.values = newValues
-                                updateImageViewValidationError(it, errorMessageState)
+                                    updateImageViewValidationError(it, errorMessageState)
 
-                                onChanges( it, newValues)
+                                    onChanges(it, newValues)
                                 }
 
                             },
                             onImageClick = {
-                                onClickImage(it, item.key ?: "",item.id?:"")
+                                onClickImage(it, item.key ?: "", item.id ?: "")
                             }, onCameraClick = { item ->
                                 itemState.value = item
-                                Napier.log(LogLevel.ASSERT,tag = "takePhoto onCameraClick",message =components[index].toString())
+                                Napier.log(
+                                    LogLevel.ASSERT,
+                                    tag = "takePhoto onCameraClick",
+                                    message = components[index].toString()
+                                )
 
                             })
                     }
@@ -660,7 +710,7 @@ fun initialize(
 
 
 
-                            onChanges( item, valuesState)
+                            onChanges(item, valuesState)
                         }
                     }
 
@@ -788,7 +838,7 @@ fun initialize(
 
                                 updateSelectedComponentValidationError(item, errorMessageState)
 
-                                onChanges( item, valuesState)
+                                onChanges(item, valuesState)
                             },
                             {}
                         )
@@ -859,8 +909,11 @@ fun removeComponentById(components: List<ComponentDomain>, id: String): Componen
 }
 
 
-
-fun findPhotosByComponentId(components: List<PhotoDomain>,id: String?, key: String?): MutableList<PhotoDomain> {
+fun findPhotosByComponentId(
+    components: List<PhotoDomain>,
+    id: String?,
+    key: String?
+): MutableList<PhotoDomain> {
     val list: MutableList<PhotoDomain> = arrayListOf()
     components.forEach {
         if (it.component_key == key && it.componentId == id) {

@@ -8,6 +8,7 @@ import arrow.core.Tuple4
 import arrow.core.Tuple5
 import data.network.response.task.Component
 import data.network.response.task.Value
+import dev.icerock.moko.resources.desc.StringDesc
 import domain.models.PhotoDomain
 import domain.models.form_struct.ComponentDomain
 import domain.models.form_struct.ValueDomain
@@ -27,7 +28,10 @@ import irancell.nwg.wfm.Location
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.async
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -52,7 +56,8 @@ class TicketProcessVM(
     private val updateTaskUseCase: UpdateTaskUseCase,
     private val updateStepUseCase : UpdateStepsUseCase
 ) : BaseViewModel() {
-
+    private val _scrollingPosition = MutableStateFlow(Pair(-1,-1))
+    val scrollingPosition = _scrollingPosition.asStateFlow()
 
     private val _currentLevel = MutableStateFlow(0)
     val currentLevel = _currentLevel.asStateFlow()
@@ -357,11 +362,12 @@ class TicketProcessVM(
         }
     }
 
-    fun addOrRemoveComponentDomainRepeatableToList(
+  suspend  fun addOrRemoveComponentDomainRepeatableToList(
         compD:ComponentDomain,
         indexChild: Int,
         scrollCallBack:(position:Int)->Unit
     ) {
+      withContext(Dispatchers.IO) {
 
           val createdIndex = tempComponentList.findComponentsWithKey(compD).size
           Napier.log(LogLevel.ASSERT, "createdIndex", message = createdIndex.toString())
@@ -371,20 +377,20 @@ class TicketProcessVM(
               tempComponent.addAll(tempComponentList.apply {
                   add(indexChild + createdIndex, compD)
               })
-                  tempComponentList.clear()
-                  tempComponentList.addAll(tempComponent)
+              tempComponentList.clear()
+              tempComponentList.addAll(tempComponent)
               scrollCallBack(createdIndex)
 
           } else {
               tempComponent.addAll(tempComponentList.apply {
                   removeAt(indexChild)
               })
-                  tempComponentList.clear()
-                  tempComponentList.addAll(tempComponent)
+              tempComponentList.clear()
+              tempComponentList.addAll(tempComponent)
               scrollCallBack(indexChild)
 
 
-
+          }
       }
   }
 
@@ -497,6 +503,7 @@ class TicketProcessVM(
     }
 
     fun updateImageUriForDeletePhoto(po: Int, key: String,id: String) {
+
         val itemIndex = findPhotoIndexByIdAndPosition(key, id ,po)
         itemIndex?.let {
             photoDomainList.removeAt(it)
@@ -717,6 +724,50 @@ class TicketProcessVM(
 
 
     }
+   suspend fun showFirstError(errors: Map<String, List<StringDesc>>) {
+       errors.keys.toList()[0].let {
+          val pair = findComponentById(tempComponentList,it)
+           pair?.let {
+               withContext(Dispatchers.Main) {
+                   _scrollingPosition.update { pair }
+                   delay(1000)
+                   _scrollingPosition.update { Pair(-1,-1) }
+               }
+           }
+       }
+    }
+
+    fun findComponentById(components: List<ComponentDomain>, targetId: String): Pair<Int, Int>? {
+        components.forEachIndexed { parentIndex, parentComponent ->
+            // Check if the parent component itself matches the target ID
+            if (parentComponent.id == targetId) {
+                return parentIndex to -1  // -1 signifies no child match, found at parent
+            }
+
+            // Search in the children of the parent component recursively
+            parentComponent.components?.forEachIndexed { childIndex, childComponent ->
+                if (childComponent.id == targetId) {
+                    return parentIndex to childIndex
+                }
+
+                // Recursive search in the children's children
+
+                val childResult = childComponent.components?.let{ findComponentById(it, targetId)}
+                if (childResult != null) {
+                    return parentIndex to childIndex
+                }
+            }
+        }
+        return null // Not found
+    }
+
+    fun updateScrollingState(pair: Pair<Int,Int>) {
+      _scrollingPosition.update { pair }
+    }
+//
+//    fun updateReloadState(reload: Boolean) {
+//     _reloadState.update { reload }
+//    }
 }
 
 

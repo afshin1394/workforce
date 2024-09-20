@@ -582,8 +582,8 @@ class MainScreenVM(
                     }
 
                     AsyncStatus.EMPTY -> {
-                        if(_availability.value)
-                        updateState(ViewStates.Loading)
+                        updateState(ViewStates.EMPTY)
+
 
                         Napier.log(
                             LogLevel.ASSERT,
