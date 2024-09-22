@@ -1,6 +1,5 @@
 package presentation.screens.main.viewmodel
 
-import androidx.collection.emptyObjectList
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -8,7 +7,6 @@ import androidx.compose.runtime.mutableStateOf
 import com.irancell.nwg.wfm.presentation.components.FilterSectionItem
 import presentation.model.FilterType
 import com.irancell.nwg.wfm.presentation.model.SelectableItem
-import com.irancell.nwg.wfm.presentation.model.View
 import database.entity.GeneralLocationEntity
 import domain.models.LiveLocationDomain
 import domain.models.PhotoDomain
@@ -158,12 +156,9 @@ class MainScreenVM(
 
                     AsyncStatus.LOADING -> {
                         updateState(ViewStates.Loading)
-
                     }
 
-                    AsyncStatus.EMPTY -> {
-
-                    }
+                    AsyncStatus.EMPTY -> {}
 
                     AsyncStatus.SUCCESS -> {
                         it.data?.let { locations -> generalLocationList.addAll(locations) }
@@ -206,8 +201,7 @@ class MainScreenVM(
                     AsyncStatus.LOADING -> {
                     }
 
-                    AsyncStatus.EMPTY -> {
-                    }
+                    AsyncStatus.EMPTY -> {}
 
                     AsyncStatus.SUCCESS -> {
                         println("Work executed!      ${" is SUCCESS"}")
@@ -216,7 +210,6 @@ class MainScreenVM(
                     }
                 }
             }
-
         }
     }
 
@@ -228,14 +221,11 @@ class MainScreenVM(
                 when (it.status) {
                     AsyncStatus.ERROR -> {
                         println("Work executed!      ${" is ERROR delete"}")
-
                     }
 
-                    AsyncStatus.LOADING -> {
-                    }
+                    AsyncStatus.LOADING -> {}
 
-                    AsyncStatus.EMPTY -> {
-                    }
+                    AsyncStatus.EMPTY -> {}
 
                     AsyncStatus.SUCCESS -> {
                         println("Work executed!      ${" is SUCCESS delete"}")
@@ -244,10 +234,8 @@ class MainScreenVM(
                     }
                 }
             }
-
         }
     }
-
 
     private fun deleteSendLocationInDB() {
 
@@ -270,7 +258,6 @@ class MainScreenVM(
                     }
                 }
             }
-
         }
     }
 
@@ -296,14 +283,9 @@ class MainScreenVM(
                             handleError(it.resultStatus)
                         }
 
-                        AsyncStatus.LOADING -> {
+                        AsyncStatus.LOADING -> {}
 
-                        }
-
-                        AsyncStatus.EMPTY -> {
-
-                        }
-
+                        AsyncStatus.EMPTY -> {}
 
                         AsyncStatus.SUCCESS -> {
                             it.data?.let {
@@ -336,9 +318,7 @@ class MainScreenVM(
                         updateState(ViewStates.Loading)
                     }
 
-                    AsyncStatus.EMPTY -> {
-
-                    }
+                    AsyncStatus.EMPTY -> {}
 
                     AsyncStatus.SUCCESS -> {
                         updateState(ViewStates.Success())
@@ -376,9 +356,7 @@ class MainScreenVM(
                         updateState(ViewStates.Loading)
                     }
 
-                    is AsyncResult.Empty -> {
-
-                    }
+                    is AsyncResult.Empty -> {}
 
                     is AsyncResult.Success -> {
                         _availability.update { result.data ?: false }
@@ -498,20 +476,26 @@ class MainScreenVM(
         for (key in filterMaps) {
             tasksList = when (key.type) {
                 FilterType.REGION -> {
-                    val filteredByRegion = tasksList.filter { it.basic_info.region == key.filter.title }
+                    val filteredByRegion =
+                        tasksList.filter { it.basic_info.region == key.filter.title }
                     println("Filtering by region (${key.filter.title}): $filteredByRegion")
                     filteredByRegion
                 }
+
                 FilterType.STATE -> {
-                    val filteredByState = tasksList.filter { it.basic_info.ticket_state == key.filter.title }
+                    val filteredByState =
+                        tasksList.filter { it.basic_info.ticket_state == key.filter.title }
                     println("Filtering by state (${key.filter.title}): $filteredByState")
                     filteredByState
                 }
+
                 FilterType.SEVERITY_LEVEL -> {
-                    val filteredBySeverity = tasksList.filter { it.basic_info.level == key.filter.title }
+                    val filteredBySeverity =
+                        tasksList.filter { it.basic_info.level == key.filter.title }
                     println("Filtering by severity (${key.filter.title}): $filteredBySeverity")
                     filteredBySeverity
                 }
+
                 else -> tasksList
             }
             println("TasksList after applying ${key.type}: $tasksList")
@@ -522,7 +506,6 @@ class MainScreenVM(
 
         println("Final filtered tasks: $tasks")
     }
-
 
 
     fun removeAllFilters() {
@@ -557,7 +540,6 @@ class MainScreenVM(
     }
 
     fun getTasks() {
-
         viewModelScope.launch(Dispatchers.Main) {
             delay(1000)
             getTasksUseCase(Unit).collect {
@@ -582,17 +564,15 @@ class MainScreenVM(
                     }
 
                     AsyncStatus.EMPTY -> {
-                        if(_availability.value)
-                        updateState(ViewStates.Loading)
+                        if (_availability.value)
+                            updateState(ViewStates.Loading)
 
                         Napier.log(
                             LogLevel.ASSERT,
                             "getAllWorksUseCase",
                             message = "EMPTY: "
                         )
-
                         _reload.update { true }
-
                     }
 
                     AsyncStatus.SUCCESS -> {
@@ -616,10 +596,7 @@ class MainScreenVM(
                             "getAllWorksUseCase",
                             message = "initialTasks: $tasks"
                         )
-
                     }
-
-
                 }
             }
         }
@@ -656,9 +633,7 @@ class MainScreenVM(
 
                         }
 
-                        AsyncStatus.EMPTY -> {
-
-                        }
+                        AsyncStatus.EMPTY -> {}
 
                         AsyncStatus.SUCCESS -> {
                             updateState(ViewStates.Success())
@@ -678,7 +653,6 @@ class MainScreenVM(
     fun saveSuspendTask() {
         Location.start { }
         Napier.log(LogLevel.ASSERT, "atttac", message = suspendTaskDomain.value.attachmentsUri)
-
 
         viewModelScope.launch {
             selectedTask.value?.basic_info?.ticket_number?.let {
@@ -707,15 +681,10 @@ class MainScreenVM(
 
 
                         }
-
                     }
                 }
             }
-
-
         }
-
-
     }
 
     private fun storeSuspendTask() {
@@ -745,31 +714,24 @@ class MainScreenVM(
 
                     }
 
-                    AsyncStatus.EMPTY -> {
-
-                    }
+                    AsyncStatus.EMPTY -> {}
 
                     AsyncStatus.SUCCESS -> {
                         updateState(ViewStates.Success())
                         Location.stop()
 
                     }
-
                 }
             }
         }
     }
 
     fun updateSuspendTicketReason(reason: String) {
-
         suspendTaskDomain.value.reason = reason
-
-
     }
 
     fun updateSuspendTicketDescription(description: String) {
         suspendTaskDomain.value.description = description
-
     }
 
     fun updateSuspendTicketImageUri(imgUri: String) {
@@ -790,12 +752,7 @@ class MainScreenVM(
                 suspendTaskDomain.value.latitude,
                 suspendTaskDomain.value.longitude
             )
-
-
-
         updatePhotoDomain(imgUri)
-
-
     }
 
 
@@ -844,12 +801,9 @@ class MainScreenVM(
                     AsyncStatus.LOADING -> {
                         Napier.log(LogLevel.ASSERT, "getAllPhotoUseCase", message = "LOADING: ")
                         updateState(ViewStates.Loading)
-
                     }
 
-                    AsyncStatus.EMPTY -> {
-
-                    }
+                    AsyncStatus.EMPTY -> {}
 
                     AsyncStatus.SUCCESS -> {
                         photoDomainList.clear()
@@ -872,15 +826,10 @@ class MainScreenVM(
                                 photoDomainList.add(photoDomain.value)
                             }
                         }
-
-
                     }
-
                 }
             }
         }
-
-
     }
 
     private fun updatePhotoDomain(imgUri: String) {
@@ -896,7 +845,6 @@ class MainScreenVM(
                 "0"
             )
         photoDomainList.add(photoDomain.value)
-
     }
 
     private fun insertNewPhoto() {
@@ -927,26 +875,18 @@ class MainScreenVM(
 
                         }
 
-                        AsyncStatus.EMPTY -> {
-
-                        }
+                        AsyncStatus.EMPTY -> {}
 
                         AsyncStatus.SUCCESS -> {
                             updateState(ViewStates.Success())
 
 
                         }
-
                     }
                 }
-
             }
-
-
         }
-
     }
-
 
     fun updateSuspendTicketImageUriForDeletePhoto(imgUri: String, po: Int) {
 
@@ -984,33 +924,25 @@ class MainScreenVM(
                 when (it.status) {
                     AsyncStatus.ERROR -> {
                         handleError(it.resultStatus)
-
                     }
 
                     AsyncStatus.LOADING -> {
                         Napier.log(LogLevel.ASSERT, "saveSuspendTask", message = "LOADING: ")
                         updateState(ViewStates.Loading)
-
                     }
 
-                    AsyncStatus.EMPTY -> {
-
-                    }
+                    AsyncStatus.EMPTY -> {}
 
                     AsyncStatus.SUCCESS -> {
                         it.data?.let { isEdited ->
                             _ticketIsEdited.update { isEdited }
                             if (!isEdited)
                                 updateShowAcceptDialog(true)
-
                         }
                         updateState(ViewStates.Success())
                         updateTicketNumber(selectedTask.value?.basic_info?.ticket_number ?: "")
-
                     }
-
                 }
-
             }
         }
     }
@@ -1023,29 +955,22 @@ class MainScreenVM(
                         AsyncStatus.ERROR -> {
                             handleError(it.resultStatus)
                             Location.stop()
-
                         }
 
                         AsyncStatus.LOADING -> {
                             Napier.log(LogLevel.ASSERT, "saveSuspendTask", message = "LOADING: ")
                             updateState(ViewStates.Loading)
-
                         }
 
-                        AsyncStatus.EMPTY -> {
-
-                        }
+                        AsyncStatus.EMPTY -> {}
 
                         AsyncStatus.SUCCESS -> {
                             updateState(ViewStates.Success())
                             insertNewPhoto()
                         }
-
                     }
                 }
             }
-
-
         }
 
     }
@@ -1067,9 +992,7 @@ class MainScreenVM(
                         updateState(ViewStates.Loading)
                     }
 
-                    AsyncStatus.EMPTY -> {
-
-                    }
+                    AsyncStatus.EMPTY -> {}
 
                     AsyncStatus.SUCCESS -> {
                         checkIfTicketIsEdited()
@@ -1077,7 +1000,6 @@ class MainScreenVM(
                 }
             }
         }
-
     }
 
     fun logoutCallApi() {
@@ -1086,28 +1008,18 @@ class MainScreenVM(
             logoutUseCase(Unit).collect {
                 when (it.status) {
                     AsyncStatus.ERROR -> {
-
                         println("apiiLogout   ${"ERROR"}")
                     }
 
-                    AsyncStatus.LOADING -> {
+                    AsyncStatus.LOADING -> {}
 
-                    }
-
-                    AsyncStatus.EMPTY -> {
-
-                    }
+                    AsyncStatus.EMPTY -> {}
 
                     AsyncStatus.SUCCESS -> {
-
                         println("apiiLogout   ${"success"}")
-
-
                     }
                 }
             }
         }
     }
-
-
 }

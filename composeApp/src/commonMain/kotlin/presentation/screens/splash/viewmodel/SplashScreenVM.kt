@@ -62,7 +62,6 @@ class SplashScreenVM(
             ipDetectionUseCase(Unit).collect {
                 when (it.status) {
                     AsyncStatus.ERROR -> {
-                        checkVersionOfServer()
                         Napier.log(
                             LogLevel.ASSERT,
                             tag = "get country",
@@ -78,6 +77,12 @@ class SplashScreenVM(
                     AsyncStatus.SUCCESS -> {
                         if (it.data.toString() != "IR") {
                             _showVpnBottomSheet.update { true }
+                        } else {
+                            Napier.log(
+                                LogLevel.ASSERT,
+                                tag = "checkVersionOfServer",
+                                message = "LOADING"
+                            )
                         }
                         Napier.log(
                             LogLevel.ASSERT,
@@ -94,15 +99,12 @@ class SplashScreenVM(
         _showVpnBottomSheet.update { show }
     }
 
-
     private fun checkVersionOfServer() {
         viewModelScope.launch {
             getVersionOfServerUseCase(Unit).collect {
                 when (it.status) {
                     AsyncStatus.ERROR -> {
-
                         eventsVersion.value = CheckVersionEvent.InvalidToken
-
                         Napier.log(
                             LogLevel.ASSERT,
                             tag = "get version of Server",
@@ -119,9 +121,7 @@ class SplashScreenVM(
                         )
                     }
 
-                    AsyncStatus.EMPTY -> {
-
-                    }
+                    AsyncStatus.EMPTY -> {}
 
                     AsyncStatus.SUCCESS -> {
                         getProfile()
@@ -166,18 +166,13 @@ class SplashScreenVM(
                     AsyncStatus.ERROR -> {
                         handleError(it.resultStatus)
                         Napier.log(LogLevel.ASSERT, tag = "getProfile", message = "ERROR")
-
                     }
 
                     AsyncStatus.LOADING -> {
-
                         Napier.log(LogLevel.ASSERT, tag = "getProfile", message = "LOADING")
-
                     }
 
-                    AsyncStatus.EMPTY -> {
-
-                    }
+                    AsyncStatus.EMPTY -> {}
 
                     AsyncStatus.SUCCESS -> {
                         Napier.log(
@@ -205,7 +200,6 @@ class SplashScreenVM(
     fun changeStateDenied() {
         _permissionState.update { PermissionEvent.CheckPermission }
     }
-
 
 }
 

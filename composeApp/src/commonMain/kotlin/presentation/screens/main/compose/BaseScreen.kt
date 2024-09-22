@@ -43,11 +43,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import cafe.adriel.voyager.core.registry.rememberScreen
-import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import dev.icerock.moko.resources.compose.painterResource
@@ -55,13 +53,11 @@ import irancell.nwg.wfm.BackButtonHandler
 import irancell.nwg.wfm.LifecycleEvent
 import irancell.nwg.wfm.MR
 import irancell.nwg.wfm.OnLifecycleEvent
-import irancell.nwg.wfm.checkPermission
 import irancell.nwg.wfm.openVpnSettings
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import presentation.model.BottomSheetActionModel
-import presentation.screens.splash.events.PermissionEvent
 import presentation.screens.splash.viewmodel.SplashScreenVM
 import presentation.theme.surfaceBrandDefault
 
@@ -93,16 +89,23 @@ fun <T : BaseViewModel> BaseScreen(
     val state by viewModel.state.collectAsState()
     val gpsState by viewModel.gpsState.collectAsState()
     val splashViewModel: SplashScreenVM = koinInject()
-    val lifecycleEvent by splashViewModel.lifeCycleEvent.collectAsState()
     val showVpnBottomSheet by splashViewModel.showVpnBottomSheet.collectAsState()
 
     var isDrawerInitialized = remember { mutableStateOf(false) }
 
     val scope = rememberCoroutineScope()
 
-    if (lifecycleEvent == LifecycleEvent.ON_RESUME) {
-        splashViewModel.updateLifeCycleEventState(LifecycleEvent.ON_ANY)
-        splashViewModel.restrictForeignIp()
+    OnLifecycleEvent { _, event ->
+        when (event) {
+            LifecycleEvent.ON_RESUME -> {
+                splashViewModel.updateLifeCycleEventState(LifecycleEvent.ON_ANY)
+                splashViewModel.restrictForeignIp()
+            }
+
+            LifecycleEvent.ON_STOP -> {
+                splashViewModel.updateBottomSheetState(false)
+            }
+        }
     }
 
     OnLifecycleEvent { _, event ->
@@ -112,6 +115,34 @@ fun <T : BaseViewModel> BaseScreen(
     Box(
         modifier = Modifier.background(color = backgroundBackground3).fillMaxSize()
     ) {
+
+        @Composable
+        fun showVpnBottomSheetHandler() {
+            if (showVpnBottomSheet) {
+                customBottomSheetWithImage(
+                    BottomSheetActionModel(
+                        stringResource(MR.strings.go_to_setting),
+                        surfaceBrandDefault,
+                        surfaceBrandDefault,
+                    ),
+                    description = stringResource(MR.strings.vpn_detected_description),
+                    imageResource = MR.images.disconnected,
+                    onButtonClick = {
+                        openVpnSettings()
+                        splashViewModel.updateBottomSheetState(false)
+                    },
+                )
+                scope.launch {
+                    scaffoldState.bottomSheetState.expand()
+                }
+            } else {
+                scope.launch {
+                    scaffoldState.bottomSheetState.collapse()
+                }
+                bottomSheetContent(scaffoldState.bottomSheetState)
+            }
+        }
+
 
         if (hasDrawer) {
             ModalDrawer(modifier = Modifier.background(color = backgroundBackground3),
@@ -127,23 +158,18 @@ fun <T : BaseViewModel> BaseScreen(
                             drawerState.close()
                         }
                     }
-
                 },
                     scaffoldState = scaffoldState,
-                    topBar = {
-                        topBar()
-                    },
-
-
+                    topBar = { topBar() },
                     sheetPeekHeight = 0.dp,
                     sheetGesturesEnabled = false,
                     sheetShape = RoundedCornerShape(topEnd = radius, topStart = radius),
                     sheetContent = {
                         CustomBottomSheet(scaffoldState.bottomSheetState,
-                            hasHeader = bottomSheetHasHeader,
+                            hasHeader = if (showVpnBottomSheet) false else bottomSheetHasHeader,
                             title = bottomSheetTitle,
                             content = {
-                                bottomSheetContent(scaffoldState.bottomSheetState)
+                                showVpnBottomSheetHandler()
                             },
                             onClose = {
                                 onCloseBottomSheet()
@@ -156,35 +182,25 @@ fun <T : BaseViewModel> BaseScreen(
                     Box(
                         modifier = Modifier.fillMaxWidth().fillMaxHeight()
                             .background(backgroundBackground3)
-
                     ) {
                         content(scaffoldState.snackbarHostState)
                         BackButtonHandler.backPress(onBackPressed = {
                             println("checkkkkvalueeee")
                             onBackPressed()
-
-
                         })
                         when (gpsState) {
-                            GpsState.Default -> {
-
-                            }
+                            GpsState.Default -> {}
 
                             GpsState.Disabled -> {
                                 GPS.enableGpsDialog(provideAppContext())
                             }
 
-                            GpsState.Enabled -> {
-
-                            }
+                            GpsState.Enabled -> {}
                         }
                         when (state) {
-                            ViewStates.Default -> {
-
-                            }
+                            ViewStates.Default -> {}
 
                             ViewStates.EMPTY -> {
-
                                 Column(
                                     modifier = Modifier.fillMaxSize()
                                         .wrapContentSize(Alignment.Center),
@@ -238,7 +254,6 @@ fun <T : BaseViewModel> BaseScreen(
                                 }
                             }
 
-
                             is ViewStates.Success -> {
                                 viewModel.updateState(ViewStates.Default)
                             }
@@ -276,8 +291,7 @@ fun <T : BaseViewModel> BaseScreen(
                 sheetGesturesEnabled = false,
                 sheetShape = RoundedCornerShape(topEnd = radius, topStart = radius),
                 sheetContent = {
-                    CustomBottomSheet(
-                        scaffoldState.bottomSheetState,
+                    CustomBottomSheet(scaffoldState.bottomSheetState,
                         hasHeader = if (showVpnBottomSheet) false else bottomSheetHasHeader,
                         title = bottomSheetTitle,
                         content = {
@@ -286,29 +300,7 @@ fun <T : BaseViewModel> BaseScreen(
                                 tag = "showVpnBottomSheet",
                                 message = "$showVpnBottomSheet"
                             )
-                            if (showVpnBottomSheet) {
-                                customBottomSheetWithImage(
-                                    BottomSheetActionModel(
-                                        stringResource(MR.strings.go_to_setting),
-                                        surfaceBrandDefault,
-                                        surfaceBrandDefault,
-                                    ),
-                                    description = stringResource(MR.strings.vpn_detected_description),
-                                    imageResource = MR.images.disconnected,
-                                    onButtonClick = {
-                                        openVpnSettings()
-                                        splashViewModel.updateBottomSheetState(false)
-                                    },
-                                )
-                                scope.launch {
-                                    scaffoldState.bottomSheetState.expand()
-                                }
-                            } else {
-                                scope.launch {
-                                    scaffoldState.bottomSheetState.collapse()
-                                }
-                                bottomSheetContent(scaffoldState.bottomSheetState)
-                            }
+                            showVpnBottomSheetHandler()
                         },
                         onClose = {
                             onCloseBottomSheet()
@@ -320,8 +312,6 @@ fun <T : BaseViewModel> BaseScreen(
                 Box(
                     modifier = Modifier.fillMaxWidth().fillMaxHeight()
                         .background(backgroundBackground3)
-
-
                 ) {
                     content(scaffoldState.snackbarHostState)
 
@@ -330,26 +320,17 @@ fun <T : BaseViewModel> BaseScreen(
                         onBackPressed()
                     })
 
-
                     when (gpsState) {
-                        GpsState.Default -> {
-
-                        }
-
+                        GpsState.Default -> {}
                         GpsState.Disabled -> {
                             GPS.enableGpsDialog(provideAppContext())
                         }
 
-                        GpsState.Enabled -> {
-
-                        }
+                        GpsState.Enabled -> {}
                     }
 
                     when (state) {
-                        ViewStates.Default -> {
-
-                        }
-
+                        ViewStates.Default -> {}
                         ViewStates.EMPTY -> {
                             Column(
                                 modifier = Modifier.fillMaxSize().wrapContentSize(Alignment.Center),
@@ -361,7 +342,6 @@ fun <T : BaseViewModel> BaseScreen(
                                     contentDescription = "empty",
                                     modifier = Modifier.width(150.dp).height(120.dp)
                                 )
-
                                 Spacer(modifier = Modifier.height(12.dp))
                                 Text(
                                     text = stringResource(MR.strings.empty_list), style = TextStyle(
@@ -376,7 +356,6 @@ fun <T : BaseViewModel> BaseScreen(
                             LaunchedEffect(Unit) {
                                 scaffoldState.snackbarHostState.showSnackbar(message = errorMessage)
                                 viewModel.updateState(ViewStates.Default)
-
                             }
                             Napier.log(
                                 LogLevel.INFO, tag = "fkpekfpw", message = errorMessage.toString()
@@ -404,9 +383,7 @@ fun <T : BaseViewModel> BaseScreen(
                             viewModel.updateState(ViewStates.Default)
                         }
 
-                        ViewStates.Reload -> {
-
-                        }
+                        ViewStates.Reload -> {}
 
                         is ViewStates.UnAuthorized -> {
                             val key = navigator.items[navigator.items.lastIndex].key
@@ -425,18 +402,12 @@ fun <T : BaseViewModel> BaseScreen(
                                         navigator.push(loginScreen)
                                     }
                                 }
-
                             }
                         }
                     }
-
-
                 }
             }
         }
-
-
     }
-
 }
 

@@ -59,12 +59,10 @@ open class BaseViewModel : ViewModel() {
 
 
     init {
-
         traceNetwork()
         traceLocation()
         collectServiceState()
     }
-
 
 
     private fun collectServiceState() {
@@ -90,39 +88,29 @@ open class BaseViewModel : ViewModel() {
         when (GPS.getLocationsState()) {
             true -> {
                 _gpsState.update { GpsState.Enabled }
-
             }
 
             false -> {
                 _gpsState.update { GpsState.Disabled }
-
             }
         }
     }
 
 
     private fun traceNetwork() {
-
-
         viewModelScope.launch(Dispatchers.Main) {
             konnectivity.currentNetworkConnectionState.collect { connection ->
                 when (connection) {
                     NetworkConnection.NONE -> {
-
                         _networkState.update { NetworkStates.NetworkConnectionNONE }
-
                     }
 
                     NetworkConnection.WIFI -> {
-
                         _networkState.update { NetworkStates.NetworkConnectionWIFI }
-
                     }
 
                     NetworkConnection.CELLULAR -> {
-
                         _networkState.update { NetworkStates.NetworkConnectionCELLULAR }
-
                     }
                 }
 
@@ -138,42 +126,31 @@ open class BaseViewModel : ViewModel() {
     fun handleError(resultStatus: ResultStatus?) {
         when (resultStatus) {
             is ResultStatus.CLIENT_EXCEPTION.FORBIDDEN -> {
-
                 _state.update { ViewStates.UnAuthorized(MR.strings.unauthorized) }
             }
 
             is ResultStatus.CLIENT_EXCEPTION.UNATHORIZED -> {
-
                 _state.update { ViewStates.UnAuthorized(MR.strings.unauthorized) }
             }
 
             is ResultStatus.CLIENT_EXCEPTION -> {
-
                 _state.update { ViewStates.Error(MR.strings.client_error) }
-
-
             }
 
             is ResultStatus.EXCEPTION -> {
                 _state.update { ViewStates.Error(MR.strings.general_error) }
-
-
             }
 
             is ResultStatus.IO_EXCEPTION -> {
                 _state.update { ViewStates.Error(MR.strings.general_error) }
-
-
             }
 
             is ResultStatus.REDIRECT_EXCEPTION -> {
                 _state.update { ViewStates.Error(MR.strings.redirect_error) }
-
             }
 
             is ResultStatus.SERVER_EXCEPTION -> {
                 _state.update { ViewStates.Error(MR.strings.server_error) }
-
             }
 
             is ResultStatus.SUCCESS -> {
@@ -182,12 +159,10 @@ open class BaseViewModel : ViewModel() {
 
             is ResultStatus.TIME_OUT -> {
                 _state.update { ViewStates.Error(MR.strings.timeout_error) }
-
             }
 
             else -> {
                 _state.update { ViewStates.Error(MR.strings.general_error) }
-
             }
         }
 

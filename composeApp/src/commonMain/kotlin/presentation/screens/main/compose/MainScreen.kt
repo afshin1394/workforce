@@ -122,7 +122,6 @@ class MainScreen(
             viewModel.cancelItems
         }
 
-
         val underDevelopment = stringResource(MR.strings.under_development)
 
         val bottomSheetTitle: String = when (events) {
@@ -189,14 +188,11 @@ class MainScreen(
             MainEvent.DiscardSuspendTicket -> {
                 stringResource(MR.strings.save_change)
             }
-
-
         }
 
         Camera.onResult { obj, uri ->
             viewModel.updateSuspendTicketImageUri(uri.toString())
         }
-
 
         if (showContent) {
             hasDrawer = true
@@ -294,8 +290,6 @@ class MainScreen(
 //                                navigator.push(formViewerScreen)
 
                                 }
-
-
                             }
 
                         }
@@ -366,22 +360,10 @@ class MainScreen(
                                 scaffoldState.bottomSheetState.expand()
                             }
                         }
-
-                        MainEvent.AvailabilityStatus -> {
-
-                        }
-
-                        MainEvent.PhotoPreview -> {
-
-                        }
-
-                        MainEvent.EditPhoto -> {
-
-                        }
-
+                        MainEvent.AvailabilityStatus -> {}
+                        MainEvent.PhotoPreview -> {}
+                        MainEvent.EditPhoto -> {}
                         MainEvent.DeletePhoto -> {
-
-
                             bottomSheetDoubleActionBottomBar(BottomSheetActionModel(
                                 stringResource(MR.strings.cancel),
                                 surfaceDefault,
@@ -396,7 +378,6 @@ class MainScreen(
                                     viewModel.photoDomainList[positionSelectedPhotoForEdit].origin_uri,
                                     positionSelectedPhotoForEdit
                                 )
-
 
                             })
                             scope.launch {

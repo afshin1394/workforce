@@ -83,6 +83,7 @@ import io.ktor.client.plugins.logging.Logger
 import io.ktor.client.plugins.logging.Logging
 import io.ktor.client.request.headers
 import io.ktor.http.ContentType
+import io.ktor.http.HttpHeaders
 
 import io.ktor.http.contentType
 import io.ktor.serialization.kotlinx.json.json
@@ -112,17 +113,14 @@ fun repositoryModule() = module {
     //Repositories
     single<IGeneralLocationRepository> {
         GeneralLocationRepositoryImpl(
-            get(),
-            get(named("tokenized"))
+            get(), get(named("tokenized"))
         )
     }
     single<IAvailabilityRepository> { AvailabilityRepositoryImpl(get(named("tokenized"))) }
     single<ISuspendTaskRepository> { SuspendTaskRepositoryImpl(get(), get(named("tokenized"))) }
     single<IAuthRepository> {
         AuthRepositoryImpl(
-            get(named("noToken")),
-            get(named("tokenized")),
-            get()
+            get(named("noToken")), get(named("tokenized")), get()
         )
     }
     single<ITaskRepository> { TaskRepositoryImpl(get(named("tokenized")), get()) }
@@ -135,8 +133,7 @@ fun repositoryModule() = module {
     single<IUploadRepository> { UploadRepositoryImpl(get(named("tokenized"))) }
     single<IVersionRepository> {
         VersionRepositoryImpl(
-            get(named("noToken")),
-            get(named("tokenized"))
+            get(named("noToken")), get(named("tokenized"))
         )
     }
     single<IIpDetectionRepository> { IpDetectionRepositoryImpl(get(named("ipDetection"))) }
@@ -189,22 +186,19 @@ fun httpModule() = module {
         HttpClient {
             expectSuccess = true
             install(ContentNegotiation) {
-                json(
-                    Json {
-                        ignoreUnknownKeys = true
-                        prettyPrint = true
-                        isLenient = true
-                    }
-                )
+                json(Json {
+                    ignoreUnknownKeys = true
+                    prettyPrint = true
+                    isLenient = true
+                })
             }
             configure()
             defaultRequest {
-                url(ProductionBASEURL)
+                url(DevelopmentBASEURL)
                 contentType(ContentType.Application.Json)
                 headers {
                     append(
-                        "Authorization",
-                        "Token ${getSharedPref().getString(Token)}"
+                        "Authorization", "Token ${getSharedPref().getString(Token)}"
                     )
                     append("Content-Type", "application/json")
                     append("accept", "application/json")
@@ -227,17 +221,15 @@ fun httpModule() = module {
         HttpClient {
             expectSuccess = true
             install(ContentNegotiation) {
-                json(
-                    Json {
-                        ignoreUnknownKeys = true
-                        prettyPrint = true
-                        isLenient = true
-                    }
-                )
+                json(Json {
+                    ignoreUnknownKeys = true
+                    prettyPrint = true
+                    isLenient = true
+                })
             }
             configure()
             defaultRequest {
-                url(ProductionBASEURL)
+                url(DevelopmentBASEURL)
                 contentType(ContentType.Application.Json)
                 headers {
 
@@ -264,21 +256,36 @@ fun httpModule() = module {
         HttpClient {
             expectSuccess = true
             install(ContentNegotiation) {
-                json(
-                    Json {
-                        ignoreUnknownKeys = true
-                        prettyPrint = true
-                        isLenient = true
-                    }
-                )
+                json(Json {
+                    ignoreUnknownKeys = true
+                    prettyPrint = true
+                    isLenient = true
+                })
             }
             configure()
             defaultRequest {
                 contentType(ContentType.Application.Json)
                 headers {
-
-                    append("Content-Type", "application/json")
-                    append("accept", "application/json")
+                    append(
+                        HttpHeaders.Accept,
+                        "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7"
+                    )
+                    append(HttpHeaders.AcceptEncoding, "gzip, deflate, br, zstd")
+                    append(HttpHeaders.AcceptLanguage, "en-US,en;q=0.9,fa;q=0.8")
+                    append(HttpHeaders.CacheControl, "max-age=0")
+                    append(HttpHeaders.IfNoneMatch, "W/\"26-UEXP+PpFoBzIgCgT4fN1+cbEM1E\"")
+                    append("priority", "u=0, i")
+                    append(
+                        "sec-ch-ua",
+                        "\"Google Chrome\";v=\"129\", \"Not=A?Brand\";v=\"8\", \"Chromium\";v=\"129\""
+                    )
+                    append("sec-ch-ua-mobile", "?0")
+                    append("sec-ch-ua-platform", "\"Windows\"")
+                    append("upgrade-insecure-requests", "1")
+                    append(
+                        HttpHeaders.UserAgent,
+                        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36"
+                    )
                 }
             }
 
