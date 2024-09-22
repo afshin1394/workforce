@@ -185,10 +185,14 @@ class MainScreen(
                 stringResource(MR.strings.edit_photo)
             }
 
-            MainEvent.DiscardSuspendTicket -> {
-                stringResource(MR.strings.save_change)
+                MainEvent.DiscardSuspendTicket -> {
+                    stringResource(MR.strings.save_change)
+                }
+
+                else -> {
+                    ""
+                }
             }
-        }
 
         Camera.onResult { obj, uri ->
             viewModel.updateSuspendTicketImageUri(uri.toString())
@@ -480,6 +484,7 @@ class MainScreen(
                         }
 
 
+                        else -> {}
                     }
                 },
                 bottomSheetContent = {
@@ -738,6 +743,7 @@ class MainScreen(
                         }
 
 
+                        else -> {}
                     }
 
                 },
@@ -819,6 +825,9 @@ class MainScreen(
                                     }
                                 }
                             })
+                            },
+                            viewModel = viewModel
+                        )
                         if (viewModel.showAcceptDialog.value) {
 
                             if (isTicketEditedState) {

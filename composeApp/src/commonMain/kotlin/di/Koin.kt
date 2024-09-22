@@ -47,7 +47,6 @@ import domain.usecase.usecase.location.GetGeneralLocationListUseCase
 import domain.usecase.usecase.location.SendLocationToServerUseCase
 import domain.usecase.usecase.availability.StoreAvailabilityUseCase
 import domain.usecase.usecase.initialForm.GetInitialFormByTask
-import domain.usecase.usecase.ipDetection.IpDetectionUseCase
 import domain.usecase.usecase.location.DeleteSendLocationUseCase
 import domain.usecase.usecase.location.StoreLocationDataUseCase
 import domain.usecase.usecase.location.UpdateUnSendLocationUseCase
@@ -113,11 +112,38 @@ fun repositoryModule() = module {
     //Repositories
     single<IGeneralLocationRepository> {
         GeneralLocationRepositoryImpl(
+            get(),
+            get(named("tokenized"))
+        )
+    }
+    single<IGeneralLocationRepository> {
+        GeneralLocationRepositoryImpl(
             get(), get(named("tokenized"))
         )
     }
     single<IAvailabilityRepository> { AvailabilityRepositoryImpl(get(named("tokenized"))) }
     single<ISuspendTaskRepository> { SuspendTaskRepositoryImpl(get(), get(named("tokenized"))) }
+    single<IAuthRepository> {
+        AuthRepositoryImpl(
+            get(named("noToken")),
+            get(named("tokenized")),
+            get()
+        )
+    }
+    single<ITaskRepository> { TaskRepositoryImpl(get(named("tokenized")), get()) }
+    single<IProfileRepository> { ProfileRepositoryImpl(get(named("tokenized")), get()) }
+    single<IInitialFormRepository> { InitialFormRepositoryImpl(get()) }
+    single<IPhotoRepository> { PhotoRepositoryImpl(get()) }
+    single<IStepsRepository> { StepsRepositoryImpl(get(named("tokenized")), get()) }
+    single<IStepPointerRepository> { StepPointerRepositoryImpl(get()) }
+    single<ISendStepsRepository> { SendStepRepositoryImpl(get(), get(named("tokenized"))) }
+    single<IUploadRepository> { UploadRepositoryImpl(get(named("tokenized"))) }
+    single<IVersionRepository> {
+        VersionRepositoryImpl(
+            get(named("noToken")),
+            get(named("tokenized"))
+        )
+    }
     single<IAuthRepository> {
         AuthRepositoryImpl(
             get(named("noToken")), get(named("tokenized")), get()
@@ -177,6 +203,13 @@ fun useCaseModule() = module {
     single { DeleteSendLocationUseCase(get()) }
     single { SendVersionToServerUseCase(get()) }
     single { GetVersionOfServerUseCase(get()) }
+    single { StoreKeyValueUseCase(get(), get(), get()) }
+    single { SendStepsOfTicketToServerUseCase(get(), get(), get(), get(), get()) }
+    single { UpdateIsEditedTicketUseCase(get()) }
+    single { UpdateUnSendLocationUseCase(get()) }
+    single { DeleteSendLocationUseCase(get()) }
+    single { SendVersionToServerUseCase(get()) }
+    single { GetVersionOfServerUseCase(get()) }
     single { IpDetectionUseCase(get()) }
 }
 
@@ -194,7 +227,7 @@ fun httpModule() = module {
             }
             configure()
             defaultRequest {
-                url(DevelopmentBASEURL)
+                url(ProductionBASEURL)
                 contentType(ContentType.Application.Json)
                 headers {
                     append(
@@ -229,7 +262,7 @@ fun httpModule() = module {
             }
             configure()
             defaultRequest {
-                url(DevelopmentBASEURL)
+                url(ProductionBASEURL)
                 contentType(ContentType.Application.Json)
                 headers {
 
@@ -330,7 +363,9 @@ fun viewModelModule() = module {
             get(),
             get(),
             get(),
-            get()
+            get(),
+            get(),
+            get(),
         )
     }
     viewModelDefinition { SettingScreenVM() }

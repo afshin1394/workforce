@@ -30,6 +30,7 @@ sealed class ViewStates() {
     data object EMPTY : ViewStates()
     data object VpnDetected : ViewStates()
     data class UnAuthorized(val message: StringResource) : ViewStates()
+    data object VPNDetected : ViewStates()
 }
 
 sealed class VpnDetectionStates() {
@@ -178,6 +179,7 @@ open class BaseViewModel : ViewModel(), KoinComponent {
     }
 
     fun handleError(resultStatus: ResultStatus?) {
+
         when (resultStatus) {
             is ResultStatus.CLIENT_EXCEPTION.FORBIDDEN -> {
                 _state.update { ViewStates.UnAuthorized(MR.strings.unauthorized) }

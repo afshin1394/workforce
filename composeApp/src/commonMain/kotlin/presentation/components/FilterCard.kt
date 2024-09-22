@@ -34,11 +34,11 @@ import utils.TaskState
 
 
 @Composable
-fun FilterCard(item: StateFilter, isSelected:Boolean, onItemSelected:()->Unit){
+fun FilterCard(item: StateFilter, isSelected: Boolean, onItemSelected: () -> Unit) {
 
     Card(modifier = Modifier
-                    .fillMaxWidth()
-                   .padding(spacing1X)
+        .fillMaxWidth()
+        .padding(spacing1X)
         .clickable {
 
             onItemSelected()
@@ -66,27 +66,26 @@ fun FilterCard(item: StateFilter, isSelected:Boolean, onItemSelected:()->Unit){
 @Composable
 fun FilterRow(
     modifier: Modifier = Modifier,
-    itemTitleSelected:String,
+    itemTitleSelected: String,
     items: List<StateFilter> = arrayListOf(
-        StateFilter(TaskState.Draft.id, stringResource(MR.strings.draft) , false),
+        StateFilter(TaskState.All.id, stringResource(MR.strings.all), false),
+        StateFilter(TaskState.Draft.id, stringResource(MR.strings.draft), false),
         StateFilter(TaskState.Running.id, stringResource(MR.strings.running), false),
         StateFilter(TaskState.Cancelled.id, stringResource(MR.strings.cancel), false),
         StateFilter(TaskState.Suspended.id, stringResource(MR.strings.suspended), false),
         StateFilter(TaskState.Completed.id, stringResource(MR.strings.completed), false),
-        StateFilter(TaskState.All.id, stringResource(MR.strings.all), false)
 
 
-    ), updateFilter: (stateFilter: StateFilter) -> Unit = {}
+        ), updateFilter: (stateFilter: StateFilter) -> Unit = {}
 ) {
-
 
 
     var select by remember { mutableStateOf(itemTitleSelected) }
     LazyRow(modifier = modifier) {
         items(items) { item ->
 
-            FilterCard(item=item,isSelected = select==item.title, onItemSelected = {
-                select=item.title
+            FilterCard(item = item, isSelected = select == item.title, onItemSelected = {
+                select = item.title
                 updateFilter(item)
             })
 

@@ -34,6 +34,8 @@ import irancell.nwg.wfm.provideAppContext
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import presentation.components.CompleteFlowDialog
@@ -90,6 +92,7 @@ class TicketProcessScreen(
         val ticketFlowCompletedState = viewModel.ticketFlowCompleted.collectAsState()
 
         val updateTaskCompleteState = viewModel.updateTasksComplete.collectAsState()
+        val scrollingState = viewModel.scrollingPosition.collectAsState()
 
 
 
@@ -258,6 +261,9 @@ class TicketProcessScreen(
                                     val errors = validateComponents(viewModel.tempComponentList) {
                                         viewModel.updateTempComponentList(it)
                                     }
+                                    if(errors.isNotEmpty()){
+                                        viewModel.showFirstError(errors)
+                                    }
 
                                     if (errors.isEmpty()) {
                                         async { viewModel.saveAndDeletePhotoByComponentKey() }.await()
@@ -379,6 +385,8 @@ class TicketProcessScreen(
                     processBar(stepDetails, currentLevelState)
                     if (reloadState) {
                         initialize(
+                            isChild = false,
+                            scrollingState=scrollingState.value,
                             savedIndex = savedIndex,
                             savedParentIndex = savedParentIndex,
                             taskID = currentLevelState.toString(),
@@ -390,7 +398,6 @@ class TicketProcessScreen(
                                 componentId = id
                                 indexPhotoSelected = index
                                 viewModel.events.value = TicketProcessEvent.PhotoPreview
-
                             },
 
 
@@ -404,18 +411,31 @@ class TicketProcessScreen(
                                     }
                                 }
                             },
-                            onAddItem = { listComponent, listValueDomain, listIndexParent, indexChild ->
-                                viewModel.addOrRemoveComponentDomainRepeatableToList(
-                                    listComponent,
-                                    indexChild
-                                )
+                            onAddItem = { component,  indexChild,scrollCallback ->
+                               scope.launch {
+                                   viewModel.addOrRemoveComponentDomainRepeatableToList(
+                                       component,
+                                       indexChild,
+                                       scrollCallback
+                                   )
+                               }
+
+
+
                             },
-                            onRemoveItem = { listComponent, listValueDomain, listIndexParent, indexChild ->
-                                viewModel.addOrRemoveComponentDomainRepeatableToList(
-                                    listComponent,
-                                    indexChild
-                                )
+                            onRemoveItem = { component, indexChild,scrollCallBack ->
+                                scope.launch {
+                                    viewModel.addOrRemoveComponentDomainRepeatableToList(
+                                        component,
+                                        indexChild,
+                                        scrollCallBack
+                                    )
+                                }
+
+
+
                             },
+
 
                             )
                     }

@@ -2,6 +2,8 @@ package presentation.screens.main.compose
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.BottomSheetScaffoldState
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Text
@@ -66,7 +68,7 @@ class AccountScreen() : Screen {
                     Spacer(modifier = Modifier.padding(vertical = spacing2X))
 
                     Column(
-                        Modifier.padding(horizontal = spacing2X),
+                        Modifier.padding(horizontal = spacing2X).verticalScroll(rememberScrollState()),
                         verticalArrangement = Arrangement.Center,
                         horizontalAlignment = Alignment.Start
                     ) {

@@ -110,7 +110,7 @@ class GpsTrackingReportScreen(
                     showMap = false
                 }
                 when (state) {
-                   is ViewStates.Error -> {
+                    is ViewStates.Error -> {
                         scope.launch {
                             snackbarHostState.showSnackbar(
                                 message = "${MR.strings.error_gps_tracker}!",
@@ -118,6 +118,9 @@ class GpsTrackingReportScreen(
                             )
                         }
                     }
+
+                    ViewStates.EMPTY -> {}
+
                     ViewStates.Loading -> {
                         CircularProgressIndicator()
                     }

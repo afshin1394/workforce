@@ -14,6 +14,7 @@ import presentation.model.StateFilter
 import presentation.screens.main.events.MainEvent
 import domain.models.SuspendTaskDomain
 import domain.models.task.TaskDomain
+import domain.usecase.ResultStatus
 import domain.usecase.usecase.auth.LogoutUseCase
 import domain.usecase.usecase.availability.ChangeServerAvailabilityUseCase
 import domain.usecase.usecase.availability.GetAvailabilityUseCase
@@ -27,10 +28,12 @@ import domain.usecase.usecase.photo.GetPhotoByComponentKeyUseCase
 import domain.usecase.usecase.photo.InsertPhotoUseCase
 import domain.usecase.usecase.profile.GetProfileUseCase
 import domain.usecase.usecase.steps.UpdateIsEditedTicketUseCase
+import domain.usecase.usecase.steps.UpdateStepsUseCase
 import domain.usecase.usecase.suspendTask.DeleteByTaskIdUseCase
 import domain.usecase.usecase.suspendTask.GetSuspendTaskByIdUseCase
 import domain.usecase.usecase.suspendTask.StoreSuspendTaskUseCase
 import domain.usecase.usecase.ticket.GetTasksUseCase
+import domain.usecase.usecase.ticket.UpdateTaskUseCase
 import io.github.aakira.napier.LogLevel
 import io.github.aakira.napier.Napier
 import irancell.nwg.wfm.BackgroundServiceApp
@@ -74,8 +77,11 @@ class MainScreenVM(
     private val sendLocationToServerUseCase: SendLocationToServerUseCase,
     private val generalLocationListUseCase: GetGeneralLocationListUseCase,
     private val updateUnSendLocationUseCase: UpdateUnSendLocationUseCase,
-    private val deleteSendLocationUseCase: DeleteSendLocationUseCase
-) : BaseViewModel() {
+    private val deleteSendLocationUseCase: DeleteSendLocationUseCase,
+    private val updateTaskUseCase: UpdateTaskUseCase,
+    private val updateStepsUseCase: UpdateStepsUseCase,
+
+    ) : BaseViewModel() {
     private val _availability = MutableStateFlow(false)
     val availability = _availability.asStateFlow()
 
@@ -564,15 +570,18 @@ class MainScreenVM(
                     }
 
                     AsyncStatus.EMPTY -> {
-                        if (_availability.value)
-                            updateState(ViewStates.Loading)
+                        tasks.clear()
+                        updateState(ViewStates.EMPTY)
+
 
                         Napier.log(
                             LogLevel.ASSERT,
                             "getAllWorksUseCase",
-                            message = "EMPTY: "
+                            message = "EMPTY: ${it.data}"
                         )
                         _reload.update { true }
+
+
                     }
 
                     AsyncStatus.SUCCESS -> {
@@ -588,7 +597,6 @@ class MainScreenVM(
                             tasks.addAll(it1)
                             _reload.update { true }
                             getActiveFilterItems()
-
                         }
 
                         Napier.log(
@@ -1022,4 +1030,74 @@ class MainScreenVM(
             }
         }
     }
+
+
+    suspend fun updateTask() {
+        updateTaskUseCase(Unit)
+            .collect {
+                when (it.status) {
+                    AsyncStatus.ERROR -> {
+
+                        println("TaskCallApi${"ERROR"}")
+                    }
+
+                    AsyncStatus.LOADING -> {
+                    }
+
+                    AsyncStatus.EMPTY -> {
+
+                    }
+
+                    AsyncStatus.SUCCESS -> {
+                        updateSteps()
+                        println("PullToRefreshCallApi${"SUCCESS"}")
+                    }
+                }
+            }
+    }
+
+    private suspend fun updateSteps() {
+        updateStepsUseCase(Unit).collect {
+            when (it.status) {
+                AsyncStatus.ERROR -> {
+
+
+                    Napier.log(
+                        LogLevel.ASSERT,
+                        "updateSteps",
+                        message = "ERROR: " + it.message
+                    )
+
+                }
+
+                AsyncStatus.EMPTY -> {
+
+                }
+
+                AsyncStatus.LOADING -> {
+                    Napier.log(LogLevel.ASSERT, "updateSteps", message = "LOADING: ")
+
+                }
+
+                AsyncStatus.SUCCESS -> {
+                    getTasks()
+
+                    Napier.log(
+                        LogLevel.ASSERT,
+                        "" +
+                                "",
+                        message = "SUCCESS: " + it.data
+                    )
+
+
+                }
+
+
+            }
+        }
+
+
+    }
+
+
 }
