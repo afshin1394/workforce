@@ -593,16 +593,17 @@ class MainScreenVM(
                     }
 
                     AsyncStatus.EMPTY -> {
+                        tasks.clear()
                         updateState(ViewStates.EMPTY)
 
 
                         Napier.log(
                             LogLevel.ASSERT,
                             "getAllWorksUseCase",
-                            message = "EMPTY: "
+                            message = "EMPTY: ${it.data}"
                         )
-
                         _reload.update { true }
+
 
                     }
 
@@ -619,7 +620,6 @@ class MainScreenVM(
                             tasks.addAll(it1)
                             _reload.update { true }
                             getActiveFilterItems()
-
                         }
 
                         Napier.log(
