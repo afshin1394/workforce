@@ -19,84 +19,30 @@ import utils.AsyncStatus
 import utils.BaseViewModel
 import androidx.compose.runtime.State
 import domain.models.version.GetVersionDomain
-import domain.usecase.usecase.ipDetection.IpDetectionUseCase
 import domain.usecase.usecase.profile.StoreProfileUseCase
 import irancell.nwg.wfm.getSharedPref
-import kotlinx.coroutines.flow.StateFlow
 
 import utils.FileApk
 
 class SplashScreenVM(
     private val getVersionOfServerUseCase: GetVersionOfServerUseCase,
     private val storeProfileUseCase: StoreProfileUseCase,
-    private val ipDetectionUseCase: IpDetectionUseCase,
 ) : BaseViewModel() {
 
     private val _permissionState =
         MutableStateFlow<PermissionEvent>(PermissionEvent.RequestPermission)
     val permissionState = _permissionState.asStateFlow()
 
-
-    private val _lifeCycleEvent = MutableStateFlow(LifecycleEvent.ON_ANY)
-    val lifeCycleEvent = _lifeCycleEvent.asStateFlow()
-
     var eventsVersion = mutableStateOf<CheckVersionEvent>(CheckVersionEvent.Default)
-
 
     private val _versionData = mutableStateOf<GetVersionDomain?>(null)
     val versionData: State<GetVersionDomain?> = _versionData
-
-    private val _showVpnBottomSheet = MutableStateFlow(false)
-    val showVpnBottomSheet: StateFlow<Boolean> = _showVpnBottomSheet.asStateFlow()
-
 
     init {
         checkVersionOfServer()
         InternalStorage.initWFMImages(provideAppContext())
         InternalStorage.initProcessImages(provideAppContext())
         InternalStorage.initSuspendImages(provideAppContext())
-    }
-
-    fun restrictForeignIp() {
-        viewModelScope.launch {
-            ipDetectionUseCase(Unit).collect {
-                when (it.status) {
-                    AsyncStatus.ERROR -> {
-                        Napier.log(
-                            LogLevel.ASSERT,
-                            tag = "get country",
-                            message = "ERROR" + it.message
-                        )
-                    }
-
-                    AsyncStatus.LOADING -> {
-                        Napier.log(LogLevel.ASSERT, tag = "get country", message = "LOADING")
-                    }
-
-                    AsyncStatus.EMPTY -> {}
-                    AsyncStatus.SUCCESS -> {
-                        if (it.data.toString() != "IR") {
-                            _showVpnBottomSheet.update { true }
-                        } else {
-                            Napier.log(
-                                LogLevel.ASSERT,
-                                tag = "checkVersionOfServer",
-                                message = "LOADING"
-                            )
-                        }
-                        Napier.log(
-                            LogLevel.ASSERT,
-                            tag = "get country",
-                            message = it.data.toString()
-                        )
-                    }
-                }
-            }
-        }
-    }
-
-    fun updateBottomSheetState(show: Boolean) {
-        _showVpnBottomSheet.update { show }
     }
 
     private fun checkVersionOfServer() {
@@ -164,6 +110,7 @@ class SplashScreenVM(
             storeProfileUseCase(Unit).collect {
                 when (it.status) {
                     AsyncStatus.ERROR -> {
+
                         handleError(it.resultStatus)
                         Napier.log(LogLevel.ASSERT, tag = "getProfile", message = "ERROR")
                     }
@@ -185,11 +132,6 @@ class SplashScreenVM(
                 }
             }
         }
-    }
-
-
-    fun updateLifeCycleEventState(event: LifecycleEvent) {
-        _lifeCycleEvent.update { event }
     }
 
     fun updatePermissionState(permissionEvent: PermissionEvent) {

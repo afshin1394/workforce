@@ -153,23 +153,6 @@ class VerifyScreen(private val phoneNumber: String = "") : Screen {
 
 
                             when (state) {
-                                is ViewStates.Error -> {
-                                }
-
-                                ViewStates.Loading -> {
-                                }
-                                ViewStates.EMPTY->{
-
-                                }
-
-
-
-                                ViewStates.Default -> {
-                                }
-
-                                ViewStates.Reload -> {
-
-                                }
                                 is ViewStates.Success -> {
 
                                     scope.launch {
@@ -178,13 +161,10 @@ class VerifyScreen(private val phoneNumber: String = "") : Screen {
 
                                         when (events) {
                                             CheckVersionEvent.Default -> {
-
-
                                             }
 
                                             CheckVersionEvent.ForceUpdate -> {
                                                 showVersionDialog = true
-
                                             }
 
                                             CheckVersionEvent.NormalUpdate -> {
@@ -192,29 +172,17 @@ class VerifyScreen(private val phoneNumber: String = "") : Screen {
                                             }
 
                                             CheckVersionEvent.InvalidToken -> {
-
                                             }
                                             CheckVersionEvent.OkVersion -> {
                                                 viewModel.disableSMSListener()
                                                 navigator.popAll()
                                                 navigator.push(mainScreen)
-
-
                                             }
-
                                         }
-
                                         println("eventttttii ${events}")
                                     }
-
-
-
-
                                 }
-
-                                is ViewStates.UnAuthorized -> {
-
-                                }
+                                else -> {}
                             }
 
                             Text(text =

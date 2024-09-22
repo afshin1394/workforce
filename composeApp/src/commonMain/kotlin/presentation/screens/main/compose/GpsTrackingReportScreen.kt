@@ -118,14 +118,9 @@ class GpsTrackingReportScreen(
                             )
                         }
                     }
-
-                    ViewStates.EMPTY->{
-                    }
-
                     ViewStates.Loading -> {
                         CircularProgressIndicator()
                     }
-
                     is ViewStates.Success -> {
                         val message = stringResource(MR.strings.success)
                         scope.launch {
@@ -151,18 +146,7 @@ class GpsTrackingReportScreen(
                             }
                         }
                     }
-
-                    ViewStates.Default -> {
-
-                    }
-
-                    ViewStates.Reload -> {
-
-                    }
-
-                    is ViewStates.UnAuthorized -> {
-
-                    }
+                    else -> {}
                 }
             }
         }

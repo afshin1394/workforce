@@ -306,27 +306,27 @@ class MainScreen(
 
                             bottomSheetDoubleActionBottomBar(
                                 BottomSheetActionModel(
-                                stringResource(MR.strings.clear_all),
-                                Color.Transparent,
-                                textInverseDisabled,
-                                stringResource(MR.strings.filters),
-                                surfaceBrandDefault,
-                                textInverse
-                            ), onFirstButtonClick = {
-                                scope.launch {
-                                    viewModel.removeAllFilters()
-                                    scaffoldState.bottomSheetState.collapse()
-                                    viewModel.events.value = MainEvent.Default
-                                }
+                                    stringResource(MR.strings.clear_all),
+                                    Color.Transparent,
+                                    textInverseDisabled,
+                                    stringResource(MR.strings.filters),
+                                    surfaceBrandDefault,
+                                    textInverse
+                                ), onFirstButtonClick = {
+                                    scope.launch {
+                                        viewModel.removeAllFilters()
+                                        scaffoldState.bottomSheetState.collapse()
+                                        viewModel.events.value = MainEvent.Default
+                                    }
 
-                            }, onSecondButtonClick = {
-                                scope.launch {
-                                    viewModel.getActiveFilterItems()
-                                    scaffoldState.bottomSheetState.collapse()
-                                    viewModel.events.value = MainEvent.Default
+                                }, onSecondButtonClick = {
+                                    scope.launch {
+                                        viewModel.getActiveFilterItems()
+                                        scaffoldState.bottomSheetState.collapse()
+                                        viewModel.events.value = MainEvent.Default
 
-                                }
-                            })
+                                    }
+                                })
                             scope.launch {
                                 scaffoldState.bottomSheetState.expand()
                             }
@@ -360,6 +360,7 @@ class MainScreen(
                                 scaffoldState.bottomSheetState.expand()
                             }
                         }
+
                         MainEvent.AvailabilityStatus -> {}
                         MainEvent.PhotoPreview -> {}
                         MainEvent.EditPhoto -> {}

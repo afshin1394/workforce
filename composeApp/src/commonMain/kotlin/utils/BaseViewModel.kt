@@ -5,18 +5,21 @@ import com.plusmobileapps.konnectivity.NetworkConnection
 import dev.icerock.moko.mvvm.viewmodel.ViewModel
 import dev.icerock.moko.resources.StringResource
 import domain.usecase.ResultStatus
+import domain.usecase.usecase.ipDetection.IpDetectionUseCase
 import io.github.aakira.napier.LogLevel
 import io.github.aakira.napier.Napier
 import irancell.nwg.wfm.BackgroundServiceApp
 import irancell.nwg.wfm.GPS
+import irancell.nwg.wfm.LifecycleEvent
 import irancell.nwg.wfm.MR
-import irancell.nwg.wfm.getSharedPref
 import irancell.nwg.wfm.provideAppContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 
 sealed class ViewStates() {
     data object Default : ViewStates()
@@ -25,8 +28,14 @@ sealed class ViewStates() {
     data class Success(val message: StringResource? = MR.strings.success) : ViewStates()
     data object Reload : ViewStates()
     data object EMPTY : ViewStates()
-
+    data object VpnDetected : ViewStates()
     data class UnAuthorized(val message: StringResource) : ViewStates()
+}
+
+sealed class VpnDetectionStates() {
+    data object Default : VpnDetectionStates()
+    data object HideBottomSheet : VpnDetectionStates()
+    data object ShowBottomSheet : VpnDetectionStates()
 }
 
 sealed interface GpsState {
@@ -44,16 +53,23 @@ sealed class NetworkStates() {
 }
 
 
-open class BaseViewModel : ViewModel() {
+open class BaseViewModel : ViewModel(), KoinComponent {
+    private val ipDetectionUseCase: IpDetectionUseCase by inject()
+
     val loading = MutableStateFlow(false)
 
     private val _state = MutableStateFlow<ViewStates>(ViewStates.Default)
     private val _networkState = MutableStateFlow<NetworkStates>(NetworkStates.Default)
+    private val _vpnDetectionState =
+        MutableStateFlow<VpnDetectionStates>(VpnDetectionStates.Default)
     private val _gpsState = MutableStateFlow<GpsState>(GpsState.Default)
+    private val _lifeCycleEvent = MutableStateFlow(LifecycleEvent.ON_ANY)
+    val lifeCycleEvent = _lifeCycleEvent.asStateFlow()
 
 
     val state = _state.asStateFlow()
     val networkState = _networkState.asStateFlow()
+    val vpnDetectionStates = _vpnDetectionState.asStateFlow()
     val gpsState = _gpsState.asStateFlow()
     val konnectivity: Konnectivity = Konnectivity()
 
@@ -73,6 +89,44 @@ open class BaseViewModel : ViewModel() {
                         ViewStates.UnAuthorized(MR.strings.unauthorized)
                     }
 
+                }
+            }
+        }
+    }
+
+    fun updateLifeCycleEventState(event: LifecycleEvent) {
+        _lifeCycleEvent.update { event }
+    }
+
+    fun restrictForeignIp() {
+        viewModelScope.launch {
+            ipDetectionUseCase(Unit).collect {
+                when (it.status) {
+                    AsyncStatus.ERROR -> {
+                        Napier.log(
+                            LogLevel.ASSERT,
+                            tag = "get country",
+                            message = "ERROR" + it.message
+                        )
+                    }
+
+                    AsyncStatus.LOADING -> {
+                        Napier.log(LogLevel.ASSERT, tag = "get country", message = "LOADING")
+                    }
+
+                    AsyncStatus.EMPTY -> {}
+                    AsyncStatus.SUCCESS -> {
+                        if (it.data.toString() != "IR") {
+                            _vpnDetectionState.update { VpnDetectionStates.ShowBottomSheet }
+                        }else{
+                            _vpnDetectionState.update { VpnDetectionStates.HideBottomSheet }
+                        }
+                        Napier.log(
+                            LogLevel.ASSERT,
+                            tag = "get country",
+                            message = it.data.toString()
+                        )
+                    }
                 }
             }
         }

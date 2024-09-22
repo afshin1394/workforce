@@ -62,6 +62,7 @@ import presentation.screens.splash.viewmodel.SplashScreenVM
 import presentation.theme.surfaceBrandDefault
 
 import utils.GpsState
+import utils.VpnDetectionStates
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
@@ -88,8 +89,7 @@ fun <T : BaseViewModel> BaseScreen(
     val splashScreen = rememberScreen(presentation.nav.Screen.Splash)
     val state by viewModel.state.collectAsState()
     val gpsState by viewModel.gpsState.collectAsState()
-    val splashViewModel: SplashScreenVM = koinInject()
-    val showVpnBottomSheet by splashViewModel.showVpnBottomSheet.collectAsState()
+    val vpnDetectionStates by viewModel.vpnDetectionStates.collectAsState()
 
     var isDrawerInitialized = remember { mutableStateOf(false) }
 
@@ -98,18 +98,23 @@ fun <T : BaseViewModel> BaseScreen(
     OnLifecycleEvent { _, event ->
         when (event) {
             LifecycleEvent.ON_RESUME -> {
-                splashViewModel.updateLifeCycleEventState(LifecycleEvent.ON_ANY)
-                splashViewModel.restrictForeignIp()
+                viewModel.updateLifeCycleEventState(LifecycleEvent.ON_ANY)
+                viewModel.restrictForeignIp()
+                Napier.log(
+                    LogLevel.INFO,
+                    tag = "onResumeBaseScreen",
+                    message = viewModel.vpnDetectionStates.value.toString()
+                )
             }
 
             LifecycleEvent.ON_STOP -> {
-                splashViewModel.updateBottomSheetState(false)
+                viewModel.updateState(ViewStates.Default)
             }
         }
     }
 
     OnLifecycleEvent { _, event ->
-        splashViewModel.updateLifeCycleEventState(event as LifecycleEvent)
+        viewModel.updateLifeCycleEventState(event as LifecycleEvent)
     }
 
     Box(
@@ -118,29 +123,35 @@ fun <T : BaseViewModel> BaseScreen(
 
         @Composable
         fun showVpnBottomSheetHandler() {
-            if (showVpnBottomSheet) {
-                customBottomSheetWithImage(
-                    BottomSheetActionModel(
-                        stringResource(MR.strings.go_to_setting),
-                        surfaceBrandDefault,
-                        surfaceBrandDefault,
-                    ),
-                    description = stringResource(MR.strings.vpn_detected_description),
-                    imageResource = MR.images.disconnected,
-                    onButtonClick = {
-                        openVpnSettings()
-                        splashViewModel.updateBottomSheetState(false)
-                    },
-                )
-                scope.launch {
-                    scaffoldState.bottomSheetState.expand()
+            when (vpnDetectionStates) {
+                VpnDetectionStates.ShowBottomSheet -> {
+                    customBottomSheetWithImage(
+                        BottomSheetActionModel(
+                            stringResource(MR.strings.go_to_setting),
+                            surfaceBrandDefault,
+                            surfaceBrandDefault,
+                        ),
+                        description = stringResource(MR.strings.vpn_detected_description),
+                        imageResource = MR.images.disconnected,
+                        onButtonClick = {
+                            openVpnSettings()
+                            viewModel.updateState(ViewStates.Default)
+                        },
+                    )
+                    scope.launch {
+                        scaffoldState.bottomSheetState.expand()
+                    }
                 }
-            } else {
-                scope.launch {
-                    scaffoldState.bottomSheetState.collapse()
+
+                VpnDetectionStates.HideBottomSheet -> {
+                    scope.launch {
+                        scaffoldState.bottomSheetState.collapse()
+                    }
                 }
-                bottomSheetContent(scaffoldState.bottomSheetState)
+
+                else -> {}
             }
+            bottomSheetContent(scaffoldState.bottomSheetState)
         }
 
 
@@ -166,7 +177,7 @@ fun <T : BaseViewModel> BaseScreen(
                     sheetShape = RoundedCornerShape(topEnd = radius, topStart = radius),
                     sheetContent = {
                         CustomBottomSheet(scaffoldState.bottomSheetState,
-                            hasHeader = if (showVpnBottomSheet) false else bottomSheetHasHeader,
+                            hasHeader = if (vpnDetectionStates is VpnDetectionStates.ShowBottomSheet) false else bottomSheetHasHeader,
                             title = bottomSheetTitle,
                             content = {
                                 showVpnBottomSheetHandler()
@@ -198,8 +209,6 @@ fun <T : BaseViewModel> BaseScreen(
                             GpsState.Enabled -> {}
                         }
                         when (state) {
-                            ViewStates.Default -> {}
-
                             ViewStates.EMPTY -> {
                                 Column(
                                     modifier = Modifier.fillMaxSize()
@@ -231,9 +240,7 @@ fun <T : BaseViewModel> BaseScreen(
                                 Napier.log(LogLevel.INFO, tag = "fkpekfpw", message = errorMessage)
                                 LaunchedEffect(Unit) {
                                     scaffoldState.snackbarHostState.showSnackbar(message = errorMessage)
-
                                     viewModel.updateState(ViewStates.Default)
-
                                 }
                             }
 
@@ -258,9 +265,6 @@ fun <T : BaseViewModel> BaseScreen(
                                 viewModel.updateState(ViewStates.Default)
                             }
 
-                            ViewStates.Reload -> {
-
-                            }
 
                             is ViewStates.UnAuthorized -> {
                                 val key = navigator.items[navigator.items.lastIndex].key
@@ -277,6 +281,10 @@ fun <T : BaseViewModel> BaseScreen(
                                     }
                                 }
                             }
+
+                            else -> {
+
+                            }
                         }
                     }
                 }
@@ -292,13 +300,13 @@ fun <T : BaseViewModel> BaseScreen(
                 sheetShape = RoundedCornerShape(topEnd = radius, topStart = radius),
                 sheetContent = {
                     CustomBottomSheet(scaffoldState.bottomSheetState,
-                        hasHeader = if (showVpnBottomSheet) false else bottomSheetHasHeader,
+                        hasHeader = if (vpnDetectionStates is VpnDetectionStates.ShowBottomSheet) false else bottomSheetHasHeader,
                         title = bottomSheetTitle,
                         content = {
                             Napier.log(
                                 LogLevel.ASSERT,
                                 tag = "showVpnBottomSheet",
-                                message = "$showVpnBottomSheet"
+                                message = state.toString()
                             )
                             showVpnBottomSheetHandler()
                         },
@@ -330,7 +338,6 @@ fun <T : BaseViewModel> BaseScreen(
                     }
 
                     when (state) {
-                        ViewStates.Default -> {}
                         ViewStates.EMPTY -> {
                             Column(
                                 modifier = Modifier.fillMaxSize().wrapContentSize(Alignment.Center),
@@ -378,12 +385,10 @@ fun <T : BaseViewModel> BaseScreen(
                             }
                         }
 
-
                         is ViewStates.Success -> {
                             viewModel.updateState(ViewStates.Default)
                         }
 
-                        ViewStates.Reload -> {}
 
                         is ViewStates.UnAuthorized -> {
                             val key = navigator.items[navigator.items.lastIndex].key
@@ -404,6 +409,8 @@ fun <T : BaseViewModel> BaseScreen(
                                 }
                             }
                         }
+
+                        else -> {}
                     }
                 }
             }

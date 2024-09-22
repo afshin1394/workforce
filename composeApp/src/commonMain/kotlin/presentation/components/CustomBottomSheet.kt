@@ -10,6 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 
@@ -152,31 +153,48 @@ fun customBottomSheetWithImage(
     description: String,
     onButtonClick: () -> Unit = {},
 ) {
-    Column(
-        modifier = Modifier.fillMaxWidth().fillMaxHeight().padding(16.dp),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .fillMaxHeight()
+            .background(Color.White)
     ) {
-        Image(
-            painter = painterResource(imageResource),
-            contentDescription = null,
-            modifier = Modifier.size(160.dp).padding(bottom = 16.dp)
-        )
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .fillMaxHeight()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Image(
+                painter = painterResource(imageResource),
+                contentDescription = null,
+                modifier = Modifier.size(160.dp).padding(bottom = 16.dp)
+            )
 
-        Text(
-            text = description,
-            style = MaterialTheme.typography.body1,
-            modifier = Modifier.padding(bottom = 16.dp)
-        )
+            Text(
+                text = description,
+                style = MaterialTheme.typography.body1,
+                modifier = Modifier.padding(bottom = 16.dp)
+            )
 
-        CustomTextButton(customButtonData = CustomButtonData(
-            title = bottomSheetActionModel.firstButtonText,
-            textColor = bottomSheetActionModel.firstButtonTextColor,
-            backgroundColor = bottomSheetActionModel.firstButtonColor
-        ), modifier = Modifier.height(48.dp).clickable {
-            onButtonClick()
-        })
+            CustomTextButton(
+                customButtonData = CustomButtonData(
+                    title = bottomSheetActionModel.firstButtonText,
+                    textColor = bottomSheetActionModel.firstButtonTextColor,
+                    backgroundColor = bottomSheetActionModel.firstButtonColor
+                ),
+                modifier = Modifier
+                    .height(48.dp)
+                    .clickable {
+                        onButtonClick()
+                    }
+            )
+        }
     }
 }
+
+
 
 

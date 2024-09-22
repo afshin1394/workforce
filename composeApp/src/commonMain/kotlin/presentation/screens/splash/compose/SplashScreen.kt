@@ -24,23 +24,18 @@ import cafe.adriel.voyager.core.registry.rememberScreen
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import com.irancell.nwg.wfm.presentation.components.bottomSheetSingleActionBottomBar
-import com.irancell.nwg.wfm.presentation.components.customBottomSheetWithImage
 
 
 import com.irancell.nwg.wfm.presentation.theme.spacing2X
 
 import dev.icerock.moko.resources.compose.painterResource
 import dev.icerock.moko.resources.compose.stringResource
-import io.github.aakira.napier.LogLevel
-import io.github.aakira.napier.Napier
 
 import irancell.nwg.wfm.LifecycleEvent
 import irancell.nwg.wfm.MR
 import irancell.nwg.wfm.OnLifecycleEvent
 import irancell.nwg.wfm.checkPermission
 import irancell.nwg.wfm.openAppSettings
-import irancell.nwg.wfm.openVpnSettings
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
@@ -48,16 +43,14 @@ import presentation.components.ButtonState
 import presentation.components.CustomDialogDoubleActionWithLoading
 
 import presentation.components.CustomDialogWithLoading
-import presentation.model.BottomSheetActionModel
 import presentation.screens.main.compose.BaseScreen
 import presentation.screens.splash.events.CheckVersionEvent
 import presentation.screens.splash.events.PermissionEvent
 import presentation.screens.splash.viewmodel.SplashScreenVM
 import presentation.theme.body_small
-import presentation.theme.surfaceBrandDefault
-import presentation.theme.surfaceDefault
-import presentation.theme.textInverse
-import presentation.theme.textPrimary
+
+import utils.ViewStates
+import utils.VpnDetectionStates
 
 import utils.startDownloadFileApk
 
@@ -79,6 +72,7 @@ class SplashScreen : Screen {
         val permissionState by viewModel.permissionState.collectAsState()
         val lifecycleEvent by viewModel.lifeCycleEvent.collectAsState()
         val state by viewModel.state.collectAsState()
+        val vpnDetectionStates by viewModel.vpnDetectionStates.collectAsState()
         var events by viewModel.eventsVersion
 
 
@@ -140,9 +134,10 @@ class SplashScreen : Screen {
                                 onDismiss = {
                                     showVersionDialog = false
                                     events = CheckVersionEvent.Default
-                                    navigator.popAll()
-                                    navigator.push(mainScreen)
-
+                                    if (vpnDetectionStates !is VpnDetectionStates.ShowBottomSheet) {
+                                        navigator.popAll()
+                                        navigator.push(mainScreen)
+                                    }
                                 },
                                 onConfirm = {
                                     buttonState = ButtonState.LOADING
@@ -184,8 +179,6 @@ class SplashScreen : Screen {
 
                     when (events) {
                         CheckVersionEvent.Default -> {
-
-
                         }
 
                         CheckVersionEvent.ForceUpdate -> {
@@ -263,10 +256,9 @@ class SplashScreen : Screen {
                         }
 
                         CheckVersionEvent.InvalidToken -> {
-                            if (permissionState == PermissionEvent.IsGranted) {
+                            if (permissionState == PermissionEvent.IsGranted && vpnDetectionStates !is VpnDetectionStates.ShowBottomSheet) {
                                 navigator.popAll()
                                 navigator.push(loginScreen)
-
                             } else {
                                 if (permissionState == PermissionEvent.DeniedPermission) {
                                     val message =
@@ -302,10 +294,9 @@ class SplashScreen : Screen {
                         }
 
                         CheckVersionEvent.OkVersion -> {
-                            if (permissionState == PermissionEvent.IsGranted) {
+                            if (permissionState == PermissionEvent.IsGranted && vpnDetectionStates !is VpnDetectionStates.ShowBottomSheet) {
                                 navigator.popAll()
                                 navigator.push(mainScreen)
-
                             } else {
                                 if (permissionState == PermissionEvent.DeniedPermission) {
                                     val message =

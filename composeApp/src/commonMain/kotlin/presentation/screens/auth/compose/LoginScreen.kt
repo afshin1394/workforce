@@ -75,32 +75,12 @@ class LoginScreen() : Screen {
                 ) {
 
                     when (state) {
-                        is ViewStates.Error -> {
-                        }
-
-                        ViewStates.Loading -> {
-                        }
-
-                        ViewStates.EMPTY -> {
-                        }
-
                         is ViewStates.Success -> {
                             scope.launch {
                                 navigator.push(verifyScreen)
                             }
                         }
-
-                        ViewStates.Default -> {
-
-                        }
-
-                        ViewStates.Reload -> {
-
-                        }
-
-                        is ViewStates.UnAuthorized -> {
-
-                        }
+                        else -> {}
                     }
 
                     Image(
@@ -203,11 +183,8 @@ class LoginScreen() : Screen {
                         }
                     }
                 }
-
             }
-
         )
-
     }
 }
 
