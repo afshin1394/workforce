@@ -47,6 +47,7 @@ import domain.usecase.usecase.location.GetGeneralLocationListUseCase
 import domain.usecase.usecase.location.SendLocationToServerUseCase
 import domain.usecase.usecase.availability.StoreAvailabilityUseCase
 import domain.usecase.usecase.initialForm.GetInitialFormByTask
+import domain.usecase.usecase.ipDetection.IpDetectionUseCase
 import domain.usecase.usecase.location.DeleteSendLocationUseCase
 import domain.usecase.usecase.location.StoreLocationDataUseCase
 import domain.usecase.usecase.location.UpdateUnSendLocationUseCase

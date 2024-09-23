@@ -159,15 +159,6 @@ class MainScreen(
                 stringResource(MR.strings.cancel_reason)
             }
 
-            MainEvent.Default -> {
-                ""
-            }
-
-
-            MainEvent.AcceptTicket -> {
-                ""
-            }
-
             MainEvent.Exit -> {
                 stringResource(MR.strings.exit)
             }
@@ -185,22 +176,23 @@ class MainScreen(
                 stringResource(MR.strings.edit_photo)
             }
 
-                MainEvent.DiscardSuspendTicket -> {
-                    stringResource(MR.strings.save_change)
-                }
-
-                else -> {
-                    ""
-                }
+            MainEvent.DiscardSuspendTicket -> {
+                stringResource(MR.strings.save_change)
             }
 
-        Camera.onResult { obj, uri ->
+            else -> {
+                ""
+            }
+        }
+
+        Camera.onResult { _, uri ->
             viewModel.updateSuspendTicketImageUri(uri.toString())
         }
 
         if (showContent) {
             hasDrawer = true
-            BaseScreen(viewModel = viewModel,
+            BaseScreen(
+                viewModel = viewModel,
                 scaffoldState = scaffoldState,
                 drawerState = drawerState,
                 hasDrawer = hasDrawer,
@@ -482,9 +474,6 @@ class MainScreen(
                                 scaffoldState.bottomSheetState.expand()
                             }
                         }
-
-
-                        else -> {}
                     }
                 },
                 bottomSheetContent = {
@@ -734,15 +723,6 @@ class MainScreen(
 
                         }
 
-                        MainEvent.Default -> {
-
-                        }
-
-                        MainEvent.AcceptTicket -> {
-
-                        }
-
-
                         else -> {}
                     }
 
@@ -796,7 +776,8 @@ class MainScreen(
 
 
 
-                        TicketListScreen(searchText = "",
+                        TicketListScreen(
+                            searchText = "",
                             onEvent = { mainEvent: MainEvent, task: TaskDomain? ->
                                 if (isClickable) {
                                     isClickable = false
@@ -824,7 +805,6 @@ class MainScreen(
                                         isClickable = true
                                     }
                                 }
-                            })
                             },
                             viewModel = viewModel
                         )
@@ -836,7 +816,8 @@ class MainScreen(
                                 }
                             } else {
 
-                                CustomDialogDoubleAction(showDialog = showAcceptDialog,
+                                CustomDialogDoubleAction(
+                                    showDialog = showAcceptDialog,
                                     message = MR.strings.continue_flow_message,
                                     title = MR.strings.continue_flow_title,
                                     titleButton = MR.strings.accept,
@@ -851,13 +832,8 @@ class MainScreen(
                                         }
                                     })
                             }
-
                         }
-
-
                     }
-
-
                 },
                 onCloseBottomSheet = {
 
@@ -885,10 +861,8 @@ class MainScreen(
 
                         else -> {
                             viewModel.events.value = MainEvent.Default
-
                         }
                     }
-
                 },
                 onBackPressed = {
                     if (viewModel.events.value == MainEvent.Default) {
@@ -935,12 +909,9 @@ class MainScreen(
                     }
                 }
 
-
             )
         }
-
     }
-
 
 }
 
