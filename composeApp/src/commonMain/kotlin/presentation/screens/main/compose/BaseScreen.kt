@@ -108,7 +108,7 @@ fun <T : BaseViewModel> BaseScreen(
             }
 
             LifecycleEvent.ON_STOP -> {
-                viewModel.updateState(ViewStates.Default)
+                viewModel.updateVpnDetectionState(VpnDetectionStates.HideBottomSheet)
             }
         }
     }
@@ -197,7 +197,9 @@ fun <T : BaseViewModel> BaseScreen(
                         content(scaffoldState.snackbarHostState)
                         BackButtonHandler.backPress(onBackPressed = {
                             println("checkkkkvalueeee")
-                            onBackPressed()
+                            if (vpnDetectionStates !is VpnDetectionStates.ShowBottomSheet) {
+                                onBackPressed()
+                            }
                         })
                         when (gpsState) {
                             GpsState.Default -> {}
@@ -325,7 +327,9 @@ fun <T : BaseViewModel> BaseScreen(
 
                     BackButtonHandler.backPress(onBackPressed = {
                         println("checkkkkvalueeee")
-                        onBackPressed()
+                        if (vpnDetectionStates !is VpnDetectionStates.ShowBottomSheet) {
+                            onBackPressed()
+                        }
                     })
 
                     when (gpsState) {

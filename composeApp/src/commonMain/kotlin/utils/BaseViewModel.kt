@@ -119,7 +119,7 @@ open class BaseViewModel : ViewModel(), KoinComponent {
                     AsyncStatus.SUCCESS -> {
                         if (it.data.toString() != "IR") {
                             _vpnDetectionState.update { VpnDetectionStates.ShowBottomSheet }
-                        }else{
+                        } else {
                             _vpnDetectionState.update { VpnDetectionStates.HideBottomSheet }
                         }
                         Napier.log(
@@ -176,6 +176,10 @@ open class BaseViewModel : ViewModel(), KoinComponent {
 
     fun updateState(viewStates: ViewStates) {
         _state.update { viewStates }
+    }
+
+    fun updateVpnDetectionState(vpnDetectionStates: VpnDetectionStates) {
+        _vpnDetectionState.update { vpnDetectionStates }
     }
 
     fun handleError(resultStatus: ResultStatus?) {
