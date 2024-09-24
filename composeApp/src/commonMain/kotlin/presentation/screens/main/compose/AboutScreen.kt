@@ -17,6 +17,9 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.blur
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
@@ -28,6 +31,7 @@ import dev.icerock.moko.resources.StringResource
 import dev.icerock.moko.resources.compose.painterResource
 import dev.icerock.moko.resources.compose.stringResource
 import irancell.nwg.wfm.DeviceInfo
+import irancell.nwg.wfm.HideKeyboard
 import irancell.nwg.wfm.MR
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
@@ -37,6 +41,9 @@ import presentation.components.CustomButtonData
 import presentation.components.CustomDialogDoubleActionWithLoading
 import presentation.components.CustomDialogWithLoading
 import presentation.components.MenuItemsTopBar
+import presentation.model.BottomSheetDoubleActionModel
+import presentation.model.SingleButtonActionModel
+import presentation.screens.main.events.AboutEvent
 import presentation.screens.main.viewmodel.AboutScreenVM
 import presentation.screens.splash.events.CheckVersionEvent
 
@@ -44,6 +51,7 @@ import presentation.theme.body_large
 import presentation.theme.subtleDefault
 import presentation.theme.surfaceBrandDefault
 import presentation.theme.textInverse
+import presentation.theme.textInverseDisabled
 import presentation.theme.textPrimary
 import utils.ButtonState
 import utils.startDownloadFileApk
@@ -59,58 +67,165 @@ class AboutScreen(
         val viewModel: AboutScreenVM = koinInject()
 
         val events by viewModel.eventsVersion
+        var eventsAbout by viewModel.eventsAbout
         var showVersionDialog by remember { mutableStateOf(false) }
         var buttonState by remember { mutableStateOf(ButtonState.IDLE) }
         val scope = rememberCoroutineScope()
+
+        val errorMessage = stringResource(MR.strings.download_failed)
+        val bottomSheetTitle: String =
+            when (eventsAbout) {
+                AboutEvent.ForceUpdate->{
+                    viewModel.versionData.value?.title ?: ""
+                }
+                AboutEvent.NormUpdate->{
+                    viewModel.versionData.value?.title ?: ""
+                }
+                AboutEvent.Default->{
+                    ""
+                }
+
+
+            }
 
         BaseScreen(
             viewModel = viewModel,
             title = stringResource(MR.strings.about_application),
             scaffoldState = scaffoldState,
+            bottomSheetTitle = bottomSheetTitle,
+            isShwCloseBtnBottomSheet = !(events == CheckVersionEvent.NormalUpdate ||events == CheckVersionEvent.ForceUpdate),
             topBar = {
                 MenuItemsTopBar(stringResource(MR.strings.about_application)) {
                     navigator.pop()
                 }
             },
-            content = {
+            bottomSheetContent = {
+                when (eventsAbout) {
+                    AboutEvent.ForceUpdate -> {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(start = spacing2X),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            androidx.compose.material.Text(
+                                text = viewModel.versionData.value?.description ?: "",
+                                style = body_large
+                            )
+                        }
+                        scope.launch {
+                            scaffoldState.bottomSheetState.expand()
+                        }
+                    }
+
+
+                    AboutEvent.NormUpdate -> {
+                        androidx.compose.material.Text(
+                            text = viewModel.versionData.value?.description ?: "",
+                            textAlign = TextAlign.Center,
+                            style = body_large,
+                            modifier = Modifier.padding(start = spacing2X)
+                        )
+                        scope.launch {
+                            scaffoldState.bottomSheetState.expand()
+                        }
+
+                    }
+
+                    AboutEvent.Default -> {
+                        scope.launch {
+                            scaffoldState.bottomSheetState.collapse()
+                        }
+                    }
+                }
+            },
+
+            bottomBarBottomSheetContent ={
+                when (eventsAbout) {
+
+                    AboutEvent.ForceUpdate -> {
 
 
 
-                if (showVersionDialog) {
-                    val errorMessage = stringResource(MR.strings.download_failed)
-                        CustomDialogDoubleActionWithLoading(
-                            showDialog = showVersionDialog,
-                            message = viewModel.versionData.value?.description ?: "",
-                            title = viewModel.versionData.value?.title ?: "",
-                            titleButton = MR.strings.download,
+
+
+                        bottomSingleActionComponentWithLoading(
                             buttonState = buttonState,
-                            onDismiss = {
-                                showVersionDialog = false
-                            },
-                            onConfirm = {
+                            SingleButtonActionModel(
+                                stringResource(MR.strings.download),
+                                surfaceBrandDefault,
+                                textInverse
+                            ), onClick = {
                                 buttonState = ButtonState.LOADING
                                 scope.launch {
-                                    val isSuccess = startDownloadFileApk(viewModel.versionData.value?.apk_file ?: "")
+                                    val isSuccess = startDownloadFileApk(
+                                        viewModel.versionData.value?.apk_file ?: ""
+                                    )
                                     if (isSuccess) {
                                         buttonState = ButtonState.COMPLETED
                                     } else {
                                         buttonState = ButtonState.IDLE
-                                        scaffoldState.snackbarHostState.showSnackbar(message = errorMessage )
+                                        scaffoldState.snackbarHostState.showSnackbar(message = errorMessage)
+
                                     }
                                 }
-                            }
-                        )
+
+
+                            })
+
+                        scope.launch {
+                            scaffoldState.bottomSheetState.expand()
+                        }
+
+
+                    }
+
+                    AboutEvent.NormUpdate -> {
+
+                        bottomSheetDoubleActionBottomBarWithLoading(
+                            buttonState = buttonState,
+                            BottomSheetDoubleActionModel(
+                                stringResource(MR.strings.cancel),
+                                Color.Transparent,
+                                textInverseDisabled,
+                                stringResource(MR.strings.download),
+                                surfaceBrandDefault,
+                                textInverse
+                            ), onFirstButtonClick = {
+
+                              eventsAbout=AboutEvent.Default
+
+                            }, onSecondButtonClick = {
+                                buttonState = ButtonState.LOADING
+                                scope.launch {
+                                    val isSuccess = startDownloadFileApk(
+                                        viewModel.versionData.value?.apk_file ?: ""
+                                    )
+                                    if (isSuccess) {
+                                        buttonState = ButtonState.COMPLETED
+                                    } else {
+                                        buttonState = ButtonState.IDLE
+                                        scaffoldState.snackbarHostState.showSnackbar(message = errorMessage)
+                                    }
+                                }
+                            })
+                        scope.launch {
+                            scaffoldState.bottomSheetState.expand()
+                        }
+
+
+                    }
+
+
+                    AboutEvent.Default->{
+                        scope.launch {
+                            scaffoldState.bottomSheetState.collapse()
+                        }
+                    }
                 }
-
-
-
-
-
-
-
-
-                Column(
-                    modifier = Modifier.verticalScroll(rememberScrollState()),
+                }, content = { Column(
+                    modifier = if (eventsAbout==AboutEvent.NormUpdate ||eventsAbout==AboutEvent.ForceUpdate) Modifier.blur(7.dp) else Modifier
+                        .verticalScroll(rememberScrollState()),
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
@@ -198,7 +313,15 @@ class AboutScreen(
                                     textColor = textInverse,
                                     backgroundColor = surfaceBrandDefault,
                                 ), modifier = Modifier.clickable {
-                                    showVersionDialog = true
+
+                                    if (events == CheckVersionEvent.NormalUpdate){
+                                        eventsAbout=AboutEvent.NormUpdate
+
+                                    }else if(events == CheckVersionEvent.ForceUpdate){
+                                        eventsAbout=AboutEvent.ForceUpdate
+
+                                    }
+
 
                                 }
                             )

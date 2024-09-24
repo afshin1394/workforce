@@ -89,7 +89,6 @@ fun BottomSheetHead(
             .fillMaxWidth()
             .wrapContentHeight()
             .padding(spacing2X),
-        contentAlignment = Alignment.Center
     ) {
 
 
@@ -120,32 +119,44 @@ fun BottomSheetHead(
 
         } else if (type == BottomSheetTypes.Success) {
 
-            var scaleState by remember { mutableStateOf(1f) }
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .wrapContentHeight()
+                    .padding(spacing2X),
+                contentAlignment =  Alignment.Center
+            ) {
 
-            val scale by animateFloatAsState(
-                targetValue = scaleState,
-                animationSpec = infiniteRepeatable(
-                    animation = tween(
-                        durationMillis = 800,
-                        easing = FastOutSlowInEasing
-                    ),
-                    repeatMode = RepeatMode.Reverse
+                var scaleState by remember { mutableStateOf(1f) }
+
+                val scale by animateFloatAsState(
+                    targetValue = scaleState,
+                    animationSpec = infiniteRepeatable(
+                        animation = tween(
+                            durationMillis = 800,
+                            easing = FastOutSlowInEasing
+                        ),
+                        repeatMode = RepeatMode.Reverse
+                    )
                 )
-            )
 
 
-            LaunchedEffect(Unit) {
-                scaleState = 1.2f
+                LaunchedEffect(Unit) {
+                    scaleState = 1.2f
+                }
+
+                Image(
+                    painter = painterResource(MR.images.check_square_green),
+                    contentDescription = "ic_success",
+                    modifier = Modifier
+                        .scale(scale)
+                        .size(70.dp)
+                        .padding(spacing1X)
+                )
+
             }
 
-            Image(
-                painter = painterResource(MR.images.check_square_green),
-                contentDescription = "ic_success",
-                modifier = Modifier
-                    .scale(scale)
-                    .size(70.dp)
-                    .padding(spacing1X)
-            )
+
         }
     }
 }

@@ -172,6 +172,9 @@ class SplashScreen() : Screen {
                     }
 
                     CheckVersionEvent.Default -> {
+                        scope.launch {
+                            scaffoldState.bottomSheetState.collapse()
+                        }
 
                     }
 
@@ -260,7 +263,7 @@ class SplashScreen() : Screen {
                                     textInverse
                                 ), onFirstButtonClick = {
 
-                                    events=CheckVersionEvent.Default
+
                                     navigator.popAll()
                                     navigator.push(mainScreen)
 
@@ -350,6 +353,9 @@ class SplashScreen() : Screen {
                     }
 
                     CheckVersionEvent.Default -> {
+                        scope.launch {
+                            scaffoldState.bottomSheetState.collapse()
+                        }
 
                     }
 

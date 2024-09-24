@@ -34,6 +34,7 @@ import dev.icerock.moko.resources.compose.painterResource
 import dev.icerock.moko.resources.compose.stringResource
 import io.github.aakira.napier.LogLevel
 import io.github.aakira.napier.Napier
+import irancell.nwg.wfm.HideKeyboard
 import irancell.nwg.wfm.MR
 import irancell.nwg.wfm.openAppSettings
 import kotlinx.coroutines.delay
@@ -169,6 +170,7 @@ class VerifyScreen(private val phoneNumber: String = "") : Screen {
                     CheckVersionEvent.ForceUpdate -> {
 
 
+                        HideKeyboard()
 
 
                             bottomSingleActionComponentWithLoading(
@@ -202,7 +204,7 @@ class VerifyScreen(private val phoneNumber: String = "") : Screen {
                     }
 
                     CheckVersionEvent.NormalUpdate -> {
-
+                        HideKeyboard()
 
                             bottomSheetDoubleActionBottomBarWithLoading(
                                 buttonState=buttonState,
