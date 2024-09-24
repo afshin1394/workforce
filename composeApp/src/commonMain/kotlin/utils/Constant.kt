@@ -186,6 +186,13 @@ object PROCEED {
     const val PREVIOUS = "PREVIOUS"
 }
 
+object BottomSheetTypes {
+    const val Default = "Default"
+    const val Success = "Success"
+
+}
 
 
-
+enum class ButtonState {
+    IDLE, LOADING, COMPLETED
+}

@@ -253,6 +253,7 @@ class TicketProcessVM(
                     AsyncStatus.SUCCESS -> {
 
                         _ticketFlowCompleted.update { true }
+                        events.value=TicketProcessEvent.TicketFlowCompleted
                         updateState(ViewStates.Success())
 
                     }

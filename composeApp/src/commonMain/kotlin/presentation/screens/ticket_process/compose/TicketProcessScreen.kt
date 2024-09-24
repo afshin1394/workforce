@@ -14,12 +14,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.registry.rememberScreen
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.irancell.nwg.wfm.presentation.components.bottomSheetDoubleActionBottomBar
+import com.irancell.nwg.wfm.presentation.components.bottomSingleActionComponent
 import presentation.components.MenuItemsTopBar
 import com.irancell.nwg.wfm.presentation.theme.spacing2X
 import presentation.screens.ticket_process.viewModel.TicketProcessVM
@@ -48,7 +51,7 @@ import presentation.screens.main.components.EditPhotoComponent
 import presentation.screens.main.components.PhotoPreviewComponent
 import presentation.screens.main.compose.BaseScreen
 import presentation.screens.main.events.TicketProcessEvent
-import presentation.screens.ticket_process.components.bottomSingleActionComponent
+
 import presentation.screens.ticket_process.events.StepEvent
 import presentation.theme.body_large
 import presentation.theme.surfaceBrandDefault
@@ -151,6 +154,10 @@ class TicketProcessScreen(
                 TicketProcessEvent.InProgress -> {
                     ""
                 }
+
+                TicketProcessEvent.TicketFlowCompleted -> {
+                    "SuccessFully!"
+                }
             }
 
 
@@ -193,6 +200,8 @@ class TicketProcessScreen(
             title = stringResource(MR.strings.ticket_process),
             scaffoldState = scaffoldState,
             hasDrawer = false,
+            isShwCloseBtnBottomSheet = viewModel.events.value != TicketProcessEvent.TicketFlowCompleted,
+            typeBottomSheet = if (viewModel.events.value == TicketProcessEvent.TicketFlowCompleted) "Success" else "Default",
             bottomSheetHasHeader = viewModel.events.value != TicketProcessEvent.Default,
             topBar = {
                 MenuItemsTopBar(stringResource(MR.strings.ticket_process)) {
@@ -265,7 +274,7 @@ class TicketProcessScreen(
                                     val errors = validateComponents(viewModel.tempComponentList) {
                                         viewModel.updateTempComponentList(it)
                                     }
-                                    if(errors.isNotEmpty()){
+                                    if (errors.isNotEmpty()) {
                                         viewModel.showFirstError(errors)
                                     }
 
@@ -290,6 +299,26 @@ class TicketProcessScreen(
                         scope.launch {
                             scaffoldState.bottomSheetState.collapse()
                         }
+                    }
+
+                    TicketProcessEvent.TicketFlowCompleted -> {
+
+                        bottomSingleActionComponent(
+                            SingleButtonActionModel(
+                                stringResource(MR.strings.submit),
+                                surfaceBrandDefault,
+                                textInverse
+                            ), onClick = {
+                                viewModel.updateTicketFlowState(false)
+                                viewModel.updateTasks()
+
+
+                            })
+
+                        scope.launch {
+                            scaffoldState.bottomSheetState.expand()
+                        }
+
                     }
                 }
 
@@ -374,23 +403,36 @@ class TicketProcessScreen(
                             scaffoldState.bottomSheetState.collapse()
                         }
                     }
+
+                    TicketProcessEvent.TicketFlowCompleted -> {
+
+                        Text(
+                            text = stringResource(MR.strings.data_sent_complete),
+                            style = body_large,
+                            modifier = Modifier.padding(start = spacing2X)
+                        )
+                        scope.launch {
+                            scaffoldState.bottomSheetState.expand()
+                        }
+
+                    }
                 }
 
 
             },
             content = {
-                LaunchedEffect(updateTaskCompleteState.value){
-                    if(updateTaskCompleteState.value) {
+                LaunchedEffect(updateTaskCompleteState.value) {
+                    if (updateTaskCompleteState.value) {
                         navigator.popAll()
                         navigator.push(mainScreen)
                     }
                 }
-                Column {
+                Column(if(viewModel.events.value==TicketProcessEvent.TicketFlowCompleted)Modifier.blur(7.dp) else Modifier) {
                     processBar(stepDetails, currentLevelState)
                     if (reloadState) {
                         initialize(
                             isChild = false,
-                            scrollingState=scrollingState.value,
+                            scrollingState = scrollingState.value,
                             savedIndex = savedIndex,
                             savedParentIndex = savedParentIndex,
                             taskID = currentLevelState.toString(),
@@ -415,19 +457,18 @@ class TicketProcessScreen(
                                     }
                                 }
                             },
-                            onAddItem = { component,  indexChild,scrollCallback ->
-                               scope.launch {
-                                   viewModel.addOrRemoveComponentDomainRepeatableToList(
-                                       component,
-                                       indexChild,
-                                       scrollCallback
-                                   )
-                               }
-
+                            onAddItem = { component, indexChild, scrollCallback ->
+                                scope.launch {
+                                    viewModel.addOrRemoveComponentDomainRepeatableToList(
+                                        component,
+                                        indexChild,
+                                        scrollCallback
+                                    )
+                                }
 
 
                             },
-                            onRemoveItem = { component, indexChild,scrollCallBack ->
+                            onRemoveItem = { component, indexChild, scrollCallBack ->
                                 scope.launch {
                                     viewModel.addOrRemoveComponentDomainRepeatableToList(
                                         component,
@@ -437,26 +478,25 @@ class TicketProcessScreen(
                                 }
 
 
-
                             },
 
 
                             )
                     }
                 }
-                CompleteFlowDialog(
-                    showDialog = ticketFlowCompletedState.value,
-                    message = MR.strings.data_sent_complete,
-                    titleButton = MR.strings.submit,
-                    onDismiss = {
-                        viewModel.updateTicketFlowState(false)
-                        navigator.popAll()
-                        navigator.push(mainScreen)
-                    },
-                    onConfirm = {
-                        viewModel.updateTicketFlowState(false)
-                        viewModel.updateTasks()
-                    })
+                /*    CompleteFlowDialog(
+                        showDialog = ticketFlowCompletedState.value,
+                        message = MR.strings.data_sent_complete,
+                        titleButton = MR.strings.submit,
+                        onDismiss = {
+                            viewModel.updateTicketFlowState(false)
+                            navigator.popAll()
+                            navigator.push(mainScreen)
+                        },
+                        onConfirm = {
+    //                        viewModel.updateTicketFlowState(false)
+    //                        viewModel.updateTasks()
+                        })*/
 
             }, onCloseBottomSheet = {
                 when (viewModel.events.value) {

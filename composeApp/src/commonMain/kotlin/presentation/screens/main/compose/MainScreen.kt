@@ -192,6 +192,10 @@ class MainScreen(
                 MainEvent.DiscardSuspendTicket -> {
                     stringResource(MR.strings.save_change)
                 }
+                MainEvent.ShowAcceptTicketDialog->{
+                    stringResource(MR.strings.continue_flow_title)
+
+                }
 
                 else -> {
                     ""
@@ -209,6 +213,7 @@ class MainScreen(
                 scaffoldState = scaffoldState,
                 drawerState = drawerState,
                 hasDrawer = hasDrawer,
+                isShwCloseBtnBottomSheet = viewModel.events.value != MainEvent.ShowAcceptTicketDialog,
                 hasSwipeDrawer = viewModel.events.value != MainEvent.PhotoPreview && viewModel.events.value != MainEvent.EditPhoto,
                 topBar = {
                     CustomTopAppBar(
@@ -514,6 +519,41 @@ class MainScreen(
                                 scaffoldState.bottomSheetState.expand()
                             }
                         }
+                        MainEvent.ShowAcceptTicketDialog->{
+                            bottomSheetDoubleActionBottomBar(
+                                BottomSheetDoubleActionModel(
+                                    stringResource(MR.strings.cancel),
+                                    surfaceDefault,
+                                    textPrimary,
+                                    stringResource(MR.strings.accept),
+                                    surfaceBrandDefault,
+                                    textInverse
+                                ), onFirstButtonClick = {
+                                    scope.launch {
+                                        BackgroundServiceApp.updateServiceState(ServiceState.Normal)
+                                        viewModel.events.value = MainEvent.Default
+                                        viewModel.updateShowAcceptDialog(false)
+                                    }
+
+
+                                }, onSecondButtonClick = {
+                                    scope.launch {
+                                        viewModel.selectedTask.value?.let {
+                                            viewModel.updateEdited(true)
+                                            viewModel.events.value = MainEvent.Default
+                                        }
+
+                                    }
+
+
+
+
+                                })
+                            scope.launch {
+                                scaffoldState.bottomSheetState.expand()
+                            }
+
+                        }
 
 
                         else -> {}
@@ -781,6 +821,17 @@ class MainScreen(
                         MainEvent.AcceptTicket -> {
 
                         }
+                        MainEvent.ShowAcceptTicketDialog->{
+                            Text(
+                                text = stringResource(MR.strings.continue_flow_message),
+                                style = body_large,
+                                modifier = Modifier.padding(start = spacing2X)
+                            )
+                            scope.launch {
+                                scaffoldState.bottomSheetState.expand()
+                            }
+
+                        }
 
 
                         else -> {}
@@ -790,6 +841,7 @@ class MainScreen(
                 content = {
                     if (isTicketEditedState) {
                         viewModel.updateIsEditedTicket(false)
+                        viewModel.events.value=MainEvent.Default
                         LaunchedEffect(Unit) {
                             navigator.push(
                                 TicketInfoScreen(
@@ -876,24 +928,11 @@ class MainScreen(
                             if (isTicketEditedState) {
                                 viewModel.selectedTask.value?.let {
                                     viewModel.updateShowAcceptDialog(false)
+                                    viewModel.events.value=MainEvent.Default
                                 }
                             } else {
+                                viewModel.events.value=MainEvent.ShowAcceptTicketDialog
 
-                                CustomDialogDoubleAction(
-                                    showDialog = showAcceptDialog,
-                                    message = MR.strings.continue_flow_message,
-                                    title = MR.strings.continue_flow_title,
-                                    titleButton = MR.strings.accept,
-                                    onDismiss = {
-                                        viewModel.updateShowAcceptDialog(false)
-                                        BackgroundServiceApp.updateServiceState(ServiceState.Normal)
-                                    },
-                                    onConfirm = {
-                                        viewModel.updateShowAcceptDialog(false)
-                                        viewModel.selectedTask.value?.let {
-                                            viewModel.updateEdited(true)
-                                        }
-                                    })
                             }
 
                         }
@@ -924,6 +963,11 @@ class MainScreen(
 
                         MainEvent.SuspendTicket -> {
                             viewModel.events.value = MainEvent.DiscardSuspendTicket
+
+                        }
+                        MainEvent.ShowAcceptTicketDialog -> {
+
+                            viewModel.events.value = MainEvent.Default
 
                         }
 

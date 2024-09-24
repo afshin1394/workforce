@@ -40,6 +40,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onGloballyPositioned
@@ -57,6 +58,7 @@ import irancell.nwg.wfm.MR
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import presentation.theme.surfaceBrandDefault
+import utils.BottomSheetTypes
 
 import utils.GpsState
 
@@ -78,6 +80,8 @@ fun <T : BaseViewModel> BaseScreen(
     onCloseBottomSheet: () -> Unit = {},
     onBackPressed: () -> Unit = {},
     hasSwipeDrawer: Boolean = true,
+    isShwCloseBtnBottomSheet:Boolean=true,
+    typeBottomSheet:String= BottomSheetTypes.Default
 
     ) {
     val navigator = LocalNavigator.currentOrThrow
@@ -132,6 +136,8 @@ fun <T : BaseViewModel> BaseScreen(
                             scaffoldState.bottomSheetState,
                             hasHeader = bottomSheetHasHeader,
                             title = bottomSheetTitle,
+                            showClose = isShwCloseBtnBottomSheet,
+                            type = typeBottomSheet,
                             content = {
                                 bottomSheetContent(scaffoldState.bottomSheetState)
                             },
@@ -236,7 +242,6 @@ fun <T : BaseViewModel> BaseScreen(
                                 }
                             }
 
-
                             is ViewStates.Success -> {
                                 viewModel.updateState(ViewStates.Default)
                             }
@@ -280,6 +285,8 @@ fun <T : BaseViewModel> BaseScreen(
                         scaffoldState.bottomSheetState,
                         hasHeader = bottomSheetHasHeader,
                         title = bottomSheetTitle,
+                        showClose = isShwCloseBtnBottomSheet,
+                        type = typeBottomSheet,
                         content = {
                             bottomSheetContent(scaffoldState.bottomSheetState)
                         },

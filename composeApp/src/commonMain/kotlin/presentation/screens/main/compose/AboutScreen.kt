@@ -31,7 +31,7 @@ import irancell.nwg.wfm.DeviceInfo
 import irancell.nwg.wfm.MR
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
-import presentation.components.ButtonState
+
 import presentation.components.CustomButton
 import presentation.components.CustomButtonData
 import presentation.components.CustomDialogDoubleActionWithLoading
@@ -45,6 +45,7 @@ import presentation.theme.subtleDefault
 import presentation.theme.surfaceBrandDefault
 import presentation.theme.textInverse
 import presentation.theme.textPrimary
+import utils.ButtonState
 import utils.startDownloadFileApk
 
 @OptIn(ExperimentalMaterialApi::class)
