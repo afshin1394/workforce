@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <resources>
-    <string name= "none"> </string>
+    <string name="none"></string>
     <string name="password">پسوورد</string>
     <string name="submit">تایید</string>
     <string name="why_canceled_ticket">آیا می خواهید کنسل کنید تیکت</string>
@@ -11,10 +11,13 @@
     <string name="about_application">درباره اپلیکیشن</string>
     <string name="current_version">ورژن فعلی شما</string>
     <string name="latest_version">آخرین ورژن</string>
-    <string name="description_for_update">شما در حال استفاده از ورژن قدیمی اپلیکیشن هستید لطفا برنامه خود را به اخرین ورژن به روز رسانی نمایید.</string>
+    <string name="description_for_update">شما در حال استفاده از ورژن قدیمی اپلیکیشن هستید لطفا
+        برنامه خود را به اخرین ورژن به روز رسانی نمایید.
+    </string>
     <string name="update">به روز رسانی</string>
     <string name="account_info">اطلاعات حساب کاربری</string>
     <string name="name">نام</string>
+    <string name="openInMap">باز کردن در نقشه</string>
     <string name="expertise">تخصص</string>
     <string name="phone_number">شماره موبایل</string>
     <string name="email">ایمیل</string>
@@ -29,15 +32,16 @@
     <string name="cancel_reason">دلیل کنسل کردن</string>
     <string name="cancel">لغو کردن</string>
     <string name="are_you_logout">آیا میخواهید از برنامه خارج شوید؟</string>
-    <string name="logout_warning">بعد از خروج، تمام اطلاعات تیکت ها از روی دستگاه پاک میشود! </string>
+    <string name="logout_warning">بعد از خروج، تمام اطلاعات تیکت ها از روی دستگاه پاک میشود!
+    </string>
     <string name="clear_all">پاک کردن همه</string>
-    <string name="settings">تنظیمات </string>
-    <string name="language">زبان </string>
-    <string name="help_support">پشتیبانی </string>
-    <string name="darkMode">تم تیره </string>
-    <string name="work_force_management">مدیریت نیروی کار </string>
-    <string name="please_authorize_permissions">لطفا مجوزهای لازم را تایید نمایید </string>
-    <string name="approve">تایید </string>
+    <string name="settings">تنظیمات</string>
+    <string name="language">زبان</string>
+    <string name="help_support">پشتیبانی</string>
+    <string name="darkMode">تم تیره</string>
+    <string name="work_force_management">مدیریت نیروی کار</string>
+    <string name="please_authorize_permissions">لطفا مجوزهای لازم را تایید نمایید</string>
+    <string name="approve">تایید</string>
     <string name="my_tickets">تسک های من</string>
     <string name="gps_tracker">گزارش لوکیشن</string>
     <string name="about">درباره ما</string>
@@ -54,7 +58,9 @@
     <string name="english">انگلیسی</string>
     <string name="farsi">فارسی</string>
     <string name="ticket_list">لیست کار ها</string>
-    <string name="tap_update_availability">جهت به روز رسانی وضعیت در دسترس بودن روی دکمه زیر کلیک کنید.</string>
+    <string name="tap_update_availability">جهت به روز رسانی وضعیت در دسترس بودن روی دکمه زیر کلیک
+        کنید.
+    </string>
     <string name="available">در دسترس بودن</string>
     <string name="unAvailable">عدم دسترسی</string>
     <string name="ticket_info">اطلاعات تیکت</string>
@@ -99,7 +105,7 @@
 
 
     //screens
-    <string name="cr_management"> مدیریت CR</string>
+    <string name="cr_management">مدیریت CR</string>
     <string name="main">اصلی</string>
     <string name="auth">احراز هویت</string>
     <string name="login">ورود</string>
@@ -107,13 +113,15 @@
     <string name="splash_sc">اسپلش</string>
     <string name="menu_sc">منو</string>
     <string name="GPS_Permission">مجوز GPS</string>
-    <string name="disc_gps_permission">این برنامه باید GPS را فعال کند. آیا می خواهید آن را اکنون فعال کنید؟</string>
+    <string name="disc_gps_permission">این برنامه باید GPS را فعال کند. آیا می خواهید آن را اکنون
+        فعال کنید؟
+    </string>
     <string name="enable">فعال</string>
 
     <string name="describe_the_reason">علت را توضیح دهید</string>
 
 
-    <string name="sure_delete_photo">آیا این تصویرحذف گردد؟ </string>
+    <string name="sure_delete_photo">آیا این تصویرحذف گردد؟</string>
     <string name="delete">حذف</string>
     <string name="discard">حذف تغییرات</string>
     <string name="sure_discard_change">آیا می خواهید تغییرات را حذف کنید؟</string>
@@ -121,20 +129,19 @@
     <string name="sure_exit_app">آیا می خواهید از برنامه خارج شوید؟</string>
     <string name="photo_preview">پیش نمایش عکس</string>
     <string name="delete_photo">پاک کردن عکس</string>
-    <string name="edit_photo"> ویرایش عکس</string>
+    <string name="edit_photo">ویرایش عکس</string>
     <string name="save_change">ذخیره تغییرات</string>
     <string name="unauthorized">درخواست شما معتبر نیست لطفا مجددا وارد شوید!</string>
 
 
-
     <string name="Equal">عدد نباید برابر باشد با %s</string>
-    <string name="NotEqual"> %s عدد باید برابر باشد با</string>
-    <string name="GreaterThan"> %s عدد نباید بزرگتر باشد از</string>
+    <string name="NotEqual">%s عدد باید برابر باشد با</string>
+    <string name="GreaterThan">%s عدد نباید بزرگتر باشد از</string>
     <string name="GreaterOrEqualTo">عدد باید بزرگتر یا مساوی باشد با %s</string>
-    <string name="NotGreaterOrEqualTo"> %s عدد باید بزرگتر  یا مساوی باشد با</string>
+    <string name="NotGreaterOrEqualTo">%s عدد باید بزرگتر یا مساوی باشد با</string>
     <string name="NotGreaterThan">عدد باید بزرگتر باشد از %s</string>
-    <string name="LessThan"> %s عدد باید کوچکتر باشد از</string>
-    <string name="LessThanOrEqualTo">عدد باید کوچکتر یا مساوی باشد با %s </string>
+    <string name="LessThan">%s عدد باید کوچکتر باشد از</string>
+    <string name="LessThanOrEqualTo">عدد باید کوچکتر یا مساوی باشد با %s</string>
 
 
     <string name="i_ticket">تسک های من</string>
@@ -150,7 +157,7 @@
     <string name="maximum_length">از حداکثر طول %1$s بیشتر است.</string>
     <string name="must_length">از حداقل طول %1$s کمتر است.</string>
 
-    <string name="invalid_format">قالب  نامعتبر است.</string>
+    <string name="invalid_format">قالب نامعتبر است.</string>
     <string name="file_total_size">حجم کل فایل نباید از %1$s مگابایت تجاوز کند.</string>
     <string name="file_total_count">شما نمی توانید بیش از %1$s فایل آپلود کنید.</string>
     <string name="file_type_black">فایل‌های با پسوند %1$s مجاز نیستند.</string>
@@ -159,15 +166,17 @@
     <string name="redirect_error">خطای تغییر مسیر ادرس</string>
     <string name="empty_error_message" />
 
-    <string name="continue_flow_title" >شروع اجرای مراحل تیکت</string>
-    <string name="continue_flow_message" >در صورت ادامه تغییرات تیکت را دریافت نخواهید کرد آیا مطمئن هستید؟</string>
+    <string name="continue_flow_title">شروع اجرای مراحل تیکت</string>
+    <string name="continue_flow_message">در صورت ادامه تغییرات تیکت را دریافت نخواهید کرد آیا مطمئن
+        هستید؟
+    </string>
 
-    <string name="empty_list" > لیست خالی است</string>
-    <string name="data_sent_complete" >اطلاعات با موفقیت ارسال شد!</string>
-    <string name="under_development" >در حال توسعه می باشد!</string>
-    <string name="download" >دانلود</string>
-    <string name="download_failed" >دانلود یا نصب موفق نبود، لطفاً دوباره تلاش کنید.</string>
-    <string name="accept" >پذیرفتن</string>
+    <string name="empty_list">لیست خالی است</string>
+    <string name="data_sent_complete">اطلاعات با موفقیت ارسال شد!</string>
+    <string name="under_development">در حال توسعه می باشد!</string>
+    <string name="download">دانلود</string>
+    <string name="download_failed">دانلود یا نصب موفق نبود، لطفاً دوباره تلاش کنید.</string>
+    <string name="accept">پذیرفتن</string>
     <string name="more_options">گزینه های بیشتر</string>
 
 </resources>

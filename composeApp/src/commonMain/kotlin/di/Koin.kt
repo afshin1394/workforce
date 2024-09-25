@@ -285,6 +285,7 @@ fun viewModelModule() = module {
             get(),
             get(),
             get(),
+            get(),
         )
     }
     viewModelDefinition { SettingScreenVM() }

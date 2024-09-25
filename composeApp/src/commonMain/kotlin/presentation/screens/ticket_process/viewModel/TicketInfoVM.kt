@@ -24,16 +24,9 @@ class TicketInfoVM(
     private val getInitialFormByTask: GetInitialFormByTask,
 ) : BaseViewModel() {
 
-
     val initFormsState = mutableStateListOf<InitFormDomain>()
-
-
-
-
-
     private val _ticketNumber = MutableStateFlow("0")
     val ticketNumber = _ticketNumber.asStateFlow()
-
 
     fun updateTicketNumber(ticketNumber: String) {
         _ticketNumber.update { ticketNumber }
@@ -41,8 +34,6 @@ class TicketInfoVM(
 
     private val _positionSelected = MutableStateFlow(0)
     val positionSelected = _positionSelected.asStateFlow()
-
-
 
     fun getInitialForm(ticketNumber: String) {
         viewModelScope.launch {
@@ -56,7 +47,7 @@ class TicketInfoVM(
                         updateState(ViewStates.Loading)
                     }
 
-                    AsyncStatus.EMPTY->{
+                    AsyncStatus.EMPTY -> {
                         updateState(ViewStates.EMPTY)
                     }
 
@@ -64,14 +55,13 @@ class TicketInfoVM(
                         updateState(ViewStates.Success())
 
                         it.data?.let {
-                            initFormsState .addAll(it.initForms)
+                            initFormsState.addAll(it.initForms)
                         }
                     }
                 }
             }
         }
     }
-
 }
 
 
