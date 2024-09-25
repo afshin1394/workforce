@@ -997,6 +997,7 @@ class MainScreenVM(
                             val latLong = location?.split(",")
                             if (latLong != null && latLong.size == 2) {
                                 openInMap(latLong[0], latLong[1])
+                                updateState(MainEvent.Default)
                             } else {
 //                                openInMap("35.715298", "51.404343")
                             }
