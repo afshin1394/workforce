@@ -37,6 +37,6 @@ data class Component(
     @SerialName("removable")
     val removable : Boolean? = null,
 
-//    @SerialName("logics")
-//    val logics : List<Logic>?= null
+    @SerialName("logics")
+    val logics : List<Logic>?= null
 )

@@ -11,6 +11,7 @@ import utils.TaskState
 
 fun Detail.toTaskEntity(): TaskEntity {
     return   TaskEntity(
+        ticket_id = this.basic_info.ticket_id.toString(),
         ticket_number = this.basic_info.ticket_number?:"",
         ticket_state = this.basic_info.ticket_state?:"",
         city = this.basic_info.city?:"",
@@ -56,6 +57,7 @@ fun TaskEntity.toTaskDomain(): TaskDomain {
     return  TaskDomain(
          initial_form = null,
          basic_info = BasicInfoDomain(
+             ticket_id = this.ticket_id,
              ticket_number =this.ticket_number,
              ticket_state = this.ticket_state,
              level = this.level,

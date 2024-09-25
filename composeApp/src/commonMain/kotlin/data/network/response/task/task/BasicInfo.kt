@@ -5,6 +5,8 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class BasicInfo(
+    @SerialName("ticket_id")
+    val ticket_id : Long,
     @SerialName("ticket_number")
     val ticket_number : String?,
     @SerialName("ticket_state")

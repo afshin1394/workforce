@@ -50,6 +50,7 @@ import utils.validateComponents
 
 
 class TicketInfoScreen(
+    private val ticketId : String,
     private val ticket_number: String
 ) : Screen {
     @OptIn(ExperimentalMaterialApi::class, FlowPreview::class)
@@ -61,7 +62,7 @@ class TicketInfoScreen(
         val navigator = LocalNavigator.currentOrThrow
 
         val ticketProcessScreen =
-            rememberScreen(presentation.nav.Screen.TicketProcess.TicketProcessScreen(ticket_number))
+            rememberScreen(presentation.nav.Screen.TicketProcess.TicketProcessScreen(ticketId,ticket_number))
 
         val viewModel: TicketInfoVM = koinInject()
 
@@ -74,6 +75,7 @@ class TicketInfoScreen(
         LaunchedEffect(Unit) {
             viewModel.getInitialForm(ticket_number)
             viewModel.updateTicketNumber(ticket_number)
+            viewModel.updateTicketId(ticketId)
         }
 
 
@@ -106,7 +108,7 @@ class TicketInfoScreen(
                     ), onClick = {
                         if (isClickable) {
                             isClickable = false
-                            navigator.push(TicketProcessScreen(viewModel.ticketNumber.value))
+                            navigator.push(TicketProcessScreen(viewModel.ticketId.value,viewModel.ticketNumber.value))
                             scope.launch {
                                 delay(500)
                                 isClickable = true

@@ -86,6 +86,9 @@ class TicketProcessVM(
     private val _positionSelected = MutableStateFlow(0)
     val positionSelected = _positionSelected.asStateFlow()
 
+    private val _ticketId = MutableStateFlow("0")
+    val ticketId = _ticketId.asStateFlow()
+
     private val _ticketNumber = MutableStateFlow("0")
     val ticketNumber = _ticketNumber.asStateFlow()
 
@@ -106,7 +109,7 @@ class TicketProcessVM(
     var updateTasksComplete = _updateTasksComplete.asStateFlow()
 
 
-    val logicCalculation: LogicCalculation = LogicCalculation(tempComponentList)
+    val logicCalculation: LogicCalculation = LogicCalculation(viewModelScope,tempComponentList)
 
      fun getMokStepsForm(proceed: String) {
         events.value = TicketProcessEvent.InProgress
@@ -147,6 +150,7 @@ class TicketProcessVM(
                             )
                             tempComponentList.clear()
                             tempComponentList.addAll(it.toList())
+                            handleLogics()
 
                         }
 
@@ -303,6 +307,7 @@ class TicketProcessVM(
     fun updateTicketNumber(ticketNumber: String) {
         _ticketNumber.update { ticketNumber }
     }
+
 
 
     fun updateTempComponentList(newList: List<ComponentDomain>) {
@@ -763,6 +768,12 @@ class TicketProcessVM(
 
     fun updateScrollingState(pair: Pair<Int,Int>) {
       _scrollingPosition.update { pair }
+    }
+
+    fun updateTicketId(ticketId: String) {
+        _ticketId.update { ticketId }
+        logicCalculation.ticketId(ticketId)
+
     }
 //
 //    fun updateReloadState(reload: Boolean) {

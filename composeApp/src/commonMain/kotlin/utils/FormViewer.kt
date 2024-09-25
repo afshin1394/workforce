@@ -112,6 +112,7 @@ fun initialize(
 
 
                         groupComponent(
+                            item.processLogicDomain,
                             true,
                             scrollingState = scrollingState,
                             parentIndex = savedParentIndex,

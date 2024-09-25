@@ -793,6 +793,7 @@ class MainScreen(
                         LaunchedEffect(Unit) {
                             navigator.push(
                                 TicketInfoScreen(
+                                    viewModel.selectedTask.value?.basic_info?.ticket_id.toString(),
                                     viewModel.selectedTask.value?.basic_info?.ticket_number.toString()
                                 )
                             )

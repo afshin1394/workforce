@@ -116,6 +116,9 @@ object OperatorType {
     const val Multiply = "Multiply"
     const val Divide = "Divide"
     const val Add = "Add"
+    const val ContainsAny = "Contains any"
+    const val NotContainsAny = "Not contains any"
+    const val ContainsAll = "Contains all"
 
 }
 

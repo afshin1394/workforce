@@ -1,6 +1,7 @@
 package irancell.nwg.wfm
 
 import android.os.CountDownTimer
+import dev.icerock.moko.mvvm.compose.BuildConfig
 
 actual class CountdownTimer actual constructor(private val seconds: Int, private val listener: TimerListener) {
     private var timer: CountDownTimer? = null

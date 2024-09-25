@@ -1,6 +1,7 @@
 package domain.models.task
 
 data class BasicInfoDomain(
+    val ticket_id : String?,
     val ticket_number : String?,
     val ticket_state : String?,
     val level : String?,

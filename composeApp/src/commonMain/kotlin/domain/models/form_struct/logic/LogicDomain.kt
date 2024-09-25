@@ -5,7 +5,6 @@ import domain.models.form_struct.logic.ExpressionDomain
 import kotlinx.serialization.Serializable
 @Serializable
 data class LogicDomain(
-    val feild: String?=null,
     val logicType: String? = null,
     val experssions: List<ExpressionDomain>? = null,
     val filterOptionsLogic :  List<FilterOptionsLogicDomain>?=null,

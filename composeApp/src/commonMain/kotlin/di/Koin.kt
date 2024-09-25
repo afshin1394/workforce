@@ -19,6 +19,7 @@ import data.StepPointerRepositoryImpl
 import data.StepsRepositoryImpl
 import data.SuspendTaskRepositoryImpl
 import data.TaskRepositoryImpl
+import data.TicketRepositoryImpl
 import data.UploadRepositoryImpl
 import data.VersionRepositoryImpl
 import domain.repository.IAuthRepository
@@ -32,6 +33,7 @@ import domain.repository.IStepPointerRepository
 import domain.repository.IStepsRepository
 import domain.repository.ISuspendTaskRepository
 import domain.repository.ITaskRepository
+import domain.repository.ITicketRepository
 import domain.repository.IUploadRepository
 import domain.repository.IVersionRepository
 import domain.usecase.usecase.auth.LoginUseCase
@@ -66,6 +68,7 @@ import domain.usecase.usecase.suspendTask.GetSuspendTaskByIdUseCase
 import domain.usecase.usecase.suspendTask.StoreSuspendTaskUseCase
 import domain.usecase.usecase.ticket.UpdateTaskUseCase
 import domain.usecase.usecase.ticket.GetTasksUseCase
+import domain.usecase.usecase.ticket.GetTicketDetailsUseCase
 import domain.usecase.usecase.upload.SendFileToServerUseCase
 import domain.usecase.usecase.version.GetVersionOfServerUseCase
 import domain.usecase.usecase.version.SendVersionToServerUseCase
@@ -136,6 +139,7 @@ fun repositoryModule() = module {
             get(named("tokenized"))
         )
     }
+    single<ITicketRepository> { TicketRepositoryImpl(get(named("tokenized"))) }
 }
 
 fun useCaseModule() = module {
@@ -176,6 +180,7 @@ fun useCaseModule() = module {
     single { DeleteSendLocationUseCase(get()) }
     single { SendVersionToServerUseCase(get()) }
     single { GetVersionOfServerUseCase(get()) }
+    single { GetTicketDetailsUseCase(get()) }
 }
 
 fun httpModule() = module {
@@ -194,7 +199,9 @@ fun httpModule() = module {
             }
             configure()
             defaultRequest {
-                url(ProductionBASEURL)
+
+                url(DevelopmentBASEURL)
+
                 contentType(ContentType.Application.Json)
                 headers {
                     append(
@@ -232,7 +239,7 @@ fun httpModule() = module {
             }
             configure()
             defaultRequest {
-                url(ProductionBASEURL)
+                url(DevelopmentBASEURL)
                 contentType(ContentType.Application.Json)
                 headers {
 

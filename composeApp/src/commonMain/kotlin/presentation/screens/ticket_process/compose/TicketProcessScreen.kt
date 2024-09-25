@@ -65,6 +65,7 @@ import kotlin.random.Random
 
 
 class TicketProcessScreen(
+    private val ticketId: String,
     private val ticketNumber: String
 ) : Screen {
     @OptIn(ExperimentalMaterialApi::class)
@@ -103,6 +104,7 @@ class TicketProcessScreen(
 
 
         LaunchedEffect(Unit) {
+            viewModel.updateTicketId(ticketId)
             viewModel.updateTicketNumber(ticketNumber)
             viewModel.getMokStepsForm(PROCEED.INITIAL)
         }
