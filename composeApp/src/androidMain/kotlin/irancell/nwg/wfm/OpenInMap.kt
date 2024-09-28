@@ -1,6 +1,5 @@
 package irancell.nwg.wfm
 
-import android.annotation.SuppressLint
 import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
@@ -9,7 +8,6 @@ import android.net.Uri
 import java.util.Locale
 
 
-@SuppressLint("DefaultLocale")
 actual fun openInMap(lat: String, long: String) {
     try {
         val uri = java.lang.String.format(
