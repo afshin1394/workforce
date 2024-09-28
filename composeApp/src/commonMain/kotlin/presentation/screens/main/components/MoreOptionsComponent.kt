@@ -11,14 +11,27 @@ import irancell.nwg.wfm.MR
 import presentation.model.ItemComponentModel
 
 @Composable
-fun MoreOptions(onSuspendClick : () -> Unit = {},onCancelClick : () -> Unit = {}){
+fun MoreOptions(
+    onSuspendClick: () -> Unit = {},
+    onCancelClick: () -> Unit = {},
+    onOpenInMapClick: () -> Unit = {}
+) {
     Column(modifier = Modifier.fillMaxWidth()) {
-        ItemComponent(itemComponentModel =  ItemComponentModel( text = stringResource(MR.strings.suspend_ticket)),modifier = Modifier.clickable {
-            onSuspendClick()
-        })
-        ItemComponent(itemComponentModel = ItemComponentModel(text = stringResource(MR.strings.cancel_ticket)),modifier = Modifier.clickable {
-            onCancelClick()
-        })
+        ItemComponent(
+            itemComponentModel = ItemComponentModel(text = stringResource(MR.strings.suspend_ticket)),
+            modifier = Modifier.clickable {
+                onSuspendClick()
+            })
+        ItemComponent(
+            itemComponentModel = ItemComponentModel(text = stringResource(MR.strings.cancel_ticket)),
+            modifier = Modifier.clickable {
+                onCancelClick()
+            })
+        ItemComponent(
+            itemComponentModel = ItemComponentModel(text = stringResource(MR.strings.openInMap)),
+            modifier = Modifier.clickable {
+                onOpenInMapClick()
+            })
     }
 
 }

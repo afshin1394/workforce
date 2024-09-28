@@ -44,8 +44,6 @@ class TicketInfoVM(
     private val _positionSelected = MutableStateFlow(0)
     val positionSelected = _positionSelected.asStateFlow()
 
-
-
     fun getInitialForm(ticketNumber: String) {
         viewModelScope.launch {
             getInitialFormByTask(ticketNumber).collect {

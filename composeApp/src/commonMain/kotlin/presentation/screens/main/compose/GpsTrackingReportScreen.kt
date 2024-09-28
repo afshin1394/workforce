@@ -119,8 +119,6 @@ class GpsTrackingReportScreen(
                         }
                     }
 
-                    ViewStates.EMPTY -> {}
-
                     ViewStates.Loading -> {
                         CircularProgressIndicator()
                     }
@@ -151,19 +149,7 @@ class GpsTrackingReportScreen(
                         }
                     }
 
-                    ViewStates.Default -> {
-
-                    }
-
-                    ViewStates.Reload -> {
-
-                    }
-
-                    is ViewStates.UnAuthorized -> {
-
-                    }
-
-                    ViewStates.VPNDetected -> TODO()
+                    else -> {}
                 }
             }
         }

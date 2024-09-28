@@ -90,7 +90,6 @@ fun TicketListScreen(
             } else {
                 it.id.toString()
             }
-
         }
         Box(Modifier.pullRefresh(refreshState)) {
             LazyColumn(
@@ -100,9 +99,7 @@ fun TicketListScreen(
                     .background(color = backgroundBackground3)
                     .padding(horizontal = spacing2X)
             ) {
-
                 val filteredList = tasks.filter {
-
                     it.basic_info.ticket_number?.lowercase()
                         ?.contains(searchTextState.lowercase()) == true ||
                             it.basic_info.ticket_state?.lowercase()
@@ -124,7 +121,6 @@ fun TicketListScreen(
                 Napier.log(LogLevel.ASSERT, "selectState", message = selectState)
                 if (!refreshing) {
                     Napier.log(LogLevel.ASSERT, "refreshing", message = refreshing.toString())
-
                     itemsIndexed(items = filteredList) { _: Int, item: TaskDomain ->
                         ticketCard(modifier = Modifier.wrapContentHeight(),
                             task = item,
@@ -136,20 +132,15 @@ fun TicketListScreen(
                                 )
                                 onAccept(item)
                                 onEvent(MainEvent.AcceptTicket, item)
-
                             },
                             onMoreOptionsClick = {
                                 onEvent(MainEvent.MoreOptions, item)
                             }
-
                         )
                     }
                 }
             }
-
             PullRefreshIndicator(refreshing, refreshState, Modifier.align(Alignment.TopCenter))
         }
-
-
     }
 }

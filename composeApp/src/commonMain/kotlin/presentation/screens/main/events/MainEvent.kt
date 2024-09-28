@@ -8,6 +8,7 @@ sealed interface MainEvent : Event {
     data object AvailabilityStatus : MainEvent
     data object MoreOptions : MainEvent
     data object SuspendTicket : MainEvent
+    data object OpenInMap : MainEvent
     data object SuspendReason : MainEvent
     data object CancelTicket : MainEvent
     data object CancelReason : MainEvent

@@ -52,21 +52,16 @@ open class BaseViewModel : ViewModel() {
     private val _networkState = MutableStateFlow<NetworkStates>(NetworkStates.Default)
     private val _gpsState = MutableStateFlow<GpsState>(GpsState.Default)
 
-
     val state = _state.asStateFlow()
     val networkState = _networkState.asStateFlow()
     val gpsState = _gpsState.asStateFlow()
     val konnectivity: Konnectivity = Konnectivity()
 
-
     init {
-
         traceNetwork()
         traceLocation()
         collectServiceState()
     }
-
-
 
     private fun collectServiceState() {
         viewModelScope.launch {
@@ -103,8 +98,6 @@ open class BaseViewModel : ViewModel() {
 
 
     private fun traceNetwork() {
-
-
         viewModelScope.launch(Dispatchers.Main) {
             konnectivity.currentNetworkConnectionState.collect { connection ->
                 when (connection) {
