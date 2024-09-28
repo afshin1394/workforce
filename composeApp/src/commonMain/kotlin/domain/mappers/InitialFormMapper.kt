@@ -102,7 +102,7 @@ fun  List<InitForm>.toInitFormDomainList() : List<InitFormDomain> {
     }
 }
 fun  List<Component>.toComponentDomain() : List<ComponentDomain> {
-    return map {  ComponentDomain(id= it.id,it.key,hide= it.hide,type=  it.type,label= it.label, readOnly =  it.readOnly?:false, repeatable = it.repeatable?:false, removable = it.removable?:false,layout =  it.layout?.toLayoutDomain(), subType =  it.subType, isMulti = it.isMulti?:false, validate =  it.validate?.toValidateDomain(), values =  it.values?.toValueDomain(), conditional =  it.conditional?.toConditionalDomain(), components =  it.components?.toComponentDomain())   }.updateComponentTypes()
+    return map {  ComponentDomain(id= it.id,it.key,hide= it.hide,type=  it.type,label= it.label, readOnly =  it.readOnly?:false, disabled = it.disabled?:false, repeatable = it.repeatable?:false, removable = it.removable?:false,layout =  it.layout?.toLayoutDomain(), subType =  it.subType, isMulti = it.isMulti?:false, validate =  it.validate?.toValidateDomain(), values =  it.values?.toValueDomain(), conditional =  it.conditional?.toConditionalDomain(), components =  it.components?.toComponentDomain())   }.updateComponentTypes()
 }
 
 
@@ -192,7 +192,7 @@ fun Operator.toOperatorDomain():OperatorDomain{
 
 
 fun  List<ComponentDomain>.toComponent() : List<Component> {
-    return map {  Component(id= it.id,it.key ,hide=  it.hide,type = it.type?:"default", repeatable = it.repeatable, removable = it.removable, readOnly = it.readOnly ,label= it.label, layout =  it.layout?.toLayout(), subType =  it.subType, isMulti =  it.isMulti, validate =  it.validate?.toValidate(), values =  it.values?.toValue(), conditional =  it.conditional?.toConditional(), components =  it.components?.toComponent())}.updateComponentTypesReverse()
+    return map {  Component(id= it.id,it.key ,hide=  it.hide,type = it.type?:"default", repeatable = it.repeatable, removable = it.removable, readOnly = it.readOnly , disabled = it.disabled,label= it.label, layout =  it.layout?.toLayout(), subType =  it.subType, isMulti =  it.isMulti, validate =  it.validate?.toValidate(), values =  it.values?.toValue(), conditional =  it.conditional?.toConditional(), components =  it.components?.toComponent())}.updateComponentTypesReverse()
 }
 
 

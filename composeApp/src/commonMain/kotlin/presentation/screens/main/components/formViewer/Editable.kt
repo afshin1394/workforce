@@ -47,6 +47,7 @@ fun Editable(
     imeAction: ImeAction,
     keyboardType: KeyboardType,
     readOnly: Boolean,
+    disable: Boolean,
     maxLines: Int,
     errorMessage: ResourceFormattedStringDesc,
     onValueChange: (value: String) -> Unit
@@ -60,7 +61,7 @@ fun Editable(
             }
         }
     }
-    val disableLogic = processLogicDomain.disabled
+    val disableLogic = processLogicDomain.disabled ||disable
     val hideLogic = processLogicDomain.shouldHide
     val readOnlyLogic = processLogicDomain.readOnly || readOnly
     val requiredLogic = processLogicDomain.required
