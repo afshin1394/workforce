@@ -1,6 +1,5 @@
 package irancell.nwg.wfm
 
-import android.R
 import android.annotation.SuppressLint
 import android.content.ActivityNotFoundException
 import android.content.Context
@@ -15,7 +14,7 @@ actual fun openInMap(lat: String, long: String) {
     try {
         val uri = java.lang.String.format(
             Locale.ENGLISH,
-            ((((("geo:" + lat).toString() + "," + long).toString() + "?q=" + lat).toString() + "," + long).toString() + " (" + "").toString() + ")"
+            "geo:$lat,$long?q=$lat,$long ()"
         )
         val intent = Intent(Intent.ACTION_VIEW, Uri.parse(uri))
         intent.setFlags(FLAG_ACTIVITY_NEW_TASK)
