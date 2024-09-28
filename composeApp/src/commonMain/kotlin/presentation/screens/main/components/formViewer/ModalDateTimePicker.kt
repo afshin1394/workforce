@@ -66,10 +66,13 @@ import dev.icerock.moko.resources.compose.painterResource
 import dev.icerock.moko.resources.compose.stringResource
 import dev.icerock.moko.resources.desc.ResourceFormattedStringDesc
 import domain.models.form_struct.ProcessLogicDomain
+import io.github.aakira.napier.LogLevel
+import io.github.aakira.napier.Napier
 import irancell.nwg.wfm.ConvertStringToTimeStamp
 import irancell.nwg.wfm.DatePickerFormat.format
 import irancell.nwg.wfm.MR
 import irancell.nwg.wfm.getSharedPref
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
@@ -88,15 +91,13 @@ import utils.getLocalDateTimeFromLong
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ModalDateTimePicker(
-    readOnly : Boolean,
+    readOnly: Boolean,
     processLogicDomain: ProcessLogicDomain,
     title: String,
     titleDatePiker: String,
     errorMessage: ResourceFormattedStringDesc,
     onDateSelected: (selectDateItem: String) -> Unit,
-
-
-    ) {
+) {
     val disableLogic = processLogicDomain.disabled
     val hideLogic = processLogicDomain.shouldHide
     val readOnlyLogic = processLogicDomain.readOnly || readOnly
@@ -115,6 +116,22 @@ fun ModalDateTimePicker(
     var isBottomSheetVisible by rememberSaveable { mutableStateOf(false) }
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     var title by remember { mutableStateOf(title) }
+
+    Napier.log(LogLevel.ASSERT, tag = "calculatedValue", message = processLogicDomain.toString())
+
+    LaunchedEffect(processLogicDomain.calculatedValue) {
+        processLogicDomain.calculatedValue?.let {
+            if (it.isNotEmpty() ) {
+                title = it
+            }
+        }
+    }
+    Napier.log(
+        LogLevel.ASSERT,
+        tag = "calculatedValue",
+        message = processLogicDomain.calculatedValue.toString()
+    )
+
     var selectDate by remember {
         mutableStateOf(
             if (title.take(2).all { it.isDigit() }) title.trim().substringBefore("  ") else ""

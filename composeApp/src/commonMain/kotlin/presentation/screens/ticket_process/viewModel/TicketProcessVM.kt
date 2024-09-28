@@ -6,6 +6,8 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import arrow.core.Tuple4
 import arrow.core.Tuple5
+import arrow.core.Tuple6
+import com.irancell.nwg.wfm.presentation.model.View
 import data.network.response.task.Component
 import data.network.response.task.Value
 import dev.icerock.moko.resources.desc.StringDesc
@@ -45,6 +47,7 @@ import utils.LogicCalculation
 import utils.PROCEED
 import utils.ServiceState
 import utils.ViewStates
+import utils.updateValueDomain
 
 class TicketProcessVM(
     private val updateStepFormUseCase: UpdateStepFormUseCase,
@@ -115,12 +118,13 @@ class TicketProcessVM(
         events.value = TicketProcessEvent.InProgress
         viewModelScope.launch(Dispatchers.Main) {
         updateStepFormUseCase(
-            Tuple5(
+            Tuple6(
                 _ticketNumber.value,
                 proceed,
                 tempComponentList.toList(),
                 photoDomainList.toList(),
-                _currentLevel.value
+                _currentLevel.value,
+                _ticketId.value
             )
         ).collect {
             when (it.status) {
@@ -150,7 +154,6 @@ class TicketProcessVM(
                             )
                             tempComponentList.clear()
                             tempComponentList.addAll(it.toList())
-                            handleLogics()
 
                         }
 
@@ -213,11 +216,12 @@ class TicketProcessVM(
     private fun storeLastStep() {
         viewModelScope.launch(Dispatchers.Main) {
             storeStepFormUseCase(
-                Tuple4(
+                Tuple5(
                     _ticketNumber.value,
                     tempComponentList.toList(),
                     photoDomainList.toList(),
-                    _currentLevel.value
+                    _currentLevel.value,
+                    _ticketId.value
                 )
             ).collect {
                 when (it.status) {
@@ -270,11 +274,12 @@ class TicketProcessVM(
 
         viewModelScope.launch {
             storeStepFormUseCase(
-                Tuple4(
+                Tuple5(
                     _ticketNumber.value,
                     tempComponentList.toList(),
                     photoDomainList.toList(),
-                    _currentLevel.value
+                    _currentLevel.value,
+                    _ticketId.value
                 )
             ).collect {
                 when (it.status) {
@@ -317,7 +322,7 @@ class TicketProcessVM(
     }
 
 
-    private fun checkLogicsForAll(components: List<ComponentDomain>) {
+    private suspend fun checkLogicsForAll(components: List<ComponentDomain>) {
 
         // Create a copy of the components list to iterate over
         val componentsCopy = components.toMutableList()
@@ -344,7 +349,6 @@ class TicketProcessVM(
                 withContext(Dispatchers.IO) { checkLogicsForAll(tempComponentList) }
 
                 withContext(Dispatchers.Main) {
-
                     arrayListOf<ComponentDomain>().apply {
                         this.addAll(tempComponentList)
                         tempComponentList.clear()

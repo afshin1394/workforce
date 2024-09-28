@@ -441,8 +441,6 @@ class TicketProcessScreen(
 
 
                             },
-
-
                             )
                     }
                 }

@@ -9,10 +9,10 @@ import domain.usecase.BaseUseCase
 
 class GetTicketDetailsUseCase(
     private val iTicketRepository: ITicketRepository
-) : BaseUseCase<TicketDetailResponseDomain, Pair<String, TicketDetailRequestDomain>>() {
-    override suspend fun run(params: Pair<String,TicketDetailRequestDomain>): TicketDetailResponseDomain {
+) : BaseUseCase<Map<String,String> , Pair<String, TicketDetailRequestDomain>>() {
+    override suspend fun run(params: Pair<String,TicketDetailRequestDomain>): Map<String,String>  {
        return iTicketRepository.fetchTicketDetails(params.first,
-           params.second.toTicketDetailRequest()).toTicketDetailResponseDomain()
+           params.second.toTicketDetailRequest())
     }
 
 }
