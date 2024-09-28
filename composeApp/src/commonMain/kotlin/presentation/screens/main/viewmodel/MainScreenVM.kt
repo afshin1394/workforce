@@ -1013,6 +1013,7 @@ class MainScreenVM(
                             _ticketIsEdited.update { isEdited }
                             if (!isEdited)
                                 updateShowAcceptDialog(true)
+                            events.value=MainEvent.ShowAcceptTicketDialog
 
                         }
                         updateState(ViewStates.Success())

@@ -66,6 +66,7 @@ fun ProcessStep(
         }
         Spacer(modifier = Modifier.padding(spacing05X))
         Text(modifier = Modifier.wrapContentWidth(),text = levelText, style = caption, textAlign = TextAlign.Center, maxLines = 1)
+        Spacer(modifier = Modifier.padding(spacing05X))
     }
 }
 
@@ -84,7 +85,7 @@ fun ProcessStepSelected(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Box(
-            modifier = Modifier.size(36.dp)
+            modifier = Modifier.size(30.dp)
                 .clip(
                     CircleShape
                 )
@@ -94,15 +95,16 @@ fun ProcessStepSelected(
             Text(
                 modifier = modifier
                     .fillMaxSize()
-                    .padding(top = 4.dp).align(Alignment.Center),
+                    .padding(top = 6.dp).align(Alignment.Center),
                 text = level.toString(),
-                style = body_large,
+                style = body_small,
                 color = textInverse,
                 textAlign = TextAlign.Center
             )
         }
         Spacer(modifier = Modifier.padding(spacing05X))
         Text(modifier = Modifier.wrapContentWidth(),text = levelText, style = caption, textAlign = TextAlign.Center, maxLines = 1)
+        Spacer(modifier = Modifier.padding(spacing05X))
     }
 }
 

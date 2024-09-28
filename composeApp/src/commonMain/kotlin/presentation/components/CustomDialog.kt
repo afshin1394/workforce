@@ -44,13 +44,9 @@ import presentation.theme.surfaceBrandDefault
 import presentation.theme.surfaceBrandDisabled
 import presentation.theme.surfaceDefault
 import presentation.theme.surfaceSuccessWeak
+import utils.ButtonState
 
 
-
-
-enum class ButtonState {
-    IDLE, LOADING, COMPLETED
-}
 @Composable
 fun CustomDialog(
     showDialog: Boolean,
