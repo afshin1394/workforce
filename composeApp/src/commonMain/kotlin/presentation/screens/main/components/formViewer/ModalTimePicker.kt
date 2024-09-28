@@ -77,6 +77,7 @@ import utils.getLocalDateTimeFromLong
 @Composable
 fun ModalTimePicker(
     readOnly : Boolean,
+    disable : Boolean,
     processLogicDomain: ProcessLogicDomain,
     title: String,
     titleDatePiker: String,
@@ -89,7 +90,7 @@ fun ModalTimePicker(
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     var title by remember { mutableStateOf(title) }
 
-    val disableLogic = processLogicDomain.disabled
+    val disableLogic = processLogicDomain.disabled ||disable
     val hideLogic = processLogicDomain.shouldHide
     val readOnlyLogic = processLogicDomain.readOnly || readOnly
     val requiredLogic = processLogicDomain.required

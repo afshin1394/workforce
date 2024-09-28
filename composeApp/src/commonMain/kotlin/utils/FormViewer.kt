@@ -180,6 +180,7 @@ fun initialize(
                             errorMessage = if (errorMessageState.value == initialMessageError) errorMessageState.value else initialMessageError,
                             keyboardType = KeyboardType.Number,
                             readOnly = item.readOnly,
+                            disable = item.disabled,
                             maxLines = 1,
                             onValueChange = { newValue ->
                                 valueState.value = newValue
@@ -224,6 +225,7 @@ fun initialize(
                             errorMessage = if (errorMessageState.value == initialMessageError) errorMessageState.value else initialMessageError,
                             keyboardType = KeyboardType.Text,
                             readOnly = item.readOnly,
+                            disable = item.disabled,
                             maxLines = 1,
                             onValueChange = { newValue ->
                                 valueState.value = newValue
@@ -265,6 +267,7 @@ fun initialize(
                             errorMessage = if (errorMessageState.value == initialMessageError) errorMessageState.value else initialMessageError,
                             keyboardType = KeyboardType.Text,
                             readOnly = item.readOnly,
+                            disable = item.disabled,
                             maxLines = 1,
                             onValueChange = { newValue ->
                                 valueState.value = newValue
@@ -309,6 +312,7 @@ fun initialize(
                             errorMessage = if (errorMessageState.value == initialMessageError) errorMessageState.value else initialMessageError,
                             keyboardType = KeyboardType.Number,
                             readOnly = item.readOnly,
+                            disable = item.disabled,
                             maxLines = 1,
                             onValueChange = { newValue ->
                                 valueState.value = newValue
@@ -353,6 +357,7 @@ fun initialize(
                             errorMessage = if (errorMessageState.value == initialMessageError) errorMessageState.value else initialMessageError,
                             keyboardType = KeyboardType.Number,
                             readOnly = item.readOnly,
+                            disable = item.disabled,
                             maxLines = 1,
                             onValueChange = { newValue ->
                                 valueState.value = newValue
@@ -396,6 +401,7 @@ fun initialize(
                             imeAction = ImeAction.None,
                             keyboardType = KeyboardType.Email,
                             readOnly = item.readOnly,
+                            disable = item.disabled,
                             maxLines = 1,
                             errorMessage = if (errorMessageState.value == initialMessageError) errorMessageState.value else initialMessageError,
                             onValueChange = { newValue ->
@@ -441,6 +447,7 @@ fun initialize(
 
                         ModalDateTimePicker(
                             readOnly = item.readOnly,
+                            disable = item.disabled,
                             processLogicDomain = item.processLogicDomain,
                             selectedDateState.value,
                             item.label.toString(),
@@ -474,6 +481,7 @@ fun initialize(
 
                         ModalDatePicker(
                             item.readOnly,
+                            item.disabled,
                             item.processLogicDomain,
                             selectedDateState.value,
                             item.label.toString(),
@@ -510,6 +518,7 @@ fun initialize(
 
                         ModalTimePicker(
                             item.readOnly,
+                            item.disabled,
                             item.processLogicDomain,
                             selectedDateState.value,
                             item.label.toString(),
@@ -691,6 +700,7 @@ fun initialize(
 
                         Radio(
                             item.readOnly,
+                            item.disabled,
                             item.processLogicDomain ?: ProcessLogicDomain().copy(),
                             componentLabel.toString(),
                             if (errorMessageState.value == initialMessageError) errorMessageState.value else initialMessageError,
@@ -731,6 +741,7 @@ fun initialize(
                         item.values?.let { values ->
                             CheckList(
                                 item.readOnly,
+                                item.disabled,
                                 item.processLogicDomain,
                                 componentLabel.toString(),
                                 if (errorMessageState.value == initialMessageError) errorMessageState.value else initialMessageError,
@@ -774,6 +785,7 @@ fun initialize(
                             if (item.isMulti) {
                                 DropDownMultiChoice(
                                     item.readOnly,
+                                    item.disabled,
                                     item.processLogicDomain,
                                     componentLabel.toString(),
                                     if (errorMessageState.value == initialMessageError) errorMessageState.value else initialMessageError,
@@ -821,6 +833,7 @@ fun initialize(
 
                         DropDownSingleChoice(
                             item.readOnly,
+                            item.disabled,
                             item.processLogicDomain,
                             componentLabel.toString(),
                             if (errorMessageState.value == initialMessageError) errorMessageState.value else initialMessageError,

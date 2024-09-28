@@ -40,6 +40,7 @@ import presentation.theme.textSecondary
 @Composable
 fun Radio(
     readOnly: Boolean,
+    disable: Boolean,
     processLogicDomain: ProcessLogicDomain,
     title: String,
     errorMessage: ResourceFormattedStringDesc,
@@ -50,7 +51,7 @@ fun Radio(
 
     var select by remember { mutableStateOf(selectItem) }
     println("recomposeeee  radio ${processLogicDomain}")
-    val disableLogic = processLogicDomain.disabled
+    val disableLogic = processLogicDomain.disabled ||disable
     val readOnlyLogic = processLogicDomain.readOnly || readOnly
     val validateLogic = processLogicDomain.validate
     val requiredLogic = processLogicDomain.required
