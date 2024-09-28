@@ -57,7 +57,7 @@ fun groupComponent(
     onChanges: (componentDomain: ComponentDomain, listValueDomain: List<ValueDomain>) -> Unit,
     onAddItem: (componentDomain: ComponentDomain, indexChild: Int, onComplete: (position: Int) -> Unit) -> Unit,
     onRemoveItem: (componentDomain: ComponentDomain, indexChild: Int, onComplete: (position: Int) -> Unit) -> Unit,
-    onClickImage: (indexPhotoSelected: Int, componentKey: String, componentId: String) -> Unit,
+    onClickImage: (indexPhotoSelected: Int, componentKey: String, componentId: String,componentDomain: ComponentDomain) -> Unit,
     currentParentIndex: List<Int> = listOf(),
     item: ComponentDomain,
     onAddClick: () -> Unit,

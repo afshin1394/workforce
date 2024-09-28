@@ -65,7 +65,7 @@ fun initialize(
     onChanges: (componentDomain: ComponentDomain, listValueDomain: List<ValueDomain>?) -> Unit,
     onAddItem: (componentDomain: ComponentDomain, indexChild: Int, onComplete: (position: Int) -> Unit) -> Unit,
     onRemoveItem: (componentDomain: ComponentDomain, indexChild: Int, onComplete: (position: Int) -> Unit) -> Unit,
-    onClickImage: (indexPhotoSelected: Int, componentKey: String, componentId: String) -> Unit,
+    onClickImage: (indexPhotoSelected: Int, componentKey: String, componentId: String,componentDomain: ComponentDomain) -> Unit,
     currentParentIndex: List<Int> = listOf(),
 ) {
 
@@ -233,8 +233,7 @@ fun initialize(
                                     newValue
                                 )
                                 item.values = listOf(updatedValueDomain)
-                                updateNumberValidationError(item, errorMessageState)
-
+                                updateTextareaValidationError(item, errorMessageState)
 
 
                                 onChanges(
@@ -634,6 +633,7 @@ fun initialize(
                             )
 
                         val errorMessageState = remember { mutableStateOf(initialMessageError) }
+
                         ImagePicker(
                             index,
                             item,
@@ -663,7 +663,7 @@ fun initialize(
 
                             },
                             onImageClick = {
-                                onClickImage(it, item.key ?: "", item.id ?: "")
+                                onClickImage(it, item.key ?: "", item.id ?: "",item)
                             }, onCameraClick = { item ->
                                 itemState.value = item
                                 Napier.log(

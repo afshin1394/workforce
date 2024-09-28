@@ -399,7 +399,8 @@ class TicketProcessScreen(
                             modifier = Modifier,
                             photoDomainList = viewModel.photoDomainList,
                             components = viewModel.tempComponentList,
-                            onClickImage = { index, key, id ->
+                            onClickImage = { index, key, id,component ->
+                                viewModel.tempComponent.value=component
                                 componentKey = key
                                 componentId = id
                                 indexPhotoSelected = index
