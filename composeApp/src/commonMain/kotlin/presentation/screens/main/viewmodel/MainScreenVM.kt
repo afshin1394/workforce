@@ -131,6 +131,7 @@ class MainScreenVM(
 
 
     val generalLocationList = mutableStateListOf<GeneralLocationEntity>()
+    val initFormsState = mutableStateListOf<InitFormDomain>()
 
     init {
         getCurrentAvailability()
@@ -212,7 +213,6 @@ class MainScreenVM(
                     else -> {}
                 }
             }
-
         }
     }
 
@@ -232,7 +232,6 @@ class MainScreenVM(
                     else -> {}
                 }
             }
-
         }
     }
 
@@ -856,10 +855,7 @@ class MainScreenVM(
                     AsyncStatus.SUCCESS -> {
                         it.data?.let { isEdited ->
                             _ticketIsEdited.update { isEdited }
-                            if (!isEdited)
-                                updateShowAcceptDialog(true)
-
-                            updateState(MainEvent.ShowAcceptTicketDialog)
+                            if (!isEdited) updateShowAcceptDialog(true)
 
                         }
                         updateState(ViewStates.Success())
@@ -1002,6 +998,7 @@ class MainScreenVM(
                                 openInMap(latLong[0], latLong[1])
                                 updateState(MainEvent.Default)
                             } else {
+                                updateState(MainEvent.NoLocationFound)
 //                                openInMap("35.715298", "51.404343")
                             }
                         }

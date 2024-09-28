@@ -211,11 +211,13 @@ class MainScreen(
                         stringResource(MR.strings.ticket_list),
                         onNavigationItemClick = {
                             scope.launch {
+
                                 Napier.log(
                                     LogLevel.ASSERT,
                                     tag = "drawerState",
                                     message = drawerState.isOpen.toString()
                                 )
+
                                 if (drawerState.isOpen)
                                     drawerState.close()
                                 else
@@ -240,6 +242,7 @@ class MainScreen(
                                 tag = "drawerState",
                                 message = drawerState.isOpen.toString()
                             )
+
                             if (drawerState.isOpen)
                                 drawerState.close()
                             else
@@ -748,6 +751,14 @@ class MainScreen(
 
                 },
                 content = {
+                    if(eventsState == MainEvent.NoLocationFound) {
+                        val noLocationFoundMessage = stringResource(MR.strings.noLocationFound)
+                        LaunchedEffect(Unit) {
+                            scaffoldState.bottomSheetState.collapse()
+                            scaffoldState.snackbarHostState.showSnackbar(noLocationFoundMessage)
+                        }
+
+                    }
 
                     if (eventsState == MainEvent.OpenInMap)
                         viewModel.openInMapHandler()
