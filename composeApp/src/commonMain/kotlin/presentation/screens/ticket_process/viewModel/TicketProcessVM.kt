@@ -38,6 +38,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import presentation.model.ExtractLogicsModel
 import presentation.screens.main.events.TicketProcessEvent
 import presentation.screens.ticket_process.events.StepEvent
 import utils.AsyncStatus
@@ -115,6 +116,7 @@ class TicketProcessVM(
 
 
     val logicCalculation: LogicCalculation = LogicCalculation(viewModelScope,tempComponentList)
+    var extractLogicsModel = mutableListOf<ExtractLogicsModel>()
 
      fun getMokStepsForm(proceed: String) {
         events.value = TicketProcessEvent.InProgress
@@ -331,7 +333,7 @@ class TicketProcessVM(
         val componentsCopy = components.toMutableList()
 
         for (cmp in componentsCopy) {
-            logicCalculation.extractLogics(componentsCopy, cmp)
+            extractLogicsModel.addAll( logicCalculation.extractLogics(componentsCopy, cmp))
             cmp.components?.let { cmps ->
                 if (cmps.isNotEmpty()) {
                     checkLogicsForAll(cmps)
@@ -344,7 +346,7 @@ class TicketProcessVM(
     }
 
 
-    fun handleLogics() {
+    fun handleLogics(onResult:(MutableList<ExtractLogicsModel>) -> Unit) {
 
 
         viewModelScope.launch {
@@ -357,7 +359,10 @@ class TicketProcessVM(
                         tempComponentList.clear()
                         tempComponentList.addAll(this)
                     }
+                    onResult(extractLogicsModel)
                 }
+
+
             } catch (_: Exception) {
 
                 async { checkLogicsForAll(tempComponentList) }.await()
@@ -367,6 +372,8 @@ class TicketProcessVM(
                         tempComponentList.clear()
                         tempComponentList.addAll(this)
                     }
+                    onResult(extractLogicsModel)
+
                 }
 
             }
@@ -527,10 +534,10 @@ class TicketProcessVM(
 
         // Filtering the photo list based on component key and ID
         val filteredList = photoDomainList.filter { it.component_key == key && it.componentId == id }
-        val currentComponent = tempComponent.value!!
+        val currentComponent = tempComponent.value
 
         // Updating the list of component values based on whether there are photos or not
-        val updatedValues = currentComponent.values!!.mapIndexed { index, valueDomain ->
+        val updatedValues = currentComponent?.values?.mapIndexed { index, valueDomain ->
             if (filteredList.isEmpty()) {
                 valueDomain.copy(value = "")
             } else {
@@ -538,10 +545,10 @@ class TicketProcessVM(
             }
         }
 
-        tempComponent.value = currentComponent.copy(values = updatedValues)
+        tempComponent.value = currentComponent?.copy(values = updatedValues)
 
         // Finding the index of the component in the list and replacing it with the updated component
-        val componentIndex = tempComponentList.indexOfFirst { it.id == currentComponent.id }
+        val componentIndex = tempComponentList.indexOfFirst { it.id == currentComponent?.id }
         if (componentIndex != -1) {
             tempComponentList[componentIndex] = tempComponent.value!!
         }

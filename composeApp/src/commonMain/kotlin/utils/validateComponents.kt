@@ -20,7 +20,7 @@ fun validateComponents(
         return when (component.type) {
             FormViewerTypes.TextField -> {
 
-                if (!component.disabled||!component.processLogicDomain.disabled) {
+                if (!(component.disabled||component.processLogicDomain.disabled||component.processLogicDomain.shouldHide)) {
                     component.validate?.let { validate ->
 
                         val validationErrors = validateShortText(component, validate)
@@ -45,7 +45,7 @@ fun validateComponents(
             }
 
             FormViewerTypes.TextAREA -> {
-                if (!component.disabled||!component.processLogicDomain.disabled) {
+                if (!(component.disabled||component.processLogicDomain.disabled||component.processLogicDomain.shouldHide)) {
 
                     component.validate?.let { validate ->
 
@@ -76,7 +76,7 @@ fun validateComponents(
 
             FormViewerTypes.Number -> {
 
-                if (!component.disabled||!component.processLogicDomain.disabled) {
+                if (!(component.disabled||component.processLogicDomain.disabled||component.processLogicDomain.shouldHide)) {
 
 
                     component.validate?.let { validate ->
@@ -106,7 +106,7 @@ fun validateComponents(
             }
 
             FormViewerTypes.LatLong -> {
-                if (!component.disabled||!component.processLogicDomain.disabled) {
+                if (!(component.disabled||component.processLogicDomain.disabled||component.processLogicDomain.shouldHide)) {
 
                     component.validate?.let { validate ->
                         val validationErrors =
@@ -136,7 +136,7 @@ fun validateComponents(
 
             FormViewerTypes.Phone -> {
 
-                if (!component.disabled||!component.processLogicDomain.disabled) {
+                if (!(component.disabled||component.processLogicDomain.disabled||component.processLogicDomain.shouldHide)) {
                     component.validate?.let { validate ->
 
                         val validationErrors =
@@ -165,7 +165,7 @@ fun validateComponents(
             }
 
             FormViewerTypes.Email -> {
-                if (!component.disabled||!component.processLogicDomain.disabled) {
+                if (!(component.disabled||component.processLogicDomain.disabled||component.processLogicDomain.shouldHide)) {
 
                     component.validate?.let { validate ->
 
@@ -198,7 +198,7 @@ fun validateComponents(
             FormViewerTypes.Select,
             FormViewerTypes.Multi,
             FormViewerTypes.Radio -> {
-                if (!component.disabled||!component.processLogicDomain.disabled) {
+                if (!(component.disabled||component.processLogicDomain.disabled||component.processLogicDomain.shouldHide)) {
                     component.validate?.let { validate ->
 
                         val validationErrors =
@@ -225,7 +225,7 @@ fun validateComponents(
 
             FormViewerTypes.FileUpload -> {
 
-                if (!component.disabled||!component.processLogicDomain.disabled) {
+                if (!(component.disabled||component.processLogicDomain.disabled||component.processLogicDomain.shouldHide)) {
                 component.validate?.let { validate ->
                     val validationErrors = validateFileUpload(
                         component,
@@ -259,7 +259,7 @@ fun validateComponents(
             FormViewerTypes.Date,
             FormViewerTypes.Time,
             FormViewerTypes.ImageView -> {
-                if (!component.disabled||!component.processLogicDomain.disabled) {
+                if (!(component.disabled||component.processLogicDomain.disabled||component.processLogicDomain.shouldHide)) {
                 component.validate?.let { validate ->
 
                     val validationErrors =

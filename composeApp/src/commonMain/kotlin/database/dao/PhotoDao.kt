@@ -5,6 +5,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import database.entity.PhotoEntity
+import irancell.nwg.wfm.MR
 
 @Dao
 interface PhotoDao {
@@ -20,6 +21,9 @@ interface PhotoDao {
 
     @Query("DELETE FROM PhotoEntity WHERE ticket_number = :ticketNumber")
     suspend fun deleteByComponentKey(ticketNumber: String)
+
+    @Query("DELETE FROM PhotoEntity WHERE componentId = :componentId AND  component_key=:componentKey")
+    suspend fun deleteByComponentIdAndKey(componentId: String,componentKey: String)
 
     @Query("DELETE FROM PhotoEntity WHERE ticket_number = :ticketNumber AND component_key != 'Suspend'")
     suspend fun deleteProcessPhotoByTicketNumber(ticketNumber: String)

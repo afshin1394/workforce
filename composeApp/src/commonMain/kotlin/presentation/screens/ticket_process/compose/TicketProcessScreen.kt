@@ -28,6 +28,7 @@ import com.irancell.nwg.wfm.presentation.theme.spacing2X
 import presentation.screens.ticket_process.viewModel.TicketProcessVM
 import presentation.screens.ticket_process.components.processBar
 import dev.icerock.moko.resources.compose.stringResource
+import dev.icerock.moko.resources.desc.ResourceFormattedStringDesc
 import io.github.aakira.napier.LogLevel
 import io.github.aakira.napier.Napier
 import irancell.nwg.wfm.DrawController
@@ -265,21 +266,46 @@ class TicketProcessScreen(
                                 surfaceBrandDefault,
                                 textInverse
                             ), onClick = {
-                                scope.launch {
-                                    val errors = validateComponents(viewModel.tempComponentList) {
-                                        viewModel.updateTempComponentList(it)
-                                    }
-                                    if (errors.isNotEmpty()) {
-                                        viewModel.showFirstError(errors)
-                                    }
 
-                                    if (errors.isEmpty()) {
-                                        async { viewModel.saveAndDeletePhotoByComponentKey() }.await()
-                                        if (state is ViewStates.Success) {
-                                            viewModel.updateLevel(PROCEED.NEXT)
-                                        }
-                                    }
+
+                                viewModel.handleLogics {
+                                  if (it.size>0){
+
+
+                                      scope.launch {
+                                          val errors = mutableMapOf<String, List<ResourceFormattedStringDesc>>()
+
+                                          it.forEach {
+                                              errors[it.componentId] = arrayListOf()
+                                          }
+                                          viewModel.showFirstError(errors)
+                                      }
+
+                                  }else{
+                                      scope.launch {
+                                          val errors = validateComponents(viewModel.tempComponentList) {
+                                              viewModel.updateTempComponentList(it)
+                                          }
+                                          if (errors.isNotEmpty()) {
+                                              viewModel.showFirstError(errors)
+                                          }
+
+                                          if (errors.isEmpty()) {
+                                              async { viewModel.saveAndDeletePhotoByComponentKey() }.await()
+                                              if (state is ViewStates.Success) {
+                                                  viewModel.updateLevel(PROCEED.NEXT)
+                                              }
+                                          }
+                                      }
+
+                                  }
+
                                 }
+
+
+
+
+
 
 
                             })
@@ -422,7 +448,11 @@ class TicketProcessScreen(
                         navigator.push(mainScreen)
                     }
                 }
-                Column(if(viewModel.events.value==TicketProcessEvent.TicketFlowCompleted)Modifier.blur(7.dp) else Modifier) {
+                Column(
+                    if (viewModel.events.value == TicketProcessEvent.TicketFlowCompleted) Modifier.blur(
+                        7.dp
+                    ) else Modifier
+                ) {
                     processBar(stepDetails, currentLevelState)
                     if (reloadState) {
                         initialize(
@@ -434,8 +464,8 @@ class TicketProcessScreen(
                             modifier = Modifier,
                             photoDomainList = viewModel.photoDomainList,
                             components = viewModel.tempComponentList,
-                            onClickImage = { index, key, id,component ->
-                                viewModel.tempComponent.value=component
+                            onClickImage = { index, key, id, component ->
+                                viewModel.tempComponent.value = component
                                 componentKey = key
                                 componentId = id
                                 indexPhotoSelected = index
@@ -445,7 +475,10 @@ class TicketProcessScreen(
 
                             onChanges = { component, listValueDomain ->
 
-                                viewModel.handleLogics()
+                                viewModel.handleLogics{
+                                    viewModel.extractLogicsModel.clear()
+
+                                }
 
                                 listValueDomain?.let { listValues ->
                                     if (component.type == FormViewerTypes.ImageView) {
@@ -475,7 +508,7 @@ class TicketProcessScreen(
 
 
                             },
-                            )
+                        )
                     }
                 }
                 /*    CompleteFlowDialog(
