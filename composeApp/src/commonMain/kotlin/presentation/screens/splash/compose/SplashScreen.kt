@@ -1,6 +1,5 @@
 package presentation.screens.splash.compose
 
-
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.BottomSheetScaffoldState
@@ -11,7 +10,6 @@ import androidx.compose.material.rememberBottomSheetScaffoldState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -21,22 +19,15 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-
 import cafe.adriel.voyager.core.registry.rememberScreen
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import com.irancell.nwg.wfm.presentation.components.bottomSheetDoubleActionBottomBar
 import com.irancell.nwg.wfm.presentation.components.bottomSheetDoubleActionBottomBarWithLoading
-import com.irancell.nwg.wfm.presentation.components.bottomSingleActionComponent
 import com.irancell.nwg.wfm.presentation.components.bottomSingleActionComponentWithLoading
-
-
 import com.irancell.nwg.wfm.presentation.theme.spacing2X
-
 import dev.icerock.moko.resources.compose.painterResource
 import dev.icerock.moko.resources.compose.stringResource
-
 import irancell.nwg.wfm.LifecycleEvent
 import irancell.nwg.wfm.MR
 import irancell.nwg.wfm.OnLifecycleEvent
@@ -45,14 +36,8 @@ import irancell.nwg.wfm.openAppSettings
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
-import presentation.components.ButtonState
-
-import presentation.components.CustomDialogDoubleActionWithLoading
-
-import presentation.components.CustomDialogWithLoading
-import presentation.model.BottomSheetDoubleActionModel
+import presentation.model.BottomSheetActionModel
 import presentation.model.SingleButtonActionModel
-import presentation.screens.auth.viewmodel.VerifyScreenVM
 import presentation.screens.main.compose.BaseScreen
 import presentation.screens.splash.events.CheckVersionEvent
 import presentation.screens.splash.events.PermissionEvent
@@ -63,13 +48,7 @@ import presentation.theme.surfaceBrandDefault
 import presentation.theme.textInverse
 import presentation.theme.textInverseDisabled
 import utils.ButtonState
-import utils.ServiceState
-
-import utils.ViewStates
-import utils.VpnDetectionStates
-
 import utils.startDownloadFileApk
-
 
 class SplashScreen : Screen {
 
@@ -83,15 +62,10 @@ class SplashScreen : Screen {
         val loginScreen = rememberScreen(presentation.nav.Screen.Auth.Login)
         val mainScreen = rememberScreen(presentation.nav.Screen.Main.Menu.MyTickets)
         val viewModel: SplashScreenVM = koinInject()
-
         var buttonState by remember { mutableStateOf(ButtonState.IDLE) }
         val permissionState by viewModel.permissionState.collectAsState()
         val lifecycleEvent by viewModel.lifeCycleEvent.collectAsState()
-        val state by viewModel.state.collectAsState()
-        val vpnDetectionStates by viewModel.vpnDetectionStates.collectAsState()
-
-        var events by viewModel.eventsVersion
-
+        val events by viewModel.eventsVersion
 
         if (lifecycleEvent == LifecycleEvent.ON_RESUME) {
             viewModel.updateLifeCycleEventState(LifecycleEvent.ON_ANY)
@@ -127,7 +101,8 @@ class SplashScreen : Screen {
 
             }
 
-        BaseScreen(viewModel = viewModel,
+        BaseScreen(
+            viewModel = viewModel,
             title = "notStartService",
             scaffoldState = scaffoldState,
             bottomSheetTitle = bottomSheetTitle,
@@ -200,14 +175,12 @@ class SplashScreen : Screen {
                                 ), onClick = {
                                     buttonState = ButtonState.LOADING
                                     scope.launch {
-                                        val isSuccess = startDownloadFileApk(
-                                            viewModel.versionData.value?.apk_file ?: ""
-                                        )
+                                        val isSuccess = startDownloadFileApk(viewModel.versionData.value?.apk_file ?: "")
                                         if (isSuccess) {
                                             buttonState = ButtonState.COMPLETED
                                         } else {
                                             buttonState = ButtonState.IDLE
-                                            scaffoldState.snackbarHostState.showSnackbar(message = errorMessage)
+                                            scaffoldState.snackbarHostState.showSnackbar(message = errorMessage )
                                         }
                                     }
 
@@ -251,23 +224,19 @@ class SplashScreen : Screen {
                     }
 
                     CheckVersionEvent.NormalUpdate -> {
-
                         if (permissionState == PermissionEvent.IsGranted) {
                             bottomSheetDoubleActionBottomBarWithLoading(
-                                buttonState=buttonState,
-                                BottomSheetDoubleActionModel(
+                                buttonState = buttonState,
+                                BottomSheetActionModel(
                                     stringResource(MR.strings.cancel),
                                     Color.Transparent,
                                     textInverseDisabled,
-                                    stringResource( MR.strings.download),
+                                    stringResource(MR.strings.download),
                                     surfaceBrandDefault,
                                     textInverse
                                 ), onFirstButtonClick = {
-
-
                                     navigator.popAll()
                                     navigator.push(mainScreen)
-
                                 }, onSecondButtonClick = {
                                     buttonState = ButtonState.LOADING
                                     scope.launch {
@@ -357,7 +326,6 @@ class SplashScreen : Screen {
                         scope.launch {
                             scaffoldState.bottomSheetState.collapse()
                         }
-
                     }
 
                     CheckVersionEvent.InvalidToken -> {
@@ -387,8 +355,6 @@ class SplashScreen : Screen {
                                         }
 
                                         SnackbarResult.Dismissed -> {
-
-
                                         }
                                     }
                                 }

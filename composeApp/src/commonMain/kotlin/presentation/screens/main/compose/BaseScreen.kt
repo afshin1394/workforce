@@ -6,14 +6,12 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
-
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
-
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
@@ -23,7 +21,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-
 import com.irancell.nwg.wfm.presentation.components.*
 import presentation.theme.backgroundBackground3
 import com.irancell.nwg.wfm.presentation.theme.radius
@@ -32,14 +29,12 @@ import io.github.aakira.napier.LogLevel
 import io.github.aakira.napier.Napier
 import irancell.nwg.wfm.GPS
 import irancell.nwg.wfm.provideAppContext
-
 import utils.BaseViewModel
 import utils.ViewStates
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.draw.blur
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onGloballyPositioned
@@ -57,12 +52,9 @@ import irancell.nwg.wfm.OnLifecycleEvent
 import irancell.nwg.wfm.openVpnSettings
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import org.koin.compose.koinInject
 import presentation.model.BottomSheetActionModel
-import presentation.screens.splash.viewmodel.SplashScreenVM
 import presentation.theme.surfaceBrandDefault
 import utils.BottomSheetTypes
-
 import utils.GpsState
 import utils.VpnDetectionStates
 
@@ -84,10 +76,10 @@ fun <T : BaseViewModel> BaseScreen(
     onCloseBottomSheet: () -> Unit = {},
     onBackPressed: () -> Unit = {},
     hasSwipeDrawer: Boolean = true,
-    isShwCloseBtnBottomSheet:Boolean=true,
-    typeBottomSheet:String= BottomSheetTypes.Default
+    isShwCloseBtnBottomSheet: Boolean = true,
+    typeBottomSheet: String = BottomSheetTypes.Default
 
-    ) {
+) {
     val navigator = LocalNavigator.currentOrThrow
     val loginScreen = rememberScreen(presentation.nav.Screen.Auth.Login)
     val verifyScreen = rememberScreen(presentation.nav.Screen.Auth.Verify)
@@ -156,7 +148,6 @@ fun <T : BaseViewModel> BaseScreen(
 
                 else -> {}
             }
-            bottomSheetContent(scaffoldState.bottomSheetState)
         }
 
 
@@ -181,20 +172,24 @@ fun <T : BaseViewModel> BaseScreen(
                     sheetGesturesEnabled = false,
                     sheetShape = RoundedCornerShape(topEnd = radius, topStart = radius),
                     sheetContent = {
-                        CustomBottomSheet(scaffoldState.bottomSheetState,
-                            hasHeader = if (vpnDetectionStates is VpnDetectionStates.ShowBottomSheet) false else bottomSheetHasHeader,
-                            title = bottomSheetTitle,
-                            showClose = isShwCloseBtnBottomSheet,
-                            type = typeBottomSheet,
-                            content = {
-                                showVpnBottomSheetHandler()
-                            },
-                            onClose = {
-                                onCloseBottomSheet()
-                            },
-                            bottomBar = {
-                                bottomBarBottomSheetContent(scaffoldState.bottomSheetState)
-                            })
+                        if (vpnDetectionStates is VpnDetectionStates.ShowBottomSheet) {
+                            showVpnBottomSheetHandler()
+                        } else {
+                            CustomBottomSheet(scaffoldState.bottomSheetState,
+                                hasHeader = bottomSheetHasHeader,
+                                title = bottomSheetTitle,
+                                showClose = isShwCloseBtnBottomSheet,
+                                type = typeBottomSheet,
+                                content = {
+                                    bottomSheetContent(scaffoldState.bottomSheetState)
+                                },
+                                onClose = {
+                                    onCloseBottomSheet()
+                                },
+                                bottomBar = {
+                                    bottomBarBottomSheetContent(scaffoldState.bottomSheetState)
+                                })
+                        }
                     }) {
 
                     Box(
@@ -216,6 +211,7 @@ fun <T : BaseViewModel> BaseScreen(
                             }
 
                             GpsState.Enabled -> {}
+                            else -> {}
                         }
                         when (state) {
                             ViewStates.EMPTY -> {
@@ -308,25 +304,24 @@ fun <T : BaseViewModel> BaseScreen(
                 sheetGesturesEnabled = false,
                 sheetShape = RoundedCornerShape(topEnd = radius, topStart = radius),
                 sheetContent = {
-                    CustomBottomSheet(scaffoldState.bottomSheetState,
-                        hasHeader = if (vpnDetectionStates is VpnDetectionStates.ShowBottomSheet) false else bottomSheetHasHeader,
-                        title = bottomSheetTitle,
-                        showClose = isShwCloseBtnBottomSheet,
-                        type = typeBottomSheet,
-                        content = {
-                            Napier.log(
-                                LogLevel.ASSERT,
-                                tag = "showVpnBottomSheet",
-                                message = state.toString()
-                            )
-                            showVpnBottomSheetHandler()
-                        },
-                        onClose = {
-                            onCloseBottomSheet()
-                        },
-                        bottomBar = {
-                            bottomBarBottomSheetContent(scaffoldState.bottomSheetState)
-                        })
+                    if (vpnDetectionStates is VpnDetectionStates.ShowBottomSheet) {
+                        showVpnBottomSheetHandler()
+                    } else {
+                        CustomBottomSheet(scaffoldState.bottomSheetState,
+                            hasHeader = bottomSheetHasHeader,
+                            title = bottomSheetTitle,
+                            showClose = isShwCloseBtnBottomSheet,
+                            type = typeBottomSheet,
+                            content = {
+                                bottomSheetContent(scaffoldState.bottomSheetState)
+                            },
+                            onClose = {
+                                onCloseBottomSheet()
+                            },
+                            bottomBar = {
+                                bottomBarBottomSheetContent(scaffoldState.bottomSheetState)
+                            })
+                    }
                 }) {
                 Box(
                     modifier = Modifier.fillMaxWidth().fillMaxHeight()
@@ -348,6 +343,7 @@ fun <T : BaseViewModel> BaseScreen(
                         }
 
                         GpsState.Enabled -> {}
+                        else -> {}
                     }
 
                     when (state) {

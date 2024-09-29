@@ -4,8 +4,6 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.SnackbarDuration
-import androidx.compose.material.SnackbarResult
 import androidx.compose.material.rememberBottomSheetScaffoldState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
@@ -29,30 +27,21 @@ import com.irancell.nwg.wfm.presentation.components.bottomSheetDoubleActionBotto
 import com.irancell.nwg.wfm.presentation.components.bottomSingleActionComponentWithLoading
 import com.irancell.nwg.wfm.presentation.screens.auth.components.*
 import com.irancell.nwg.wfm.presentation.theme.*
-import dev.icerock.moko.resources.StringResource
 import dev.icerock.moko.resources.compose.painterResource
 import dev.icerock.moko.resources.compose.stringResource
 import io.github.aakira.napier.LogLevel
 import io.github.aakira.napier.Napier
 import irancell.nwg.wfm.HideKeyboard
 import irancell.nwg.wfm.MR
-import irancell.nwg.wfm.openAppSettings
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
-
-
-import presentation.components.CustomDialogDoubleActionWithLoading
-import presentation.components.CustomDialogWithLoading
-import presentation.model.BottomSheetDoubleActionModel
+import presentation.model.BottomSheetActionModel
 import presentation.model.SingleButtonActionModel
 import presentation.screens.auth.components.AuthAlertText
 import presentation.screens.auth.components.AuthAlertTextItem
 import presentation.screens.auth.viewmodel.VerifyScreenVM
 import presentation.screens.main.compose.BaseScreen
-import presentation.screens.splash.compose.SplashScreen
 import presentation.screens.splash.events.CheckVersionEvent
-import presentation.screens.splash.events.PermissionEvent
 import presentation.theme.backgroundBackground3
 import presentation.theme.body_large
 import presentation.theme.surfaceBrandDefault
@@ -84,19 +73,23 @@ class VerifyScreen(private val phoneNumber: String = "") : Screen {
         val errorMessage = stringResource(MR.strings.download_failed)
         val bottomSheetTitle: String =
             when (events) {
-                CheckVersionEvent.ForceUpdate->{
+                CheckVersionEvent.ForceUpdate -> {
                     viewModel.versionData.value?.title ?: ""
                 }
-                CheckVersionEvent.NormalUpdate->{
+
+                CheckVersionEvent.NormalUpdate -> {
                     viewModel.versionData.value?.title ?: ""
                 }
-                CheckVersionEvent.OkVersion->{
+
+                CheckVersionEvent.OkVersion -> {
                     ""
                 }
-                CheckVersionEvent.Default->{
+
+                CheckVersionEvent.Default -> {
                     ""
                 }
-                CheckVersionEvent.InvalidToken->{
+
+                CheckVersionEvent.InvalidToken -> {
                     ""
                 }
 
@@ -112,7 +105,7 @@ class VerifyScreen(private val phoneNumber: String = "") : Screen {
             viewModel = viewModel,
             scaffoldState = scaffoldState,
             bottomSheetTitle = bottomSheetTitle,
-            isShwCloseBtnBottomSheet = !(events == CheckVersionEvent.NormalUpdate ||events == CheckVersionEvent.ForceUpdate),
+            isShwCloseBtnBottomSheet = !(events == CheckVersionEvent.NormalUpdate || events == CheckVersionEvent.ForceUpdate),
             title = stringResource(MR.strings.verify),
 
             bottomSheetContent = {
@@ -164,7 +157,7 @@ class VerifyScreen(private val phoneNumber: String = "") : Screen {
             },
 
 
-            bottomBarBottomSheetContent ={
+            bottomBarBottomSheetContent = {
                 when (events) {
 
                     CheckVersionEvent.ForceUpdate -> {
@@ -173,32 +166,33 @@ class VerifyScreen(private val phoneNumber: String = "") : Screen {
                         HideKeyboard()
 
 
-                            bottomSingleActionComponentWithLoading(
-                                buttonState = buttonState,
-                                SingleButtonActionModel(
-                                    stringResource( MR.strings.download),
-                                    surfaceBrandDefault,
-                                    textInverse
-                                ), onClick = {
-                                    buttonState = ButtonState.LOADING
-                                    scope.launch {
-                                        val isSuccess = startDownloadFileApk(viewModel.versionData.value?.apk_file ?: "")
-                                        if (isSuccess) {
-                                            buttonState = ButtonState.COMPLETED
-                                        } else {
-                                            buttonState = ButtonState.IDLE
-                                            scaffoldState.snackbarHostState.showSnackbar(message = errorMessage )
+                        bottomSingleActionComponentWithLoading(
+                            buttonState = buttonState,
+                            SingleButtonActionModel(
+                                stringResource(MR.strings.download),
+                                surfaceBrandDefault,
+                                textInverse
+                            ), onClick = {
+                                buttonState = ButtonState.LOADING
+                                scope.launch {
+                                    val isSuccess = startDownloadFileApk(
+                                        viewModel.versionData.value?.apk_file ?: ""
+                                    )
+                                    if (isSuccess) {
+                                        buttonState = ButtonState.COMPLETED
+                                    } else {
+                                        buttonState = ButtonState.IDLE
+                                        scaffoldState.snackbarHostState.showSnackbar(message = errorMessage)
 
-                                        }
                                     }
+                                }
 
 
-                                })
+                            })
 
-                            scope.launch {
-                                scaffoldState.bottomSheetState.expand()
-                            }
-
+                        scope.launch {
+                            scaffoldState.bottomSheetState.expand()
+                        }
 
 
                     }
@@ -206,36 +200,37 @@ class VerifyScreen(private val phoneNumber: String = "") : Screen {
                     CheckVersionEvent.NormalUpdate -> {
                         HideKeyboard()
 
-                            bottomSheetDoubleActionBottomBarWithLoading(
-                                buttonState=buttonState,
-                                BottomSheetDoubleActionModel(
-                                    stringResource(MR.strings.cancel),
-                                    Color.Transparent,
-                                    textInverseDisabled,
-                                    stringResource( MR.strings.download),
-                                    surfaceBrandDefault,
-                                    textInverse
-                                ), onFirstButtonClick = {
+                        bottomSheetDoubleActionBottomBarWithLoading(
+                            buttonState = buttonState,
+                            BottomSheetActionModel(
+                                stringResource(MR.strings.cancel),
+                                Color.Transparent,
+                                textInverseDisabled,
+                                stringResource(MR.strings.download),
+                                surfaceBrandDefault,
+                                textInverse
+                            ), onFirstButtonClick = {
 
-                                    navigator.popAll()
-                                    navigator.push(mainScreen)
+                                navigator.popAll()
+                                navigator.push(mainScreen)
 
-                                }, onSecondButtonClick = {
-                                    buttonState = ButtonState.LOADING
-                                    scope.launch {
-                                        val isSuccess = startDownloadFileApk(viewModel.versionData.value?.apk_file ?: "")
-                                        if (isSuccess) {
-                                            buttonState = ButtonState.COMPLETED
-                                        } else {
-                                            buttonState = ButtonState.IDLE
-                                            scaffoldState.snackbarHostState.showSnackbar(message = errorMessage )
-                                        }
+                            }, onSecondButtonClick = {
+                                buttonState = ButtonState.LOADING
+                                scope.launch {
+                                    val isSuccess = startDownloadFileApk(
+                                        viewModel.versionData.value?.apk_file ?: ""
+                                    )
+                                    if (isSuccess) {
+                                        buttonState = ButtonState.COMPLETED
+                                    } else {
+                                        buttonState = ButtonState.IDLE
+                                        scaffoldState.snackbarHostState.showSnackbar(message = errorMessage)
                                     }
-                                })
-                            scope.launch {
-                                scaffoldState.bottomSheetState.expand()
-                            }
-
+                                }
+                            })
+                        scope.launch {
+                            scaffoldState.bottomSheetState.expand()
+                        }
 
 
                     }
@@ -264,89 +259,94 @@ class VerifyScreen(private val phoneNumber: String = "") : Screen {
             },
 
             content = {
+                Column(
+                    modifier = if (events == CheckVersionEvent.NormalUpdate || events == CheckVersionEvent.ForceUpdate) Modifier.blur(
+                        7.dp
+                    ) else Modifier
+                        .fillMaxSize()
+                        .background(color = backgroundBackground3),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Image(
+                        painter = painterResource(MR.images.ic_i_ticket),
+                        contentDescription = "ic_wfm",
+                        modifier = Modifier
+                            .width(82.dp)
+                            .height(82.dp)
+                            .weight(2f)
+                            .wrapContentSize()
+                    )
                     Column(
-                        modifier = if (events==CheckVersionEvent.NormalUpdate ||events==CheckVersionEvent.ForceUpdate) Modifier.blur(7.dp) else Modifier
+                        modifier = Modifier
                             .fillMaxSize()
-                            .background(color = backgroundBackground3),
-                        verticalArrangement = Arrangement.Center,
-                        horizontalAlignment = Alignment.CenterHorizontally
+                            .weight(4f)
+                            .padding(spacing2X)
                     ) {
-                        Image(
-                            painter = painterResource(MR.images.ic_i_ticket),
-                            contentDescription = "ic_wfm",
-                            modifier = Modifier
-                                .width(82.dp)
-                                .height(82.dp)
-                                .weight(2f)
-                                .wrapContentSize()
-                        )
-                        Column(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .weight(4f)
-                                .padding(spacing2X)
-                        ) {
 
 
-                            Text(text =
-                            buildAnnotatedString {
-                                val messageEnterCode = stringResource(MR.strings.enter_verification_code) + " " + phoneNumberState
+                        Text(text =
+                        buildAnnotatedString {
+                            val messageEnterCode =
+                                stringResource(MR.strings.enter_verification_code) + " " + phoneNumberState
 
-                                withStyle(style = ParagraphStyle()) {
-                                    withStyle(
-                                        style = SpanStyle(
-                                            fontWeight = FontWeight.Medium,
-                                            fontSize = 16.sp
-                                        ),
-                                    ) {
-                                        append(messageEnterCode)
-                                    }
-
-                                    withStyle(
-                                        style = SpanStyle(
-                                            fontWeight = FontWeight.SemiBold,
-                                            fontSize = 16.sp
-                                        )
-                                    ) {
-
-                                    }
+                            withStyle(style = ParagraphStyle()) {
+                                withStyle(
+                                    style = SpanStyle(
+                                        fontWeight = FontWeight.Medium,
+                                        fontSize = 16.sp
+                                    ),
+                                ) {
+                                    append(messageEnterCode)
                                 }
 
-                            }
-                            )
+                                withStyle(
+                                    style = SpanStyle(
+                                        fontWeight = FontWeight.SemiBold,
+                                        fontSize = 16.sp
+                                    )
+                                ) {
 
-                            Spacer(modifier = Modifier.height(spacing3X))
-                            AuthVerificationCodeRow(otpText = smsCode, onOtpTextChange = { otp, boolean ->
+                                }
+                            }
+
+                        }
+                        )
+
+                        Spacer(modifier = Modifier.height(spacing3X))
+                        AuthVerificationCodeRow(
+                            otpText = smsCode,
+                            onOtpTextChange = { otp, boolean ->
                                 viewModel.updateOtp(otp)
                             })
 
-                            Spacer(modifier = Modifier.height(spacing3X))
-                            if (!finishTimer)
-                                Text(text = "${stringResource(MR.strings.waiting_time_receive)} : $remainTime")
-                            else
-                                AuthAlertText(
-                                    alertTextItem = AuthAlertTextItem(
-                                        false,
-                                        text = stringResource(MR.strings.resend_code),
-                                        textColor = textBrand
-                                    )
-                                ) {
-                                    //onClick
-                                    viewModel.resendCode(onError = {
-                                        navigator.pop()
-                                    })
-                                }
-
-                            Spacer(modifier = Modifier.height(spacing5X))
-                            AuthButton(authButtonItem = AuthButtonItem(stringResource(MR.strings.verify))) {
+                        Spacer(modifier = Modifier.height(spacing3X))
+                        if (!finishTimer)
+                            Text(text = "${stringResource(MR.strings.waiting_time_receive)} : $remainTime")
+                        else
+                            AuthAlertText(
+                                alertTextItem = AuthAlertTextItem(
+                                    false,
+                                    text = stringResource(MR.strings.resend_code),
+                                    textColor = textBrand
+                                )
+                            ) {
                                 //onClick
-                                if (smsCode.length == 6) {
-                                    Napier.log(LogLevel.ASSERT,"dadsd",message= smsCode)
-                                    viewModel.verify(smsCode)
-                                }
+                                viewModel.resendCode(onError = {
+                                    navigator.pop()
+                                })
+                            }
+
+                        Spacer(modifier = Modifier.height(spacing5X))
+                        AuthButton(authButtonItem = AuthButtonItem(stringResource(MR.strings.verify))) {
+                            //onClick
+                            if (smsCode.length == 6) {
+                                Napier.log(LogLevel.ASSERT, "dadsd", message = smsCode)
+                                viewModel.verify(smsCode)
                             }
                         }
                     }
+                }
             }
         )
     }

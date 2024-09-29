@@ -181,11 +181,11 @@ android {
     }
     signingConfigs {
         create("release") {
-                storeFile  = file(providers.gradleProperty("STORE_FILE").get())
-                storePassword = providers.gradleProperty("STORE_PASSWORD").get()
-                keyAlias =  providers.gradleProperty("KEY_ALIAS").get()
-                keyPassword =  providers.gradleProperty("KEY_PASSWORD").get()
-            }
+            storeFile = file(providers.gradleProperty("STORE_FILE").get())
+            storePassword = providers.gradleProperty("STORE_PASSWORD").get()
+            keyAlias = providers.gradleProperty("KEY_ALIAS").get()
+            keyPassword = providers.gradleProperty("KEY_PASSWORD").get()
+        }
 
     }
 

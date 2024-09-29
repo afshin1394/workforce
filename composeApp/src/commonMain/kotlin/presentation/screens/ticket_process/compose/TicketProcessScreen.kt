@@ -37,11 +37,8 @@ import irancell.nwg.wfm.provideAppContext
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
-import presentation.components.CompleteFlowDialog
 import presentation.model.BottomSheetActionModel
 import presentation.model.SingleButtonActionModel
 import presentation.nav.Screen.Main.Menu

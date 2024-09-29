@@ -25,9 +25,7 @@ import presentation.screens.main.viewmodel.MainScreenVM
 import com.irancell.nwg.wfm.presentation.theme.*
 import dev.icerock.moko.resources.compose.painterResource
 import presentation.screens.main.components.TicketListScreen
-
 import dev.icerock.moko.resources.compose.stringResource
-
 import domain.models.task.TaskDomain
 import io.github.aakira.napier.LogLevel
 import io.github.aakira.napier.Napier
@@ -37,19 +35,14 @@ import irancell.nwg.wfm.DrawController
 import irancell.nwg.wfm.ExitApp
 import irancell.nwg.wfm.InternalStorage
 import irancell.nwg.wfm.MR
-
 import irancell.nwg.wfm.provideAppContext
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-
 import org.koin.compose.koinInject
-
-import presentation.components.CustomDialogDoubleAction
 import presentation.components.CustomTopAppBar
 import presentation.components.DrawerBody
 import presentation.components.DrawerHeader
 import presentation.model.BottomSheetActionModel
-
 import presentation.screens.main.components.AvailabilityStatus
 import presentation.screens.main.components.CancelTicketBottomBarComponent
 import presentation.screens.main.components.CancelTicketComponent
@@ -80,33 +73,21 @@ class MainScreen(
         Napier.log(LogLevel.ASSERT, "MainScreenVM", message = viewModel.toString())
         val availability by viewModel.availability.collectAsState()
         val openCamera by viewModel.openCamera.collectAsState()
-        val state by viewModel.state.collectAsState()
         val suspendTaskState by viewModel.suspendTaskDomain.collectAsState()
         val profileName by viewModel.profileName.collectAsState()
         val positionSelectedPhotoForEdit by viewModel.positionSelected.collectAsState()
         var indexPhotoSelected by remember { mutableStateOf(0) }
-        val showAcceptDialog by viewModel.showAcceptDialog.collectAsState()
         val isTicketEditedState by viewModel.ticketIsEdited.collectAsState()
         var isClickable by remember { mutableStateOf(true) }
-
-
         val reloadState by viewModel.reload.collectAsState()
-        val notificationScreen = rememberScreen(Notification)
         val accountScreen = rememberScreen(AccountInfo)
         val settingsScreen = rememberScreen(Menu.Settings)
-        val formViewerScreen = rememberScreen(Menu.FormViewer)
-
         val aboutScreen = rememberScreen(Menu.About)
-        val gpsTrackingReportScreen = rememberScreen(Menu.GpsTrackingReport)
         val loginScreen = rememberScreen(presentation.nav.Screen.Auth.Login)
-
         val scope = rememberCoroutineScope()
-        val scaffoldState = rememberBottomSheetScaffoldState();
-        val drawerState =
-            rememberDrawerState(initialValue = DrawerValue.Closed)
+        val scaffoldState = rememberBottomSheetScaffoldState()
+        val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
         val eventsState by viewModel.events.collectAsState()
-
-
         var hasDrawer by mutableStateOf(false)
         var showContent by remember { mutableStateOf(false) }
 
@@ -130,64 +111,62 @@ class MainScreen(
                     stringResource(MR.strings.filters)
                 }
 
-            MainEvent.Logout -> {
-                stringResource(MR.strings.logout)
-            }
+                MainEvent.Logout -> {
+                    stringResource(MR.strings.logout)
+                }
 
-            MainEvent.AvailabilityStatus -> {
-                stringResource(MR.strings.availability_status)
-            }
+                MainEvent.AvailabilityStatus -> {
+                    stringResource(MR.strings.availability_status)
+                }
 
-            MainEvent.CancelTicket -> {
-                stringResource(MR.strings.cancel_ticket)
-            }
+                MainEvent.CancelTicket -> {
+                    stringResource(MR.strings.cancel_ticket)
+                }
 
-            MainEvent.MoreOptions -> {
-                stringResource(MR.strings.more_options)
+                MainEvent.MoreOptions -> {
+                    stringResource(MR.strings.more_options)
+                }
 
-            }
-
-            MainEvent.SuspendTicket -> {
-                stringResource(MR.strings.suspend_ticket)
-            }
+                MainEvent.SuspendTicket -> {
+                    stringResource(MR.strings.suspend_ticket)
+                }
 
                 MainEvent.SuspendReason -> {
                     stringResource(MR.strings.suspend_reason)
                 }
 
-            MainEvent.CancelReason -> {
-                stringResource(MR.strings.cancel_reason)
-            }
+                MainEvent.CancelReason -> {
+                    stringResource(MR.strings.cancel_reason)
+                }
 
-            MainEvent.Exit -> {
-                stringResource(MR.strings.exit)
-            }
+                MainEvent.Exit -> {
+                    stringResource(MR.strings.exit)
+                }
 
-            MainEvent.PhotoPreview -> {
-                stringResource(MR.strings.photo_preview)
+                MainEvent.PhotoPreview -> {
+                    stringResource(MR.strings.photo_preview)
+                }
 
-            }
+                MainEvent.DeletePhoto -> {
+                    stringResource(MR.strings.delete_photo)
+                }
 
-            MainEvent.DeletePhoto -> {
-                stringResource(MR.strings.delete_photo)
-            }
-
-            MainEvent.EditPhoto -> {
-                stringResource(MR.strings.edit_photo)
-            }
+                MainEvent.EditPhoto -> {
+                    stringResource(MR.strings.edit_photo)
+                }
 
                 MainEvent.DiscardSuspendTicket -> {
                     stringResource(MR.strings.save_change)
                 }
-                MainEvent.ShowAcceptTicketDialog->{
-                    stringResource(MR.strings.continue_flow_title)
 
+                MainEvent.ShowAcceptTicketDialog -> {
+                    stringResource(MR.strings.continue_flow_title)
                 }
 
-            else -> {
-                ""
+                else -> {
+                    ""
+                }
             }
-        }
 
         Camera.onResult { _, uri ->
             viewModel.updateSuspendTicketImageUri(uri.toString())
@@ -346,7 +325,7 @@ class MainScreen(
 
                             })
                             bottomSheetDoubleActionBottomBar(
-                                BottomSheetDoubleActionModel(
+                                BottomSheetActionModel(
                                     stringResource(MR.strings.cancel),
                                     surfaceDefault,
                                     textPrimary,
@@ -366,7 +345,7 @@ class MainScreen(
 
                         MainEvent.DeletePhoto -> {
                             bottomSheetDoubleActionBottomBar(
-                                BottomSheetDoubleActionModel(
+                                BottomSheetActionModel(
                                     stringResource(MR.strings.cancel),
                                     surfaceDefault,
                                     textPrimary,
@@ -381,7 +360,7 @@ class MainScreen(
                                         positionSelectedPhotoForEdit
                                     )
 
-                            })
+                                })
                             scope.launch {
                                 scaffoldState.bottomSheetState.expand()
                             }
@@ -410,7 +389,7 @@ class MainScreen(
 
                         MainEvent.DiscardSuspendTicket -> {
                             bottomSheetDoubleActionBottomBar(
-                                BottomSheetDoubleActionModel(
+                                BottomSheetActionModel(
                                     stringResource(MR.strings.cancel),
                                     surfaceDefault,
                                     textPrimary,
@@ -427,7 +406,7 @@ class MainScreen(
                                     }
 
 
-                            })
+                                })
                             scope.launch {
                                 scaffoldState.bottomSheetState.expand()
                             }
@@ -441,7 +420,7 @@ class MainScreen(
 
                         MainEvent.Exit -> {
                             bottomSheetDoubleActionBottomBar(
-                                BottomSheetDoubleActionModel(
+                                BottomSheetActionModel(
                                     stringResource(MR.strings.cancel),
                                     surfaceDefault,
                                     textPrimary,
@@ -454,17 +433,18 @@ class MainScreen(
                                         scaffoldState.bottomSheetState.collapse()
                                     }
 
-                            }, onSecondButtonClick = {
-                                ExitApp()
+                                }, onSecondButtonClick = {
+                                    ExitApp()
 
-                            })
+                                })
                             scope.launch {
                                 scaffoldState.bottomSheetState.expand()
                             }
                         }
-                        MainEvent.ShowAcceptTicketDialog->{
+
+                        MainEvent.ShowAcceptTicketDialog -> {
                             bottomSheetDoubleActionBottomBar(
-                                BottomSheetDoubleActionModel(
+                                BottomSheetActionModel(
                                     stringResource(MR.strings.cancel),
                                     surfaceDefault,
                                     textPrimary,
@@ -487,8 +467,6 @@ class MainScreen(
                                         }
 
                                     }
-
-
 
 
                                 })
@@ -735,7 +713,8 @@ class MainScreen(
                         MainEvent.AcceptTicket -> {
 
                         }
-                        MainEvent.ShowAcceptTicketDialog->{
+
+                        MainEvent.ShowAcceptTicketDialog -> {
                             Text(
                                 text = stringResource(MR.strings.continue_flow_message),
                                 style = body_large,
@@ -753,7 +732,7 @@ class MainScreen(
 
                 },
                 content = {
-                    if(eventsState == MainEvent.NoLocationFound) {
+                    if (eventsState == MainEvent.NoLocationFound) {
                         val noLocationFoundMessage = stringResource(MR.strings.noLocationFound)
                         LaunchedEffect(Unit) {
                             scaffoldState.bottomSheetState.collapse()
@@ -880,6 +859,7 @@ class MainScreen(
                         MainEvent.SuspendTicket -> {
                             viewModel.updateState(MainEvent.DiscardSuspendTicket)
                         }
+
                         MainEvent.ShowAcceptTicketDialog -> {
 
                             viewModel.updateState(MainEvent.Default)

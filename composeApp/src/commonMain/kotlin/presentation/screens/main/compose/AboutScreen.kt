@@ -24,29 +24,22 @@ import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-
 import com.irancell.nwg.wfm.presentation.components.*
 import com.irancell.nwg.wfm.presentation.theme.*
-import dev.icerock.moko.resources.StringResource
 import dev.icerock.moko.resources.compose.painterResource
 import dev.icerock.moko.resources.compose.stringResource
 import irancell.nwg.wfm.DeviceInfo
-import irancell.nwg.wfm.HideKeyboard
 import irancell.nwg.wfm.MR
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
-
 import presentation.components.CustomButton
 import presentation.components.CustomButtonData
-import presentation.components.CustomDialogDoubleActionWithLoading
-import presentation.components.CustomDialogWithLoading
 import presentation.components.MenuItemsTopBar
-import presentation.model.BottomSheetDoubleActionModel
+import presentation.model.BottomSheetActionModel
 import presentation.model.SingleButtonActionModel
 import presentation.screens.main.events.AboutEvent
 import presentation.screens.main.viewmodel.AboutScreenVM
 import presentation.screens.splash.events.CheckVersionEvent
-
 import presentation.theme.body_large
 import presentation.theme.subtleDefault
 import presentation.theme.surfaceBrandDefault
@@ -184,7 +177,7 @@ class AboutScreen(
 
                         bottomSheetDoubleActionBottomBarWithLoading(
                             buttonState = buttonState,
-                            BottomSheetDoubleActionModel(
+                            BottomSheetActionModel(
                                 stringResource(MR.strings.cancel),
                                 Color.Transparent,
                                 textInverseDisabled,
@@ -193,7 +186,7 @@ class AboutScreen(
                                 textInverse
                             ), onFirstButtonClick = {
 
-                              eventsAbout=AboutEvent.Default
+                                eventsAbout=AboutEvent.Default
 
                             }, onSecondButtonClick = {
                                 buttonState = ButtonState.LOADING
@@ -223,115 +216,115 @@ class AboutScreen(
                         }
                     }
                 }
-                }, content = { Column(
-                    modifier = if (eventsAbout==AboutEvent.NormUpdate ||eventsAbout==AboutEvent.ForceUpdate) Modifier.blur(7.dp) else Modifier
-                        .verticalScroll(rememberScrollState()),
+            }, content = { Column(
+                modifier = if (eventsAbout==AboutEvent.NormUpdate ||eventsAbout==AboutEvent.ForceUpdate) Modifier.blur(7.dp) else Modifier
+                    .verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+
+
+
+
+                Spacer(modifier = Modifier.padding(30.dp))
+                Image(
+                    painter = painterResource(MR.images.ic_i_ticket),
+                    contentDescription = "wfm",
+                    modifier = Modifier
+                        .width(72.dp)
+                        .height(72.dp)
+                )
+                Spacer(modifier = Modifier.padding(spacing25X))
+
+                Column(
+                    modifier = Modifier.padding(horizontal = spacing3X),
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
 
 
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        Text(
+                            "${stringResource(MR.strings.current_version)}:",
+                            style = body_large,
+                            modifier = Modifier.weight(.8f),
+                        )
+                        ChipsView(
+                            chipsItem = ChipsItem(
+                                hasBorder = false,
+                                text = DeviceInfo.getAppVersionName(),
+                                chipsColor = subtleDefault,
+                                borderWidth = 0.dp,
+                                chipsRadius = radius2XLarge,
+                                textColor = textPrimary,
+                                textStyle = body_large
+                            ), modifier = Modifier.weight(.2f)
+                        )
+                    }
+                    Spacer(modifier = Modifier.padding(spacing15X))
 
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        Text(
+                            "${stringResource(MR.strings.latest_version)}:",
+                            style = body_large,
+                            modifier = Modifier.weight(.8f),
 
-                    Spacer(modifier = Modifier.padding(30.dp))
-                    Image(
-                        painter = painterResource(MR.images.ic_i_ticket),
-                        contentDescription = "wfm",
-                        modifier = Modifier
-                            .width(72.dp)
-                            .height(72.dp)
-                    )
+                            )
+                        ChipsView(
+                            chipsItem = ChipsItem(
+                                hasBorder = false,
+                                text = viewModel.versionData.value?.version_name.toString(),
+                                chipsColor = subtleDefault,
+                                borderWidth = 0.dp,
+                                chipsRadius = radius2XLarge,
+                                textColor = textPrimary,
+                                textStyle = body_large
+                            ), modifier = Modifier.weight(.2f)
+                        )
+                    }
+
                     Spacer(modifier = Modifier.padding(spacing25X))
 
-                    Column(
-                        modifier = Modifier.padding(horizontal = spacing3X),
-                        verticalArrangement = Arrangement.Center,
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
 
 
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.Center
-                        ) {
-                            Text(
-                                "${stringResource(MR.strings.current_version)}:",
-                                style = body_large,
-                                modifier = Modifier.weight(.8f),
-                            )
-                            ChipsView(
-                                chipsItem = ChipsItem(
-                                    hasBorder = false,
-                                    text = DeviceInfo.getAppVersionName(),
-                                    chipsColor = subtleDefault,
-                                    borderWidth = 0.dp,
-                                    chipsRadius = radius2XLarge,
-                                    textColor = textPrimary,
-                                    textStyle = body_large
-                                ), modifier = Modifier.weight(.2f)
-                            )
-                        }
-                        Spacer(modifier = Modifier.padding(spacing15X))
+                    if (events == CheckVersionEvent.NormalUpdate || events == CheckVersionEvent.ForceUpdate) {
 
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.Center
-                        ) {
-                            Text(
-                                "${stringResource(MR.strings.latest_version)}:",
-                                style = body_large,
-                                modifier = Modifier.weight(.8f),
-
-                                )
-                            ChipsView(
-                                chipsItem = ChipsItem(
-                                    hasBorder = false,
-                                    text = viewModel.versionData.value?.version_name.toString(),
-                                    chipsColor = subtleDefault,
-                                    borderWidth = 0.dp,
-                                    chipsRadius = radius2XLarge,
-                                    textColor = textPrimary,
-                                    textStyle = body_large
-                                ), modifier = Modifier.weight(.2f)
-                            )
-                        }
-
+                        Text(
+                            text = stringResource(MR.strings.description_for_update),
+                            style = body_large
+                        )
                         Spacer(modifier = Modifier.padding(spacing25X))
+                        CustomButton(
+                            customButtonData = CustomButtonData(
+                                title = stringResource(MR.strings.update),
+                                textColor = textInverse,
+                                backgroundColor = surfaceBrandDefault,
+                            ), modifier = Modifier.clickable {
 
+                                if (events == CheckVersionEvent.NormalUpdate){
+                                    eventsAbout=AboutEvent.NormUpdate
 
-
-                        if (events == CheckVersionEvent.NormalUpdate || events == CheckVersionEvent.ForceUpdate) {
-
-                            Text(
-                                text = stringResource(MR.strings.description_for_update),
-                                style = body_large
-                            )
-                            Spacer(modifier = Modifier.padding(spacing25X))
-                            CustomButton(
-                                customButtonData = CustomButtonData(
-                                    title = stringResource(MR.strings.update),
-                                    textColor = textInverse,
-                                    backgroundColor = surfaceBrandDefault,
-                                ), modifier = Modifier.clickable {
-
-                                    if (events == CheckVersionEvent.NormalUpdate){
-                                        eventsAbout=AboutEvent.NormUpdate
-
-                                    }else if(events == CheckVersionEvent.ForceUpdate){
-                                        eventsAbout=AboutEvent.ForceUpdate
-
-                                    }
-
+                                }else if(events == CheckVersionEvent.ForceUpdate){
+                                    eventsAbout=AboutEvent.ForceUpdate
 
                                 }
-                            )
 
-                        }
+
+                            }
+                        )
 
                     }
-                    Spacer(modifier = Modifier.padding(vertical = 30.dp))
 
                 }
+                Spacer(modifier = Modifier.padding(vertical = 30.dp))
+
+            }
             },
             onBackPressed = {
                 navigator.pop()
