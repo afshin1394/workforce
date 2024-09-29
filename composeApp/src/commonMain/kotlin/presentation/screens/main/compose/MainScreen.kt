@@ -1,9 +1,12 @@
 package presentation.screens.main.compose
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -12,7 +15,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.registry.rememberScreen
 import cafe.adriel.voyager.core.screen.Screen
@@ -404,8 +409,6 @@ class MainScreen(
                                     scope.launch {
                                         viewModel.updateState(MainEvent.Default)
                                     }
-
-
                                 })
                             scope.launch {
                                 scaffoldState.bottomSheetState.expand()
@@ -432,7 +435,6 @@ class MainScreen(
                                     scope.launch {
                                         scaffoldState.bottomSheetState.collapse()
                                     }
-
                                 }, onSecondButtonClick = {
                                     ExitApp()
 
@@ -732,6 +734,7 @@ class MainScreen(
 
                 },
                 content = {
+
                     if (eventsState == MainEvent.NoLocationFound) {
                         val noLocationFoundMessage = stringResource(MR.strings.noLocationFound)
                         LaunchedEffect(Unit) {
@@ -791,52 +794,56 @@ class MainScreen(
                         if (reloadState) {
                             viewModel.getTasks()
                         }
-                        TicketListScreen(
-                            searchText = "",
-                            onEvent = { mainEvent: MainEvent, task: TaskDomain? ->
-                                if (isClickable) {
-                                    isClickable = false
-                                    viewModel.updateState(mainEvent)
-                                    viewModel.selectedTask.value = task
-                                    viewModel.resetSuspendTask()
-                                    scope.launch {
-                                        delay(500)
-                                        isClickable = true
+                            TicketListScreen(
+                                searchText = "",
+                                onEvent = { mainEvent: MainEvent, task: TaskDomain? ->
+                                    if (isClickable) {
+                                        isClickable = false
+                                        viewModel.updateState(mainEvent)
+                                        viewModel.selectedTask.value = task
+                                        viewModel.resetSuspendTask()
+                                        scope.launch {
+                                            delay(500)
+                                            isClickable = true
+                                        }
                                     }
-                                }
-                                Napier.i("TicketListScreen")
+                                    Napier.i("TicketListScreen")
 
-                            },
-                            tasks = ArrayList(viewModel.tasks.toList()),
-                            onAccept = {
-                                if (isClickable) {
-                                    BackgroundServiceApp.updateServiceState(ServiceState.Suspend)
-                                    isClickable = false
-                                    viewModel.checkIfTicketIsEdited()
-                                    viewModel.selectedTask.value = it
-                                    viewModel.resetSuspendTask()
-                                    scope.launch {
-                                        delay(500)
-                                        isClickable = true
+                                },
+                                tasks = ArrayList(viewModel.tasks.toList()),
+                                onAccept = {
+                                    if (isClickable) {
+                                        BackgroundServiceApp.updateServiceState(ServiceState.Suspend)
+                                        isClickable = false
+                                        viewModel.checkIfTicketIsEdited()
+                                        viewModel.selectedTask.value = it
+                                        viewModel.resetSuspendTask()
+                                        scope.launch {
+                                            delay(500)
+                                            isClickable = true
+                                        }
                                     }
+                                },
+                                viewModel = viewModel
+                            )
+                            if (viewModel.showAcceptDialog.value) {
+
+                                if (isTicketEditedState) {
+                                    viewModel.selectedTask.value?.let {
+                                        viewModel.updateShowAcceptDialog(false)
+                                        viewModel.updateState(MainEvent.Default)
+
+                                    }
+                                } else {
+                                    viewModel.updateState(MainEvent.ShowAcceptTicketDialog)
+
                                 }
-                            },
-                            viewModel = viewModel
-                        )
-                        if (viewModel.showAcceptDialog.value) {
-
-                            if (isTicketEditedState) {
-                                viewModel.selectedTask.value?.let {
-                                    viewModel.updateShowAcceptDialog(false)
-                                    viewModel.updateState(MainEvent.Default)
-
-                                }
-                            } else {
-                                viewModel.updateState(MainEvent.ShowAcceptTicketDialog)
-
                             }
-                        }
+
+
+
                     }
+
                 },
                 onCloseBottomSheet = {
 

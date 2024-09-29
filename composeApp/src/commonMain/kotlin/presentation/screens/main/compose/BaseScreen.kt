@@ -35,6 +35,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onGloballyPositioned
@@ -77,6 +78,7 @@ fun <T : BaseViewModel> BaseScreen(
     onBackPressed: () -> Unit = {},
     hasSwipeDrawer: Boolean = true,
     isShwCloseBtnBottomSheet: Boolean = true,
+    shouldBlurOnBottomSheetExpansion : Boolean = true,
     typeBottomSheet: String = BottomSheetTypes.Default
 
 ) {
@@ -117,7 +119,6 @@ fun <T : BaseViewModel> BaseScreen(
     Box(
         modifier = Modifier.background(color = backgroundBackground3).fillMaxSize()
     ) {
-
         @Composable
         fun showVpnBottomSheetHandler() {
             when (vpnDetectionStates) {
@@ -146,7 +147,9 @@ fun <T : BaseViewModel> BaseScreen(
                     }
                 }
 
-                else -> {}
+                else -> {
+
+                }
             }
         }
 
@@ -191,106 +194,113 @@ fun <T : BaseViewModel> BaseScreen(
                                 })
                         }
                     }) {
+                    Column(modifier = if(scaffoldState.bottomSheetState.isCollapsed)  Modifier.fillMaxSize() else Modifier.fillMaxSize().blur(7.dp)) {
 
                     Box(
-                        modifier = Modifier.fillMaxWidth().fillMaxHeight()
-                            .background(backgroundBackground3)
-                    ) {
-                        content(scaffoldState.snackbarHostState)
-                        BackButtonHandler.backPress(onBackPressed = {
-                            println("checkkkkvalueeee")
-                            if (vpnDetectionStates !is VpnDetectionStates.ShowBottomSheet) {
-                                onBackPressed()
-                            }
-                        })
-                        when (gpsState) {
-                            GpsState.Default -> {}
-
-                            GpsState.Disabled -> {
-                                GPS.enableGpsDialog(provideAppContext())
-                            }
-
-                            GpsState.Enabled -> {}
-                            else -> {}
-                        }
-                        when (state) {
-                            ViewStates.EMPTY -> {
-                                Column(
-                                    modifier = Modifier.fillMaxSize()
-                                        .wrapContentSize(Alignment.Center),
-                                    horizontalAlignment = Alignment.CenterHorizontally,
-                                    verticalArrangement = Arrangement.Center
-                                ) {
-                                    Image(
-                                        painter = painterResource(MR.images.ic_empty),
-                                        contentDescription = "empty",
-                                        modifier = Modifier.width(150.dp).height(120.dp)
-                                    )
-
-                                    Spacer(modifier = Modifier.height(16.dp))
-                                    Text(
-                                        text = stringResource(MR.strings.empty_list),
-                                        style = TextStyle(
-                                            fontSize = 16.sp, fontWeight = FontWeight.Bold
-                                        ),
-                                        modifier = Modifier.wrapContentSize()
-                                    )
+                            modifier = Modifier.fillMaxWidth().fillMaxHeight()
+                                .background(backgroundBackground3)
+                        ) {
+                            content(scaffoldState.snackbarHostState)
+                            BackButtonHandler.backPress(onBackPressed = {
+                                println("checkkkkvalueeee")
+                                if (vpnDetectionStates !is VpnDetectionStates.ShowBottomSheet) {
+                                    onBackPressed()
                                 }
-                            }
+                            })
+                            when (gpsState) {
+                                GpsState.Default -> {}
 
-                            is ViewStates.Error -> {
-                                val errorMessage =
-                                    stringResource((state as ViewStates.Error).message)
-
-                                Napier.log(LogLevel.INFO, tag = "fkpekfpw", message = errorMessage)
-                                LaunchedEffect(Unit) {
-                                    scaffoldState.snackbarHostState.showSnackbar(message = errorMessage)
-                                    viewModel.updateState(ViewStates.Default)
+                                GpsState.Disabled -> {
+                                    GPS.enableGpsDialog(provideAppContext())
                                 }
+
+                                GpsState.Enabled -> {}
+                                else -> {}
                             }
+                            when (state) {
+                                ViewStates.EMPTY -> {
+                                    Column(
+                                        modifier = Modifier.fillMaxSize()
+                                            .wrapContentSize(Alignment.Center),
+                                        horizontalAlignment = Alignment.CenterHorizontally,
+                                        verticalArrangement = Arrangement.Center
+                                    ) {
+                                        Image(
+                                            painter = painterResource(MR.images.ic_empty),
+                                            contentDescription = "empty",
+                                            modifier = Modifier.width(150.dp).height(120.dp)
+                                        )
 
-                            is ViewStates.Loading -> {
-                                Box(modifier = Modifier.fillMaxSize()
-                                    .background(Color.LightGray.copy(alpha = 0.5f))
-                                    .pointerInput(Unit) {
-                                        awaitPointerEventScope {
-                                            while (true) {
-                                                awaitPointerEvent()
-                                            }
-                                        }
-                                    }) {
-                                    CircularProgressIndicator(
-                                        modifier = Modifier.align(Alignment.Center),
-                                        color = surfaceBrandDefault
-                                    )
-                                }
-                            }
-
-                            is ViewStates.Success -> {
-                                viewModel.updateState(ViewStates.Default)
-                            }
-
-
-                            is ViewStates.UnAuthorized -> {
-                                val key = navigator.items[navigator.items.lastIndex].key
-                                if (key != loginScreen.key && key != verifyScreen.key && key != splashScreen.key) {
-                                    val message =
-                                        stringResource((state as ViewStates.UnAuthorized).message)
-
-                                    LaunchedEffect(Unit) {
-                                        scaffoldState.snackbarHostState.showSnackbar(message = message)
-
-                                        delay(200)
-                                        navigator.popAll()
-                                        navigator.push(loginScreen)
+                                        Spacer(modifier = Modifier.height(16.dp))
+                                        Text(
+                                            text = stringResource(MR.strings.empty_list),
+                                            style = TextStyle(
+                                                fontSize = 16.sp, fontWeight = FontWeight.Bold
+                                            ),
+                                            modifier = Modifier.wrapContentSize()
+                                        )
                                     }
                                 }
-                            }
 
-                            else -> {
+                                is ViewStates.Error -> {
+                                    val errorMessage =
+                                        stringResource((state as ViewStates.Error).message)
 
+                                    Napier.log(
+                                        LogLevel.INFO,
+                                        tag = "fkpekfpw",
+                                        message = errorMessage
+                                    )
+                                    LaunchedEffect(Unit) {
+                                        scaffoldState.snackbarHostState.showSnackbar(message = errorMessage)
+                                        viewModel.updateState(ViewStates.Default)
+                                    }
+                                }
+
+                                is ViewStates.Loading -> {
+                                    Box(modifier = Modifier.fillMaxSize()
+                                        .background(Color.LightGray.copy(alpha = 0.5f))
+                                        .pointerInput(Unit) {
+                                            awaitPointerEventScope {
+                                                while (true) {
+                                                    awaitPointerEvent()
+                                                }
+                                            }
+                                        }) {
+                                        CircularProgressIndicator(
+                                            modifier = Modifier.align(Alignment.Center),
+                                            color = surfaceBrandDefault
+                                        )
+                                    }
+                                }
+
+                                is ViewStates.Success -> {
+                                    viewModel.updateState(ViewStates.Default)
+                                }
+
+
+                                is ViewStates.UnAuthorized -> {
+                                    val key = navigator.items[navigator.items.lastIndex].key
+                                    if (key != loginScreen.key && key != verifyScreen.key && key != splashScreen.key) {
+                                        val message =
+                                            stringResource((state as ViewStates.UnAuthorized).message)
+
+                                        LaunchedEffect(Unit) {
+                                            scaffoldState.snackbarHostState.showSnackbar(message = message)
+
+                                            delay(200)
+                                            navigator.popAll()
+                                            navigator.push(loginScreen)
+                                        }
+                                    }
+                                }
+
+                                else -> {
+
+                                }
                             }
                         }
+
                     }
                 }
             }
@@ -323,104 +333,118 @@ fun <T : BaseViewModel> BaseScreen(
                             })
                     }
                 }) {
-                Box(
-                    modifier = Modifier.fillMaxWidth().fillMaxHeight()
-                        .background(backgroundBackground3)
-                ) {
-                    content(scaffoldState.snackbarHostState)
 
-                    BackButtonHandler.backPress(onBackPressed = {
-                        println("checkkkkvalueeee")
-                        if (vpnDetectionStates !is VpnDetectionStates.ShowBottomSheet) {
-                            onBackPressed()
+                Column(modifier = if(scaffoldState.bottomSheetState.isExpanded && shouldBlurOnBottomSheetExpansion)  Modifier.fillMaxSize().blur(7.dp) else Modifier.fillMaxSize()) {
+
+                    Box(
+                        modifier = Modifier.fillMaxWidth().fillMaxHeight().background(
+                            backgroundBackground3)
+
+                    ) {
+
+                        content(scaffoldState.snackbarHostState)
+
+                        BackButtonHandler.backPress(onBackPressed = {
+                            println("checkkkkvalueeee")
+                            if (vpnDetectionStates !is VpnDetectionStates.ShowBottomSheet) {
+                                onBackPressed()
+                            }
+                        })
+
+                        when (gpsState) {
+                            GpsState.Default -> {}
+                            GpsState.Disabled -> {
+                                GPS.enableGpsDialog(provideAppContext())
+                            }
+
+                            GpsState.Enabled -> {}
+                            else -> {}
                         }
-                    })
 
-                    when (gpsState) {
-                        GpsState.Default -> {}
-                        GpsState.Disabled -> {
-                            GPS.enableGpsDialog(provideAppContext())
-                        }
+                        when (state) {
+                            ViewStates.EMPTY -> {
+                                Column(
+                                    modifier = Modifier.fillMaxSize()
+                                        .wrapContentSize(Alignment.Center),
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    verticalArrangement = Arrangement.Center
+                                ) {
+                                    Image(
+                                        painter = painterResource(MR.images.ic_empty),
+                                        contentDescription = "empty",
+                                        modifier = Modifier.width(150.dp).height(120.dp)
+                                    )
+                                    Spacer(modifier = Modifier.height(12.dp))
+                                    Text(
+                                        text = stringResource(MR.strings.empty_list),
+                                        style = TextStyle(
+                                            fontSize = 16.sp, fontWeight = FontWeight.Bold
+                                        ),
+                                        modifier = Modifier.wrapContentSize()
+                                    )
+                                }
+                            }
 
-                        GpsState.Enabled -> {}
-                        else -> {}
-                    }
-
-                    when (state) {
-                        ViewStates.EMPTY -> {
-                            Column(
-                                modifier = Modifier.fillMaxSize().wrapContentSize(Alignment.Center),
-                                horizontalAlignment = Alignment.CenterHorizontally,
-                                verticalArrangement = Arrangement.Center
-                            ) {
-                                Image(
-                                    painter = painterResource(MR.images.ic_empty),
-                                    contentDescription = "empty",
-                                    modifier = Modifier.width(150.dp).height(120.dp)
-                                )
-                                Spacer(modifier = Modifier.height(12.dp))
-                                Text(
-                                    text = stringResource(MR.strings.empty_list), style = TextStyle(
-                                        fontSize = 16.sp, fontWeight = FontWeight.Bold
-                                    ), modifier = Modifier.wrapContentSize()
+                            is ViewStates.Error -> {
+                                val errorMessage =
+                                    stringResource((state as ViewStates.Error).message)
+                                LaunchedEffect(Unit) {
+                                    scaffoldState.snackbarHostState.showSnackbar(message = errorMessage)
+                                    viewModel.updateState(ViewStates.Default)
+                                }
+                                Napier.log(
+                                    LogLevel.INFO,
+                                    tag = "fkpekfpw",
+                                    message = errorMessage.toString()
                                 )
                             }
-                        }
 
-                        is ViewStates.Error -> {
-                            val errorMessage = stringResource((state as ViewStates.Error).message)
-                            LaunchedEffect(Unit) {
-                                scaffoldState.snackbarHostState.showSnackbar(message = errorMessage)
+                            is ViewStates.Loading -> {
+                                Box(modifier = Modifier.fillMaxSize()
+                                    .background(Color.LightGray.copy(alpha = 0.5f))
+                                    .pointerInput(Unit) {
+                                        awaitPointerEventScope {
+                                            while (true) {
+                                                awaitPointerEvent()
+                                            }
+                                        }
+                                    }) {
+                                    CircularProgressIndicator(
+                                        modifier = Modifier.align(Alignment.Center),
+                                        color = surfaceBrandDefault
+                                    )
+                                }
+                            }
+
+                            is ViewStates.Success -> {
                                 viewModel.updateState(ViewStates.Default)
                             }
-                            Napier.log(
-                                LogLevel.INFO, tag = "fkpekfpw", message = errorMessage.toString()
-                            )
-                        }
 
-                        is ViewStates.Loading -> {
-                            Box(modifier = Modifier.fillMaxSize()
-                                .background(Color.LightGray.copy(alpha = 0.5f)).pointerInput(Unit) {
-                                    awaitPointerEventScope {
-                                        while (true) {
-                                            awaitPointerEvent()
+
+                            is ViewStates.UnAuthorized -> {
+                                val key = navigator.items[navigator.items.lastIndex].key
+
+                                if (key != loginScreen.key && key != verifyScreen.key && key != splashScreen.key) {
+                                    val message =
+                                        stringResource((state as ViewStates.UnAuthorized).message)
+
+
+                                    LaunchedEffect(Unit) {
+                                        scaffoldState.snackbarHostState.showSnackbar(message = message)
+
+                                        delay(200)
+                                        if (navigator.items[navigator.items.lastIndex].key != loginScreen.key) {
+                                            navigator.popAll()
+                                            navigator.push(loginScreen)
                                         }
-                                    }
-                                }) {
-                                CircularProgressIndicator(
-                                    modifier = Modifier.align(Alignment.Center),
-                                    color = surfaceBrandDefault
-                                )
-                            }
-                        }
-
-                        is ViewStates.Success -> {
-                            viewModel.updateState(ViewStates.Default)
-                        }
-
-
-                        is ViewStates.UnAuthorized -> {
-                            val key = navigator.items[navigator.items.lastIndex].key
-
-                            if (key != loginScreen.key && key != verifyScreen.key && key != splashScreen.key) {
-                                val message =
-                                    stringResource((state as ViewStates.UnAuthorized).message)
-
-
-                                LaunchedEffect(Unit) {
-                                    scaffoldState.snackbarHostState.showSnackbar(message = message)
-
-                                    delay(200)
-                                    if (navigator.items[navigator.items.lastIndex].key != loginScreen.key) {
-                                        navigator.popAll()
-                                        navigator.push(loginScreen)
                                     }
                                 }
                             }
-                        }
 
-                        else -> {}
+                            else -> {}
+                        }
                     }
+
                 }
             }
         }

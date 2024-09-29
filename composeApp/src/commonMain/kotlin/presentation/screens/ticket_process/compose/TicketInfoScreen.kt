@@ -121,7 +121,7 @@ class TicketInfoScreen(
 
             }, onBackPressed = {
                 navigator.pop()
-            }
+            }, shouldBlurOnBottomSheetExpansion = false
 
         )
 

@@ -531,7 +531,7 @@ class TicketProcessScreen(
                 }
 
 
-            })
+            }, shouldBlurOnBottomSheetExpansion = false)
 
 
     }

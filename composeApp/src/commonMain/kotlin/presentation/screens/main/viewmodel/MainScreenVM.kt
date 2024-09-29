@@ -523,7 +523,7 @@ class MainScreenVM(
                     }
 
                     AsyncStatus.EMPTY -> {
-                        tasks.clear()
+//                        tasks.clear()
                         updateState(ViewStates.EMPTY)
                         Napier.log(
                             LogLevel.ASSERT, "getAllWorksUseCase", message = "EMPTY: ${it.data}"
