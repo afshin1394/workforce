@@ -217,6 +217,7 @@ class VerifyScreenVM(
             getVersionOfServerUseCase(Unit).collect {
                 when (it.status) {
                     AsyncStatus.ERROR -> {
+                        disableSMSListener()
                         eventsVersion.value = CheckVersionEvent.InvalidToken
 
 
@@ -267,6 +268,7 @@ class VerifyScreenVM(
                             eventsVersion.value = CheckVersionEvent.OkVersion
 
                         }
+                        disableSMSListener()
                         updateState(ViewStates.Success())
                         countdownTimer.stop()
 

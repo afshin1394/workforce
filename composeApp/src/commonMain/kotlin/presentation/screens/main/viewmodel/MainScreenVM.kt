@@ -13,11 +13,12 @@ import domain.models.PhotoDomain
 import presentation.model.StateFilter
 import presentation.screens.main.events.MainEvent
 import domain.models.SuspendTaskDomain
+import domain.models.task.InitFormDomain
 import domain.models.task.TaskDomain
-import domain.usecase.ResultStatus
 import domain.usecase.usecase.auth.LogoutUseCase
 import domain.usecase.usecase.availability.ChangeServerAvailabilityUseCase
 import domain.usecase.usecase.availability.GetAvailabilityUseCase
+import domain.usecase.usecase.initialForm.GetInitialFormByTask
 import domain.usecase.usecase.location.DeleteSendLocationUseCase
 import domain.usecase.usecase.location.GetGeneralLocationListUseCase
 import domain.usecase.usecase.location.SendLocationToServerUseCase
@@ -40,6 +41,7 @@ import irancell.nwg.wfm.BackgroundServiceApp
 import irancell.nwg.wfm.BackgroundWorker
 import irancell.nwg.wfm.Location
 import irancell.nwg.wfm.getSharedPref
+import irancell.nwg.wfm.openInMap
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.delay
@@ -80,8 +82,8 @@ class MainScreenVM(
     private val deleteSendLocationUseCase: DeleteSendLocationUseCase,
     private val updateTaskUseCase: UpdateTaskUseCase,
     private val updateStepsUseCase: UpdateStepsUseCase,
-
-    ) : BaseViewModel() {
+    private val getInitialFormByTask: GetInitialFormByTask,
+) : BaseViewModel() {
     private val _availability = MutableStateFlow(false)
     val availability = _availability.asStateFlow()
 
@@ -109,7 +111,8 @@ class MainScreenVM(
     var ticketNumber = _ticketNumber.asStateFlow()
     var selectedTask: MutableState<TaskDomain?> = mutableStateOf(null)
 
-    var events = mutableStateOf<MainEvent>(MainEvent.Default)
+    private val _events = MutableStateFlow<MainEvent>(MainEvent.Default)
+    var events = _events.asStateFlow()
 
 
     var enableSuspendSubmit = mutableStateOf(false)
@@ -128,12 +131,17 @@ class MainScreenVM(
 
 
     val generalLocationList = mutableStateListOf<GeneralLocationEntity>()
+    val initFormsState = mutableStateListOf<InitFormDomain>()
 
     init {
         getCurrentAvailability()
         getProfileName()
         getTasks()
         updateTicketNumber("")
+    }
+
+    fun updateState(eventState: MainEvent) {
+        _events.value = eventState
     }
 
 
@@ -150,7 +158,6 @@ class MainScreenVM(
 
 
     private fun getGeneralUnSendLocationList(): List<LiveLocationDomain> {
-
         viewModelScope.launch {
             generalLocationListUseCase(
                 Unit,
@@ -164,17 +171,16 @@ class MainScreenVM(
                         updateState(ViewStates.Loading)
                     }
 
-                    AsyncStatus.EMPTY -> {}
-
                     AsyncStatus.SUCCESS -> {
                         it.data?.let { locations -> generalLocationList.addAll(locations) }
                         withContext(Dispatchers.Main) {
                             updateState(ViewStates.Success())
                         }
                     }
+
+                    else -> {}
                 }
             }
-
         }
 
         println("AvailabilityObjectId  ${getSharedPref().getString(AvailabilityObjectId)}")
@@ -192,81 +198,55 @@ class MainScreenVM(
     }
 
     private fun sendLocationForServer() {
-
-
         viewModelScope.launch {
-
-            sendLocationToServerUseCase(
-                Unit
-            ).collect {
+            sendLocationToServerUseCase(Unit).collect {
                 when (it.status) {
                     AsyncStatus.ERROR -> {
                         println("Work executed!      ${" is ERROR"}")
                     }
 
-                    AsyncStatus.LOADING -> {
-                    }
-
-                    AsyncStatus.EMPTY -> {}
-
                     AsyncStatus.SUCCESS -> {
                         println("Work executed!      ${" is SUCCESS"}")
                         updateSendLocationInDB()
-
                     }
+
+                    else -> {}
                 }
             }
         }
     }
 
     private fun updateSendLocationInDB() {
-
         viewModelScope.launch {
-
             updateUnSendLocationUseCase(Unit).collect {
                 when (it.status) {
                     AsyncStatus.ERROR -> {
                         println("Work executed!      ${" is ERROR delete"}")
                     }
 
-                    AsyncStatus.LOADING -> {}
-
-                    AsyncStatus.EMPTY -> {}
-
                     AsyncStatus.SUCCESS -> {
                         println("Work executed!      ${" is SUCCESS delete"}")
                         deleteSendLocationInDB()
-
                     }
+
+                    else -> {}
                 }
             }
         }
     }
 
     private fun deleteSendLocationInDB() {
-
         viewModelScope.launch {
-
             deleteSendLocationUseCase(Unit).collect {
                 when (it.status) {
-                    AsyncStatus.ERROR -> {
-
-                    }
-
-                    AsyncStatus.LOADING -> {
-                    }
-
-                    AsyncStatus.EMPTY -> {
-                    }
-
-                    AsyncStatus.SUCCESS -> {
-
-                    }
+                    AsyncStatus.ERROR -> {}
+                    AsyncStatus.LOADING -> {}
+                    AsyncStatus.EMPTY -> {}
+                    AsyncStatus.SUCCESS -> {}
                 }
             }
         }
     }
-
 
     fun updateIsEditedTicket(isEdited: Boolean) {
         _ticketIsEdited.update { isEdited }
@@ -282,27 +262,23 @@ class MainScreenVM(
 
     private fun getProfileName() {
         viewModelScope.launch {
-            getProfileUseCase(Unit)
-                .collect {
-                    when (it.status) {
-                        AsyncStatus.ERROR -> {
-                            handleError(it.resultStatus)
-                        }
+            getProfileUseCase(Unit).collect {
+                when (it.status) {
+                    AsyncStatus.ERROR -> {
+                        handleError(it.resultStatus)
+                    }
 
-                        AsyncStatus.LOADING -> {}
-
-                        AsyncStatus.EMPTY -> {}
-
-                        AsyncStatus.SUCCESS -> {
-                            it.data?.let {
-                                val name = it.firstName + " " + it.lastName
-                                updateState(ViewStates.Success())
-                                _profileName.update { name }
-                            }
-
+                    AsyncStatus.SUCCESS -> {
+                        it.data?.let {
+                            val name = it.firstName + " " + it.lastName
+                            updateState(ViewStates.Success())
+                            _profileName.update { name }
                         }
                     }
+
+                    else -> {}
                 }
+            }
         }
     }
 
@@ -324,8 +300,6 @@ class MainScreenVM(
                         updateState(ViewStates.Loading)
                     }
 
-                    AsyncStatus.EMPTY -> {}
-
                     AsyncStatus.SUCCESS -> {
                         updateState(ViewStates.Success())
 
@@ -337,21 +311,18 @@ class MainScreenVM(
                                 BackgroundServiceApp.updateServiceState(ServiceState.Normal)
 //                                delay(1000)
 //                                startWorkerManager()
-                            } else
-                                BackgroundServiceApp.stopBackgroundService()
+                            } else BackgroundServiceApp.stopBackgroundService()
                         }
                     }
+
+                    else -> {}
                 }
             }
         }
     }
 
-
     fun changeAvailability() {
-
         viewModelScope.launch(Dispatchers.IO) {
-
-
             changeServerAvailabilityUseCase(Unit).collect { result ->
                 when (result) {
                     is AsyncResult.Error -> {
@@ -362,12 +333,10 @@ class MainScreenVM(
                         updateState(ViewStates.Loading)
                     }
 
-                    is AsyncResult.Empty -> {}
-
                     is AsyncResult.Success -> {
                         _availability.update { result.data ?: false }
                         updateState(ViewStates.Success())
-                        events.value = MainEvent.Default
+                        updateState(MainEvent.Default)
                         Napier.log(
                             LogLevel.ASSERT,
                             "storeAvailabilityUseCase start back",
@@ -387,13 +356,11 @@ class MainScreenVM(
                             BackgroundServiceApp.stopBackgroundService()
                         }
                     }
+
+                    else -> {}
                 }
             }
-
-
         }
-
-
     }
 
 
@@ -407,7 +374,6 @@ class MainScreenVM(
 
     )
 
-
     val cancelItems = mutableStateListOf(
         SelectableItem(1, "Lack of expertise", false),
         SelectableItem(2, "Unavailable resources", false),
@@ -420,10 +386,8 @@ class MainScreenVM(
         SelectableItem(9, "Other", false),
     )
 
-
     val items = FilterSectionItem(
-        "Severity Level",
-        arrayListOf(
+        "Severity Level", arrayListOf(
             StateFilter(1, "1", false, FilterType.SEVERITY_LEVEL),
             StateFilter(2, "2", false, FilterType.SEVERITY_LEVEL),
             StateFilter(3, "3", false, FilterType.SEVERITY_LEVEL),
@@ -433,8 +397,7 @@ class MainScreenVM(
     )
 
     val items2 = FilterSectionItem(
-        "Region",
-        arrayListOf(
+        "Region", arrayListOf(
             StateFilter(1, "R1", false, FilterType.REGION),
             StateFilter(2, "R2", false, FilterType.REGION),
             StateFilter(3, "R3", false, FilterType.REGION),
@@ -449,8 +412,7 @@ class MainScreenVM(
     )
 
     val items3 = FilterSectionItem(
-        "State",
-        arrayListOf(
+        "State", arrayListOf(
             StateFilter(1, "Running", false, FilterType.STATE),
             StateFilter(2, "Draft", false, FilterType.STATE),
             StateFilter(3, "Cancel", false, FilterType.STATE),
@@ -513,9 +475,7 @@ class MainScreenVM(
         println("Final filtered tasks: $tasks")
     }
 
-
     fun removeAllFilters() {
-
         filterSectionItems.forEach {
             it.filterStates.forEach { stateFilter ->
                 run {
@@ -541,8 +501,6 @@ class MainScreenVM(
     fun updateTicketNumber(ticketNum: String) {
         _ticketNumber.update { ticketNum }
         getSharedPref().put(TicketNumber, ticketNumber.value)
-
-
     }
 
     fun getTasks() {
@@ -554,63 +512,44 @@ class MainScreenVM(
                         //handleError(it.resultStatus)
                         handleError(it.resultStatus)
                         Napier.log(
-                            LogLevel.ASSERT,
-                            "getAllWorksUseCase",
-                            message = "ERROR: " + it.message
+                            LogLevel.ASSERT, "getAllWorksUseCase", message = "ERROR: " + it.message
                         )
-
                     }
 
                     AsyncStatus.LOADING -> {
                         _reload.update { false }
-
                         Napier.log(LogLevel.ASSERT, "getAllWorksUseCase", message = "LOADING: ")
                         // updateState(ViewStates.Loading)
-
                     }
 
                     AsyncStatus.EMPTY -> {
                         tasks.clear()
                         updateState(ViewStates.EMPTY)
-
-
                         Napier.log(
-                            LogLevel.ASSERT,
-                            "getAllWorksUseCase",
-                            message = "EMPTY: ${it.data}"
+                            LogLevel.ASSERT, "getAllWorksUseCase", message = "EMPTY: ${it.data}"
                         )
                         _reload.update { true }
-
-
                     }
 
                     AsyncStatus.SUCCESS -> {
                         tasks.clear()
                         updateState(ViewStates.Success())
-
                         Napier.log(
-                            LogLevel.ASSERT,
-                            "getAllWorksUseCase",
-                            message = "SUCCESS: " + it.data
+                            LogLevel.ASSERT, "getAllWorksUseCase", message = "SUCCESS: " + it.data
                         )
                         it.data?.let { it1 ->
                             tasks.addAll(it1)
                             _reload.update { true }
                             getActiveFilterItems()
                         }
-
                         Napier.log(
-                            LogLevel.ASSERT,
-                            "getAllWorksUseCase",
-                            message = "initialTasks: $tasks"
+                            LogLevel.ASSERT, "getAllWorksUseCase", message = "initialTasks: $tasks"
                         )
                     }
                 }
             }
         }
-
     }
-
 
     val suspendTaskDomain = MutableStateFlow<SuspendTaskDomain>(
         SuspendTaskDomain(
@@ -638,10 +577,7 @@ class MainScreenVM(
                         AsyncStatus.LOADING -> {
                             Napier.log(LogLevel.ASSERT, "getAllWorksUseCase", message = "LOADING: ")
 //                            updateState(ViewStates.Loading)
-
                         }
-
-                        AsyncStatus.EMPTY -> {}
 
                         AsyncStatus.SUCCESS -> {
                             updateState(ViewStates.Success())
@@ -651,6 +587,8 @@ class MainScreenVM(
                                 getPhotoByComponentKey()
                             }
                         }
+
+                        else -> {}
                     }
                 }
             }
@@ -661,7 +599,6 @@ class MainScreenVM(
     fun saveSuspendTask() {
         Location.start { }
         Napier.log(LogLevel.ASSERT, "atttac", message = suspendTaskDomain.value.attachmentsUri)
-
         viewModelScope.launch {
             selectedTask.value?.basic_info?.ticket_number?.let {
                 deleteByTaskIdUseCase(it).collect {
@@ -669,26 +606,19 @@ class MainScreenVM(
                         AsyncStatus.ERROR -> {
                             handleError(it.resultStatus)
                             Location.stop()
-
                         }
 
                         AsyncStatus.LOADING -> {
                             Napier.log(LogLevel.ASSERT, "saveSuspendTask", message = "LOADING: ")
                             updateState(ViewStates.Loading)
-
-                        }
-
-                        AsyncStatus.EMPTY -> {
-
                         }
 
                         AsyncStatus.SUCCESS -> {
-
                             storeSuspendTask()
                             saveAndDeletePhotoByComponentKey()
-
-
                         }
+
+                        else -> {}
                     }
                 }
             }
@@ -713,22 +643,19 @@ class MainScreenVM(
                     AsyncStatus.ERROR -> {
                         handleError(it.resultStatus)
                         Location.stop()
-
                     }
 
                     AsyncStatus.LOADING -> {
                         Napier.log(LogLevel.ASSERT, "getAllWorksUseCase", message = "LOADING: ")
                         updateState(ViewStates.Loading)
-
                     }
-
-                    AsyncStatus.EMPTY -> {}
 
                     AsyncStatus.SUCCESS -> {
                         updateState(ViewStates.Success())
                         Location.stop()
-
                     }
+
+                    else -> {}
                 }
             }
         }
@@ -744,22 +671,22 @@ class MainScreenVM(
 
     fun updateSuspendTicketImageUri(imgUri: String) {
 
-        val uriAttachment = if (suspendTaskDomain.value.attachmentsUri.isEmpty())
-            suspendTaskDomain.value.attachmentsUri.plus(imgUri)
-        else
-            suspendTaskDomain.value.attachmentsUri.plus(",$imgUri")
-
-        suspendTaskDomain.value =
-            SuspendTaskDomain(
-                suspendTaskDomain.value.ticket_number,
-                suspendTaskDomain.value.reason,
-                suspendTaskDomain.value.description,
-                uriAttachment,
-                0,
-                suspendTaskDomain.value.datetime,
-                suspendTaskDomain.value.latitude,
-                suspendTaskDomain.value.longitude
+        val uriAttachment =
+            if (suspendTaskDomain.value.attachmentsUri.isEmpty()) suspendTaskDomain.value.attachmentsUri.plus(
+                imgUri
             )
+            else suspendTaskDomain.value.attachmentsUri.plus(",$imgUri")
+
+        suspendTaskDomain.value = SuspendTaskDomain(
+            suspendTaskDomain.value.ticket_number,
+            suspendTaskDomain.value.reason,
+            suspendTaskDomain.value.description,
+            uriAttachment,
+            0,
+            suspendTaskDomain.value.datetime,
+            suspendTaskDomain.value.latitude,
+            suspendTaskDomain.value.longitude
+        )
         updatePhotoDomain(imgUri)
     }
 
@@ -783,16 +710,10 @@ class MainScreenVM(
 
     private val photoDomain = MutableStateFlow<PhotoDomain>(
         PhotoDomain(
-            selectedTask.value?.basic_info?.ticket_number ?: "0", "0",
-            "0",
-            0,
-            "",
-            "",
-            "0"
+            selectedTask.value?.basic_info?.ticket_number ?: "0", "0", "0", 0, "", "", "0"
         )
     )
     var photoDomainList = mutableStateListOf<PhotoDomain>()
-
 
     private fun getPhotoByComponentKey() {
 
@@ -820,21 +741,22 @@ class MainScreenVM(
 
                         it.data?.let { it1 ->
                             for (i in it1.indices) {
-                                photoDomain.value =
-                                    PhotoDomain(
-                                        selectedTask.value?.basic_info?.ticket_number ?: "0",
-                                        "0",
-                                        "0",
-                                        i.toLong(),
-                                        it1[i].origin_uri,
-                                        it1[i].edited_uri,
-                                        it1[i].angle
-                                    )
+                                photoDomain.value = PhotoDomain(
+                                    selectedTask.value?.basic_info?.ticket_number ?: "0",
+                                    "0",
+                                    "0",
+                                    i.toLong(),
+                                    it1[i].origin_uri,
+                                    it1[i].edited_uri,
+                                    it1[i].angle
+                                )
 
                                 photoDomainList.add(photoDomain.value)
                             }
                         }
                     }
+
+                    else -> {}
                 }
             }
         }
@@ -842,16 +764,9 @@ class MainScreenVM(
 
     private fun updatePhotoDomain(imgUri: String) {
 
-        photoDomain.value =
-            PhotoDomain(
-                selectedTask.value?.basic_info?.ticket_number ?: "0",
-                "0",
-                "0",
-                0,
-                imgUri,
-                "",
-                "0"
-            )
+        photoDomain.value = PhotoDomain(
+            selectedTask.value?.basic_info?.ticket_number ?: "0", "0", "0", 0, imgUri, "", "0"
+        )
         photoDomainList.add(photoDomain.value)
     }
 
@@ -875,21 +790,17 @@ class MainScreenVM(
                     when (it.status) {
                         AsyncStatus.ERROR -> {
                             handleError(it.resultStatus)
-
                         }
 
                         AsyncStatus.LOADING -> {
                             updateState(ViewStates.Loading)
-
                         }
-
-                        AsyncStatus.EMPTY -> {}
 
                         AsyncStatus.SUCCESS -> {
                             updateState(ViewStates.Success())
-
-
                         }
+
+                        else -> {}
                     }
                 }
             }
@@ -902,19 +813,18 @@ class MainScreenVM(
         val updatedList = attachmentUriList.filter { it != imgUri }
         val updatedListAsString = updatedList.joinToString(",")
 
-        suspendTaskDomain.value =
-            SuspendTaskDomain(
-                suspendTaskDomain.value.ticket_number,
-                suspendTaskDomain.value.reason,
-                suspendTaskDomain.value.description,
-                updatedListAsString,
-                0,
-                suspendTaskDomain.value.datetime,
-                suspendTaskDomain.value.latitude,
-                suspendTaskDomain.value.longitude
-            )
+        suspendTaskDomain.value = SuspendTaskDomain(
+            suspendTaskDomain.value.ticket_number,
+            suspendTaskDomain.value.reason,
+            suspendTaskDomain.value.description,
+            updatedListAsString,
+            0,
+            suspendTaskDomain.value.datetime,
+            suspendTaskDomain.value.latitude,
+            suspendTaskDomain.value.longitude
+        )
         photoDomainList.removeAt(po)
-        events.value = MainEvent.SuspendTicket
+        updateState(MainEvent.SuspendTicket)
 
 //        if (photoDomainList.size == 0) {
 //            events.value = MainEvent.SuspendTicket
@@ -939,17 +849,17 @@ class MainScreenVM(
                         updateState(ViewStates.Loading)
                     }
 
-                    AsyncStatus.EMPTY -> {}
-
                     AsyncStatus.SUCCESS -> {
                         it.data?.let { isEdited ->
                             _ticketIsEdited.update { isEdited }
-                            if (!isEdited)
-                                updateShowAcceptDialog(true)
+                            if (!isEdited) updateShowAcceptDialog(true)
+
                         }
                         updateState(ViewStates.Success())
                         updateTicketNumber(selectedTask.value?.basic_info?.ticket_number ?: "")
                     }
+
+                    else -> {}
                 }
             }
         }
@@ -970,25 +880,23 @@ class MainScreenVM(
                             updateState(ViewStates.Loading)
                         }
 
-                        AsyncStatus.EMPTY -> {}
-
                         AsyncStatus.SUCCESS -> {
                             updateState(ViewStates.Success())
                             insertNewPhoto()
                         }
+
+                        else -> {}
                     }
                 }
             }
         }
-
     }
 
     fun updateEdited(isEdited: Boolean) {
         viewModelScope.launch {
             updateIsEditedTicketUseCase(
                 Pair(
-                    selectedTask.value?.basic_info?.ticket_number.toString(),
-                    isEdited
+                    selectedTask.value?.basic_info?.ticket_number.toString(), isEdited
                 )
             ).collect {
                 when (it.status) {
@@ -1005,13 +913,14 @@ class MainScreenVM(
                     AsyncStatus.SUCCESS -> {
                         checkIfTicketIsEdited()
                     }
+
+                    else -> {}
                 }
             }
         }
     }
 
     fun logoutCallApi() {
-
         viewModelScope.launch {
             logoutUseCase(Unit).collect {
                 when (it.status) {
@@ -1019,85 +928,82 @@ class MainScreenVM(
                         println("apiiLogout   ${"ERROR"}")
                     }
 
-                    AsyncStatus.LOADING -> {}
-
-                    AsyncStatus.EMPTY -> {}
-
                     AsyncStatus.SUCCESS -> {
                         println("apiiLogout   ${"success"}")
                     }
+
+                    else -> {}
                 }
             }
         }
     }
 
-
     suspend fun updateTask() {
-        updateTaskUseCase(Unit)
-            .collect {
-                when (it.status) {
-                    AsyncStatus.ERROR -> {
-
-                        println("TaskCallApi${"ERROR"}")
-                    }
-
-                    AsyncStatus.LOADING -> {
-                    }
-
-                    AsyncStatus.EMPTY -> {
-
-                    }
-
-                    AsyncStatus.SUCCESS -> {
-                        updateSteps()
-                        println("PullToRefreshCallApi${"SUCCESS"}")
-                    }
+        updateTaskUseCase(Unit).collect {
+            when (it.status) {
+                AsyncStatus.ERROR -> {
+                    println("TaskCallApi${"ERROR"}")
                 }
+
+                AsyncStatus.SUCCESS -> {
+                    updateSteps()
+                    println("PullToRefreshCallApi${"SUCCESS"}")
+                }
+
+                else -> {}
             }
+        }
     }
 
     private suspend fun updateSteps() {
         updateStepsUseCase(Unit).collect {
             when (it.status) {
                 AsyncStatus.ERROR -> {
-
-
                     Napier.log(
-                        LogLevel.ASSERT,
-                        "updateSteps",
-                        message = "ERROR: " + it.message
+                        LogLevel.ASSERT, "updateSteps", message = "ERROR: " + it.message
                     )
-
-                }
-
-                AsyncStatus.EMPTY -> {
-
                 }
 
                 AsyncStatus.LOADING -> {
                     Napier.log(LogLevel.ASSERT, "updateSteps", message = "LOADING: ")
-
                 }
 
                 AsyncStatus.SUCCESS -> {
                     getTasks()
 
                     Napier.log(
-                        LogLevel.ASSERT,
-                        "" +
-                                "",
-                        message = "SUCCESS: " + it.data
+                        LogLevel.ASSERT, "" + "", message = "SUCCESS: " + it.data
                     )
-
-
                 }
 
-
+                else -> {}
             }
         }
-
-
     }
 
+    fun openInMapHandler() {
+        viewModelScope.launch {
+            getInitialFormByTask(
+                selectedTask.value?.basic_info?.ticket_number ?: ""
+            ).collect { it ->
+                when (it.status) {
+                    AsyncStatus.SUCCESS -> {
+                        it.data?.let {
+                            val location = it.initForms.firstOrNull { it.key == "location" }?.value
+                            val latLong = location?.split(",")
+                            if (latLong != null && latLong.size == 2) {
+                                openInMap(latLong[0], latLong[1])
+                                updateState(MainEvent.Default)
+                            } else {
+                                updateState(MainEvent.NoLocationFound)
+//                                openInMap("35.715298", "51.404343")
+                            }
+                        }
+                    }
 
+                    else -> {}
+                }
+            }
+        }
+    }
 }

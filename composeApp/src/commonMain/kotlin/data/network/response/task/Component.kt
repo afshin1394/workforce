@@ -36,7 +36,9 @@ data class Component(
     val repeatable : Boolean? = null,
     @SerialName("removable")
     val removable : Boolean? = null,
+    @SerialName("disabled")
+    val disabled : Boolean? = null,
 
-//    @SerialName("logics")
-//    val logics : List<Logic>?= null
+    @SerialName("logics")
+    val logics : List<Logic>?= null
 )

@@ -39,6 +39,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onGloballyPositioned
@@ -60,6 +61,7 @@ import org.koin.compose.koinInject
 import presentation.model.BottomSheetActionModel
 import presentation.screens.splash.viewmodel.SplashScreenVM
 import presentation.theme.surfaceBrandDefault
+import utils.BottomSheetTypes
 
 import utils.GpsState
 import utils.VpnDetectionStates
@@ -82,7 +84,10 @@ fun <T : BaseViewModel> BaseScreen(
     onCloseBottomSheet: () -> Unit = {},
     onBackPressed: () -> Unit = {},
     hasSwipeDrawer: Boolean = true,
-) {
+    isShwCloseBtnBottomSheet:Boolean=true,
+    typeBottomSheet:String= BottomSheetTypes.Default
+
+    ) {
     val navigator = LocalNavigator.currentOrThrow
     val loginScreen = rememberScreen(presentation.nav.Screen.Auth.Login)
     val verifyScreen = rememberScreen(presentation.nav.Screen.Auth.Verify)
@@ -179,6 +184,8 @@ fun <T : BaseViewModel> BaseScreen(
                         CustomBottomSheet(scaffoldState.bottomSheetState,
                             hasHeader = if (vpnDetectionStates is VpnDetectionStates.ShowBottomSheet) false else bottomSheetHasHeader,
                             title = bottomSheetTitle,
+                            showClose = isShwCloseBtnBottomSheet,
+                            type = typeBottomSheet,
                             content = {
                                 showVpnBottomSheetHandler()
                             },
@@ -304,6 +311,8 @@ fun <T : BaseViewModel> BaseScreen(
                     CustomBottomSheet(scaffoldState.bottomSheetState,
                         hasHeader = if (vpnDetectionStates is VpnDetectionStates.ShowBottomSheet) false else bottomSheetHasHeader,
                         title = bottomSheetTitle,
+                        showClose = isShwCloseBtnBottomSheet,
+                        type = typeBottomSheet,
                         content = {
                             Napier.log(
                                 LogLevel.ASSERT,

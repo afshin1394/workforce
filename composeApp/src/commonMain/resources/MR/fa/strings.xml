@@ -20,6 +20,7 @@
     <string name="go_to_setting">رفتن به تنظیمات</string>
     <string name="vpn_detected">فیلترشکن شناسایی شد</string>
     <string name="vpn_detected_description">برای ادامه اتصال فیلترشکن خود را قطع نمایید</string>
+    <string name="openInMap">باز کردن در نقشه</string>
     <string name="expertise">تخصص</string>
     <string name="phone_number">شماره موبایل</string>
     <string name="email">ایمیل</string>
@@ -180,5 +181,7 @@
     <string name="download_failed">دانلود یا نصب موفق نبود، لطفاً دوباره تلاش کنید.</string>
     <string name="accept">پذیرفتن</string>
     <string name="more_options">گزینه های بیشتر</string>
+    <string name= "noLocationFound">موقعیت مکانی یافت نشد</string>
+
 
 </resources>

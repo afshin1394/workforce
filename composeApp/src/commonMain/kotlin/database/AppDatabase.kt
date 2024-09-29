@@ -30,7 +30,7 @@ import database.type_converter.InitFormTypeConverter
 
 @Database(
     entities = [ProfileEntity::class, RoleEntity::class, GeneralLocationEntity::class, TaskEntity::class, SuspendTaskEntity::class, InitialFormEntity::class, PhotoEntity::class, StepsEntity::class,StepPointerEntity::class,SendStepsEntity::class],
-    version = 2
+    version = 3
 )
 @TypeConverters(InitFormTypeConverter::class)
 abstract class AppDatabase : RoomDatabase(), DB {

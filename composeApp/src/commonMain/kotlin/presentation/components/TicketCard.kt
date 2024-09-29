@@ -51,34 +51,23 @@ fun ticketCard(
 
     Card(
         colors = CardDefaults.cardColors(surfaceDefault),
-        modifier = modifier
-            .fillMaxWidth()
-
-            .padding(top = spacing15X)
-
-
+        modifier = modifier.fillMaxWidth().padding(top = spacing15X)
     ) {
         Column(
-            modifier = Modifier
-                .padding(12.dp),
+            modifier = Modifier.padding(12.dp),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.Start,
-            ) {
-
-
+        ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 androidx.compose.material3.Text(
-                    text = task.basic_info.ticket_number?:"",
+                    text = task.basic_info.ticket_number ?: "",
                     style = body_large_strong,
                     maxLines = 1,
                     modifier = modifier
                         .fillMaxWidth()
                         .height(22.dp),
                     color = textPrimary
-
-
                 )
-
             }
             Spacer(modifier = modifier.padding(vertical = spacing05X))
 
@@ -86,7 +75,6 @@ fun ticketCard(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Start
             ) {
-
                 Card(
                     colors = CardDefaults.cardColors(surfaceErrorLight),
                     modifier = modifier
@@ -103,7 +91,7 @@ fun ticketCard(
 
                 ) {
                     androidx.compose.material3.Text(
-                        text =  task.basic_info.province.toString(),
+                        text = task.basic_info.province.toString(),
                         style = body_small,
                         color = textError
                     )
@@ -133,11 +121,11 @@ fun ticketCard(
                 Spacer(modifier = modifier.padding(spacing15X))
 
 
-
             }
             Spacer(modifier = modifier.padding(vertical = spacing05X))
 
-            Row(verticalAlignment = Alignment.CenterVertically,
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Start
             ) {
                 Card(
@@ -165,92 +153,92 @@ fun ticketCard(
 
             Row(verticalAlignment = Alignment.CenterVertically) {
 //                if (task.instanceStateId != Completed.id) {
-                    Card(
-                        onClick = onMoreOptionsClick,
-                        colors = CardDefaults.cardColors(surfaceDefault),
-                        modifier = modifier
-                            .weight(1f)
-                            .background(
-                                color = surfaceDefault,
-                                shape = RoundedCornerShape(size = radiusLarge)
-                            )
-
-                            .border(
-                                width = 1.dp,
-                                color = strokeDefaultLight,
-                                shape = RoundedCornerShape(size = radiusLarge)
-                            )
-
-                    ) {
-                        androidx.compose.material3.Text(
-                            text = stringResource(MR.strings.more_options),
-                            color = textPrimary,
-                            style = body_large,
-                            fontSize = 16.sp,
-                            maxLines = 1,
-                            textAlign = TextAlign.Center,
-                            modifier = modifier
-                                .align(alignment = Alignment.CenterHorizontally)
-                                .padding(
-                                    start = spacing05X,
-                                    top = 4.dp,
-                                    end = spacing05X,
-                                    bottom = 4.dp
-                                )
-                                .padding(
-                                    start = spacing05X,
-                                    top = 4.dp,
-                                    end = spacing05X,
-                                    bottom = 4.dp
-                                )
-
+                Card(
+                    onClick = onMoreOptionsClick,
+                    colors = CardDefaults.cardColors(surfaceDefault),
+                    modifier = modifier
+                        .weight(1f)
+                        .background(
+                            color = surfaceDefault,
+                            shape = RoundedCornerShape(size = radiusLarge)
                         )
 
-                    }
-                    Spacer(modifier = modifier.padding(spacing05X))
-
-                    Card(
-                        onClick = onActionClick,
-
-                        colors = CardDefaults.cardColors(surfaceBrandDefault),
-                        modifier = modifier
-                            .weight(1f)
-                            .background(
-                                color = surfaceBrandDefault,
-                                shape = RoundedCornerShape(size = radius)
-                            )
-                            .background(
-                                color = surfaceBrandDefault,
-                                shape = RoundedCornerShape(size = radiusLarge),
-
-                                )
-
-
-                    ) {
-                        androidx.compose.material3.Text(
-                            text = stringResource(MR.strings.accept),
-                            color = textInverse,
-                            style = body_large,
-                            maxLines = 1,
-                            textAlign = TextAlign.Center,
-                            modifier = modifier
-                                .align(alignment = Alignment.CenterHorizontally)
-                                .padding(
-                                    start = spacing05X,
-                                    top = 4.dp,
-                                    end = spacing05X,
-                                    bottom = 4.dp
-                                )
-                                .padding(
-                                    start = spacing05X,
-                                    top = 4.dp,
-                                    end = spacing05X,
-                                    bottom = 4.dp
-                                )
-
+                        .border(
+                            width = 1.dp,
+                            color = strokeDefaultLight,
+                            shape = RoundedCornerShape(size = radiusLarge)
                         )
 
-                    }
+                ) {
+                    androidx.compose.material3.Text(
+                        text = stringResource(MR.strings.more_options),
+                        color = textPrimary,
+                        style = body_large,
+                        fontSize = 16.sp,
+                        maxLines = 1,
+                        textAlign = TextAlign.Center,
+                        modifier = modifier
+                            .align(alignment = Alignment.CenterHorizontally)
+                            .padding(
+                                start = spacing05X,
+                                top = 4.dp,
+                                end = spacing05X,
+                                bottom = 4.dp
+                            )
+                            .padding(
+                                start = spacing05X,
+                                top = 4.dp,
+                                end = spacing05X,
+                                bottom = 4.dp
+                            )
+
+                    )
+
+                }
+                Spacer(modifier = modifier.padding(spacing05X))
+
+                Card(
+                    onClick = onActionClick,
+
+                    colors = CardDefaults.cardColors(surfaceBrandDefault),
+                    modifier = modifier
+                        .weight(1f)
+                        .background(
+                            color = surfaceBrandDefault,
+                            shape = RoundedCornerShape(size = radius)
+                        )
+                        .background(
+                            color = surfaceBrandDefault,
+                            shape = RoundedCornerShape(size = radiusLarge),
+
+                            )
+
+
+                ) {
+                    androidx.compose.material3.Text(
+                        text = stringResource(MR.strings.accept),
+                        color = textInverse,
+                        style = body_large,
+                        maxLines = 1,
+                        textAlign = TextAlign.Center,
+                        modifier = modifier
+                            .align(alignment = Alignment.CenterHorizontally)
+                            .padding(
+                                start = spacing05X,
+                                top = 4.dp,
+                                end = spacing05X,
+                                bottom = 4.dp
+                            )
+                            .padding(
+                                start = spacing05X,
+                                top = 4.dp,
+                                end = spacing05X,
+                                bottom = 4.dp
+                            )
+
+                    )
+
+                }
 //                }
 
             }

@@ -72,6 +72,7 @@ import presentation.theme.textSecondary
 @Composable
 fun DropDownMultiChoice(
     readOnly: Boolean,
+    disable: Boolean,
     processLogicDomain: ProcessLogicDomain,
     titleDropDown: String,
     errorMessage: ResourceFormattedStringDesc,
@@ -82,7 +83,7 @@ fun DropDownMultiChoice(
     onSearchButtonClicked: (query: String) -> Unit
 ) {
 
-    val disableLogic = processLogicDomain.disabled
+    val disableLogic = processLogicDomain.disabled ||disable
     val hideLogic = processLogicDomain.shouldHide
     val readOnlyLogic = processLogicDomain.readOnly || readOnly
     val requiredLogic = processLogicDomain.required

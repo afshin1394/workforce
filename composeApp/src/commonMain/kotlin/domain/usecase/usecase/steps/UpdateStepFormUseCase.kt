@@ -3,6 +3,7 @@ package domain.usecase.usecase.steps
 
 import arrow.core.Tuple4
 import arrow.core.Tuple5
+import arrow.core.Tuple6
 import data.network.response.task.FormStruct
 import domain.mappers.toComponent
 import domain.mappers.toPhotoDomainList
@@ -16,14 +17,21 @@ import domain.repository.ISendStepsRepository
 import domain.repository.IStepPointerRepository
 import domain.repository.IStepsRepository
 import domain.usecase.BaseUseCase
+import domain.usecase.usecase.ticket.GetTicketDetailsUseCase
 import io.github.aakira.napier.LogLevel
 import io.github.aakira.napier.Napier
 import irancell.nwg.wfm.Location
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 import toActivityDomain
 import toActivityDomainList
 import utils.FormViewerTypes
+import utils.LogicCalculation
 import utils.PROCEED
 import utils.getCurrentDate
 import utils.parsGpsDateTime
@@ -42,13 +50,15 @@ class UpdateStepFormUseCase(
     private val iStepPointerRepository: IStepPointerRepository,
     private val iSendStepsRepository: ISendStepsRepository,
     private val iPhotoRepository: IPhotoRepository,
-) : BaseUseCase<StructureActivity, Tuple5<String, String, List<ComponentDomain>, List<PhotoDomain>, Int>>() {
+) : BaseUseCase<StructureActivity, Tuple6<String, String, List<ComponentDomain>, List<PhotoDomain>, Int,String>>(){
 
-    override suspend fun run(params: Tuple5<String, String, List<ComponentDomain>, List<PhotoDomain>, Int>): StructureActivity {
+    override suspend fun run(params: Tuple6<String, String, List<ComponentDomain>, List<PhotoDomain>, Int,String>): StructureActivity {
         Location.start { }
+
         val removablesWithParent: ArrayList<ComponentDomain> = arrayListOf()
         val dict = mutableMapOf<String, Any>()
         val dictImages = mutableMapOf<String, Any>()
+
         Napier.log(LogLevel.ASSERT, tag = "processType", message = params.second)
         val stepList: List<ActivityDomain> =
             iStepsRepository.getStepsByTicketNumber(params.first).toActivityDomainList()
@@ -130,6 +140,15 @@ class UpdateStepFormUseCase(
         } catch (_: Exception) {
 
         }
+        data.form.form_structure.components?.let {
+            val logicCalculation = LogicCalculation(
+                CoroutineScope(Dispatchers.IO),
+                it
+            )
+            logicCalculation.ticketId = params.sixth
+            checkLogicsForAll(logicCalculation,it)
+        }
+
         params.third.createRepeatableSectionStructure(
             ticketNumber = params.first,
             removablesWithParent,
@@ -455,6 +474,24 @@ class UpdateStepFormUseCase(
             component.values = newValues
         }
         return imageComponents
+    }
+
+    private suspend fun checkLogicsForAll(logicCalculation: LogicCalculation,components: List<ComponentDomain>) {
+
+        // Create a copy of the components list to iterate over
+        val componentsCopy = components.toMutableList()
+
+        for (cmp in componentsCopy) {
+            logicCalculation.extractLogics(componentsCopy, cmp)
+            cmp.components?.let { cmps ->
+                if (cmps.isNotEmpty()) {
+                    checkLogicsForAll(logicCalculation,cmps)
+
+                }
+            }
+        }
+
+
     }
 
 }

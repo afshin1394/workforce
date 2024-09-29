@@ -1,5 +1,6 @@
 package utils
 
+import irancell.nwg.wfm.MR
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDateTime
@@ -8,6 +9,9 @@ import kotlinx.datetime.toLocalDateTime
 import kotlinx.datetime.*
 fun getCurrentDate() : String {
    return Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).toString()
+}
+fun getCurrentDateLocalDateTime() : LocalDateTime {
+    return Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
 }
 
 
@@ -20,6 +24,75 @@ fun  String.parsGpsDateTime() : String{
     return formatDateTime(inputDateTime)
 }
 
+fun String.parsServerDateTime() : String {
+    val inputDateTime = parseServerDateTime(this)
+    return formatDateTime(inputDateTime)
+}
+fun LocalDateTime.localDateTimeToMilliseconds(): Long {
+    // Convert LocalDateTime to milliseconds since the epoch
+    return this.toInstant(TimeZone.UTC).toEpochMilliseconds()
+}
+
+
+fun compareLocalDateTimes(dateTime1: LocalDateTime, dateTime2: LocalDateTime): Int {
+    return dateTime1.compareTo(dateTime2) // Negative if dateTime1 < dateTime2, positive if >, 0 if equal
+}
+
+
+fun String.parseLocalDateTime(): LocalDateTime? {
+    // Trim the input string and split into date and time parts
+    val parts = this.trim().split(" ")
+    if (parts.size < 3) return null // Invalid format
+
+    val datePart = parts[0] // "2024-09-18"
+    val timePart = parts[1] + " " + parts[2] // "12:19 PM"
+
+    // Split date into year, month, and day
+    val dateComponents = datePart.split("-")
+    if (dateComponents.size != 3) return null
+
+    val year = dateComponents[0].toIntOrNull() ?: return null
+    val month = dateComponents[1].toIntOrNull() ?: return null
+    val day = dateComponents[2].toIntOrNull() ?: return null
+
+    // Split time into hour and minute and handle AM/PM
+    val timeComponents = timePart.split(":")
+    if (timeComponents.size != 2) return null
+
+    val hour = timeComponents[0].trim().toIntOrNull() ?: return null
+    val minute = timeComponents[1].trim().substring(0, 2).toIntOrNull() ?: return null
+    val amPm = parts[3].trim() // "AM" or "PM"
+
+    // Convert to 24-hour format
+    val adjustedHour = when (amPm) {
+        "AM" -> if (hour == 12) 0 else hour
+        "PM" -> if (hour == 12) hour else hour + 12
+        else -> return null // Invalid AM/PM format
+    }
+
+    return LocalDateTime(year, month, day, adjustedHour, minute)
+}
+
+
+fun parseServerDateTime(input : String) : LocalDateTime{
+    val monthMap = mapOf(
+        "01" to Month.JANUARY, "02" to Month.FEBRUARY, "03" to Month.MARCH,
+        "04" to Month.APRIL, "05" to Month.MAY, "06" to Month.JUNE,
+        "07" to Month.JULY, "08" to Month.AUGUST, "09" to Month.SEPTEMBER,
+        "10" to Month.OCTOBER, "11" to Month.NOVEMBER, "12" to Month.DECEMBER
+    )
+
+    val parts = input.split("-"," ", ":")
+    val year = parts[0].toInt()
+    val month = monthMap[parts[1]] ?: throw IllegalArgumentException("Invalid month")
+    val day = parts[2].toInt()
+    val hour = parts[3].toInt()
+    val minute = parts[4].toInt()
+    val second = parts[5].toInt()
+
+    return LocalDateTime(year, month, day, hour, minute, second)
+
+}
 
 fun parseDateTime(input: String): LocalDateTime {
     val monthMap = mapOf(
@@ -53,3 +126,4 @@ fun formatDateTime(dateTime: LocalDateTime): String {
 
     return "$year-$month-$day  $formattedHourString:$minute $amPm"
 }
+

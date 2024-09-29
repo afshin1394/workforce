@@ -14,153 +14,182 @@ fun validateComponents(
     clearTempComponentListCallback: (List<ComponentDomain>) -> Unit
 ): Map<String, List<StringDesc>> {
     val errors = mutableMapOf<String, List<ResourceFormattedStringDesc>>()
-    Napier.log(LogLevel.ASSERT, tag= "validateComponent", message = components.toList().toString())
+    Napier.log(LogLevel.ASSERT, tag = "validateComponent", message = components.toList().toString())
 
     fun updateComponentsRecursively(component: ComponentDomain): ComponentDomain {
         return when (component.type) {
             FormViewerTypes.TextField -> {
-                component.validate?.let { validate ->
 
-                    val validationErrors =
-                        validateShortText(component, validate)
-                    val listMessageError: ArrayList<ResourceFormattedStringDesc> = arrayListOf()
-                    if (validationErrors != null) {
-                        listMessageError.add(validationErrors)
+                if (!component.disabled||!component.processLogicDomain.disabled) {
+                    component.validate?.let { validate ->
 
-                        errors[component.id.toString()] = listMessageError
-                    }
-                    component.copy(
-                        validate = component.validate?.copy(
-                            messageError = validationErrors
-                        ) ?: ValidateDomain(
-                            messageError = validationErrors
+                        val validationErrors = validateShortText(component, validate)
+                        val listMessageError: ArrayList<ResourceFormattedStringDesc> = arrayListOf()
+                        if (validationErrors != null) {
+                            listMessageError.add(validationErrors)
+                            errors[component.id.toString()] = listMessageError
+                        }
+                        component.copy(
+                            validate = component.validate?.copy(
+                                messageError = validationErrors
+                            ) ?: ValidateDomain(
+                                messageError = validationErrors
+                            )
                         )
-                    )
-                } ?: run {
+                    } ?: run {
+                        return component
+                    }
+                } else {
                     return component
                 }
             }
 
-
             FormViewerTypes.TextAREA -> {
-                component.validate?.let { validate ->
+                if (!component.disabled||!component.processLogicDomain.disabled) {
 
-                    val validationErrors =
-                        validateTextarea(component, validate, true)
-                    val listMessageError: ArrayList<ResourceFormattedStringDesc> = arrayListOf()
-                    if (validationErrors != null) {
-                        listMessageError.add(validationErrors)
+                    component.validate?.let { validate ->
 
-                        errors[component.id.toString()] = listMessageError
-                    }
-                    component.copy(
-                        validate = component.validate?.copy(
-                            messageError = validationErrors
-                        ) ?: ValidateDomain(
-                            messageError = validationErrors
+                        val validationErrors =
+                            validateTextarea(component, validate, true)
+                        val listMessageError: ArrayList<ResourceFormattedStringDesc> = arrayListOf()
+                        if (validationErrors != null) {
+                            listMessageError.add(validationErrors)
+
+                            errors[component.id.toString()] = listMessageError
+                        }
+                        component.copy(
+                            validate = component.validate?.copy(
+                                messageError = validationErrors
+                            ) ?: ValidateDomain(
+                                messageError = validationErrors
+                            )
                         )
-                    )
-                } ?: run {
+                    } ?: run {
+                        return component
+                    }
+
+                } else {
                     return component
                 }
             }
 
 
             FormViewerTypes.Number -> {
-                component.validate?.let { validate ->
 
-                    val validationErrors =
-                        validateNumber(component, validate, true)
-                    val listMessageError: ArrayList<ResourceFormattedStringDesc> = arrayListOf()
-                    if (validationErrors != null) {
-                        listMessageError.add(validationErrors)
+                if (!component.disabled||!component.processLogicDomain.disabled) {
 
-                        errors[component.id.toString()] = listMessageError
-                    }
 
-                    component.copy(
-                        validate = component.validate?.copy(
-                            messageError = validationErrors
-                        ) ?: ValidateDomain(
-                            messageError = validationErrors
+                    component.validate?.let { validate ->
+
+                        val validationErrors =
+                            validateNumber(component, validate, true)
+                        val listMessageError: ArrayList<ResourceFormattedStringDesc> = arrayListOf()
+                        if (validationErrors != null) {
+                            listMessageError.add(validationErrors)
+
+                            errors[component.id.toString()] = listMessageError
+                        }
+
+                        component.copy(
+                            validate = component.validate?.copy(
+                                messageError = validationErrors
+                            ) ?: ValidateDomain(
+                                messageError = validationErrors
+                            )
                         )
-                    )
-                } ?: run {
+                    } ?: run {
+                        return component
+                    }
+                } else {
                     return component
                 }
             }
 
             FormViewerTypes.LatLong -> {
+                if (!component.disabled||!component.processLogicDomain.disabled) {
 
-                component.validate?.let { validate ->
-                    val validationErrors =
-                        validateLatLong(component, validate)
-                    val listMessageError: ArrayList<ResourceFormattedStringDesc> = arrayListOf()
-                    if (validationErrors != null) {
-                        listMessageError.add(validationErrors)
+                    component.validate?.let { validate ->
+                        val validationErrors =
+                            validateLatLong(component, validate)
+                        val listMessageError: ArrayList<ResourceFormattedStringDesc> = arrayListOf()
+                        if (validationErrors != null) {
+                            listMessageError.add(validationErrors)
 
-                        errors[component.id.toString()] = listMessageError
-                    }
-                    return component.copy(
-                        validate = component.validate?.copy(
-                            messageError = validationErrors
-                        ) ?: ValidateDomain(
-                            messageError = validationErrors
+                            errors[component.id.toString()] = listMessageError
+                        }
+                        return component.copy(
+                            validate = component.validate?.copy(
+                                messageError = validationErrors
+                            ) ?: ValidateDomain(
+                                messageError = validationErrors
+                            )
                         )
-                    )
-                } ?: run {
+                    } ?: run {
+                        return component
+                    }
+
+                } else {
                     return component
                 }
             }
 
 
             FormViewerTypes.Phone -> {
-                component.validate?.let { validate ->
 
-                    val validationErrors =
-                        validatePhone(component, validate, true)
+                if (!component.disabled||!component.processLogicDomain.disabled) {
+                    component.validate?.let { validate ->
 
-                    val listMessageError: ArrayList<ResourceFormattedStringDesc> = arrayListOf()
-                    if (validationErrors != null) {
-                        listMessageError.add(validationErrors)
-                        errors[component.id.toString()] = listMessageError
+                        val validationErrors =
+                            validatePhone(component, validate, true)
 
-                    }
+                        val listMessageError: ArrayList<ResourceFormattedStringDesc> = arrayListOf()
+                        if (validationErrors != null) {
+                            listMessageError.add(validationErrors)
+                            errors[component.id.toString()] = listMessageError
 
-                    component.copy(
-                        validate = component.validate?.copy(
-                            messageError = validationErrors
-                        ) ?: ValidateDomain(
-                            messageError = validationErrors
+                        }
+
+                        component.copy(
+                            validate = component.validate?.copy(
+                                messageError = validationErrors
+                            ) ?: ValidateDomain(
+                                messageError = validationErrors
+                            )
                         )
-                    )
-                } ?: run {
+                    } ?: run {
+                        return component
+                    }
+                } else {
                     return component
                 }
             }
 
             FormViewerTypes.Email -> {
+                if (!component.disabled||!component.processLogicDomain.disabled) {
 
-                component.validate?.let { validate ->
+                    component.validate?.let { validate ->
 
-                    val validationErrors =
-                        validateEmail(component, validate, true)
+                        val validationErrors =
+                            validateEmail(component, validate, true)
 
-                    val listMessageError: ArrayList<ResourceFormattedStringDesc> = arrayListOf()
-                    if (validationErrors != null) {
-                        listMessageError.add(validationErrors)
-                        errors[component.id.toString()] = listMessageError
+                        val listMessageError: ArrayList<ResourceFormattedStringDesc> = arrayListOf()
+                        if (validationErrors != null) {
+                            listMessageError.add(validationErrors)
+                            errors[component.id.toString()] = listMessageError
 
-                    }
+                        }
 
-                    component.copy(
-                        validate = component.validate?.copy(
-                            messageError = validationErrors
-                        ) ?: ValidateDomain(
-                            messageError = validationErrors
+                        component.copy(
+                            validate = component.validate?.copy(
+                                messageError = validationErrors
+                            ) ?: ValidateDomain(
+                                messageError = validationErrors
+                            )
                         )
-                    )
-                } ?: run {
+                    } ?: run {
+                        return component
+                    }
+                } else {
                     return component
                 }
             }
@@ -169,28 +198,34 @@ fun validateComponents(
             FormViewerTypes.Select,
             FormViewerTypes.Multi,
             FormViewerTypes.Radio -> {
-                component.validate?.let { validate ->
+                if (!component.disabled||!component.processLogicDomain.disabled) {
+                    component.validate?.let { validate ->
 
-                    val validationErrors =
-                        validateSelected(component, validate)
-                    val listMessageError: ArrayList<ResourceFormattedStringDesc> = arrayListOf()
-                    if (validationErrors != null) {
-                        listMessageError.add(validationErrors)
-                        errors[component.id.toString()] = listMessageError
+                        val validationErrors =
+                            validateSelected(component, validate)
+                        val listMessageError: ArrayList<ResourceFormattedStringDesc> = arrayListOf()
+                        if (validationErrors != null) {
+                            listMessageError.add(validationErrors)
+                            errors[component.id.toString()] = listMessageError
 
-                    }
-                    component.copy(
-                        validate = component.validate?.copy(
-                            messageError = validationErrors
-                        ) ?: ValidateDomain(
-                            messageError = validationErrors
+                        }
+                        component.copy(
+                            validate = component.validate?.copy(
+                                messageError = validationErrors
+                            ) ?: ValidateDomain(
+                                messageError = validationErrors
+                            )
                         )
-                    )
-                } ?: run { return component }
+                    } ?: run { return component }
+                } else {
+                    return component
+                }
             }
 
 
             FormViewerTypes.FileUpload -> {
+
+                if (!component.disabled||!component.processLogicDomain.disabled) {
                 component.validate?.let { validate ->
                     val validationErrors = validateFileUpload(
                         component,
@@ -211,7 +246,10 @@ fun validateComponents(
                             messageError = validationErrors
                         )
                     )
-                }?:run{
+                } ?: run {
+                    return component
+                }
+                } else {
                     return component
                 }
             }
@@ -221,6 +259,7 @@ fun validateComponents(
             FormViewerTypes.Date,
             FormViewerTypes.Time,
             FormViewerTypes.ImageView -> {
+                if (!component.disabled||!component.processLogicDomain.disabled) {
                 component.validate?.let { validate ->
 
                     val validationErrors =
@@ -238,7 +277,10 @@ fun validateComponents(
                             messageError = validationErrors
                         )
                     )
-                }?:run{
+                } ?: run {
+                    return component
+                }
+                } else {
                     return component
                 }
             }

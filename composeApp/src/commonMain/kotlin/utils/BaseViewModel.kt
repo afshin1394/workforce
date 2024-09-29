@@ -67,13 +67,11 @@ open class BaseViewModel : ViewModel(), KoinComponent {
     private val _lifeCycleEvent = MutableStateFlow(LifecycleEvent.ON_ANY)
     val lifeCycleEvent = _lifeCycleEvent.asStateFlow()
 
-
     val state = _state.asStateFlow()
     val networkState = _networkState.asStateFlow()
     val vpnDetectionStates = _vpnDetectionState.asStateFlow()
     val gpsState = _gpsState.asStateFlow()
     val konnectivity: Konnectivity = Konnectivity()
-
 
     init {
         traceNetwork()

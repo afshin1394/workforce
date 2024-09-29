@@ -9,14 +9,28 @@ import dev.icerock.moko.resources.desc.StringDesc
 import domain.models.form_struct.ComponentDomain
 import domain.models.form_struct.ValueDomain
 import domain.models.form_struct.logic.ConditionDomain
+import domain.models.ticket.PhaseDomain
+import domain.models.ticket.TicketDetailRequestDomain
+import domain.usecase.ResultStatus
+import domain.usecase.usecase.ticket.GetTicketDetailsUseCase
 import io.github.aakira.napier.LogLevel
 import io.github.aakira.napier.Napier
 import irancell.nwg.wfm.MR
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 
-class LogicCalculation (private val allComponents: List<ComponentDomain>) {
 
-
-    fun extractLogics(components: List<ComponentDomain>, component: ComponentDomain): Boolean {
+class LogicCalculation(
+    private val viewModelScope: CoroutineScope,
+    private val allComponents: List<ComponentDomain>
+) : KoinComponent {
+    val getTicketDetailsUseCase: GetTicketDetailsUseCase by inject()
+    lateinit var ticketId: String
+    suspend fun extractLogics(components: List<ComponentDomain>, component: ComponentDomain): Boolean {
 
         var hasLogic = false
         component.logics?.forEach { it ->
@@ -25,7 +39,7 @@ class LogicCalculation (private val allComponents: List<ComponentDomain>) {
                 LogicType.Hide -> {
                     val expressionSatisfied = evaluateLogics(components, it)
                     val cmp = allComponents.findComponentById(component.id)
-                    Napier.log(LogLevel.ASSERT,"Hide", message = cmp.toString())
+                    Napier.log(LogLevel.ASSERT, "Hide", message = cmp.toString())
 
                     cmp?.processLogicDomain?.shouldHide =
                         expressionSatisfied
@@ -37,7 +51,7 @@ class LogicCalculation (private val allComponents: List<ComponentDomain>) {
                 LogicType.Required -> {
                     val expressionSatisfied = evaluateLogics(components, it)
                     val cmp = allComponents.findComponentById(component.id)
-                   cmp?.processLogicDomain?.required =
+                    cmp?.processLogicDomain?.required =
                         expressionSatisfied
                     hasLogic = true
                 }
@@ -105,7 +119,7 @@ class LogicCalculation (private val allComponents: List<ComponentDomain>) {
 
                 }
 
-                LogicType.Bind ->{
+                LogicType.Bind -> {
                     val listOfBinding = it.getListOfBindingComponents()
                     Napier.log(
                         LogLevel.ASSERT,
@@ -114,7 +128,7 @@ class LogicCalculation (private val allComponents: List<ComponentDomain>) {
                     )
                     val cmp = allComponents.findComponentById(component.id)
 
-                    if(listOfBinding.isNotEmpty()){
+                    if (listOfBinding.isNotEmpty()) {
                         val updatedValueDomain = updateValueDomain(
                             cmp?.values?.get(0) ?: ValueDomain(),
                             listOfBinding[0]
@@ -123,7 +137,7 @@ class LogicCalculation (private val allComponents: List<ComponentDomain>) {
                         cmp?.processLogicDomain?.calculatedValue = listOfBinding[0]
 
                         hasLogic = true
-                    }else{
+                    } else {
                         val updatedValueDomain = updateValueDomain(
                             cmp?.values?.get(0) ?: ValueDomain(),
                             ""
@@ -133,6 +147,75 @@ class LogicCalculation (private val allComponents: List<ComponentDomain>) {
                     }
 
 
+                }
+
+                LogicType.Ticket_Auto_Fill -> {
+                    it.ticketAutoFillLogicDomain?.options?.forEach { option ->
+                        option.phaseName?.let { phaseName ->
+                            option.property?.let {
+                                viewModelScope.launch {
+                                    getTicketDetailsUseCase(
+                                        Pair(
+                                            ticketId, TicketDetailRequestDomain(
+                                                listOf(
+                                                    PhaseDomain(option.phaseName, option.property)
+                                                )
+                                            )
+                                        )
+                                    ).collect { result ->
+                                        when (result.status) {
+                                            AsyncStatus.EMPTY -> {
+
+                                            }
+
+                                            AsyncStatus.ERROR -> {
+
+                                            }
+
+                                            AsyncStatus.LOADING -> {
+
+                                            }
+
+                                            AsyncStatus.SUCCESS -> {
+                                                    result.data?.keys?.forEach { key ->
+                                                        val component =
+                                                            allComponents.findComponentByKey(key)
+
+                                                        result.data[key]?.let { resultData ->
+                                                            var value = resultData
+
+                                                            if (resultData.isNotEmpty()) {
+                                                                if (component?.type == FormViewerTypes.Datetime ||
+                                                                    component?.type == FormViewerTypes.Time ||
+                                                                    component?.type == FormViewerTypes.Date
+                                                                ) {
+                                                                    value =
+                                                                        resultData.parsServerDateTime()
+                                                                }
+                                                                val updatedValueDomain =
+                                                                    updateValueDomain(
+                                                                        component?.values?.get(0)
+                                                                            ?: ValueDomain(),
+                                                                        value
+                                                                    )
+                                                                component?.values = listOf(updatedValueDomain)
+
+
+                                                                component?.processLogicDomain?.calculatedValue = value
+                                                                Napier.log(LogLevel.INFO, tag = "insideLogiices", message = component?.processLogicDomain?.calculatedValue.toString())
+                                                                hasLogic = true
+                                                            }
+
+                                                        }
+
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
 
                 }
 
@@ -141,13 +224,13 @@ class LogicCalculation (private val allComponents: List<ComponentDomain>) {
         return hasLogic
     }
 
-    private fun LogicDomain.getListOfBindingComponents() : List<String> {
-        val list : ArrayList<String> =  arrayListOf()
+    private fun LogicDomain.getListOfBindingComponents(): List<String> {
+        val list: ArrayList<String> = arrayListOf()
         this.bind_logic?.field_options?.let {
-            it.forEach { fieldOption->
-                val cmp = allComponents.findComponentById(fieldOption.field_key)
-                cmp?.values?.get(0)?.value?.let{ value->
-                    if(value.isNotEmpty())
+            it.forEach { fieldOption ->
+                val cmp = allComponents.findComponentByKey(fieldOption.field_key)
+                cmp?.values?.get(0)?.value?.let { value ->
+                    if (value.isNotEmpty())
                         list.add(value)
                 }
 
@@ -222,8 +305,8 @@ class LogicCalculation (private val allComponents: List<ComponentDomain>) {
         cond: ConditionDomain,
         components: List<ComponentDomain>
     ): String? {
-        val componet1 = allComponents.findComponentById(cond.firstFieldKey)
-        val componet2 = allComponents.findComponentById(cond.secondFieldKey)
+        val componet1 = allComponents.findComponentByKey(cond.firstFieldKey)
+        val componet2 = allComponents.findComponentByKey(cond.secondFieldKey)
         componet1?.values?.let { values1 ->
             if (values1.isNotEmpty()) {
                 values1[0].let { value1 ->
@@ -270,6 +353,7 @@ class LogicCalculation (private val allComponents: List<ComponentDomain>) {
         return null
     }
 
+
     private fun checkExpression(
         components: List<ComponentDomain>,
         it: LogicDomain
@@ -278,7 +362,7 @@ class LogicCalculation (private val allComponents: List<ComponentDomain>) {
         it.experssions?.forEachIndexed { i, expression ->
             expressionResults.add(arrayListOf())
             expression.conditions?.forEachIndexed { j, condition ->
-                val component = allComponents. findComponentById(condition.firstFieldKey)
+                val component = allComponents.findComponentByKey(condition.firstFieldKey)
 
 
                 when (condition.secondOperator?.title) {
@@ -289,23 +373,47 @@ class LogicCalculation (private val allComponents: List<ComponentDomain>) {
                     }
 
                     OperatorType.IsBlank -> {
-                        if (component?.values == null)
+                        if (component?.values == null) {
                             expressionResults[i].add(true)
-                        component?.values?.let {
-                            expressionResults[i].add(it[0].value?.isEmpty() == true)
+                        } else {
+                            component.values?.let {
+                                expressionResults[i].add(it[0].value?.isEmpty() == true)
+                            }
                         }
                     }
 
                     OperatorType.Equals -> {
-                        if (component?.values?.get(0)?.value == condition.value.toString())
-                            expressionResults[i].add(true)
+                        if (component?.isSelectableValue() == true) {
+                            component.values?.forEach {
+                                if (it.isSelected && it.value.equals(condition.value))
+                                    expressionResults[i].add(true)
+                            }
+                        } else {
+                            component?.values?.get(0)?.let {
+                                if (it.value.equals(condition.value))
+                                    expressionResults[i].add(true)
+                            }
+                        }
+
                     }
 
                     OperatorType.NotEquals -> {
                         component?.values?.let {
                             if (it.isNotEmpty()) {
-                                if (component.values?.get(0)?.value != condition.value.toString())
-                                    expressionResults[i].add(true)
+                                if (component.isSelectableValue()) {
+                                    component.values?.forEach {
+                                        if (it.isSelected && !(it.value.equals(
+                                                condition.value
+                                            ))
+                                        )
+                                            expressionResults[i].add(true)
+                                    }
+                                } else {
+                                    component.values?.get(0)?.let {
+                                        if (!it.value.equals(condition.value))
+                                            expressionResults[i].add(true)
+                                    }
+                                }
                             }
                         }
                     }
@@ -313,136 +421,216 @@ class LogicCalculation (private val allComponents: List<ComponentDomain>) {
                     OperatorType.Contains -> {
                         component?.values?.let {
                             if (it.isNotEmpty()) {
-                                expressionResults[i].add(
-                                    component.values?.get(0)?.value?.contains(
-                                        condition.value.toString()
-                                    ) == true
-                                )
+                                if (component.isSelectableValue()) {
+                                    component.values?.forEach {
+                                        if (it.isSelected && !(it.value.equals(
+                                                condition.value
+                                            ))
+                                        )
+                                            expressionResults[i].add(true)
+                                    }
+                                } else {
+                                    component.values?.get(0)?.let {
+                                        if (!it.value.equals(condition.value))
+                                            expressionResults[i].add(true)
+                                    }
+                                }
+
                             }
                         }
-
                     }
 
                     OperatorType.StartWith -> {
                         component?.values?.let {
                             if (it.isNotEmpty()) {
-                                expressionResults[i].add(
-                                    component.values?.get(0)?.value?.startsWith(
-                                        condition.value.toString()
-                                    ) == true
-                                )
+                                if (component.isSelectableValue()) {
+                                    component.values?.forEach {
+                                        if (it.isSelected && it.value?.startsWith(
+                                                condition.value.toString()
+                                            ) == true
+                                        )
+                                            expressionResults[i].add(true)
+                                    }
+                                } else {
+                                    component.values?.let {
+                                        if (it.isNotEmpty()) {
+                                            if (it.get(0).value?.startsWith(
+                                                    condition.value.toString()
+                                                ) == true
+                                            )
+                                                expressionResults[i].add(true)
+                                        }
+                                    }
+
+
+                                    expressionResults[i].add(
+                                        component.values?.get(0)?.value?.startsWith(
+                                            condition.value.toString()
+                                        ) == true
+                                    )
+                                }
+
                             }
                         }
-
                     }
 
                     OperatorType.GreaterThan -> {
-                        component?.values?.let {
+                        component?.values?.let { it ->
                             if (it.isNotEmpty()) {
-                                component.values?.get(0)?.value?.let { value ->
-                                    if (value.isNotEmpty())
-                                        value.toFloatOrNull()?.let { intValue ->
-                                            condition.value?.let { conditionValue ->
-                                                if (conditionValue.isNotEmpty()) {
-                                                    conditionValue.toFloatOrNull()
-                                                        ?.let { intConditionValue ->
+                                if (component.isSelectableValue()) {
+                                    component.values?.filter { it.isSelected && it.value?.isNotEmpty() == true }
+                                        ?.forEach { valueDomain ->
+                                            valueDomain.value?.toFloatOrNull()
+                                                ?.let { componentValue ->
+                                                    condition.value?.toFloatOrNull()
+                                                        ?.let { conditionValue ->
                                                             expressionResults[i].add(
-                                                                intValue > intConditionValue
+                                                                componentValue > conditionValue
                                                             )
                                                         }
                                                 }
-
-                                            }
-
                                         }
+                                } else {
+                                    component.values?.get(0)?.let { valueDomain ->
+                                        valueDomain.value?.toFloatOrNull()?.let { componentValue ->
+                                            condition.value?.toFloatOrNull()
+                                                ?.let { conditionValue ->
+                                                    expressionResults[i].add(
+                                                        componentValue > conditionValue
+                                                    )
+                                                }
+                                        }
+                                    }
                                 }
-
                             }
                         }
 
                     }
 
                     OperatorType.GreaterThanOrEqualsTo -> {
-                        component?.values?.let {
+                        component?.values?.let { it ->
                             if (it.isNotEmpty()) {
-                                component.values?.get(0)?.value?.let { value ->
-                                    if (value.isNotEmpty())
-                                        value.toFloatOrNull()?.let { intValue ->
-                                            condition.value?.let { conditionValue ->
-                                                if (conditionValue.isNotEmpty()) {
-                                                    conditionValue.toFloatOrNull()
-                                                        ?.let { intConditionValue ->
+                                if (component.isSelectableValue()) {
+                                    component.values?.filter { it.isSelected && it.value?.isNotEmpty() == true }
+                                        ?.forEach { valueDomain ->
+                                            valueDomain.value?.toFloatOrNull()
+                                                ?.let { componentValue ->
+                                                    condition.value?.toFloatOrNull()
+                                                        ?.let { conditionValue ->
                                                             expressionResults[i].add(
-                                                                intValue >= intConditionValue
+                                                                componentValue >= conditionValue
                                                             )
                                                         }
                                                 }
-                                            }
                                         }
+                                } else {
+                                    component.values?.get(0)?.let { valueDomain ->
+                                        valueDomain.value?.toFloatOrNull()?.let { componentValue ->
+                                            condition.value?.toFloatOrNull()
+                                                ?.let { conditionValue ->
+                                                    expressionResults[i].add(
+                                                        componentValue >= conditionValue
+                                                    )
+                                                }
+                                        }
+                                    }
                                 }
                             }
                         }
                     }
 
                     OperatorType.LessThan -> {
-                        component?.values?.let {
+                        component?.values?.let { it ->
                             if (it.isNotEmpty()) {
-                                component.values?.get(0)?.value?.let { value ->
-                                    if (value.isNotEmpty())
-                                        value.toFloatOrNull()?.let { intValue ->
-                                            Napier.log(
-                                                LogLevel.ASSERT,
-                                                tag = "evaluateLogics",
-                                                message = intValue.toString()
-                                            )
-
-                                            condition.value?.let { conditionValue ->
-                                                Napier.log(
-                                                    LogLevel.ASSERT,
-                                                    tag = "evaluateLogics",
-                                                    message = conditionValue
-                                                )
-
-                                                if (conditionValue.isNotEmpty()) {
-                                                    conditionValue.toFloatOrNull()
-                                                        ?.let { intConditionValue ->
+                                if (component.isSelectableValue()) {
+                                    component.values?.filter { it.isSelected && it.value?.isNotEmpty() == true }
+                                        ?.forEach { valueDomain ->
+                                            valueDomain.value?.toFloatOrNull()
+                                                ?.let { componentValue ->
+                                                    condition.value?.toFloatOrNull()
+                                                        ?.let { conditionValue ->
                                                             expressionResults[i].add(
-                                                                intValue < intConditionValue
+                                                                componentValue < conditionValue
                                                             )
                                                         }
                                                 }
-
-                                            }
-
                                         }
+                                } else {
+                                    component.values?.get(0)?.let { valueDomain ->
+                                        valueDomain.value?.toFloatOrNull()?.let { componentValue ->
+                                            condition.value?.toFloatOrNull()
+                                                ?.let { conditionValue ->
+                                                    expressionResults[i].add(
+                                                        componentValue < conditionValue
+                                                    )
+                                                }
+                                        }
+                                    }
                                 }
-
                             }
                         }
                     }
 
                     OperatorType.LessThanOrEqualsTo -> {
-                        component?.values?.let {
+                        component?.values?.let { it ->
                             if (it.isNotEmpty()) {
-                                component.values?.get(0)?.value?.let { value ->
-                                    if (value.isNotEmpty())
-                                        value.toFloatOrNull()?.let { intValue ->
-                                            condition.value?.let { conditionValue ->
-                                                if (conditionValue.isNotEmpty()) {
-                                                    conditionValue.toFloatOrNull()
-                                                        ?.let { intConditionValue ->
+                                if (component.isSelectableValue()) {
+                                    component.values?.filter { it.isSelected && it.value?.isNotEmpty() == true }
+                                        ?.forEach { valueDomain ->
+                                            valueDomain.value?.toFloatOrNull()
+                                                ?.let { componentValue ->
+                                                    condition.value?.toFloatOrNull()
+                                                        ?.let { conditionValue ->
                                                             expressionResults[i].add(
-                                                                intValue <= intConditionValue
+                                                                componentValue <= conditionValue
                                                             )
                                                         }
                                                 }
-
-                                            }
-
                                         }
-                                }
+                                } else {
+                                    component.values?.get(0)?.let { valueDomain ->
+                                        valueDomain.value?.toFloatOrNull()?.let { componentValue ->
+                                            condition.value?.toFloatOrNull()
+                                                ?.let { conditionValue ->
+                                                    expressionResults[i].add(
+                                                        componentValue <= conditionValue
+                                                    )
 
+                                                }
+                                        }
+                                    }
+                                }
                             }
+                        }
+                    }
+
+                    OperatorType.ContainsAny -> {
+
+                        condition.values?.let {
+                            if (component?.values?.filter { it.value?.isNotEmpty() == true && it.isSelected }
+                                    ?.map { it.value }?.intersect(condition.values)
+                                    ?.isNotEmpty() == true
+                            )
+                                expressionResults[i].add(true)
+                        }
+
+                    }
+
+                    OperatorType.NotContainsAny -> {
+                        condition.values?.let {
+                            if (component?.values?.filter { it.value?.isNotEmpty() == true && it.isSelected }
+                                    ?.map { it.value }?.intersect(condition.values)
+                                    ?.isEmpty() == true
+                            )
+                                expressionResults[i].add(true)
+                        }
+                    }
+
+                    OperatorType.ContainsAll -> {
+                        condition.values?.let {
+                            if (component?.values?.filter { it.value?.isNotEmpty() == true && it.isSelected }
+                                    ?.map { it.value }?.containsAll(condition.values) == true)
+                                expressionResults[i].add(true)
                         }
                     }
                 }
@@ -457,16 +645,26 @@ class LogicCalculation (private val allComponents: List<ComponentDomain>) {
     }
 
 
-
-    private fun List<ComponentDomain>.findComponentById(firstFieldKey: String?): ComponentDomain? {
+    private fun List<ComponentDomain>.findComponentByKey(firstFieldKey: String?): ComponentDomain? {
         for (component in this) {
-            if (component.id == firstFieldKey) {
+            if (component.key == firstFieldKey) {
                 return component
             }
-            component.components?.findComponentById(firstFieldKey)?.let { return it }
+            component.components?.findComponentByKey(firstFieldKey)?.let { return it }
         }
         return null
     }
+
+    private fun List<ComponentDomain>.findComponentById(id: String?): ComponentDomain? {
+        for (component in this) {
+            if (component.id == id) {
+                return component
+            }
+            component.components?.findComponentByKey(id)?.let { return it }
+        }
+        return null
+    }
+
 
     data class ValidateLogicResult(val result: Boolean, val message: ResourceFormattedStringDesc) {
         override fun toString(): String {
@@ -483,540 +681,687 @@ class LogicCalculation (private val allComponents: List<ComponentDomain>) {
         it.experssions?.forEachIndexed { i, expression ->
             expressionResults.add(arrayListOf())
             expression.conditions?.forEachIndexed { j, condition ->
-                val cmp = allComponents.findComponentById(condition.firstFieldKey)
-                val value = cmp?.values?.get(0)?.value
+                val cmp = allComponents.findComponentByKey(condition.firstFieldKey)
+                val value  = if (condition.firstFieldKey == "now") {
+                    getCurrentDateLocalDateTime().localDateTimeToMilliseconds().toString()
+                } else {
+                    cmp?.values?.get(0)?.value
+                }
                 condition.firstOperator?.let {
                     when (condition.firstOperator.title) {
                         OperatorType.Equals -> {
-                            when (condition.secondOperator?.title) {
-                                OperatorType.Add -> {
-                                    value?.toFloatOrNull()?.let { fieldValue ->
-                                        condition.value?.toFloatOrNull()?.let { conditionValue ->
-                                            componentDomain.values?.get(0)?.value?.toFloatOrNull()
-                                                ?.let { currentValue ->
-                                                    expressionResults[i].add(
-                                                        ValidateLogicResult(
-                                                            fieldValue + conditionValue == currentValue,
-                                                            StringDesc.ResourceFormatted(
-                                                                MR.strings.Equal,
-                                                                (fieldValue + conditionValue).toString()
-                                                            )
-                                                        )
-                                                    )
-
-                                                }
-                                        }
-                                    }
-
-                                }
-
-                                OperatorType.Subtract -> {
-                                    value?.toFloatOrNull()?.let { fieldValue ->
-                                        condition.value?.toFloatOrNull()?.let { conditionValue ->
-                                            componentDomain.values?.get(0)?.value?.toFloatOrNull()
-                                                ?.let { currentValue ->
-                                                    expressionResults[i].add(
-                                                        ValidateLogicResult(
-                                                            fieldValue - conditionValue == currentValue,
-                                                            StringDesc.ResourceFormatted(
-                                                                MR.strings.Equal,
-                                                                (fieldValue - conditionValue).toString()
-                                                            )
-                                                        )
-                                                    )
-
-                                                }
-                                        }
-                                    }
-                                }
-
-                                OperatorType.Multiply -> {
-                                    value?.toFloatOrNull()?.let { fieldValue ->
-                                        condition.value?.toFloatOrNull()?.let { conditionValue ->
-                                            componentDomain.values?.get(0)?.value?.toFloatOrNull()
-                                                ?.let { currentValue ->
-                                                    expressionResults[i].add(
-                                                        ValidateLogicResult(
-                                                            fieldValue * conditionValue == currentValue,
-                                                            StringDesc.ResourceFormatted(
-                                                                MR.strings.Equal,
-                                                                (fieldValue * conditionValue).toString()
-                                                            )
-                                                        )
-                                                    )
-
-                                                }
-                                        }
-                                    }
-                                }
-
-                                OperatorType.Divide -> {
-                                    value?.toFloatOrNull()?.let { fieldValue ->
-                                        condition.value?.toFloatOrNull()?.let { conditionValue ->
-                                            componentDomain.values?.get(0)?.value?.toFloatOrNull()
-                                                ?.let { currentValue ->
-                                                    if (conditionValue != 0.0f)
-                                                        expressionResults[i].add(
-                                                            ValidateLogicResult(
-                                                                fieldValue / conditionValue == currentValue,
-                                                                StringDesc.ResourceFormatted(
-                                                                    MR.strings.Equal,
-                                                                    (fieldValue / conditionValue).toString()
+                            condition.secondOperator?.let {
+                                when (condition.secondOperator.title) {
+                                    OperatorType.Add -> {
+                                        value?.toFloatOrNull()?.let { fieldValue ->
+                                            condition.values?.get(0)?.toFloatOrNull()
+                                                ?.let { conditionValue ->
+                                                    componentDomain.values?.get(0)?.value?.toFloatOrNull()
+                                                        ?.let { currentValue ->
+                                                            expressionResults[i].add(
+                                                                ValidateLogicResult(
+                                                                    fieldValue + conditionValue == currentValue,
+                                                                    StringDesc.ResourceFormatted(
+                                                                        MR.strings.Equal,
+                                                                        (fieldValue + conditionValue).toString()
+                                                                    )
                                                                 )
                                                             )
-                                                        )
 
+                                                        }
+                                                }
+                                        }
+
+                                    }
+
+                                    OperatorType.Subtract -> {
+                                        value?.toFloatOrNull()?.let { fieldValue ->
+                                            condition.values?.get(0)?.toFloatOrNull()
+                                                ?.let { conditionValue ->
+                                                    componentDomain.values?.get(0)?.value?.toFloatOrNull()
+                                                        ?.let { currentValue ->
+                                                            expressionResults[i].add(
+                                                                ValidateLogicResult(
+                                                                    fieldValue - conditionValue == currentValue,
+                                                                    StringDesc.ResourceFormatted(
+                                                                        MR.strings.Equal,
+                                                                        (fieldValue - conditionValue).toString()
+                                                                    )
+                                                                )
+                                                            )
+
+                                                        }
                                                 }
                                         }
                                     }
-                                }
 
-                                else -> {}
+                                    OperatorType.Multiply -> {
+                                        value?.toFloatOrNull()?.let { fieldValue ->
+                                            condition.values?.get(0)?.toFloatOrNull()
+                                                ?.let { conditionValue ->
+                                                    componentDomain.values?.get(0)?.value?.toFloatOrNull()
+                                                        ?.let { currentValue ->
+                                                            expressionResults[i].add(
+                                                                ValidateLogicResult(
+                                                                    fieldValue * conditionValue == currentValue,
+                                                                    StringDesc.ResourceFormatted(
+                                                                        MR.strings.Equal,
+                                                                        (fieldValue * conditionValue).toString()
+                                                                    )
+                                                                )
+                                                            )
+
+                                                        }
+                                                }
+                                        }
+                                    }
+
+                                    OperatorType.Divide -> {
+                                        value?.toFloatOrNull()?.let { fieldValue ->
+                                            condition.values?.get(0)?.toFloatOrNull()
+                                                ?.let { conditionValue ->
+                                                    componentDomain.values?.get(0)?.value?.toFloatOrNull()
+                                                        ?.let { currentValue ->
+                                                            if (conditionValue != 0.0f)
+                                                                expressionResults[i].add(
+                                                                    ValidateLogicResult(
+                                                                        fieldValue / conditionValue == currentValue,
+                                                                        StringDesc.ResourceFormatted(
+                                                                            MR.strings.Equal,
+                                                                            (fieldValue / conditionValue).toString()
+                                                                        )
+                                                                    )
+                                                                )
+
+                                                        }
+                                                }
+                                        }
+                                    }
+                                    OperatorType.GreaterThan->{
+
+                                    }
+
+                                    else -> {}
+                                }
+                            }?:run{
+                                val cmpValue =  if (componentDomain.type == FormViewerTypes.Datetime){
+                                    componentDomain.values?.get(0)?.value?.parseLocalDateTime()?.localDateTimeToMilliseconds()
+                                }else{
+                                    componentDomain.values?.get(0)?.value?.toDouble()
+                                }
+                                expressionResults[i].add(
+                                    ValidateLogicResult(
+                                        (cmpValue?.toDouble()
+                                            ?: 0.0) == (value?.toDouble() ?: 0.0),
+                                        StringDesc.ResourceFormatted(
+                                            MR.strings.Equal,
+                                            (value).toString()
+                                        )
+                                    )
+                                )
+
                             }
                         }
 
                         OperatorType.NotEquals -> {
-                            when (condition.secondOperator?.title) {
-                                OperatorType.Add -> {
-                                    value?.toFloatOrNull()?.let { fieldValue ->
-                                        condition.value?.toFloatOrNull()?.let { conditionValue ->
-                                            componentDomain.values?.get(0)?.value?.toFloatOrNull()
-                                                ?.let { currentValue ->
-                                                    expressionResults[i].add(
-                                                        ValidateLogicResult(
-                                                            fieldValue + conditionValue != currentValue,
-                                                            StringDesc.ResourceFormatted(
-                                                                MR.strings.NotEqual,
-                                                                (fieldValue + conditionValue).toString()
-                                                            )
-                                                        )
-                                                    )
-
-                                                }
-                                        }
-                                    }
-
-                                }
-
-                                OperatorType.Subtract -> {
-                                    value?.toFloatOrNull()?.let { fieldValue ->
-                                        condition.value?.toFloatOrNull()?.let { conditionValue ->
-                                            componentDomain.values?.get(0)?.value?.toFloatOrNull()
-                                                ?.let { currentValue ->
-                                                    expressionResults[i].add(
-                                                        ValidateLogicResult(
-                                                            fieldValue - conditionValue != currentValue,
-                                                            StringDesc.ResourceFormatted(
-                                                                MR.strings.NotEqual,
-                                                                (fieldValue - conditionValue).toString()
-                                                            )
-                                                        )
-                                                    )
-
-                                                }
-                                        }
-                                    }
-                                }
-
-                                OperatorType.Multiply -> {
-                                    value?.toFloatOrNull()?.let { fieldValue ->
-                                        condition.value?.toFloatOrNull()?.let { conditionValue ->
-                                            componentDomain.values?.get(0)?.value?.toFloatOrNull()
-                                                ?.let { currentValue ->
-                                                    expressionResults[i].add(
-                                                        ValidateLogicResult(
-                                                            fieldValue * conditionValue != currentValue,
-                                                            StringDesc.ResourceFormatted(
-                                                                MR.strings.NotEqual,
-                                                                (fieldValue * conditionValue).toString()
-                                                            )
-                                                        )
-                                                    )
-
-                                                }
-                                        }
-                                    }
-                                }
-
-                                OperatorType.Divide -> {
-                                    value?.toFloatOrNull()?.let { fieldValue ->
-                                        condition.value?.toFloatOrNull()?.let { conditionValue ->
-                                            componentDomain.values?.get(0)?.value?.toFloatOrNull()
-                                                ?.let { currentValue ->
-                                                    if (conditionValue != 0.0f)
-                                                        expressionResults[i].add(
-                                                            ValidateLogicResult(
-                                                                fieldValue / conditionValue != currentValue,
-                                                                StringDesc.ResourceFormatted(
-                                                                    MR.strings.NotEqual,
-                                                                    (fieldValue / conditionValue).toString()
+                            condition.secondOperator?.let {
+                                when (condition.secondOperator?.title) {
+                                    OperatorType.Add -> {
+                                        value?.toFloatOrNull()?.let { fieldValue ->
+                                            condition.values?.get(0)?.toFloatOrNull()
+                                                ?.let { conditionValue ->
+                                                    componentDomain.values?.get(0)?.value?.toFloatOrNull()
+                                                        ?.let { currentValue ->
+                                                            expressionResults[i].add(
+                                                                ValidateLogicResult(
+                                                                    fieldValue + conditionValue != currentValue,
+                                                                    StringDesc.ResourceFormatted(
+                                                                        MR.strings.NotEqual,
+                                                                        (fieldValue + conditionValue).toString()
+                                                                    )
                                                                 )
                                                             )
-                                                        )
 
+                                                        }
+                                                }
+                                        }
+
+                                    }
+
+                                    OperatorType.Subtract -> {
+                                        value?.toFloatOrNull()?.let { fieldValue ->
+                                            condition.values?.get(0)?.toFloatOrNull()
+                                                ?.let { conditionValue ->
+                                                    componentDomain.values?.get(0)?.value?.toFloatOrNull()
+                                                        ?.let { currentValue ->
+                                                            expressionResults[i].add(
+                                                                ValidateLogicResult(
+                                                                    fieldValue - conditionValue != currentValue,
+                                                                    StringDesc.ResourceFormatted(
+                                                                        MR.strings.NotEqual,
+                                                                        (fieldValue - conditionValue).toString()
+                                                                    )
+                                                                )
+                                                            )
+
+                                                        }
                                                 }
                                         }
                                     }
-                                }
 
-                                else -> {}
+                                    OperatorType.Multiply -> {
+                                        value?.toFloatOrNull()?.let { fieldValue ->
+                                            condition.values?.get(0)?.toFloatOrNull()
+                                                ?.let { conditionValue ->
+                                                    componentDomain.values?.get(0)?.value?.toFloatOrNull()
+                                                        ?.let { currentValue ->
+                                                            expressionResults[i].add(
+                                                                ValidateLogicResult(
+                                                                    fieldValue * conditionValue != currentValue,
+                                                                    StringDesc.ResourceFormatted(
+                                                                        MR.strings.NotEqual,
+                                                                        (fieldValue * conditionValue).toString()
+                                                                    )
+                                                                )
+                                                            )
+
+                                                        }
+                                                }
+                                        }
+                                    }
+
+                                    OperatorType.Divide -> {
+                                        value?.toFloatOrNull()?.let { fieldValue ->
+                                            condition.values?.get(0)?.toFloatOrNull()
+                                                ?.let { conditionValue ->
+                                                    componentDomain.values?.get(0)?.value?.toFloatOrNull()
+                                                        ?.let { currentValue ->
+                                                            if (conditionValue != 0.0f)
+                                                                expressionResults[i].add(
+                                                                    ValidateLogicResult(
+                                                                        fieldValue / conditionValue != currentValue,
+                                                                        StringDesc.ResourceFormatted(
+                                                                            MR.strings.NotEqual,
+                                                                            (fieldValue / conditionValue).toString()
+                                                                        )
+                                                                    )
+                                                                )
+
+                                                        }
+                                                }
+                                        }
+                                    }
+
+                                    else -> {}
+                                }
+                            }?:run{
+                                val cmpValue =  if (componentDomain.type == FormViewerTypes.Datetime){
+                                    componentDomain.values?.get(0)?.value?.parseLocalDateTime()?.localDateTimeToMilliseconds()
+                                }else{
+                                    componentDomain.values?.get(0)?.value?.toDouble()
+                                }
+                                expressionResults[i].add(
+                                    ValidateLogicResult(
+                                        (cmpValue?.toDouble()
+                                            ?: 0.0) != (value?.toDouble() ?: 0.0),
+                                        StringDesc.ResourceFormatted(
+                                            MR.strings.NotEqual,
+                                            (value).toString()
+                                        )
+                                    )
+                                )
+
                             }
                         }
 
                         OperatorType.GreaterThan -> {
-                            when (condition.secondOperator?.title) {
-                                OperatorType.Add -> {
-                                    value?.toFloatOrNull()?.let { fieldValue ->
-                                        condition.value?.toFloatOrNull()?.let { conditionValue ->
-                                            componentDomain.values?.get(0)?.value?.toFloatOrNull()
-                                                ?.let { currentValue ->
-                                                    expressionResults[i].add(
-                                                        ValidateLogicResult(
-                                                            fieldValue + conditionValue > currentValue,
-                                                            StringDesc.ResourceFormatted(
-                                                                MR.strings.GreaterThan,
-                                                                (fieldValue + conditionValue).toString()
-                                                            )
-                                                        )
-                                                    )
-
-                                                }
-                                        }
-                                    }
-
-                                }
-
-                                OperatorType.Subtract -> {
-                                    value?.toFloatOrNull()?.let { fieldValue ->
-                                        condition.value?.toFloatOrNull()?.let { conditionValue ->
-                                            componentDomain.values?.get(0)?.value?.toFloatOrNull()
-                                                ?.let { currentValue ->
-                                                    expressionResults[i].add(
-                                                        ValidateLogicResult(
-                                                            fieldValue - conditionValue > currentValue,
-                                                            StringDesc.ResourceFormatted(
-                                                                MR.strings.GreaterThan,
-                                                                (fieldValue - conditionValue).toString()
-                                                            )
-                                                        )
-                                                    )
-
-                                                }
-                                        }
-                                    }
-                                }
-
-                                OperatorType.Multiply -> {
-                                    value?.toFloatOrNull()?.let { fieldValue ->
-                                        condition.value?.toFloatOrNull()?.let { conditionValue ->
-                                            componentDomain.values?.get(0)?.value?.toFloatOrNull()
-                                                ?.let { currentValue ->
-                                                    expressionResults[i].add(
-                                                        ValidateLogicResult(
-                                                            fieldValue * conditionValue > currentValue,
-                                                            StringDesc.ResourceFormatted(
-                                                                MR.strings.GreaterThan,
-                                                                (fieldValue * conditionValue).toString()
-                                                            )
-                                                        )
-                                                    )
-
-                                                }
-                                        }
-                                    }
-                                }
-
-                                OperatorType.Divide -> {
-                                    value?.toFloatOrNull()?.let { fieldValue ->
-                                        condition.value?.toFloatOrNull()?.let { conditionValue ->
-                                            componentDomain.values?.get(0)?.value?.toFloatOrNull()
-                                                ?.let { currentValue ->
-                                                    if (conditionValue != 0.0f)
-                                                        expressionResults[i].add(
-                                                            ValidateLogicResult(
-                                                                fieldValue / conditionValue > currentValue,
-                                                                StringDesc.ResourceFormatted(
-                                                                    MR.strings.GreaterThan,
-                                                                    (fieldValue / conditionValue).toString()
+                            condition.secondOperator?.let {
+                                when (condition.secondOperator?.title) {
+                                    OperatorType.Add -> {
+                                        value?.toFloatOrNull()?.let { fieldValue ->
+                                            condition.values?.get(0)?.toFloatOrNull()
+                                                ?.let { conditionValue ->
+                                                    componentDomain.values?.get(0)?.value?.toFloatOrNull()
+                                                        ?.let { currentValue ->
+                                                            expressionResults[i].add(
+                                                                ValidateLogicResult(
+                                                                    fieldValue + conditionValue > currentValue,
+                                                                    StringDesc.ResourceFormatted(
+                                                                        MR.strings.GreaterThan,
+                                                                        (fieldValue + conditionValue).toString()
+                                                                    )
                                                                 )
                                                             )
-                                                        )
 
+                                                        }
+                                                }
+                                        }
+
+                                    }
+
+                                    OperatorType.Subtract -> {
+                                        value?.toFloatOrNull()?.let { fieldValue ->
+                                            condition.values?.get(0)?.toFloatOrNull()
+                                                ?.let { conditionValue ->
+                                                    componentDomain.values?.get(0)?.value?.toFloatOrNull()
+                                                        ?.let { currentValue ->
+                                                            expressionResults[i].add(
+                                                                ValidateLogicResult(
+                                                                    fieldValue - conditionValue > currentValue,
+                                                                    StringDesc.ResourceFormatted(
+                                                                        MR.strings.GreaterThan,
+                                                                        (fieldValue - conditionValue).toString()
+                                                                    )
+                                                                )
+                                                            )
+
+                                                        }
                                                 }
                                         }
                                     }
-                                }
 
-                                else -> {}
+                                    OperatorType.Multiply -> {
+                                        value?.toFloatOrNull()?.let { fieldValue ->
+                                            condition.values?.get(0)?.toFloatOrNull()
+                                                ?.let { conditionValue ->
+                                                    componentDomain.values?.get(0)?.value?.toFloatOrNull()
+                                                        ?.let { currentValue ->
+                                                            expressionResults[i].add(
+                                                                ValidateLogicResult(
+                                                                    fieldValue * conditionValue > currentValue,
+                                                                    StringDesc.ResourceFormatted(
+                                                                        MR.strings.GreaterThan,
+                                                                        (fieldValue * conditionValue).toString()
+                                                                    )
+                                                                )
+                                                            )
+
+                                                        }
+                                                }
+                                        }
+                                    }
+
+                                    OperatorType.Divide -> {
+                                        value?.toFloatOrNull()?.let { fieldValue ->
+                                            condition.values?.get(0)?.toFloatOrNull()
+                                                ?.let { conditionValue ->
+                                                    componentDomain.values?.get(0)?.value?.toFloatOrNull()
+                                                        ?.let { currentValue ->
+                                                            if (conditionValue != 0.0f)
+                                                                expressionResults[i].add(
+                                                                    ValidateLogicResult(
+                                                                        fieldValue / conditionValue > currentValue,
+                                                                        StringDesc.ResourceFormatted(
+                                                                            MR.strings.GreaterThan,
+                                                                            (fieldValue / conditionValue).toString()
+                                                                        )
+                                                                    )
+                                                                )
+
+                                                        }
+                                                }
+                                        }
+                                    }
+
+                                    else -> {}
+                                }
+                            }?:run {
+                                val cmpValue =  if (componentDomain.type == FormViewerTypes.Datetime){
+                                    componentDomain.values?.get(0)?.value?.parseLocalDateTime()?.localDateTimeToMilliseconds()
+                                }else{
+                                    componentDomain.values?.get(0)?.value?.toDouble()
+                                }
+                                if (componentDomain.type == FormViewerTypes.Datetime) {
+                                    expressionResults[i].add(
+                                        ValidateLogicResult(
+                                            (cmpValue?.toDouble()
+                                                ?: 0.0) < (value?.toDouble() ?: 0.0),
+                                            StringDesc.ResourceFormatted(
+                                                MR.strings.GreaterThan,
+                                                (value).toString()
+                                            )
+                                        )
+                                    )
+                                }
                             }
                         }
 
                         OperatorType.GreaterThanOrEqualsTo -> {
-                            when (condition.secondOperator?.title) {
-                                OperatorType.Add -> {
-                                    value?.toFloatOrNull()?.let { fieldValue ->
-                                        condition.value?.toFloatOrNull()?.let { conditionValue ->
-                                            componentDomain.values?.get(0)?.value?.toFloatOrNull()
-                                                ?.let { currentValue ->
-                                                    expressionResults[i].add(
-                                                        ValidateLogicResult(
-                                                            fieldValue + conditionValue > currentValue,
-                                                            StringDesc.ResourceFormatted(
-                                                                MR.strings.GreaterOrEqualTo,
-                                                                (fieldValue + conditionValue).toString()
-                                                            )
-                                                        )
-                                                    )
 
-                                                }
-                                        }
-                                    }
-
-                                }
-
-                                OperatorType.Subtract -> {
-                                    value?.toFloatOrNull()?.let { fieldValue ->
-                                        condition.value?.toFloatOrNull()?.let { conditionValue ->
-                                            componentDomain.values?.get(0)?.value?.toFloatOrNull()
-                                                ?.let { currentValue ->
-                                                    expressionResults[i].add(
-                                                        ValidateLogicResult(
-                                                            fieldValue - conditionValue > currentValue,
-                                                            StringDesc.ResourceFormatted(
-                                                                MR.strings.GreaterOrEqualTo,
-                                                                (fieldValue - conditionValue).toString()
-                                                            )
-                                                        )
-                                                    )
-
-                                                }
-                                        }
-                                    }
-                                }
-
-                                OperatorType.Multiply -> {
-                                    value?.toFloatOrNull()?.let { fieldValue ->
-                                        condition.value?.toFloatOrNull()?.let { conditionValue ->
-                                            componentDomain.values?.get(0)?.value?.toFloatOrNull()
-                                                ?.let { currentValue ->
-                                                    expressionResults[i].add(
-                                                        ValidateLogicResult(
-                                                            fieldValue * conditionValue > currentValue,
-                                                            StringDesc.ResourceFormatted(
-                                                                MR.strings.GreaterOrEqualTo,
-                                                                (fieldValue * conditionValue).toString()
-                                                            )
-                                                        )
-                                                    )
-
-                                                }
-                                        }
-                                    }
-                                }
-
-                                OperatorType.Divide -> {
-                                    value?.toFloatOrNull()?.let { fieldValue ->
-                                        condition.value?.toFloatOrNull()?.let { conditionValue ->
-                                            componentDomain.values?.get(0)?.value?.toFloatOrNull()
-                                                ?.let { currentValue ->
-                                                    if (conditionValue != 0.0f)
-                                                        expressionResults[i].add(
-                                                            ValidateLogicResult(
-                                                                fieldValue / conditionValue > currentValue,
-                                                                StringDesc.ResourceFormatted(
-                                                                    MR.strings.GreaterOrEqualTo,
-                                                                    (fieldValue / conditionValue).toString()
+                            condition.secondOperator?.let {
+                                when (condition.secondOperator?.title) {
+                                    OperatorType.Add -> {
+                                        value?.toFloatOrNull()?.let { fieldValue ->
+                                            condition.values?.get(0)?.toFloatOrNull()
+                                                ?.let { conditionValue ->
+                                                    componentDomain.values?.get(0)?.value?.toFloatOrNull()
+                                                        ?.let { currentValue ->
+                                                            expressionResults[i].add(
+                                                                ValidateLogicResult(
+                                                                    fieldValue + conditionValue > currentValue,
+                                                                    StringDesc.ResourceFormatted(
+                                                                        MR.strings.GreaterOrEqualTo,
+                                                                        (fieldValue + conditionValue).toString()
+                                                                    )
                                                                 )
                                                             )
-                                                        )
 
+                                                        }
+                                                }
+                                        }
+
+                                    }
+
+                                    OperatorType.Subtract -> {
+                                        value?.toFloatOrNull()?.let { fieldValue ->
+                                            condition.values?.get(0)?.toFloatOrNull()
+                                                ?.let { conditionValue ->
+                                                    componentDomain.values?.get(0)?.value?.toFloatOrNull()
+                                                        ?.let { currentValue ->
+                                                            expressionResults[i].add(
+                                                                ValidateLogicResult(
+                                                                    fieldValue - conditionValue > currentValue,
+                                                                    StringDesc.ResourceFormatted(
+                                                                        MR.strings.GreaterOrEqualTo,
+                                                                        (fieldValue - conditionValue).toString()
+                                                                    )
+                                                                )
+                                                            )
+
+                                                        }
                                                 }
                                         }
                                     }
-                                }
 
-                                else -> {}
+                                    OperatorType.Multiply -> {
+                                        value?.toFloatOrNull()?.let { fieldValue ->
+                                            condition.values?.get(0)?.toFloatOrNull()
+                                                ?.let { conditionValue ->
+                                                    componentDomain.values?.get(0)?.value?.toFloatOrNull()
+                                                        ?.let { currentValue ->
+                                                            expressionResults[i].add(
+                                                                ValidateLogicResult(
+                                                                    fieldValue * conditionValue > currentValue,
+                                                                    StringDesc.ResourceFormatted(
+                                                                        MR.strings.GreaterOrEqualTo,
+                                                                        (fieldValue * conditionValue).toString()
+                                                                    )
+                                                                )
+                                                            )
+
+                                                        }
+                                                }
+                                        }
+                                    }
+
+                                    OperatorType.Divide -> {
+                                        value?.toFloatOrNull()?.let { fieldValue ->
+                                            condition.values?.get(0)?.toFloatOrNull()
+                                                ?.let { conditionValue ->
+                                                    componentDomain.values?.get(0)?.value?.toFloatOrNull()
+                                                        ?.let { currentValue ->
+                                                            if (conditionValue != 0.0f)
+                                                                expressionResults[i].add(
+                                                                    ValidateLogicResult(
+                                                                        fieldValue / conditionValue > currentValue,
+                                                                        StringDesc.ResourceFormatted(
+                                                                            MR.strings.GreaterOrEqualTo,
+                                                                            (fieldValue / conditionValue).toString()
+                                                                        )
+                                                                    )
+                                                                )
+
+                                                        }
+                                                }
+                                        }
+                                    }
+
+                                    else -> {}
+                                }
+                            }?:run{
+                                val cmpValue =  if (componentDomain.type == FormViewerTypes.Datetime){
+                                    componentDomain.values?.get(0)?.value?.parseLocalDateTime()?.localDateTimeToMilliseconds()
+                                }else{
+                                    componentDomain.values?.get(0)?.value?.toDouble()
+                                }
+                                expressionResults[i].add(
+                                    ValidateLogicResult(
+                                        (cmpValue?.toDouble()
+                                            ?: 0.0) >= (value?.toDouble() ?: 0.0),
+                                        StringDesc.ResourceFormatted(
+                                            MR.strings.GreaterOrEqualTo,
+                                            (value).toString()
+                                        )
+                                    )
+                                )
                             }
+
                         }
 
                         OperatorType.LessThan -> {
-                            when (condition.secondOperator?.title) {
-                                OperatorType.Add -> {
-                                    value?.toFloatOrNull()?.let { fieldValue ->
-                                        condition.value?.toFloatOrNull()?.let { conditionValue ->
-                                            componentDomain.values?.get(0)?.value?.toFloatOrNull()
-                                                ?.let { currentValue ->
-                                                    expressionResults[i].add(
-                                                        ValidateLogicResult(
-                                                            fieldValue + conditionValue < currentValue,
-                                                            StringDesc.ResourceFormatted(
-                                                                MR.strings.LessThan,
-                                                                (fieldValue + conditionValue).toString()
-                                                            )
-                                                        )
-                                                    )
-
-                                                }
-                                        }
-                                    }
-
-                                }
-
-                                OperatorType.Subtract -> {
-                                    value?.toFloatOrNull()?.let { fieldValue ->
-                                        condition.value?.toFloatOrNull()?.let { conditionValue ->
-                                            componentDomain.values?.get(0)?.value?.toFloatOrNull()
-                                                ?.let { currentValue ->
-                                                    expressionResults[i].add(
-                                                        ValidateLogicResult(
-                                                            fieldValue - conditionValue < currentValue,
-                                                            StringDesc.ResourceFormatted(
-                                                                MR.strings.LessThan,
-                                                                (fieldValue - conditionValue).toString()
-                                                            )
-                                                        )
-                                                    )
-
-                                                }
-                                        }
-                                    }
-                                }
-
-                                OperatorType.Multiply -> {
-                                    value?.toFloatOrNull()?.let { fieldValue ->
-                                        condition.value?.toFloatOrNull()?.let { conditionValue ->
-                                            componentDomain.values?.get(0)?.value?.toFloatOrNull()
-                                                ?.let { currentValue ->
-                                                    expressionResults[i].add(
-                                                        ValidateLogicResult(
-                                                            fieldValue * conditionValue < currentValue,
-                                                            StringDesc.ResourceFormatted(
-                                                                MR.strings.LessThan,
-                                                                (fieldValue * conditionValue).toString()
-                                                            )
-                                                        )
-                                                    )
-
-                                                }
-                                        }
-                                    }
-                                }
-
-                                OperatorType.Divide -> {
-                                    value?.toFloatOrNull()?.let { fieldValue ->
-                                        condition.value?.toFloatOrNull()?.let { conditionValue ->
-                                            componentDomain.values?.get(0)?.value?.toFloatOrNull()
-                                                ?.let { currentValue ->
-                                                    if (conditionValue != 0.0f)
-                                                        expressionResults[i].add(
-                                                            ValidateLogicResult(
-                                                                fieldValue / conditionValue < currentValue,
-                                                                StringDesc.ResourceFormatted(
-                                                                    MR.strings.LessThan,
-                                                                    (fieldValue / conditionValue).toString()
+                            condition.secondOperator?.let {
+                                when (condition.secondOperator?.title) {
+                                    OperatorType.Add -> {
+                                        value?.toFloatOrNull()?.let { fieldValue ->
+                                            condition.values?.get(0)?.toFloatOrNull()
+                                                ?.let { conditionValue ->
+                                                    componentDomain.values?.get(0)?.value?.toFloatOrNull()
+                                                        ?.let { currentValue ->
+                                                            expressionResults[i].add(
+                                                                ValidateLogicResult(
+                                                                    fieldValue + conditionValue < currentValue,
+                                                                    StringDesc.ResourceFormatted(
+                                                                        MR.strings.LessThan,
+                                                                        (fieldValue + conditionValue).toString()
+                                                                    )
                                                                 )
                                                             )
-                                                        )
 
+                                                        }
+                                                }
+                                        }
+
+                                    }
+
+                                    OperatorType.Subtract -> {
+                                        value?.toFloatOrNull()?.let { fieldValue ->
+                                            condition.values?.get(0)?.toFloatOrNull()
+                                                ?.let { conditionValue ->
+                                                    componentDomain.values?.get(0)?.value?.toFloatOrNull()
+                                                        ?.let { currentValue ->
+                                                            expressionResults[i].add(
+                                                                ValidateLogicResult(
+                                                                    fieldValue - conditionValue < currentValue,
+                                                                    StringDesc.ResourceFormatted(
+                                                                        MR.strings.LessThan,
+                                                                        (fieldValue - conditionValue).toString()
+                                                                    )
+                                                                )
+                                                            )
+
+                                                        }
                                                 }
                                         }
                                     }
-                                }
 
-                                else -> {}
+                                    OperatorType.Multiply -> {
+                                        value?.toFloatOrNull()?.let { fieldValue ->
+                                            condition.values?.get(0)?.toFloatOrNull()
+                                                ?.let { conditionValue ->
+                                                    componentDomain.values?.get(0)?.value?.toFloatOrNull()
+                                                        ?.let { currentValue ->
+                                                            expressionResults[i].add(
+                                                                ValidateLogicResult(
+                                                                    fieldValue * conditionValue < currentValue,
+                                                                    StringDesc.ResourceFormatted(
+                                                                        MR.strings.LessThan,
+                                                                        (fieldValue * conditionValue).toString()
+                                                                    )
+                                                                )
+                                                            )
+
+                                                        }
+                                                }
+                                        }
+                                    }
+
+                                    OperatorType.Divide -> {
+                                        value?.toFloatOrNull()?.let { fieldValue ->
+                                            condition.values?.get(0)?.toFloatOrNull()
+                                                ?.let { conditionValue ->
+                                                    componentDomain.values?.get(0)?.value?.toFloatOrNull()
+                                                        ?.let { currentValue ->
+                                                            if (conditionValue != 0.0f)
+                                                                expressionResults[i].add(
+                                                                    ValidateLogicResult(
+                                                                        fieldValue / conditionValue < currentValue,
+                                                                        StringDesc.ResourceFormatted(
+                                                                            MR.strings.LessThan,
+                                                                            (fieldValue / conditionValue).toString()
+                                                                        )
+                                                                    )
+                                                                )
+
+                                                        }
+                                                }
+                                        }
+                                    }
+
+                                    else -> {}
+                                }
+                            }?:run{
+                                val cmpValue =  if (componentDomain.type == FormViewerTypes.Datetime){
+                                    componentDomain.values?.get(0)?.value?.parseLocalDateTime()?.localDateTimeToMilliseconds()
+                                }else{
+                                    componentDomain.values?.get(0)?.value?.toDouble()
+                                }
+                                expressionResults[i].add(
+                                    ValidateLogicResult(
+                                        (cmpValue?.toDouble()
+                                            ?: 0.0) < (value?.toDouble() ?: 0.0),
+                                        StringDesc.ResourceFormatted(
+                                            MR.strings.LessThan,
+                                            (value).toString()
+                                        )
+                                    )
+                                )
                             }
                         }
 
                         OperatorType.LessThanOrEqualsTo -> {
-                            when (condition.secondOperator?.title) {
-                                OperatorType.Add -> {
-                                    value?.toFloatOrNull()?.let { fieldValue ->
-                                        condition.value?.toFloatOrNull()?.let { conditionValue ->
-                                            componentDomain.values?.get(0)?.value?.toFloatOrNull()
-                                                ?.let { currentValue ->
-                                                    expressionResults[i].add(
-                                                        ValidateLogicResult(
-                                                            fieldValue + conditionValue <= currentValue,
-                                                            StringDesc.ResourceFormatted(
-                                                                MR.strings.LessThanOrEqualTo,
-                                                                (fieldValue + conditionValue).toString()
-                                                            )
-                                                        )
-                                                    )
-
-                                                }
-                                        }
-                                    }
-
-                                }
-
-                                OperatorType.Subtract -> {
-                                    value?.toFloatOrNull()?.let { fieldValue ->
-                                        condition.value?.toFloatOrNull()?.let { conditionValue ->
-                                            componentDomain.values?.get(0)?.value?.toFloatOrNull()
-                                                ?.let { currentValue ->
-                                                    expressionResults[i].add(
-                                                        ValidateLogicResult(
-                                                            fieldValue - conditionValue <= currentValue,
-                                                            StringDesc.ResourceFormatted(
-                                                                MR.strings.LessThanOrEqualTo,
-                                                                (fieldValue - conditionValue).toString()
-                                                            )
-                                                        )
-                                                    )
-
-                                                }
-                                        }
-                                    }
-                                }
-
-                                OperatorType.Multiply -> {
-                                    value?.toFloatOrNull()?.let { fieldValue ->
-                                        condition.value?.toFloatOrNull()?.let { conditionValue ->
-                                            componentDomain.values?.get(0)?.value?.toFloatOrNull()
-                                                ?.let { currentValue ->
-                                                    expressionResults[i].add(
-                                                        ValidateLogicResult(
-                                                            fieldValue * conditionValue <= currentValue,
-                                                            StringDesc.ResourceFormatted(
-                                                                MR.strings.LessThanOrEqualTo,
-                                                                (fieldValue * conditionValue).toString()
-                                                            )
-                                                        )
-                                                    )
-
-                                                }
-                                        }
-                                    }
-                                }
-
-                                OperatorType.Divide -> {
-                                    value?.toFloatOrNull()?.let { fieldValue ->
-                                        condition.value?.toFloatOrNull()?.let { conditionValue ->
-                                            componentDomain.values?.get(0)?.value?.toFloatOrNull()
-                                                ?.let { currentValue ->
-                                                    if (conditionValue != 0.0f)
-                                                        expressionResults[i].add(
-                                                            ValidateLogicResult(
-                                                                fieldValue / conditionValue <= currentValue,
-                                                                StringDesc.ResourceFormatted(
-                                                                    MR.strings.LessThanOrEqualTo,
-                                                                    (fieldValue / conditionValue).toString()
+                            condition.secondOperator?.let {
+                                when (condition.secondOperator?.title) {
+                                    OperatorType.Add -> {
+                                        value?.toFloatOrNull()?.let { fieldValue ->
+                                            condition.values?.get(0)?.toFloatOrNull()
+                                                ?.let { conditionValue ->
+                                                    componentDomain.values?.get(0)?.value?.toFloatOrNull()
+                                                        ?.let { currentValue ->
+                                                            expressionResults[i].add(
+                                                                ValidateLogicResult(
+                                                                    fieldValue + conditionValue <= currentValue,
+                                                                    StringDesc.ResourceFormatted(
+                                                                        MR.strings.LessThanOrEqualTo,
+                                                                        (fieldValue + conditionValue).toString()
+                                                                    )
                                                                 )
                                                             )
-                                                        )
 
+                                                        }
+                                                }
+                                        }
+
+                                    }
+
+                                    OperatorType.Subtract -> {
+                                        value?.toFloatOrNull()?.let { fieldValue ->
+                                            condition.values?.get(0)?.toFloatOrNull()
+                                                ?.let { conditionValue ->
+                                                    componentDomain.values?.get(0)?.value?.toFloatOrNull()
+                                                        ?.let { currentValue ->
+                                                            expressionResults[i].add(
+                                                                ValidateLogicResult(
+                                                                    fieldValue - conditionValue <= currentValue,
+                                                                    StringDesc.ResourceFormatted(
+                                                                        MR.strings.LessThanOrEqualTo,
+                                                                        (fieldValue - conditionValue).toString()
+                                                                    )
+                                                                )
+                                                            )
+
+                                                        }
                                                 }
                                         }
                                     }
-                                }
 
-                                else -> {}
+                                    OperatorType.Multiply -> {
+                                        value?.toFloatOrNull()?.let { fieldValue ->
+                                            condition.values?.get(0)?.toFloatOrNull()
+                                                ?.let { conditionValue ->
+                                                    componentDomain.values?.get(0)?.value?.toFloatOrNull()
+                                                        ?.let { currentValue ->
+                                                            expressionResults[i].add(
+                                                                ValidateLogicResult(
+                                                                    fieldValue * conditionValue <= currentValue,
+                                                                    StringDesc.ResourceFormatted(
+                                                                        MR.strings.LessThanOrEqualTo,
+                                                                        (fieldValue * conditionValue).toString()
+                                                                    )
+                                                                )
+                                                            )
+
+                                                        }
+                                                }
+                                        }
+                                    }
+
+                                    OperatorType.Divide -> {
+                                        value?.toFloatOrNull()?.let { fieldValue ->
+                                            condition.values?.get(0)?.toFloatOrNull()
+                                                ?.let { conditionValue ->
+                                                    componentDomain.values?.get(0)?.value?.toFloatOrNull()
+                                                        ?.let { currentValue ->
+                                                            if (conditionValue != 0.0f)
+                                                                expressionResults[i].add(
+                                                                    ValidateLogicResult(
+                                                                        fieldValue / conditionValue <= currentValue,
+                                                                        StringDesc.ResourceFormatted(
+                                                                            MR.strings.LessThanOrEqualTo,
+                                                                            (fieldValue / conditionValue).toString()
+                                                                        )
+                                                                    )
+                                                                )
+
+                                                        }
+                                                }
+                                        }
+                                    }
+
+                                    else -> {}
+                                }
+                            }?:run{
+                                val cmpValue =  if (componentDomain.type == FormViewerTypes.Datetime){
+                                    componentDomain.values?.get(0)?.value?.parseLocalDateTime()?.localDateTimeToMilliseconds()
+                                }else{
+                                    componentDomain.values?.get(0)?.value?.toDouble()
+                                }
+                                expressionResults[i].add(
+                                    ValidateLogicResult(
+                                        (cmpValue?.toDouble()
+                                            ?: 0.0) <= (value?.toDouble() ?: 0.0),
+                                        StringDesc.ResourceFormatted(
+                                            MR.strings.LessThanOrEqualTo,
+                                            (value).toString()
+                                        )
+                                    )
+                                )
                             }
                         }
 
 
-                        else -> {}
+                        else -> {
+
+                        }
                     }
 
                 }
@@ -1057,5 +1402,18 @@ class LogicCalculation (private val allComponents: List<ComponentDomain>) {
             return null
         }
     }
+
+    fun ComponentDomain.isSelectableValue(): Boolean {
+        return when (type) {
+            FormViewerTypes.Select, FormViewerTypes.Multi -> isMulti
+            FormViewerTypes.Checklist -> true
+            else -> false
+        }
+    }
+
+    fun ticketId(ticketId: String) {
+        this.ticketId = ticketId
+    }
 }
+
 

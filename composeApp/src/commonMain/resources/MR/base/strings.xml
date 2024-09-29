@@ -15,6 +15,7 @@
         enjoy the latest version.
     </string>
     <string name="update">Update</string>
+    <string name="openInMap">Open in map</string>
     <string name="go_to_setting">Go to setting</string>
     <string name="vpn_detected">Vpn Detected</string>
     <string name="vpn_detected_description">Disconnect your vpn to continue</string>
@@ -182,5 +183,6 @@
     <string name="download">Download</string>
     <string name="download_failed">Download or installation failed, please try again.</string>
     <string name="accept">Accept</string>
+    <string name= "noLocationFound">location is not available</string>
 
 </resources>

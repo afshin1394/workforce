@@ -6,6 +6,8 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import arrow.core.Tuple4
 import arrow.core.Tuple5
+import arrow.core.Tuple6
+import com.irancell.nwg.wfm.presentation.model.View
 import data.network.response.task.Component
 import data.network.response.task.Value
 import dev.icerock.moko.resources.desc.StringDesc
@@ -45,6 +47,7 @@ import utils.LogicCalculation
 import utils.PROCEED
 import utils.ServiceState
 import utils.ViewStates
+import utils.updateValueDomain
 
 class TicketProcessVM(
     private val updateStepFormUseCase: UpdateStepFormUseCase,
@@ -81,10 +84,15 @@ class TicketProcessVM(
     var tempComponentList = mutableStateListOf<ComponentDomain>()
     var photoDomainList = mutableStateListOf<PhotoDomain>()
 
+    var tempComponent = mutableStateOf<ComponentDomain?>(null)
+
     var events = mutableStateOf<TicketProcessEvent>(TicketProcessEvent.Default)
 
     private val _positionSelected = MutableStateFlow(0)
     val positionSelected = _positionSelected.asStateFlow()
+
+    private val _ticketId = MutableStateFlow("0")
+    val ticketId = _ticketId.asStateFlow()
 
     private val _ticketNumber = MutableStateFlow("0")
     val ticketNumber = _ticketNumber.asStateFlow()
@@ -106,18 +114,19 @@ class TicketProcessVM(
     var updateTasksComplete = _updateTasksComplete.asStateFlow()
 
 
-    val logicCalculation: LogicCalculation = LogicCalculation(tempComponentList)
+    val logicCalculation: LogicCalculation = LogicCalculation(viewModelScope,tempComponentList)
 
      fun getMokStepsForm(proceed: String) {
         events.value = TicketProcessEvent.InProgress
         viewModelScope.launch(Dispatchers.Main) {
         updateStepFormUseCase(
-            Tuple5(
+            Tuple6(
                 _ticketNumber.value,
                 proceed,
                 tempComponentList.toList(),
                 photoDomainList.toList(),
-                _currentLevel.value
+                _currentLevel.value,
+                _ticketId.value
             )
         ).collect {
             when (it.status) {
@@ -209,11 +218,12 @@ class TicketProcessVM(
     private fun storeLastStep() {
         viewModelScope.launch(Dispatchers.Main) {
             storeStepFormUseCase(
-                Tuple4(
+                Tuple5(
                     _ticketNumber.value,
                     tempComponentList.toList(),
                     photoDomainList.toList(),
-                    _currentLevel.value
+                    _currentLevel.value,
+                    _ticketId.value
                 )
             ).collect {
                 when (it.status) {
@@ -253,6 +263,7 @@ class TicketProcessVM(
                     AsyncStatus.SUCCESS -> {
 
                         _ticketFlowCompleted.update { true }
+                        events.value=TicketProcessEvent.TicketFlowCompleted
                         updateState(ViewStates.Success())
 
                     }
@@ -266,11 +277,12 @@ class TicketProcessVM(
 
         viewModelScope.launch {
             storeStepFormUseCase(
-                Tuple4(
+                Tuple5(
                     _ticketNumber.value,
                     tempComponentList.toList(),
                     photoDomainList.toList(),
-                    _currentLevel.value
+                    _currentLevel.value,
+                    _ticketId.value
                 )
             ).collect {
                 when (it.status) {
@@ -305,6 +317,7 @@ class TicketProcessVM(
     }
 
 
+
     fun updateTempComponentList(newList: List<ComponentDomain>) {
         tempComponentList.clear()
         tempComponentList.addAll(newList)
@@ -312,7 +325,7 @@ class TicketProcessVM(
     }
 
 
-    private fun checkLogicsForAll(components: List<ComponentDomain>) {
+    private suspend fun checkLogicsForAll(components: List<ComponentDomain>) {
 
         // Create a copy of the components list to iterate over
         val componentsCopy = components.toMutableList()
@@ -339,7 +352,6 @@ class TicketProcessVM(
                 withContext(Dispatchers.IO) { checkLogicsForAll(tempComponentList) }
 
                 withContext(Dispatchers.Main) {
-
                     arrayListOf<ComponentDomain>().apply {
                         this.addAll(tempComponentList)
                         tempComponentList.clear()
@@ -492,7 +504,6 @@ class TicketProcessVM(
 
         val filteredList = photoDomainList.filter { it.component_key == key && it.componentId == id }
 
-
         if (filteredList.isNotEmpty()) {
             if (position in filteredList.indices) {
                 val itemIndex = photoDomainList.indexOf(filteredList[position])
@@ -502,12 +513,37 @@ class TicketProcessVM(
         return null
     }
 
-    fun updateImageUriForDeletePhoto(po: Int, key: String,id: String) {
+    fun updateImageUriForDeletePhoto(po: Int, key: String, id: String) {
 
-        val itemIndex = findPhotoIndexByIdAndPosition(key, id ,po)
+        // Since every time the Image component captures a photo, a new item is added to the photo table
+        // instead of storing the photos as a list in the value field, I have to use photoDomainList.size
+        // to manage the photos. Also, the validation for the photo is only "required" (i.e., it checks if a photo
+        // is present, but no other validations like size or format are applied).
+        val itemIndex = findPhotoIndexByIdAndPosition(key, id, po)
         itemIndex?.let {
             photoDomainList.removeAt(it)
             events.value = TicketProcessEvent.Default
+        }
+
+        // Filtering the photo list based on component key and ID
+        val filteredList = photoDomainList.filter { it.component_key == key && it.componentId == id }
+        val currentComponent = tempComponent.value!!
+
+        // Updating the list of component values based on whether there are photos or not
+        val updatedValues = currentComponent.values!!.mapIndexed { index, valueDomain ->
+            if (filteredList.isEmpty()) {
+                valueDomain.copy(value = "")
+            } else {
+                valueDomain
+            }
+        }
+
+        tempComponent.value = currentComponent.copy(values = updatedValues)
+
+        // Finding the index of the component in the list and replacing it with the updated component
+        val componentIndex = tempComponentList.indexOfFirst { it.id == currentComponent.id }
+        if (componentIndex != -1) {
+            tempComponentList[componentIndex] = tempComponent.value!!
         }
     }
 
@@ -763,6 +799,12 @@ class TicketProcessVM(
 
     fun updateScrollingState(pair: Pair<Int,Int>) {
       _scrollingPosition.update { pair }
+    }
+
+    fun updateTicketId(ticketId: String) {
+        _ticketId.update { ticketId }
+        logicCalculation.ticketId(ticketId)
+
     }
 //
 //    fun updateReloadState(reload: Boolean) {

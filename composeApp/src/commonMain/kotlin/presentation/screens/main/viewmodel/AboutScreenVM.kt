@@ -15,6 +15,7 @@ import irancell.nwg.wfm.DeviceInfo
 import irancell.nwg.wfm.getPlatform
 import irancell.nwg.wfm.getSharedPref
 import kotlinx.coroutines.launch
+import presentation.screens.main.events.AboutEvent
 import presentation.screens.splash.events.CheckVersionEvent
 import utils.AsyncStatus
 import utils.BaseViewModel
@@ -27,6 +28,7 @@ class AboutScreenVM(
 
 
     var eventsVersion = mutableStateOf<CheckVersionEvent>(CheckVersionEvent.Default)
+    var eventsAbout = mutableStateOf<AboutEvent>(AboutEvent.Default)
 
     private val _versionData = mutableStateOf<GetVersionDomain?>(null)
     val versionData: State<GetVersionDomain?> = _versionData

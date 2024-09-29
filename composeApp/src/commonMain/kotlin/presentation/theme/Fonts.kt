@@ -1,5 +1,6 @@
 package presentation.theme
 
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -65,6 +66,11 @@ fun button_small() = TextStyle(
 val h4 = TextStyle(
     fontWeight = FontWeight.SemiBold,
     fontSize = 20.sp
+)
+val h4Success = TextStyle(
+    fontWeight = FontWeight.SemiBold,
+    fontSize = 20.sp,
+    color = Color.Green
 )
 
 val h5 = TextStyle(

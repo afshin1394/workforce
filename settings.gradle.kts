@@ -7,7 +7,6 @@ pluginManagement {
         google()
         gradlePluginPortal()
         mavenCentral()
-
     }
 }
 

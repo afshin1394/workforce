@@ -7,5 +7,6 @@ sealed interface TicketProcessEvent :Event {
     data object InProgress : TicketProcessEvent
     data object DeletePhoto : TicketProcessEvent
     data object EditPhoto : TicketProcessEvent
+    data object TicketFlowCompleted : TicketProcessEvent
 
 }

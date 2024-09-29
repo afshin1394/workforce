@@ -1,6 +1,7 @@
 package domain.usecase.usecase.steps
 
 import arrow.core.Tuple4
+import arrow.core.Tuple5
 import data.network.response.task.Component
 import data.network.response.task.FormStruct
 import database.entity.SendStepsEntity
@@ -18,10 +19,14 @@ import domain.usecase.BaseUseCase
 import io.github.aakira.napier.LogLevel
 import io.github.aakira.napier.Napier
 import irancell.nwg.wfm.Location
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import toActivityDomain
 import utils.FormViewerTypes
+import utils.LogicCalculation
 import utils.parsGpsDateTime
 import utils.toJson
 
@@ -30,10 +35,10 @@ class StoreStepFormUseCase(
     private val iStepPointerRepository: IStepPointerRepository,
     private val iSendStepsRepository: ISendStepsRepository,
     private val iPhotoRepository: IPhotoRepository
-) : BaseUseCase<Unit, Tuple4<String, List<ComponentDomain>, List<PhotoDomain>, Int>>() {
+) : BaseUseCase<Unit, Tuple5<String, List<ComponentDomain>, List<PhotoDomain>, Int, String>>() {
 
 
-    override suspend fun run(params: Tuple4<String, List<ComponentDomain>, List<PhotoDomain>, Int>) {
+    override suspend fun run(params: Tuple5<String, List<ComponentDomain>, List<PhotoDomain>, Int, String>) {
         Location.start { }
         val removablesWithParent: ArrayList<ComponentDomain> = arrayListOf()
         val dict = mutableMapOf<String, Any>()
@@ -56,6 +61,14 @@ class StoreStepFormUseCase(
                 arrayListOf(ValueDomain("submitted_date", location.datetime.parsGpsDateTime()))
         } catch (e: Exception) {
 
+        }
+        params.second.let {
+            val logicCalculation = LogicCalculation(
+                CoroutineScope(Dispatchers.IO),
+                it
+            )
+            logicCalculation.ticketId = params.fifth
+            checkLogicsForAll(logicCalculation,it)
         }
 
 
@@ -351,7 +364,23 @@ class StoreStepFormUseCase(
         })
     }
 
+    private suspend fun checkLogicsForAll(logicCalculation: LogicCalculation, components: List<ComponentDomain>) {
 
+        // Create a copy of the components list to iterate over
+        val componentsCopy = components.toMutableList()
+
+        for (cmp in componentsCopy) {
+            logicCalculation.extractLogics(componentsCopy, cmp)
+            cmp.components?.let { cmps ->
+                if (cmps.isNotEmpty()) {
+                    checkLogicsForAll(logicCalculation,cmps)
+
+                }
+            }
+        }
+
+
+    }
 }
 
 

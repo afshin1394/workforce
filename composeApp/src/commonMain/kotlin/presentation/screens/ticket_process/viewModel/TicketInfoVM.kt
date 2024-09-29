@@ -30,6 +30,8 @@ class TicketInfoVM(
 
 
 
+    private val _ticketId = MutableStateFlow("0")
+    val ticketId = _ticketId.asStateFlow()
 
     private val _ticketNumber = MutableStateFlow("0")
     val ticketNumber = _ticketNumber.asStateFlow()
@@ -41,8 +43,6 @@ class TicketInfoVM(
 
     private val _positionSelected = MutableStateFlow(0)
     val positionSelected = _positionSelected.asStateFlow()
-
-
 
     fun getInitialForm(ticketNumber: String) {
         viewModelScope.launch {
@@ -70,6 +70,10 @@ class TicketInfoVM(
                 }
             }
         }
+    }
+
+    fun updateTicketId(ticketId: String) {
+      _ticketId.update { ticketId }
     }
 
 }

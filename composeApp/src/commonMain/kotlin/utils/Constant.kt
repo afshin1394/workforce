@@ -116,6 +116,9 @@ object OperatorType {
     const val Multiply = "Multiply"
     const val Divide = "Divide"
     const val Add = "Add"
+    const val ContainsAny = "Contains any"
+    const val NotContainsAny = "Not contains any"
+    const val ContainsAll = "Contains all"
 
 }
 
@@ -186,6 +189,13 @@ object PROCEED {
     const val PREVIOUS = "PREVIOUS"
 }
 
+object BottomSheetTypes {
+    const val Default = "Default"
+    const val Success = "Success"
+
+}
 
 
-
+enum class ButtonState {
+    IDLE, LOADING, COMPLETED
+}

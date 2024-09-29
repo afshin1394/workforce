@@ -65,7 +65,7 @@ fun initialize(
     onChanges: (componentDomain: ComponentDomain, listValueDomain: List<ValueDomain>?) -> Unit,
     onAddItem: (componentDomain: ComponentDomain, indexChild: Int, onComplete: (position: Int) -> Unit) -> Unit,
     onRemoveItem: (componentDomain: ComponentDomain, indexChild: Int, onComplete: (position: Int) -> Unit) -> Unit,
-    onClickImage: (indexPhotoSelected: Int, componentKey: String, componentId: String) -> Unit,
+    onClickImage: (indexPhotoSelected: Int, componentKey: String, componentId: String,componentDomain: ComponentDomain) -> Unit,
     currentParentIndex: List<Int> = listOf(),
 ) {
 
@@ -112,6 +112,7 @@ fun initialize(
 
 
                         groupComponent(
+                            item.processLogicDomain,
                             true,
                             scrollingState = scrollingState,
                             parentIndex = savedParentIndex,
@@ -179,6 +180,7 @@ fun initialize(
                             errorMessage = if (errorMessageState.value == initialMessageError) errorMessageState.value else initialMessageError,
                             keyboardType = KeyboardType.Number,
                             readOnly = item.readOnly,
+                            disable = item.disabled,
                             maxLines = 1,
                             onValueChange = { newValue ->
                                 valueState.value = newValue
@@ -223,6 +225,7 @@ fun initialize(
                             errorMessage = if (errorMessageState.value == initialMessageError) errorMessageState.value else initialMessageError,
                             keyboardType = KeyboardType.Text,
                             readOnly = item.readOnly,
+                            disable = item.disabled,
                             maxLines = 1,
                             onValueChange = { newValue ->
                                 valueState.value = newValue
@@ -232,8 +235,7 @@ fun initialize(
                                     newValue
                                 )
                                 item.values = listOf(updatedValueDomain)
-                                updateNumberValidationError(item, errorMessageState)
-
+                                updateTextareaValidationError(item, errorMessageState)
 
 
                                 onChanges(
@@ -265,6 +267,7 @@ fun initialize(
                             errorMessage = if (errorMessageState.value == initialMessageError) errorMessageState.value else initialMessageError,
                             keyboardType = KeyboardType.Text,
                             readOnly = item.readOnly,
+                            disable = item.disabled,
                             maxLines = 1,
                             onValueChange = { newValue ->
                                 valueState.value = newValue
@@ -309,6 +312,7 @@ fun initialize(
                             errorMessage = if (errorMessageState.value == initialMessageError) errorMessageState.value else initialMessageError,
                             keyboardType = KeyboardType.Number,
                             readOnly = item.readOnly,
+                            disable = item.disabled,
                             maxLines = 1,
                             onValueChange = { newValue ->
                                 valueState.value = newValue
@@ -353,6 +357,7 @@ fun initialize(
                             errorMessage = if (errorMessageState.value == initialMessageError) errorMessageState.value else initialMessageError,
                             keyboardType = KeyboardType.Number,
                             readOnly = item.readOnly,
+                            disable = item.disabled,
                             maxLines = 1,
                             onValueChange = { newValue ->
                                 valueState.value = newValue
@@ -396,6 +401,7 @@ fun initialize(
                             imeAction = ImeAction.None,
                             keyboardType = KeyboardType.Email,
                             readOnly = item.readOnly,
+                            disable = item.disabled,
                             maxLines = 1,
                             errorMessage = if (errorMessageState.value == initialMessageError) errorMessageState.value else initialMessageError,
                             onValueChange = { newValue ->
@@ -441,6 +447,7 @@ fun initialize(
 
                         ModalDateTimePicker(
                             readOnly = item.readOnly,
+                            disable = item.disabled,
                             processLogicDomain = item.processLogicDomain,
                             selectedDateState.value,
                             item.label.toString(),
@@ -474,6 +481,7 @@ fun initialize(
 
                         ModalDatePicker(
                             item.readOnly,
+                            item.disabled,
                             item.processLogicDomain,
                             selectedDateState.value,
                             item.label.toString(),
@@ -510,6 +518,7 @@ fun initialize(
 
                         ModalTimePicker(
                             item.readOnly,
+                            item.disabled,
                             item.processLogicDomain,
                             selectedDateState.value,
                             item.label.toString(),
@@ -633,6 +642,7 @@ fun initialize(
                             )
 
                         val errorMessageState = remember { mutableStateOf(initialMessageError) }
+
                         ImagePicker(
                             index,
                             item,
@@ -662,7 +672,7 @@ fun initialize(
 
                             },
                             onImageClick = {
-                                onClickImage(it, item.key ?: "", item.id ?: "")
+                                onClickImage(it, item.key ?: "", item.id ?: "",item)
                             }, onCameraClick = { item ->
                                 itemState.value = item
                                 Napier.log(
@@ -690,6 +700,7 @@ fun initialize(
 
                         Radio(
                             item.readOnly,
+                            item.disabled,
                             item.processLogicDomain ?: ProcessLogicDomain().copy(),
                             componentLabel.toString(),
                             if (errorMessageState.value == initialMessageError) errorMessageState.value else initialMessageError,
@@ -730,6 +741,7 @@ fun initialize(
                         item.values?.let { values ->
                             CheckList(
                                 item.readOnly,
+                                item.disabled,
                                 item.processLogicDomain,
                                 componentLabel.toString(),
                                 if (errorMessageState.value == initialMessageError) errorMessageState.value else initialMessageError,
@@ -773,6 +785,7 @@ fun initialize(
                             if (item.isMulti) {
                                 DropDownMultiChoice(
                                     item.readOnly,
+                                    item.disabled,
                                     item.processLogicDomain,
                                     componentLabel.toString(),
                                     if (errorMessageState.value == initialMessageError) errorMessageState.value else initialMessageError,
@@ -820,6 +833,7 @@ fun initialize(
 
                         DropDownSingleChoice(
                             item.readOnly,
+                            item.disabled,
                             item.processLogicDomain,
                             componentLabel.toString(),
                             if (errorMessageState.value == initialMessageError) errorMessageState.value else initialMessageError,

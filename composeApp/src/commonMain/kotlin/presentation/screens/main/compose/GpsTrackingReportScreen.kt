@@ -119,8 +119,6 @@ class GpsTrackingReportScreen(
                         }
                     }
 
-                    ViewStates.EMPTY -> {}
-
                     ViewStates.Loading -> {
                         CircularProgressIndicator()
                     }

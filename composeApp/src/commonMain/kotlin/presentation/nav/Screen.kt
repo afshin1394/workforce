@@ -55,12 +55,10 @@ sealed class Screen() : ScreenProvider {
         data object Verify : Auth()
     }
 
-    sealed class TicketProcess() : Screen() {
-        data class TicketInfo(val ticketNumber: String) : TicketProcess()
-        data class TicketProcessScreen(val ticketNumber: String) : TicketProcess()
+    sealed class  TicketProcess() : Screen(){
+        data class TicketInfo(val ticketId : String,val ticketNumber: String ) : TicketProcess()
+        data class TicketProcessScreen(val ticketId : String,val ticketNumber : String) : TicketProcess()
     }
-
-
 }
 
 

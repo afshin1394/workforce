@@ -337,10 +337,10 @@ import presentation.screens.ticket_process.compose.TicketProcessScreen
                 NotificationScreen()
             }
             register<Screen.TicketProcess.TicketInfo> { provider->
-                TicketInfoScreen(provider.ticketNumber)
+                TicketInfoScreen(provider.ticketId,provider.ticketNumber)
             }
             register<Screen.TicketProcess.TicketProcessScreen> { provider->
-                TicketProcessScreen(provider.ticketNumber)
+                TicketProcessScreen(provider.ticketId,provider.ticketNumber)
             }
         }
 

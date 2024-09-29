@@ -19,6 +19,7 @@ import cafe.adriel.voyager.core.registry.rememberScreen
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import com.irancell.nwg.wfm.presentation.components.bottomSingleActionComponent
 import com.irancell.nwg.wfm.presentation.model.SelectableItem
 import com.irancell.nwg.wfm.presentation.screens.main.components.OptionsItemComponent
 import com.irancell.nwg.wfm.presentation.theme.spacing15X
@@ -38,7 +39,7 @@ import presentation.screens.main.components.NotificationItem
 import presentation.screens.main.components.formViewer.Editable
 import presentation.screens.main.components.formViewer.SimpleEditable
 import presentation.screens.main.components.formViewer.TypeEditable
-import presentation.screens.ticket_process.components.bottomSingleActionComponent
+
 import presentation.screens.ticket_process.viewModel.TicketInfoVM
 import presentation.theme.mediumDivider
 import presentation.theme.surfaceBrandDefault
@@ -50,6 +51,7 @@ import utils.validateComponents
 
 
 class TicketInfoScreen(
+    private val ticketId : String,
     private val ticket_number: String
 ) : Screen {
     @OptIn(ExperimentalMaterialApi::class, FlowPreview::class)
@@ -61,7 +63,7 @@ class TicketInfoScreen(
         val navigator = LocalNavigator.currentOrThrow
 
         val ticketProcessScreen =
-            rememberScreen(presentation.nav.Screen.TicketProcess.TicketProcessScreen(ticket_number))
+            rememberScreen(presentation.nav.Screen.TicketProcess.TicketProcessScreen(ticketId,ticket_number))
 
         val viewModel: TicketInfoVM = koinInject()
 
@@ -74,6 +76,7 @@ class TicketInfoScreen(
         LaunchedEffect(Unit) {
             viewModel.getInitialForm(ticket_number)
             viewModel.updateTicketNumber(ticket_number)
+            viewModel.updateTicketId(ticketId)
         }
 
 
@@ -106,7 +109,7 @@ class TicketInfoScreen(
                     ), onClick = {
                         if (isClickable) {
                             isClickable = false
-                            navigator.push(TicketProcessScreen(viewModel.ticketNumber.value))
+                            navigator.push(TicketProcessScreen(viewModel.ticketId.value,viewModel.ticketNumber.value))
                             scope.launch {
                                 delay(500)
                                 isClickable = true

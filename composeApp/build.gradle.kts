@@ -1,4 +1,6 @@
 import org.jetbrains.compose.ExperimentalComposeLibrary
+import com.android.build.gradle.BaseExtension
+import org.jetbrains.kotlin.gradle.plugin.extraProperties
 
 plugins {
 
@@ -169,27 +171,38 @@ android {
         applicationId = "irancell.nwg.wfm"
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
-        versionCode = 4
-        versionName = "0.0.4"
+        versionCode = 3
+        versionName = "0.0.3"
     }
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
+    signingConfigs {
+        create("release") {
+                storeFile  = file(providers.gradleProperty("STORE_FILE").get())
+                storePassword = providers.gradleProperty("STORE_PASSWORD").get()
+                keyAlias =  providers.gradleProperty("KEY_ALIAS").get()
+                keyPassword =  providers.gradleProperty("KEY_PASSWORD").get()
+            }
+
+    }
+
     buildTypes {
         getByName("release") {
             isMinifyEnabled = false
+            signingConfig = signingConfigs.getByName("release")
         }
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
     }
     lintOptions {
-      isCheckReleaseBuilds = false
+        isCheckReleaseBuilds = false
     }
-
 
 
 }
