@@ -1,6 +1,8 @@
 package domain.repository
 
 import database.entity.PhotoEntity
+import domain.models.DeletePhotoByComponentIdAndKeyModel
+import irancell.nwg.wfm.MR
 
 
 interface IPhotoRepository {
@@ -12,6 +14,7 @@ interface IPhotoRepository {
     suspend fun getPhotoListByKey(key: String): List<PhotoEntity>
 
     suspend fun deleteByKey(key: String)
+    suspend fun deleteByComponentIdAndKey(deletePhotoByComponentIdAndKeyModel: DeletePhotoByComponentIdAndKeyModel)
 
     suspend fun getTicketProcessPhotos(
         ticket_number: String,

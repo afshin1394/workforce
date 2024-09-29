@@ -12,6 +12,7 @@ import domain.models.form_struct.logic.ConditionDomain
 import domain.models.ticket.PhaseDomain
 import domain.models.ticket.TicketDetailRequestDomain
 import domain.usecase.ResultStatus
+import domain.usecase.usecase.photo.DeletePhotoByComponentKeyAndIdUseCase
 import domain.usecase.usecase.ticket.GetTicketDetailsUseCase
 import io.github.aakira.napier.LogLevel
 import io.github.aakira.napier.Napier
@@ -22,6 +23,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
+import presentation.model.ExtractLogicsModel
 
 
 class LogicCalculation(
@@ -30,50 +32,69 @@ class LogicCalculation(
 ) : KoinComponent {
     val getTicketDetailsUseCase: GetTicketDetailsUseCase by inject()
     lateinit var ticketId: String
-    suspend fun extractLogics(components: List<ComponentDomain>, component: ComponentDomain): Boolean {
+    val validationErrorList = mutableListOf<ExtractLogicsModel>()
+    suspend fun extractLogics(components: List<ComponentDomain>, component: ComponentDomain): MutableList<ExtractLogicsModel> {
 
         var hasLogic = false
+        var typeLogic = ""
+        var idCmp=""
         component.logics?.forEach { it ->
 
             when (it.logicType) {
                 LogicType.Hide -> {
+                    typeLogic = LogicType.Hide
                     val expressionSatisfied = evaluateLogics(components, it)
                     val cmp = allComponents.findComponentById(component.id)
                     Napier.log(LogLevel.ASSERT, "Hide", message = cmp.toString())
 
                     cmp?.processLogicDomain?.shouldHide =
                         expressionSatisfied
+                    if(expressionSatisfied){
+                        cmp?.values =null
+                    }
+                    cmp?.components?.forEach {
+                        it.processLogicDomain.shouldHide = expressionSatisfied
+                        if(expressionSatisfied)
+                        it.values = null
+                    }
+
+
                     if (expressionSatisfied)
                         hasLogic = true
 
                 }
 
                 LogicType.Required -> {
+                    typeLogic = LogicType.Required
                     val expressionSatisfied = evaluateLogics(components, it)
                     val cmp = allComponents.findComponentById(component.id)
+                    idCmp=component.id?:""
                     cmp?.processLogicDomain?.required =
                         expressionSatisfied
-                    hasLogic = true
+                    hasLogic = expressionSatisfied
                 }
 
                 LogicType.Disable -> {
+                    typeLogic = LogicType.Disable
                     val expressionSatisfied = evaluateLogics(components, it)
                     val cmp = allComponents.findComponentById(component.id)
                     cmp?.processLogicDomain?.disabled =
                         expressionSatisfied
-                    hasLogic = true
+                    hasLogic = expressionSatisfied
                 }
 
                 LogicType.ReadOnly -> {
+                    typeLogic = LogicType.ReadOnly
                     val expressionSatisfied = evaluateLogics(components, it)
                     val cmp = allComponents.findComponentById(component.id)
                     cmp?.processLogicDomain?.readOnly =
                         expressionSatisfied
-                    hasLogic = true
+                    hasLogic = expressionSatisfied
                 }
 
 
                 LogicType.Calculate -> {
+                    typeLogic = LogicType.Calculate
                     val result = checkCalculation(components, it)
                     val cmp = allComponents.findComponentById(component.id)
                     result?.let { res ->
@@ -83,7 +104,7 @@ class LogicCalculation(
                         )
                         cmp?.values = listOf(updatedValueDomain)
                         cmp?.processLogicDomain?.calculatedValue = result
-                        hasLogic = true
+                        hasLogic = result.isNotEmpty()
 
                     } ?: run {
                         val updatedValueDomain = updateValueDomain(
@@ -97,8 +118,12 @@ class LogicCalculation(
                 }
 
                 LogicType.Validate -> {
+                    typeLogic = LogicType.Validate
                     val expressionSatisfied = evaluateValidateLogics(components, component, it)
                     val cmp = allComponents.findComponentById(component.id)
+                        idCmp=component.id?:""
+
+
                     Napier.log(
                         LogLevel.ASSERT,
                         tag = "expressionSatisfiedsss",
@@ -114,12 +139,13 @@ class LogicCalculation(
                             cmp.processLogicDomain.validate =
                                 false
                         }
-                        hasLogic = true
+                        hasLogic = expressionSatisfied?.result?:false
                     }
 
                 }
 
                 LogicType.Bind -> {
+                    typeLogic = LogicType.Bind
                     val listOfBinding = it.getListOfBindingComponents()
                     Napier.log(
                         LogLevel.ASSERT,
@@ -177,38 +203,39 @@ class LogicCalculation(
                                             }
 
                                             AsyncStatus.SUCCESS -> {
-                                                    result.data?.keys?.forEach { key ->
-                                                        val component =
-                                                            allComponents.findComponentByKey(key)
+                                                result.data?.keys?.forEach { key ->
+                                                    val component =
+                                                        allComponents.findComponentByKey(key)
 
-                                                        result.data[key]?.let { resultData ->
-                                                            var value = resultData
+                                                    result.data[key]?.let { resultData ->
+                                                        var value = resultData
 
-                                                            if (resultData.isNotEmpty()) {
-                                                                if (component?.type == FormViewerTypes.Datetime ||
-                                                                    component?.type == FormViewerTypes.Time ||
-                                                                    component?.type == FormViewerTypes.Date
-                                                                ) {
-                                                                    value =
-                                                                        resultData.parsServerDateTime()
-                                                                }
-                                                                val updatedValueDomain =
-                                                                    updateValueDomain(
-                                                                        component?.values?.get(0)
-                                                                            ?: ValueDomain(),
-                                                                        value
-                                                                    )
-                                                                component?.values = listOf(updatedValueDomain)
-
-
-                                                                component?.processLogicDomain?.calculatedValue = value
-                                                                Napier.log(LogLevel.INFO, tag = "insideLogiices", message = component?.processLogicDomain?.calculatedValue.toString())
-                                                                hasLogic = true
+                                                        if (resultData.isNotEmpty()) {
+                                                            if (component?.type == FormViewerTypes.Datetime ||
+                                                                component?.type == FormViewerTypes.Time ||
+                                                                component?.type == FormViewerTypes.Date
+                                                            ) {
+                                                                value =
+                                                                    resultData.parsServerDateTime()
                                                             }
+                                                            val updatedValueDomain =
+                                                                updateValueDomain(
+                                                                    component?.values?.get(0)
+                                                                        ?: ValueDomain(),
+                                                                    value
+                                                                )
+                                                            component?.values = listOf(updatedValueDomain)
 
+
+                                                            component?.processLogicDomain?.calculatedValue = value
+                                                            Napier.log(LogLevel.INFO, tag = "insideLogiices", message = component?.processLogicDomain?.calculatedValue.toString())
+                                                            hasLogic = true
                                                         }
 
+                                                    }
+
                                                 }
+                                                typeLogic=LogicType.Ticket_Auto_Fill
                                             }
                                         }
                                     }
@@ -221,8 +248,18 @@ class LogicCalculation(
 
             }
         }
-        return hasLogic
+        val logicModel = ExtractLogicsModel(hasLogic, typeLogic,idCmp)
+
+
+
+        if (hasLogic && (typeLogic == LogicType.Required || typeLogic == LogicType.Validate)) {
+            validationErrorList.add(logicModel)
+        }else{
+            validationErrorList.clear()
+        }
+        return validationErrorList
     }
+
 
     private fun LogicDomain.getListOfBindingComponents(): List<String> {
         val list: ArrayList<String> = arrayListOf()

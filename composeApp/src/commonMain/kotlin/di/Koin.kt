@@ -54,6 +54,7 @@ import domain.usecase.usecase.steps.CheckForEditedTicketUseCase
 import domain.usecase.usecase.steps.StoreStepFormUseCase
 import domain.usecase.usecase.steps.UpdateStepFormUseCase
 import domain.usecase.usecase.photo.DeleteByComponentKeyUseCase
+import domain.usecase.usecase.photo.DeletePhotoByComponentKeyAndIdUseCase
 import domain.usecase.usecase.photo.GetPhotoByComponentKeyUseCase
 import domain.usecase.usecase.photo.InsertPhotoUseCase
 
@@ -167,6 +168,7 @@ fun useCaseModule() = module {
     single { InsertPhotoUseCase(get()) }
     single { GetPhotoByComponentKeyUseCase(get()) }
     single { DeleteByComponentKeyUseCase(get()) }
+    single { DeletePhotoByComponentKeyAndIdUseCase(get()) }
     single { UpdateStepsUseCase(get(), get(), get(), get()) }
     single { UpdateStepFormUseCase(get(), get(), get(), get()) }
     single { StoreStepFormUseCase(get(), get(), get(), get()) }
