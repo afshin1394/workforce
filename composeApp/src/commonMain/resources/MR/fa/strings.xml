@@ -11,9 +11,7 @@
     <string name="about_application">درباره اپلیکیشن</string>
     <string name="current_version">ورژن فعلی شما</string>
     <string name="latest_version">آخرین ورژن</string>
-    <string name="description_for_update">شما در حال استفاده از ورژن قدیمی اپلیکیشن هستید لطفا
-        برنامه خود را به اخرین ورژن به روز رسانی نمایید.
-    </string>
+    <string name="description_for_update">شما در حال استفاده از ورژن قدیمی اپلیکیشن هستید لطفا برنامه خود را به اخرین ورژن به روز رسانی نمایید.</string>
     <string name="update">به روز رسانی</string>
     <string name="account_info">اطلاعات حساب کاربری</string>
     <string name="name">نام</string>
@@ -35,8 +33,7 @@
     <string name="cancel_reason">دلیل کنسل کردن</string>
     <string name="cancel">لغو کردن</string>
     <string name="are_you_logout">آیا میخواهید از برنامه خارج شوید؟</string>
-    <string name="logout_warning">بعد از خروج، تمام اطلاعات تیکت ها از روی دستگاه پاک میشود!
-    </string>
+    <string name="logout_warning">بعد از خروج، تمام اطلاعات تیکت ها از روی دستگاه پاک میشود!</string>
     <string name="clear_all">پاک کردن همه</string>
     <string name="settings">تنظیمات</string>
     <string name="language">زبان</string>
@@ -61,9 +58,7 @@
     <string name="english">انگلیسی</string>
     <string name="farsi">فارسی</string>
     <string name="ticket_list">لیست کار ها</string>
-    <string name="tap_update_availability">جهت به روز رسانی وضعیت در دسترس بودن روی دکمه زیر کلیک
-        کنید.
-    </string>
+    <string name="tap_update_availability">جهت به روز رسانی وضعیت در دسترس بودن روی دکمه زیر کلیک کنید.</string>
     <string name="available">در دسترس بودن</string>
     <string name="unAvailable">عدم دسترسی</string>
     <string name="ticket_info">اطلاعات تیکت</string>
@@ -116,9 +111,7 @@
     <string name="splash_sc">اسپلش</string>
     <string name="menu_sc">منو</string>
     <string name="GPS_Permission">مجوز GPS</string>
-    <string name="disc_gps_permission">این برنامه باید GPS را فعال کند. آیا می خواهید آن را اکنون
-        فعال کنید؟
-    </string>
+    <string name="disc_gps_permission">این برنامه باید GPS را فعال کند. آیا می خواهید آن را اکنونفعال کنید؟</string>
     <string name="enable">فعال</string>
 
     <string name="describe_the_reason">علت را توضیح دهید</string>
@@ -170,9 +163,7 @@
     <string name="empty_error_message" />
 
     <string name="continue_flow_title">شروع اجرای مراحل تیکت</string>
-    <string name="continue_flow_message">در صورت ادامه تغییرات تیکت را دریافت نخواهید کرد آیا مطمئن
-        هستید؟
-    </string>
+    <string name="continue_flow_message">در صورت ادامه تغییرات تیکت را دریافت نخواهید کرد آیا مطمئن هستید؟</string>
 
     <string name="empty_list">لیست خالی است</string>
     <string name="data_sent_complete">اطلاعات با موفقیت ارسال شد!</string>
@@ -181,7 +172,7 @@
     <string name="download_failed">دانلود یا نصب موفق نبود، لطفاً دوباره تلاش کنید.</string>
     <string name="accept">پذیرفتن</string>
     <string name="more_options">گزینه های بیشتر</string>
-    <string name= "noLocationFound">موقعیت مکانی یافت نشد</string>
+    <string name="noLocationFound">موقعیت مکانی یافت نشد</string>
 
 
 </resources>

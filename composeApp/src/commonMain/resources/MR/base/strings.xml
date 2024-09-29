@@ -11,9 +11,7 @@
     <string name="about_application">About Application</string>
     <string name="current_version">Your current version</string>
     <string name="latest_version">Latest version</string>
-    <string name="description_for_update">You are using an old version of the app. Please update and
-        enjoy the latest version.
-    </string>
+    <string name="description_for_update">You are using an old version of the app. Please update and enjoy the latest version.</string>
     <string name="update">Update</string>
     <string name="openInMap">Open in map</string>
     <string name="go_to_setting">Go to setting</string>
@@ -52,20 +50,16 @@
     <string name="company_email">Company email</string>
     <string name="email_required">Email is required</string>
     <string name="password_required">Password is required</string>
-    <string name="password_should_least_8_characters">Password should be at least 8 characters
-    </string>
+    <string name="password_should_least_8_characters">Password should be at least 8 characters</string>
     <string name="sign_in">Sign In</string>
-    <string name="enter_verification_code">Enter the verification code that is sent to your phone
-        number
-    </string>
+    <string name="enter_verification_code">Enter the verification code that is sent to your phone number</string>
     <string name="waiting_time_receive">Waiting time to receive</string>
     <string name="resend_code">Resend Code</string>
     <string name="verify">Verify</string>
     <string name="english">English</string>
     <string name="farsi">Farsi</string>
     <string name="ticket_list">TicketList</string>
-    <string name="tap_update_availability">Tap the button and update your availability status.
-    </string>
+    <string name="tap_update_availability">Tap the button and update your availability status.</string>
     <string name="available">Available</string>
     <string name="unAvailable">UnAvailable</string>
     <string name="ticket_info">Ticket Info</string>
@@ -129,9 +123,7 @@
     <string name="splash_sc">splash</string>
     <string name="menu_sc">menu</string>
     <string name="GPS_Permission">GPSPermission</string>
-    <string name="disc_gps_permission">This app requires GPS to be enabled. Do you want to enable it
-        now?
-    </string>
+    <string name="disc_gps_permission">This app requires GPS to be enabled. Do you want to enable it now?</string>
     <string name="enable">Enable</string>
     <string name="error_receive_sms">Error receiving confirm sms</string>
     <string name="exit">Exit</string>
@@ -174,9 +166,7 @@
     <string name="redirect_error">Redirect Exception happened</string>
     <string name="empty_error_message" />
     <string name="continue_flow_title">Continue ticket process</string>
-    <string name="continue_flow_message">If you proceed you wont get updates for this ticket anymore
-        during the process
-    </string>
+    <string name="continue_flow_message">If you proceed you wont get updates for this ticket anymore during the process</string>
     <string name="empty_list">List is empty</string>
     <string name="data_sent_complete">Information has been send successfully!</string>
     <string name="under_development">Feature under development!</string>
