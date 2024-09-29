@@ -68,6 +68,7 @@
     <string name="fault_information">اطلاعات خطا</string>
     <string name="login_error">شما با اطلاعات وارد شده نمی توانید وارد شوید!</string>
     <string name="verify_error">کد داده شده اشتباه است!</string>
+    <string name="connection_status">وضعیت اتصال</string>
 
     <string name="draft">پیش نویس</string>
     <string name="running">در حال اجرا</string>
@@ -173,6 +174,7 @@
     <string name="accept">پذیرفتن</string>
     <string name="more_options">گزینه های بیشتر</string>
     <string name="noLocationFound">موقعیت مکانی یافت نشد</string>
-
+    <string name= "online">آنلاین</string>
+    <string name= "offline">آفلاین</string>
 
 </resources>

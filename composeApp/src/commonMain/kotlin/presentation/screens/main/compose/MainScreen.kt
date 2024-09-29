@@ -313,22 +313,7 @@ class MainScreen(
                         }
 
                         MainEvent.Logout -> {
-                            bottomSheetDoubleActionBottomBar(BottomSheetActionModel(
-                                stringResource(MR.strings.cancel),
-                                surfaceDefault,
-                                textPrimary,
-                                stringResource(MR.strings.logout),
-                                surfaceBrandDefault,
-                                textInverse
-                            ), onFirstButtonClick = {
 
-
-                            }, onSecondButtonClick = {
-                                viewModel.logoutCallApi()
-                                navigator.popAll()
-                                navigator.push(loginScreen)
-
-                            })
                             bottomSheetDoubleActionBottomBar(
                                 BottomSheetActionModel(
                                     stringResource(MR.strings.cancel),

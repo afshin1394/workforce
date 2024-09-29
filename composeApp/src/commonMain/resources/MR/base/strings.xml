@@ -33,8 +33,7 @@
     <string name="cancel_reason">Cancel Reason</string>
     <string name="cancel">Cancel</string>
     <string name="are_you_logout">Are you sure you want to logout?</string>
-    <string name="logout_warning">All ticket data will be removed from your device after logout!
-    </string>
+    <string name="logout_warning">All ticket data will be removed from your device after logout!</string>
     <string name="clear_all">Clear All</string>
     <string name="settings">Settings</string>
     <string name="language">Language</string>
@@ -128,7 +127,7 @@
     <string name="error_receive_sms">Error receiving confirm sms</string>
     <string name="exit">Exit</string>
     <string name="sure_exit_app">Are you sure exit the app?</string>
-    <string name="offline_mode">Offline Mode</string>
+    <string name="connection_status">Connection Status</string>
 
     <string name="describe_the_reason">describe the reason</string>
     <string name="photo_preview">PhotoPreview</string>
@@ -174,5 +173,7 @@
     <string name="download_failed">Download or installation failed, please try again.</string>
     <string name="accept">Accept</string>
     <string name= "noLocationFound">location is not available</string>
+    <string name= "online">Online</string>
+    <string name= "offline">Offline</string>
 
 </resources>

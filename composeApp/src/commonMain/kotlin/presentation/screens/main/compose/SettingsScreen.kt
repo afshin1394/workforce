@@ -18,6 +18,7 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import com.irancell.nwg.wfm.presentation.components.*
 import presentation.model.ItemComponentModel
 import com.irancell.nwg.wfm.presentation.model.SelectableItem
+import com.irancell.nwg.wfm.presentation.model.SelectableItemStringResource
 import com.irancell.nwg.wfm.presentation.screens.main.components.SwitchItem
 import presentation.screens.main.events.SettingEvent
 import com.irancell.nwg.wfm.presentation.screens.main.viewmodel.SettingScreenVM
@@ -36,6 +37,7 @@ import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import presentation.components.MenuItemsTopBar
 import presentation.screens.main.components.SelectableSingleItemComponent
+import presentation.screens.main.components.SelectableSingleItemComponentStringResource
 import utils.Language
 import utils.ModeApp
 import utils.SelectLanguage
@@ -65,7 +67,7 @@ class SettingsScreen(
                 }
 
                 SettingEvent.ChangeMode -> {
-                    stringResource(MR.strings.offline_mode)
+                    stringResource(MR.strings.connection_status)
                 }
 
 
@@ -159,25 +161,25 @@ class SettingsScreen(
                 viewModel.events.value = SettingEvent.Default
             }, content = {
                 Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
-                    val tagSelectLanguage = if (getSharedPref().getString(Language) == "fa") "Farsi"
-                    else "English"
+                    val tagSelectLanguage = if (getSharedPref().getString(Language) == "fa") MR.strings.farsi
+                    else MR.strings.english
                     ItemComponent(itemComponentModel = ItemComponentModel(
                         text = stringResource(MR.strings.language),
                         hasTag = true,
                         color = Color.Transparent,
-                        textTag = tagSelectLanguage,
+                        textTag = stringResource(tagSelectLanguage),
                         textTagColor = textBrand,
                         tagColor = subtleDefault
                     ), modifier = Modifier.clickable {
                         viewModel.events.value = SettingEvent.ChangeLanguage
                     })
-                    val tagSelectMode = if (getSharedPref().getString(ModeApp) == "on") "Online"
-                    else "Offline"
+                    val tagSelectMode = if (getSharedPref().getString(ModeApp) == "on") MR.strings.online
+                    else MR.strings.offline
                     ItemComponent(itemComponentModel = ItemComponentModel(
-                        text = stringResource(MR.strings.offline_mode),
+                        text = stringResource(MR.strings.connection_status),
                         hasTag = true,
                         color = Color.Transparent,
-                        textTag = tagSelectMode,
+                        textTag = stringResource(tagSelectMode),
                         textTagColor = textBrand,
                         tagColor = subtleDefault
                     ), modifier = Modifier.clickable {
@@ -208,10 +210,10 @@ class SettingsScreen(
 
 @Composable
 fun ChangeLanguageBottomSheetComponent(
-    list: MutableList<SelectableItem>,
-    onItemSelected: (Int, SelectableItem) -> Unit
+    list: MutableList<SelectableItemStringResource>,
+    onItemSelected: (Int, SelectableItemStringResource) -> Unit
 ) {
-    SelectableSingleItemComponent(
+    SelectableSingleItemComponentStringResource(
         selectableItems = list,
         itemSelected = getSharedPref().getString(Language) ?: "",
         onOptionSelected = { index, selectableItem ->
@@ -221,10 +223,10 @@ fun ChangeLanguageBottomSheetComponent(
 
 @Composable
 fun ChangeModeBottomSheetComponent(
-    list: MutableList<SelectableItem>,
-    onItemSelected: (Int, SelectableItem) -> Unit
+    list: MutableList<SelectableItemStringResource>,
+    onItemSelected: (Int, SelectableItemStringResource) -> Unit
 ) {
-    SelectableSingleItemComponent(
+    SelectableSingleItemComponentStringResource(
         selectableItems = list,
         itemSelected = getSharedPref().getString(ModeApp) ?: "",
         onOptionSelected = { index, selectableItem ->
