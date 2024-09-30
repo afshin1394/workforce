@@ -78,7 +78,7 @@ fun <T : BaseViewModel> BaseScreen(
     onBackPressed: () -> Unit = {},
     hasSwipeDrawer: Boolean = true,
     isShwCloseBtnBottomSheet: Boolean = true,
-    shouldBlurOnBottomSheetExpansion : Boolean = true,
+    shouldBlurOnBottomSheetExpansion: Boolean = true,
     typeBottomSheet: String = BottomSheetTypes.Default
 
 ) {
@@ -89,10 +89,9 @@ fun <T : BaseViewModel> BaseScreen(
     val state by viewModel.state.collectAsState()
     val gpsState by viewModel.gpsState.collectAsState()
     val vpnDetectionStates by viewModel.vpnDetectionStates.collectAsState()
-
-    var isDrawerInitialized = remember { mutableStateOf(false) }
-
+    val isDrawerInitialized = remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
+    val vpnScaffoldState = rememberBottomSheetScaffoldState()
 
     OnLifecycleEvent { _, event ->
         when (event) {
@@ -137,13 +136,13 @@ fun <T : BaseViewModel> BaseScreen(
                         },
                     )
                     scope.launch {
-                        scaffoldState.bottomSheetState.expand()
+                        vpnScaffoldState.bottomSheetState.expand()
                     }
                 }
 
                 VpnDetectionStates.HideBottomSheet -> {
                     scope.launch {
-                        scaffoldState.bottomSheetState.collapse()
+                        vpnScaffoldState.bottomSheetState.collapse()
                     }
                 }
 
@@ -169,7 +168,7 @@ fun <T : BaseViewModel> BaseScreen(
                         }
                     }
                 },
-                    scaffoldState = scaffoldState,
+                    scaffoldState = if (vpnDetectionStates == VpnDetectionStates.ShowBottomSheet) vpnScaffoldState else scaffoldState,
                     topBar = { topBar() },
                     sheetPeekHeight = 0.dp,
                     sheetGesturesEnabled = false,
@@ -194,9 +193,12 @@ fun <T : BaseViewModel> BaseScreen(
                                 })
                         }
                     }) {
-                    Column(modifier = if(scaffoldState.bottomSheetState.isCollapsed)  Modifier.fillMaxSize() else Modifier.fillMaxSize().blur(7.dp)) {
+                    Column(
+                        modifier = if (scaffoldState.bottomSheetState.isCollapsed) Modifier.fillMaxSize()
+                        else Modifier.fillMaxSize().blur(7.dp)
+                    ) {
 
-                    Box(
+                        Box(
                             modifier = Modifier.fillMaxWidth().fillMaxHeight()
                                 .background(backgroundBackground3)
                         ) {
@@ -247,9 +249,7 @@ fun <T : BaseViewModel> BaseScreen(
                                         stringResource((state as ViewStates.Error).message)
 
                                     Napier.log(
-                                        LogLevel.INFO,
-                                        tag = "fkpekfpw",
-                                        message = errorMessage
+                                        LogLevel.INFO, tag = "fkpekfpw", message = errorMessage
                                     )
                                     LaunchedEffect(Unit) {
                                         scaffoldState.snackbarHostState.showSnackbar(message = errorMessage)
@@ -306,7 +306,7 @@ fun <T : BaseViewModel> BaseScreen(
             }
         } else {
             BottomSheetScaffold(modifier = Modifier.background(color = backgroundBackground3),
-                scaffoldState = scaffoldState,
+                scaffoldState = if (vpnDetectionStates == VpnDetectionStates.ShowBottomSheet) vpnScaffoldState else scaffoldState,
                 topBar = {
                     topBar()
                 },
@@ -334,11 +334,15 @@ fun <T : BaseViewModel> BaseScreen(
                     }
                 }) {
 
-                Column(modifier = if(scaffoldState.bottomSheetState.isExpanded && shouldBlurOnBottomSheetExpansion)  Modifier.fillMaxSize().blur(7.dp) else Modifier.fillMaxSize()) {
+                Column(
+                    modifier = if (scaffoldState.bottomSheetState.isExpanded && shouldBlurOnBottomSheetExpansion) Modifier.fillMaxSize()
+                        .blur(7.dp) else Modifier.fillMaxSize()
+                ) {
 
                     Box(
                         modifier = Modifier.fillMaxWidth().fillMaxHeight().background(
-                            backgroundBackground3)
+                            backgroundBackground3
+                        )
 
                     ) {
 

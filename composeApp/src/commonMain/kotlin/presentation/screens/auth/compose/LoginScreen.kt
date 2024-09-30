@@ -80,6 +80,7 @@ class LoginScreen() : Screen {
                                 navigator.push(verifyScreen)
                             }
                         }
+
                         else -> {}
                     }
 

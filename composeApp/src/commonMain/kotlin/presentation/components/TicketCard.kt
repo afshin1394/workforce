@@ -157,7 +157,7 @@ fun ticketCard(
                     colors = CardDefaults.cardColors(surfaceDefault),
                     modifier = Modifier
                         .weight(1f)
-                        .height(48.dp) // Ensure consistent height
+                        .height(48.dp)
                         .border(
                             width = 1.dp,
                             color = strokeDefaultLight,
@@ -165,7 +165,7 @@ fun ticketCard(
                         )
                 ) {
                     Box(
-                        contentAlignment = Alignment.Center, // Centers content both vertically and horizontally
+                        contentAlignment = Alignment.Center,
                         modifier = Modifier.fillMaxSize()
                     ) {
                         androidx.compose.material3.Text(
@@ -176,7 +176,7 @@ fun ticketCard(
                             maxLines = 1,
                             textAlign = TextAlign.Center,
                             modifier = Modifier
-                                .fillMaxWidth() // Ensure it spans the width of the Box
+                                .fillMaxWidth()
                                 .padding(horizontal = spacing05X)
                         )
                     }
@@ -189,15 +189,15 @@ fun ticketCard(
                     colors = CardDefaults.cardColors(surfaceBrandDefault),
                     modifier = Modifier
                         .weight(1f)
-                        .height(48.dp) // Ensure consistent height
+                        .height(48.dp)
                         .border(
                             width = 1.dp,
                             color = strokeDefaultLight,
-                            shape = RoundedCornerShape(size = radiusLarge)
+                            shape = RoundedCornerShape(size = 12.dp)
                         )
                 ) {
                     Box(
-                        contentAlignment = Alignment.Center, // Centers content both vertically and horizontally
+                        contentAlignment = Alignment.Center,
                         modifier = Modifier.fillMaxSize()
                     ) {
                         androidx.compose.material3.Text(
@@ -207,7 +207,7 @@ fun ticketCard(
                             maxLines = 1,
                             textAlign = TextAlign.Center,
                             modifier = Modifier
-                                .fillMaxWidth() // Ensure it spans the width of the Box
+                                .fillMaxWidth()
                                 .padding(horizontal = spacing05X)
                         )
                     }
