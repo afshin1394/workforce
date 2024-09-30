@@ -119,7 +119,7 @@ fun TicketListScreen(
 
                 }.filter {
                     it.basic_info.instanceStateId.toString().contains(selectState.lowercase())
-                }
+                }.sortedByDescending { it.basic_info.ticket_id?.toLong() ?: (0..Long.MAX_VALUE).random() }
                 Napier.log(LogLevel.ASSERT, "selectState", message = selectState)
                 if (!refreshing) {
                     Napier.log(LogLevel.ASSERT, "refreshing", message = refreshing.toString())
