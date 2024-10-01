@@ -1,19 +1,27 @@
 package presentation.screens.main.compose
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -57,6 +65,7 @@ import presentation.model.BottomSheetActionModel
 import presentation.theme.surfaceBrandDefault
 import utils.BottomSheetTypes
 import utils.GpsState
+import utils.NetworkStates
 import utils.VpnDetectionStates
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -92,6 +101,9 @@ fun <T : BaseViewModel> BaseScreen(
     val isDrawerInitialized = remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
     val vpnScaffoldState = rememberBottomSheetScaffoldState()
+    val networkState by viewModel.networkState.collectAsState()
+    val isConnected = networkState != NetworkStates.NetworkConnectionNONE
+    val offsetX = animateDpAsState(targetValue = if (!isConnected) 300.dp else 0.dp)
 
     OnLifecycleEvent { _, event ->
         when (event) {
@@ -146,12 +158,9 @@ fun <T : BaseViewModel> BaseScreen(
                     }
                 }
 
-                else -> {
-
-                }
+                else -> {}
             }
         }
-
 
         if (hasDrawer) {
             ModalDrawer(modifier = Modifier.background(color = backgroundBackground3),
@@ -449,6 +458,53 @@ fun <T : BaseViewModel> BaseScreen(
                         }
                     }
 
+                }
+            }
+        }
+        AnimatedVisibility(
+            visible = !isConnected,
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(bottom = 24.dp)
+                .offset(x = offsetX.value, y = 0.dp)
+        ) {
+            Napier.log(LogLevel.ASSERT, "GHiyooo", message = isConnected.toString())
+            Card(
+                modifier = Modifier
+                    .offset(x = offsetX.value, y = 0.dp)
+                    .width(250.dp)
+                    .height(60.dp),
+                shape = RoundedCornerShape(topStart = 30.dp, bottomStart = 30.dp),
+                elevation = 18.dp,
+                backgroundColor = Color.White
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Start,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(start = 16.dp)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(50.dp)
+                            .offset(x = (-10).dp)
+                            .background(Color.Red, shape = CircleShape),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Image(
+                            painter = painterResource(MR.images.warning),
+                            contentDescription = "No Connection",
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = "No internet connection",
+                        color = Color.Black,
+                        style = MaterialTheme.typography.body2,
+                        modifier = Modifier.weight(1f)
+                    )
                 }
             }
         }

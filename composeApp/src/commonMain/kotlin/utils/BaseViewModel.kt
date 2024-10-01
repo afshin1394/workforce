@@ -26,11 +26,8 @@ sealed class ViewStates() {
     data object Loading : ViewStates()
     data class Error(val message: StringResource) : ViewStates()
     data class Success(val message: StringResource? = MR.strings.success) : ViewStates()
-    data object Reload : ViewStates()
     data object EMPTY : ViewStates()
-    data object VpnDetected : ViewStates()
     data class UnAuthorized(val message: StringResource) : ViewStates()
-    data object VPNDetected : ViewStates()
 }
 
 sealed class VpnDetectionStates() {
@@ -50,7 +47,6 @@ sealed class NetworkStates() {
     data object NetworkConnectionNONE : NetworkStates()
     data object NetworkConnectionWIFI : NetworkStates()
     data object NetworkConnectionCELLULAR : NetworkStates()
-
 }
 
 
@@ -78,7 +74,6 @@ open class BaseViewModel : ViewModel(), KoinComponent {
         traceLocation()
         collectServiceState()
     }
-
 
     private fun collectServiceState() {
         viewModelScope.launch {
@@ -166,9 +161,7 @@ open class BaseViewModel : ViewModel(), KoinComponent {
                         _networkState.update { NetworkStates.NetworkConnectionCELLULAR }
                     }
                 }
-
             }
-
         }
     }
 
@@ -223,7 +216,5 @@ open class BaseViewModel : ViewModel(), KoinComponent {
                 _state.update { ViewStates.Error(MR.strings.general_error) }
             }
         }
-
-
     }
 }
