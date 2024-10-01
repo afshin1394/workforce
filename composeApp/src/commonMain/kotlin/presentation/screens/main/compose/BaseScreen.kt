@@ -102,8 +102,6 @@ fun <T : BaseViewModel> BaseScreen(
     val scope = rememberCoroutineScope()
     val vpnScaffoldState = rememberBottomSheetScaffoldState()
     val networkState by viewModel.networkState.collectAsState()
-    val isConnected = networkState != NetworkStates.NetworkConnectionNONE
-    val offsetX = animateDpAsState(targetValue = if (!isConnected) 300.dp else 0.dp)
 
     OnLifecycleEvent { _, event ->
         when (event) {
@@ -461,51 +459,26 @@ fun <T : BaseViewModel> BaseScreen(
                 }
             }
         }
+
         AnimatedVisibility(
-            visible = !isConnected,
+            visible = networkState == NetworkStates.NetworkConnectionNONE,
             modifier = Modifier
                 .align(Alignment.BottomEnd)
                 .padding(bottom = 24.dp)
-                .offset(x = offsetX.value, y = 0.dp)
         ) {
-            Napier.log(LogLevel.ASSERT, "GHiyooo", message = isConnected.toString())
+            Napier.log(LogLevel.ASSERT, "GHiyooo", message = networkState.toString())
             Card(
                 modifier = Modifier
-                    .offset(x = offsetX.value, y = 0.dp)
-                    .width(250.dp)
                     .height(60.dp),
                 shape = RoundedCornerShape(topStart = 30.dp, bottomStart = 30.dp),
-                elevation = 18.dp,
+                elevation = 22.dp,
                 backgroundColor = Color.White
             ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Start,
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(start = 16.dp)
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .size(50.dp)
-                            .offset(x = (-10).dp)
-                            .background(Color.Red, shape = CircleShape),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Image(
-                            painter = painterResource(MR.images.warning),
-                            contentDescription = "No Connection",
-                            modifier = Modifier.size(20.dp)
-                        )
-                    }
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        text = "No internet connection",
-                        color = Color.Black,
-                        style = MaterialTheme.typography.body2,
-                        modifier = Modifier.weight(1f)
-                    )
-                }
+                Image(
+                    painter = painterResource(MR.images.warning),
+                    contentDescription = "No Connection",
+                    modifier = Modifier.size(50.dp).padding(12.dp)
+                )
             }
         }
     }
