@@ -73,10 +73,13 @@ import utils.GpsState
 import utils.NetworkStates
 import utils.VpnDetectionStates
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Card
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.draw.clip
+import irancell.nwg.wfm.BackgroundServiceApp
 
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -472,7 +475,7 @@ fun <T : BaseViewModel> BaseScreen(
         }
 
         AnimatedVisibility(
-            visible = networkState == NetworkStates.NetworkConnectionNONE,
+            visible = networkState == NetworkStates.NetworkConnectionNONE || !BackgroundServiceApp.isServiceRunning(),
             enter = slideInHorizontally(
                 initialOffsetX = { it },
                 animationSpec = tween(durationMillis = 500)
@@ -485,38 +488,132 @@ fun <T : BaseViewModel> BaseScreen(
                 .align(Alignment.BottomEnd)
                 .padding(bottom = 24.dp)
         ) {
-            Card(
+            Box(
                 modifier = Modifier
-                    .height(60.dp),
-                shape = RoundedCornerShape(topStart = 30.dp, bottomStart = 30.dp),
-                elevation = 22.dp,
-                backgroundColor = Color.White
+                    .fillMaxSize()
+                    .padding(bottom = 24.dp),
+                contentAlignment = Alignment.BottomEnd
             ) {
-                Box(
-                    contentAlignment = Alignment.Center,
+                var showTooltip by remember { mutableStateOf(false) }
+                var showServiceTooltip by remember { mutableStateOf(false) }
+
+                Card(
                     modifier = Modifier
-                        .size(60.dp)
-                        .padding(12.dp)
+                        .height(60.dp),
+                    shape = RoundedCornerShape(topStart = 30.dp, bottomStart = 30.dp),
+                    elevation = 22.dp,
+                    backgroundColor = Color.White
                 ) {
-                    Image(
-                        painter = painterResource(MR.images.circle_red_warning),
-                        contentDescription = "No Connection",
+                    Row(
+                        modifier = Modifier.padding(end = 16.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        // Network Connection Icon
+                        if (networkState == NetworkStates.NetworkConnectionNONE) {
+                            Box(
+                                contentAlignment = Alignment.Center,
+                                modifier = Modifier
+                                    .size(60.dp)
+                                    .padding(8.dp)
+                            ) {
+                                Image(
+                                    painter = painterResource(MR.images.circle_red_warning),
+                                    contentDescription = "No Connection",
+                                    modifier = Modifier
+                                        .size(30.dp)
+                                        .clip(CircleShape)
+                                        .background(Color.LightGray)
+                                        .clickable {
+                                            showServiceTooltip = false
+                                            showTooltip = true
+                                        }
+                                )
+                                CircularProgressIndicator(
+                                    modifier = Modifier
+                                        .size(46.dp),
+                                    color = Color(0xFFE50000),
+                                    strokeWidth = 3.dp
+                                )
+                            }
+                        }
+
+                        if (!BackgroundServiceApp.isServiceRunning()) {
+                            Box(
+                                contentAlignment = Alignment.Center,
+                                modifier = Modifier
+                                    .size(60.dp)
+                                    .padding(8.dp)
+                            ) {
+                                Image(
+                                    painter = painterResource(MR.images.circle_orange_warning),
+                                    contentDescription = "Service Status",
+                                    modifier = Modifier
+                                        .size(30.dp)
+                                        .clip(CircleShape)
+                                        .background(Color.LightGray)
+                                        .clickable {
+                                            showTooltip = false
+                                            showServiceTooltip = true
+                                        }
+                                )
+                                CircularProgressIndicator(
+                                    modifier = Modifier
+                                        .size(46.dp),
+                                    color = Color(0xFFFFA500),
+                                    strokeWidth = 3.dp
+                                )
+                            }
+                        }
+                    }
+                }
+
+                AnimatedVisibility(visible = showTooltip) {
+                    Box(
                         modifier = Modifier
-                            .size(30.dp)
-                            .clip(CircleShape)
-                            .background(Color.LightGray)
-                            .align(alignment = Alignment.Center)
-                    )
-                    CircularProgressIndicator(
+                            .align(Alignment.BottomEnd)
+                            .offset(y = (-60).dp, x = (-10).dp)
+                            .background(Color.Black, shape = CircleShape)
+                            .padding(18.dp)
+                    ) {
+                        Text(
+                            text = "You are offline",
+                            color = Color.White,
+                            style = MaterialTheme.typography.body2
+                        )
+                    }
+                }
+
+                AnimatedVisibility(visible = showServiceTooltip) {
+                    Box(
                         modifier = Modifier
-                            .size(46.dp),
-                        color = surfaceBrandDefault,
-                        strokeWidth = 3.dp
-                    )
+                            .align(Alignment.BottomEnd)
+                            .offset(y = (-60).dp, x = (-10).dp)
+                            .background(Color.Black, shape = CircleShape)
+                            .padding(18.dp)
+                    ) {
+                        Text(
+                            text = "Service is not running",
+                            color = Color.White,
+                            style = MaterialTheme.typography.body2
+                        )
+                    }
+                }
+
+                LaunchedEffect(showTooltip) {
+                    if (showTooltip) {
+                        delay(3000)
+                        showTooltip = false
+                    }
+                }
+
+                LaunchedEffect(showServiceTooltip) {
+                    if (showServiceTooltip) {
+                        delay(3000)
+                        showServiceTooltip = false
+                    }
                 }
             }
         }
-
     }
 }
 

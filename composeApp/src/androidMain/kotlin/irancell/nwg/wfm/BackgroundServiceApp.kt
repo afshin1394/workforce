@@ -104,7 +104,7 @@ internal actual class BackgroundServiceApp : Service(), KoinComponent {
 
         }
 
-        fun isServiceRunning(): Boolean {
+        actual fun isServiceRunning(): Boolean {
             val activityManager =
                 (provideAppContext() as Context).getSystemService(ACTIVITY_SERVICE) as ActivityManager
             for (service in activityManager.getRunningServices(Int.MAX_VALUE)) {
@@ -141,7 +141,11 @@ internal actual class BackgroundServiceApp : Service(), KoinComponent {
 
         /*getSharedPref().put(isRunningGPS, true)*/
         val notification =
-            createNotification(applicationContext, "Ready to work", "iTicket is running on you device")
+            createNotification(
+                applicationContext,
+                "Ready to work",
+                "iTicket is running on you device"
+            )
         val intent1 = Intent(this, BackgroundServiceApp::class.java)
         intent1.setAction(AlarmAction.UPDATE.title)
 
@@ -233,7 +237,7 @@ internal actual class BackgroundServiceApp : Service(), KoinComponent {
 
     private suspend fun BackgroundServiceApp.storeLocation(data: JsonObject) {
 
-        Log.i("networkState", "storeLocation: "+_networkState.value)
+        Log.i("networkState", "storeLocation: " + _networkState.value)
 
         val networkInfo: String = when (_networkState.value) {
             true -> {
