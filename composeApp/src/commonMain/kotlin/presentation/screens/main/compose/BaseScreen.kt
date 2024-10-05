@@ -2,6 +2,11 @@ package presentation.screens.main.compose
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -67,6 +72,12 @@ import utils.BottomSheetTypes
 import utils.GpsState
 import utils.NetworkStates
 import utils.VpnDetectionStates
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.layout.*
+import androidx.compose.material.Card
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.draw.clip
+
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
@@ -462,11 +473,18 @@ fun <T : BaseViewModel> BaseScreen(
 
         AnimatedVisibility(
             visible = networkState == NetworkStates.NetworkConnectionNONE,
+            enter = slideInHorizontally(
+                initialOffsetX = { it },
+                animationSpec = tween(durationMillis = 500)
+            ),
+            exit = slideOutHorizontally(
+                targetOffsetX = { it },
+                animationSpec = tween(durationMillis = 500)
+            ),
             modifier = Modifier
                 .align(Alignment.BottomEnd)
                 .padding(bottom = 24.dp)
         ) {
-            Napier.log(LogLevel.ASSERT, "GHiyooo", message = networkState.toString())
             Card(
                 modifier = Modifier
                     .height(60.dp),
@@ -474,13 +492,31 @@ fun <T : BaseViewModel> BaseScreen(
                 elevation = 22.dp,
                 backgroundColor = Color.White
             ) {
-                Image(
-                    painter = painterResource(MR.images.warning),
-                    contentDescription = "No Connection",
-                    modifier = Modifier.size(50.dp).padding(12.dp)
-                )
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier
+                        .size(60.dp)
+                        .padding(12.dp)
+                ) {
+                    Image(
+                        painter = painterResource(MR.images.circle_red_warning),
+                        contentDescription = "No Connection",
+                        modifier = Modifier
+                            .size(30.dp)
+                            .clip(CircleShape)
+                            .background(Color.LightGray)
+                            .align(alignment = Alignment.Center)
+                    )
+                    CircularProgressIndicator(
+                        modifier = Modifier
+                            .size(46.dp),
+                        color = surfaceBrandDefault,
+                        strokeWidth = 3.dp
+                    )
+                }
             }
         }
+
     }
 }
 
