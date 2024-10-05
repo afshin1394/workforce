@@ -194,29 +194,23 @@ internal actual class BackgroundServiceApp : Service(), KoinComponent {
             scope.launch(Dispatchers.Main) {
                 println("YOYOYO Wusssuppp ${isServiceRunning().toString()}")
                 println("YOYOYO Wusssuppp ${_serviceState.value}")
-                if (_serviceState.value != ServiceState.Suspend) {
-                    if (isServiceRunning()) {
-                        updateServiceState(ServiceState.Running)
-                    }
+                if (_serviceState.value !in listOf(ServiceState.Suspend, ServiceState.Faulty)) {
+                    val newState = if (isServiceRunning()) ServiceState.Running else ServiceState.NotRunning
+                    updateServiceState(newState)
                 }
 
+
                 val data = telephonyData.getTelephonyData()
-
                 println("service action${intent?.action}")
-
                 when (intent?.action) {
-
-
                     AlarmAction.SEND_LOCATION.title -> {
                         startSendLocationAlarm()
                         sendLocationToServer()
-
                     }
 
                     AlarmAction.STORE_LOCATION.title -> {
                         startStoreLocationAlarm()
                         storeLocation(data)
-
                     }
 
                     AlarmAction.UPDATE.title -> {
@@ -228,16 +222,11 @@ internal actual class BackgroundServiceApp : Service(), KoinComponent {
                         }
                     }
                 }
-
-
             }
 
         } catch (e: Exception) {
 
         }
-
-
-
         return START_STICKY
     }
 
@@ -254,8 +243,6 @@ internal actual class BackgroundServiceApp : Service(), KoinComponent {
                 Json.encodeToString(JsonObject.serializer(), createEmptyTelephonyData())
             }
         }
-
-
 
         storeLocationDataUseCase(
             GeneralLocationEntity(

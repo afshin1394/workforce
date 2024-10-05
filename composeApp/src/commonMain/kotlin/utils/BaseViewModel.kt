@@ -104,10 +104,6 @@ open class BaseViewModel : ViewModel(), KoinComponent {
                         _serviceState.update { ServiceState.Running }
                     }
 
-                    ServiceState.Suspend -> {
-                        _serviceState.update { ServiceState.Suspend }
-                    }
-
                     else -> {}
                 }
             }

@@ -1,12 +1,9 @@
 package presentation.screens.main.compose
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutHorizontally
-import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -26,7 +23,6 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
-import androidx.compose.material.icons.Icons
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -72,14 +68,10 @@ import utils.BottomSheetTypes
 import utils.GpsState
 import utils.NetworkStates
 import utils.VpnDetectionStates
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
 import androidx.compose.material.Card
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.draw.clip
-import irancell.nwg.wfm.BackgroundServiceApp
 import utils.ServiceState
 
 
@@ -477,7 +469,7 @@ fun <T : BaseViewModel> BaseScreen(
         }
 
         AnimatedVisibility(
-            visible = networkState == NetworkStates.NetworkConnectionNONE || serviceState is ServiceState.Suspend,
+            visible = networkState == NetworkStates.NetworkConnectionNONE || serviceState is ServiceState.NotRunning,
             enter = slideInHorizontally(
                 initialOffsetX = { it },
                 animationSpec = tween(durationMillis = 500)
@@ -538,7 +530,7 @@ fun <T : BaseViewModel> BaseScreen(
                             }
                         }
 
-                        if (serviceState is ServiceState.Suspend) {
+                        if (serviceState is ServiceState.NotRunning) {
                             Box(
                                 contentAlignment = Alignment.Center,
                                 modifier = Modifier
