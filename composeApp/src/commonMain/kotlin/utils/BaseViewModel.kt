@@ -27,7 +27,15 @@ sealed class ViewStates() {
     data class Error(val message: StringResource) : ViewStates()
     data class Success(val message: StringResource? = MR.strings.success) : ViewStates()
     data object EMPTY : ViewStates()
-    data class UnAuthorized(val message: StringResource) : ViewStates()
+}
+
+sealed interface ServiceState {
+    data object Running : ServiceState
+    data object NotRunning : ServiceState
+    data object Normal : ServiceState
+    data object Faulty : ServiceState
+    data object Suspend : ServiceState
+    data class UnAuthorized(val message: StringResource) : ServiceState
 }
 
 sealed class VpnDetectionStates() {
@@ -56,6 +64,7 @@ open class BaseViewModel : ViewModel(), KoinComponent {
     val loading = MutableStateFlow(false)
 
     private val _state = MutableStateFlow<ViewStates>(ViewStates.Default)
+    private val _serviceState = MutableStateFlow<ServiceState>(ServiceState.Normal)
     private val _networkState = MutableStateFlow<NetworkStates>(NetworkStates.Default)
     private val _vpnDetectionState =
         MutableStateFlow<VpnDetectionStates>(VpnDetectionStates.Default)
@@ -64,10 +73,11 @@ open class BaseViewModel : ViewModel(), KoinComponent {
     val lifeCycleEvent = _lifeCycleEvent.asStateFlow()
 
     val state = _state.asStateFlow()
+    val serviceState = _serviceState.asStateFlow()
     val networkState = _networkState.asStateFlow()
     val vpnDetectionStates = _vpnDetectionState.asStateFlow()
     val gpsState = _gpsState.asStateFlow()
-    val konnectivity: Konnectivity = Konnectivity()
+    private val konnectivity: Konnectivity = Konnectivity()
 
     init {
         traceNetwork()
@@ -78,11 +88,27 @@ open class BaseViewModel : ViewModel(), KoinComponent {
     private fun collectServiceState() {
         viewModelScope.launch {
             BackgroundServiceApp.serviceState.collect {
-                if (it is ServiceState.Faulty) {
-                    _state.update {
-                        ViewStates.UnAuthorized(MR.strings.unauthorized)
+                when (it) {
+                    ServiceState.Faulty -> {
+                        _serviceState.update {
+                            ServiceState.UnAuthorized(MR.strings.unauthorized)
+                        }
+                        BackgroundServiceApp.stopBackgroundService()
                     }
 
+                    ServiceState.NotRunning -> {
+                        _serviceState.update { ServiceState.NotRunning }
+                    }
+
+                    ServiceState.Running -> {
+                        _serviceState.update { ServiceState.Running }
+                    }
+
+                    ServiceState.Suspend -> {
+                        _serviceState.update { ServiceState.Suspend }
+                    }
+
+                    else -> {}
                 }
             }
         }
@@ -177,11 +203,11 @@ open class BaseViewModel : ViewModel(), KoinComponent {
 
         when (resultStatus) {
             is ResultStatus.CLIENT_EXCEPTION.FORBIDDEN -> {
-                _state.update { ViewStates.UnAuthorized(MR.strings.unauthorized) }
+                _serviceState.update { ServiceState.UnAuthorized(MR.strings.unauthorized) }
             }
 
             is ResultStatus.CLIENT_EXCEPTION.UNATHORIZED -> {
-                _state.update { ViewStates.UnAuthorized(MR.strings.unauthorized) }
+                _serviceState.update { ServiceState.UnAuthorized(MR.strings.unauthorized) }
             }
 
             is ResultStatus.CLIENT_EXCEPTION -> {

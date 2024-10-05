@@ -190,10 +190,16 @@ internal actual class BackgroundServiceApp : Service(), KoinComponent {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-
-
         try {
             scope.launch(Dispatchers.Main) {
+                println("YOYOYO Wusssuppp ${isServiceRunning().toString()}")
+                println("YOYOYO Wusssuppp ${_serviceState.value}")
+                if (_serviceState.value != ServiceState.Suspend) {
+                    if (isServiceRunning()) {
+                        updateServiceState(ServiceState.Running)
+                    }
+                }
+
                 val data = telephonyData.getTelephonyData()
 
                 println("service action${intent?.action}")

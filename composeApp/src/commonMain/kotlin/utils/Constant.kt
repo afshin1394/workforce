@@ -27,11 +27,7 @@ const val DevelopmentBASEURLForVersionFile = "https://uat.ios.mtnirancell.ir/"
 
 const val FileApk = "fileApk"
 
-sealed interface ServiceState {
-    data object Normal : ServiceState
-    data object Faulty : ServiceState
-    data object Suspend : ServiceState
-}
+
 
 object LOCATION_RECORDS {
     const val RED_NUMBER_OF_LOCATION_RECORDS = 500

@@ -80,6 +80,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.draw.clip
 import irancell.nwg.wfm.BackgroundServiceApp
+import utils.ServiceState
 
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -116,6 +117,7 @@ fun <T : BaseViewModel> BaseScreen(
     val scope = rememberCoroutineScope()
     val vpnScaffoldState = rememberBottomSheetScaffoldState()
     val networkState by viewModel.networkState.collectAsState()
+    val serviceState by viewModel.serviceState.collectAsState()
 
     OnLifecycleEvent { _, event ->
         when (event) {
@@ -299,26 +301,27 @@ fun <T : BaseViewModel> BaseScreen(
                                     viewModel.updateState(ViewStates.Default)
                                 }
 
-
-                                is ViewStates.UnAuthorized -> {
+                                else -> {}
+                            }
+                            when (serviceState) {
+                                is ServiceState.UnAuthorized -> {
                                     val key = navigator.items[navigator.items.lastIndex].key
                                     if (key != loginScreen.key && key != verifyScreen.key && key != splashScreen.key) {
                                         val message =
-                                            stringResource((state as ViewStates.UnAuthorized).message)
-
-                                        LaunchedEffect(Unit) {
+                                            stringResource((serviceState as ServiceState.UnAuthorized).message)
+                                        scope.launch {
                                             scaffoldState.snackbarHostState.showSnackbar(message = message)
-
                                             delay(200)
-                                            navigator.popAll()
-                                            navigator.push(loginScreen)
+                                            if (navigator.items[navigator.items.lastIndex].key != loginScreen.key) {
+                                                navigator.popAll()
+                                                navigator.push(loginScreen)
+                                            }
                                         }
+
                                     }
                                 }
 
-                                else -> {
-
-                                }
+                                else -> {}
                             }
                         }
 
@@ -445,37 +448,36 @@ fun <T : BaseViewModel> BaseScreen(
                                 viewModel.updateState(ViewStates.Default)
                             }
 
+                            else -> {}
+                        }
 
-                            is ViewStates.UnAuthorized -> {
+                        when (serviceState) {
+                            is ServiceState.UnAuthorized -> {
                                 val key = navigator.items[navigator.items.lastIndex].key
-
                                 if (key != loginScreen.key && key != verifyScreen.key && key != splashScreen.key) {
                                     val message =
-                                        stringResource((state as ViewStates.UnAuthorized).message)
-
-
-                                    LaunchedEffect(Unit) {
+                                        stringResource((serviceState as ServiceState.UnAuthorized).message)
+                                    scope.launch {
                                         scaffoldState.snackbarHostState.showSnackbar(message = message)
-
                                         delay(200)
                                         if (navigator.items[navigator.items.lastIndex].key != loginScreen.key) {
                                             navigator.popAll()
                                             navigator.push(loginScreen)
                                         }
                                     }
+
                                 }
                             }
 
                             else -> {}
                         }
                     }
-
                 }
             }
         }
 
         AnimatedVisibility(
-            visible = networkState == NetworkStates.NetworkConnectionNONE || !BackgroundServiceApp.isServiceRunning(),
+            visible = networkState == NetworkStates.NetworkConnectionNONE || serviceState is ServiceState.Suspend,
             enter = slideInHorizontally(
                 initialOffsetX = { it },
                 animationSpec = tween(durationMillis = 500)
@@ -508,7 +510,6 @@ fun <T : BaseViewModel> BaseScreen(
                         modifier = Modifier.padding(end = 16.dp),
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        // Network Connection Icon
                         if (networkState == NetworkStates.NetworkConnectionNONE) {
                             Box(
                                 contentAlignment = Alignment.Center,
@@ -537,7 +538,7 @@ fun <T : BaseViewModel> BaseScreen(
                             }
                         }
 
-                        if (!BackgroundServiceApp.isServiceRunning()) {
+                        if (serviceState is ServiceState.Suspend) {
                             Box(
                                 contentAlignment = Alignment.Center,
                                 modifier = Modifier
