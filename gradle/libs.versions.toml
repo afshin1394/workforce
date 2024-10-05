@@ -20,6 +20,7 @@ compose-compiler = "1.5.6"
 compose-plugin = "1.6.11"
 junit = "4.13.2"
 kotlin = "2.0.0"
+landscapistCoil3 = "2.3.2"
 room = "2.7.0-alpha02"
 ksp = "2.0.0-1.0.21"
 sqlite = "2.5.0-SNAPSHOT"
@@ -66,7 +67,7 @@ sentry-android = "7.2.0"
 google-map = "4.3.1"
 kotlin1920-RC2 = "1.9.20-RC2"
 composeImageLoader = "1.7.8"
-kotlinx-serialization = "1.6.2"
+kotlinx-serialization = "1.7.3"
 connectivity_status= "1.2.0"
 orbital = "0.3.4"
 accompanist = "0.32.0"
@@ -101,6 +102,7 @@ compose-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview"
 compose-foundation = { module = "androidx.compose.foundation:foundation", version.ref = "compose" }
 compose-material = { module = "androidx.compose.material:material", version.ref = "compose" }
 
+landscapist-coil3 = { module = "com.github.skydoves:landscapist-coil3", version.ref = "landscapistCoil3" }
 logging-interceptor = { module = "com.squareup.okhttp3:logging-interceptor", version.ref = "loggingInterceptor" }
 map-sdk = { module = "ir.map:map-sdk", version.ref = "mapSdk" }
 mapbox-sdk-services = { module = "com.mapbox.mapboxsdk:mapbox-sdk-services", version.ref = "mapboxSdkTurf" }

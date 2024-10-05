@@ -93,7 +93,8 @@ kotlin {
                 implementation(libs.konnectivity)
                 implementation(libs.room.runtime)
                 implementation(libs.sqlite.bundled)
-                implementation("com.github.skydoves:landscapist-coil3:2.3.2")
+
+                implementation(libs.landscapist.coil3)
             }
         }
 
@@ -115,7 +116,7 @@ kotlin {
                 implementation(libs.ktor.client.logging)
                 implementation(libs.accompanist.permission)
 
-                implementation("org.osmdroid:osmdroid-android:6.1.6")
+                implementation(libs.osmdroid.android)
                 implementation(libs.kotlin.reflect)
 
 
@@ -191,6 +192,7 @@ android {
 
     buildTypes {
         getByName("release") {
+            isDebuggable = true
             isMinifyEnabled = false
             signingConfig = signingConfigs.getByName("release")
         }

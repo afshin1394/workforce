@@ -1,5 +1,6 @@
 package data.network.response.task
 
+import data.network.INetworkObject
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -17,4 +18,12 @@ data class Validate (
     val subtype : String? = null,
     @SerialName("required")
     val required : Boolean?= null,
-)
+) : INetworkObject {
+    override fun hasNullProperty(): Boolean {
+      return  (id == null || key == null || hide == null || layout == null || subtype == null || required == null)
+    }
+
+    override fun areAllMembersNull(): Boolean {
+       return (id == null && key == null && hide == null && layout == null && subtype == null && required == null)
+    }
+}
