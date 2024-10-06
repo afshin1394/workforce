@@ -73,7 +73,6 @@ abstract class BaseUseCase<out Type, in Params> {
     }
 
 
-
     private fun Exception.handleError(): ResultStatus {
         when (this) {
             is RedirectResponseException -> {

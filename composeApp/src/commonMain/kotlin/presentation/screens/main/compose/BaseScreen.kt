@@ -72,6 +72,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.material.Card
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.draw.clip
+import irancell.nwg.wfm.BackgroundServiceApp
+import irancell.nwg.wfm.openInternetSettings
 import utils.ServiceState
 
 
@@ -296,11 +298,11 @@ fun <T : BaseViewModel> BaseScreen(
                                 else -> {}
                             }
                             when (serviceState) {
-                                is ServiceState.UnAuthorized -> {
+                                is ServiceState.Faulty -> {
                                     val key = navigator.items[navigator.items.lastIndex].key
                                     if (key != loginScreen.key && key != verifyScreen.key && key != splashScreen.key) {
                                         val message =
-                                            stringResource((serviceState as ServiceState.UnAuthorized).message)
+                                            stringResource((serviceState as ServiceState.Faulty).message)
                                         scope.launch {
                                             scaffoldState.snackbarHostState.showSnackbar(message = message)
                                             delay(200)
@@ -309,10 +311,8 @@ fun <T : BaseViewModel> BaseScreen(
                                                 navigator.push(loginScreen)
                                             }
                                         }
-
                                     }
                                 }
-
                                 else -> {}
                             }
                         }
@@ -359,11 +359,8 @@ fun <T : BaseViewModel> BaseScreen(
                         modifier = Modifier.fillMaxWidth().fillMaxHeight().background(
                             backgroundBackground3
                         )
-
                     ) {
-
                         content(scaffoldState.snackbarHostState)
-
                         BackButtonHandler.backPress(onBackPressed = {
                             println("checkkkkvalueeee")
                             if (vpnDetectionStates !is VpnDetectionStates.ShowBottomSheet) {
@@ -372,12 +369,9 @@ fun <T : BaseViewModel> BaseScreen(
                         })
 
                         when (gpsState) {
-                            GpsState.Default -> {}
                             GpsState.Disabled -> {
                                 GPS.enableGpsDialog(provideAppContext())
                             }
-
-                            GpsState.Enabled -> {}
                             else -> {}
                         }
 
@@ -444,11 +438,11 @@ fun <T : BaseViewModel> BaseScreen(
                         }
 
                         when (serviceState) {
-                            is ServiceState.UnAuthorized -> {
+                            is ServiceState.Faulty -> {
                                 val key = navigator.items[navigator.items.lastIndex].key
                                 if (key != loginScreen.key && key != verifyScreen.key && key != splashScreen.key) {
                                     val message =
-                                        stringResource((serviceState as ServiceState.UnAuthorized).message)
+                                        stringResource((serviceState as ServiceState.Faulty).message)
                                     scope.launch {
                                         scaffoldState.snackbarHostState.showSnackbar(message = message)
                                         delay(200)
@@ -569,7 +563,7 @@ fun <T : BaseViewModel> BaseScreen(
                             .padding(18.dp)
                     ) {
                         Text(
-                            text = "You are offline",
+                            text = stringResource(MR.strings.internet_unavailable),
                             color = Color.White,
                             style = MaterialTheme.typography.body2
                         )
@@ -585,7 +579,7 @@ fun <T : BaseViewModel> BaseScreen(
                             .padding(18.dp)
                     ) {
                         Text(
-                            text = "Service is not running",
+                            text = stringResource(MR.strings.service_unavailable),
                             color = Color.White,
                             style = MaterialTheme.typography.body2
                         )
@@ -594,15 +588,17 @@ fun <T : BaseViewModel> BaseScreen(
 
                 LaunchedEffect(showTooltip) {
                     if (showTooltip) {
-                        delay(3000)
+                        delay(1000)
                         showTooltip = false
+                        openInternetSettings()
                     }
                 }
 
                 LaunchedEffect(showServiceTooltip) {
                     if (showServiceTooltip) {
-                        delay(3000)
+                        delay(1000)
                         showServiceTooltip = false
+                        BackgroundServiceApp.startBackgroundService()
                     }
                 }
             }

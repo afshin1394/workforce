@@ -21,7 +21,14 @@ import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
-sealed class ViewStates() {
+sealed class AvailabilityStatus {
+    data object NotRunning : AvailabilityStatus()
+    data object Available : AvailabilityStatus()
+    data object Unavailable : AvailabilityStatus()
+    data object NoInternet : AvailabilityStatus()
+}
+
+sealed class ViewStates {
     data object Default : ViewStates()
     data object Loading : ViewStates()
     data class Error(val message: StringResource) : ViewStates()
@@ -30,15 +37,13 @@ sealed class ViewStates() {
 }
 
 sealed interface ServiceState {
-    data object Running : ServiceState
     data object NotRunning : ServiceState
     data object Normal : ServiceState
-    data object Faulty : ServiceState
     data object Suspend : ServiceState
-    data class UnAuthorized(val message: StringResource) : ServiceState
+    data class Faulty(val message: StringResource) : ServiceState
 }
 
-sealed class VpnDetectionStates() {
+sealed class VpnDetectionStates {
     data object Default : VpnDetectionStates()
     data object HideBottomSheet : VpnDetectionStates()
     data object ShowBottomSheet : VpnDetectionStates()
@@ -50,7 +55,7 @@ sealed interface GpsState {
     data object Disabled : GpsState
 }
 
-sealed class NetworkStates() {
+sealed class NetworkStates {
     data object Default : NetworkStates()
     data object NetworkConnectionNONE : NetworkStates()
     data object NetworkConnectionWIFI : NetworkStates()
@@ -78,6 +83,9 @@ open class BaseViewModel : ViewModel(), KoinComponent {
     val vpnDetectionStates = _vpnDetectionState.asStateFlow()
     val gpsState = _gpsState.asStateFlow()
     private val konnectivity: Konnectivity = Konnectivity()
+    private val _availabilityStatus =
+        MutableStateFlow<AvailabilityStatus>(AvailabilityStatus.Unavailable)
+    val availabilityStatus = _availabilityStatus.asStateFlow()
 
     init {
         traceNetwork()
@@ -85,23 +93,27 @@ open class BaseViewModel : ViewModel(), KoinComponent {
         collectServiceState()
     }
 
+    fun updateAvailabilityState(availabilityStatus: AvailabilityStatus) {
+        _availabilityStatus.update { availabilityStatus }
+    }
+
     private fun collectServiceState() {
         viewModelScope.launch {
             BackgroundServiceApp.serviceState.collect {
                 when (it) {
-                    ServiceState.Faulty -> {
-                        _serviceState.update {
-                            ServiceState.UnAuthorized(MR.strings.unauthorized)
-                        }
+                    is ServiceState.Faulty -> {
+                        _serviceState.update { ServiceState.Faulty(MR.strings.unauthorized) }
                         BackgroundServiceApp.stopBackgroundService()
                     }
 
                     ServiceState.NotRunning -> {
                         _serviceState.update { ServiceState.NotRunning }
+                        updateAvailabilityState(AvailabilityStatus.NotRunning)
                     }
 
-                    ServiceState.Running -> {
-                        _serviceState.update { ServiceState.Running }
+                    ServiceState.Normal -> {
+                        _serviceState.update { ServiceState.Normal }
+                        updateAvailabilityState(AvailabilityStatus.Available)
                     }
 
                     else -> {}
@@ -166,7 +178,6 @@ open class BaseViewModel : ViewModel(), KoinComponent {
         }
     }
 
-
     private fun traceNetwork() {
         viewModelScope.launch(Dispatchers.Main) {
             konnectivity.currentNetworkConnectionState.collect { connection ->
@@ -191,6 +202,7 @@ open class BaseViewModel : ViewModel(), KoinComponent {
         _state.update { viewStates }
     }
 
+
     fun updateVpnDetectionState(vpnDetectionStates: VpnDetectionStates) {
         _vpnDetectionState.update { vpnDetectionStates }
     }
@@ -199,11 +211,11 @@ open class BaseViewModel : ViewModel(), KoinComponent {
 
         when (resultStatus) {
             is ResultStatus.CLIENT_EXCEPTION.FORBIDDEN -> {
-                _serviceState.update { ServiceState.UnAuthorized(MR.strings.unauthorized) }
+                _serviceState.update { ServiceState.Faulty(MR.strings.unauthorized) }
             }
 
             is ResultStatus.CLIENT_EXCEPTION.UNATHORIZED -> {
-                _serviceState.update { ServiceState.UnAuthorized(MR.strings.unauthorized) }
+                _serviceState.update { ServiceState.Faulty(MR.strings.unauthorized) }
             }
 
             is ResultStatus.CLIENT_EXCEPTION -> {

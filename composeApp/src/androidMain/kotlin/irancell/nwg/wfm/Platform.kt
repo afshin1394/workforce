@@ -24,6 +24,12 @@ actual fun openVpnSettings() {
     context.startActivity(intent)
 }
 
+actual fun openInternetSettings() {
+    val context = provideAppContext() as Context
+    val intent = Intent(Settings.ACTION_DATA_ROAMING_SETTINGS)
+    intent.addFlags(FLAG_ACTIVITY_NEW_TASK)
+    context.startActivity(intent)
+}
 
 actual fun provideAppContext() : Any{
     return App.INSTANCE

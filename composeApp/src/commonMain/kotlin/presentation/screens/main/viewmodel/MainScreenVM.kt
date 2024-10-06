@@ -1,13 +1,17 @@
 package presentation.screens.main.viewmodel
 
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
-
 import com.irancell.nwg.wfm.presentation.components.FilterSectionItem
 import presentation.model.FilterType
 import com.irancell.nwg.wfm.presentation.model.SelectableItem
+import com.plusmobileapps.konnectivity.Konnectivity
+import com.plusmobileapps.konnectivity.NetworkConnection
 import database.entity.GeneralLocationEntity
+import dev.icerock.moko.resources.StringResource
 import domain.models.LiveLocationDomain
 import domain.models.PhotoDomain
 import presentation.model.StateFilter
@@ -52,11 +56,14 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
+import presentation.screens.main.components.AvailabilityStatus
 import utils.AsyncResult
 
 import utils.AsyncStatus
 import utils.AvailabilityObjectId
+import utils.AvailabilityStatus
 import utils.BaseViewModel
+import utils.NetworkStates
 import utils.ServiceState
 import utils.TicketNumber
 import utils.ViewStates
@@ -114,7 +121,6 @@ class MainScreenVM(
     private val _events = MutableStateFlow<MainEvent>(MainEvent.Default)
     var events = _events.asStateFlow()
 
-
     var enableSuspendSubmit = mutableStateOf(false)
     var enableCancelSubmit = mutableStateOf(false)
 
@@ -133,7 +139,11 @@ class MainScreenVM(
     val generalLocationList = mutableStateListOf<GeneralLocationEntity>()
     val initFormsState = mutableStateListOf<InitFormDomain>()
 
+    private val konnectivity: Konnectivity = Konnectivity()
+
+
     init {
+        traceNetwork()
         getCurrentAvailability()
         getProfileName()
         getTasks()
@@ -142,6 +152,22 @@ class MainScreenVM(
 
     fun updateState(eventState: MainEvent) {
         _events.value = eventState
+    }
+
+    private fun traceNetwork() {
+        viewModelScope.launch(Dispatchers.Main) {
+            konnectivity.currentNetworkConnectionState.collect { connection ->
+                when (connection) {
+                    NetworkConnection.NONE -> {
+                        updateAvailabilityState(AvailabilityStatus.NoInternet)
+                    }
+
+                    else -> {
+                        updateAvailabilityState(if (_availability.value) AvailabilityStatus.Available else AvailabilityStatus.Unavailable)
+                    }
+                }
+            }
+        }
     }
 
 
@@ -305,6 +331,7 @@ class MainScreenVM(
 
                         println("testtttttttavaliblity ${it.data}")
                         it.data?.let { available ->
+                            updateAvailabilityState(if (available) AvailabilityStatus.Available else AvailabilityStatus.Unavailable)
                             _availability.update { available }
                             if (_availability.value) {
                                 BackgroundServiceApp.startBackgroundService()
@@ -343,11 +370,13 @@ class MainScreenVM(
                             message = _availability.value.toString()
                         )
                         if (_availability.value) {
+                            updateAvailabilityState(AvailabilityStatus.Available)
                             BackgroundServiceApp.startBackgroundService()
                             BackgroundServiceApp.updateServiceState(ServiceState.Normal)
                             getTasks()
 
                         } else {
+                            updateAvailabilityState(AvailabilityStatus.Unavailable)
                             Napier.log(
                                 LogLevel.ASSERT,
                                 "storeAvailabilityUseCase stop back",
@@ -362,7 +391,6 @@ class MainScreenVM(
             }
         }
     }
-
 
     val suspendItems = mutableStateListOf(
         SelectableItem(1, "Equipment failure", false),
