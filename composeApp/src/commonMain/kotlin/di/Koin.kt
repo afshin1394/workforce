@@ -1,10 +1,6 @@
 package di
 
 import io.ktor.client.*
-
-import io.ktor.client.*
-
-import io.ktor.util.*
 import presentation.screens.main.viewmodel.MainScreenVM
 import com.irancell.nwg.wfm.presentation.screens.main.viewmodel.SettingScreenVM
 import presentation.screens.ticket_process.viewModel.TicketProcessVM
@@ -60,7 +56,6 @@ import domain.usecase.usecase.photo.DeleteByComponentKeyUseCase
 import domain.usecase.usecase.photo.DeletePhotoByComponentKeyAndIdUseCase
 import domain.usecase.usecase.photo.GetPhotoByComponentKeyUseCase
 import domain.usecase.usecase.photo.InsertPhotoUseCase
-
 import domain.usecase.usecase.profile.GetProfileUseCase
 import domain.usecase.usecase.profile.StoreProfileUseCase
 import domain.usecase.usecase.steps.SendStepsOfTicketToServerUseCase
@@ -88,7 +83,6 @@ import io.ktor.client.plugins.logging.Logging
 import io.ktor.client.request.headers
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
-
 import io.ktor.http.contentType
 import io.ktor.serialization.kotlinx.json.json
 import irancell.nwg.wfm.configureForPlatform
@@ -211,7 +205,7 @@ fun httpModule() = module {
             }
             configure()
             defaultRequest {
-                url(DeploymentBASEURL)
+                url(ProductionBASEURL)
                 contentType(ContentType.Application.Json)
                 headers {
                     append(
@@ -246,7 +240,7 @@ fun httpModule() = module {
             }
             configure()
             defaultRequest {
-                url(DeploymentBASEURL)
+                url(ProductionBASEURL)
                 contentType(ContentType.Application.Json)
                 headers {
 

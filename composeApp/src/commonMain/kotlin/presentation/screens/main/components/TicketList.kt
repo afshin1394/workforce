@@ -1,5 +1,7 @@
 package presentation.screens.main.components
 
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -31,7 +33,7 @@ import kotlinx.coroutines.launch
 import presentation.screens.main.viewmodel.MainScreenVM
 import utils.TaskState
 
-@OptIn(ExperimentalMaterialApi::class)
+@OptIn(ExperimentalMaterialApi::class, ExperimentalFoundationApi::class)
 @Composable
 fun TicketListScreen(
     tasks: ArrayList<TaskDomain>,
@@ -117,12 +119,18 @@ fun TicketListScreen(
 
                 }.filter {
                     it.basic_info.instanceStateId.toString().contains(selectState.lowercase())
-                }
+                }.sortedByDescending { it.basic_info.ticket_id?.toLong() ?: (0..Long.MAX_VALUE).random() }
                 Napier.log(LogLevel.ASSERT, "selectState", message = selectState)
                 if (!refreshing) {
                     Napier.log(LogLevel.ASSERT, "refreshing", message = refreshing.toString())
-                    itemsIndexed(items = filteredList) { _: Int, item: TaskDomain ->
-                        ticketCard(modifier = Modifier.wrapContentHeight(),
+                    itemsIndexed(items = filteredList,
+                        key = { index, item ->
+                            if (index == 0) index else item.basic_info.ticket_id
+                                ?: (0..Int.MAX_VALUE).random()
+                        }
+                    ) { _: Int, item: TaskDomain ->
+                        ticketCard(modifier = Modifier.wrapContentHeight()
+                            .animateItemPlacement(tween(400)),
                             task = item,
                             onActionClick = {
                                 Napier.log(

@@ -9,6 +9,7 @@ interface Platform {
 expect fun getPlatform(): Platform
 expect fun openAppSettings()
 expect fun openVpnSettings()
+expect fun openInternetSettings()
 expect fun provideAppContext(): Any
 expect fun <T : Any> T.nullIfAllPropertiesNull(): T?
 

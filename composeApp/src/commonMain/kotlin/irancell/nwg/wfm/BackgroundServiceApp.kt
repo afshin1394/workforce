@@ -10,5 +10,6 @@ internal expect class BackgroundServiceApp {
         fun updateServiceState(serviceState: ServiceState)
         fun startBackgroundService()
         fun stopBackgroundService()
+        fun isServiceRunning(): Boolean
     }
 }
