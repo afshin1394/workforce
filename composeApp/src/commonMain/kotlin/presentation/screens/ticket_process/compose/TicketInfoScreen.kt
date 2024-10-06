@@ -33,7 +33,7 @@ import presentation.theme.textInverse
 
 
 class TicketInfoScreen(
-    private val ticketId : String,
+    private val ticketId: String,
     private val ticket_number: String
 ) : Screen {
     @OptIn(ExperimentalMaterialApi::class, FlowPreview::class)
@@ -45,25 +45,23 @@ class TicketInfoScreen(
         val navigator = LocalNavigator.currentOrThrow
 
         val ticketProcessScreen =
-            rememberScreen(presentation.nav.Screen.TicketProcess.TicketProcessScreen(ticketId,ticket_number))
+            rememberScreen(
+                presentation.nav.Screen.TicketProcess.TicketProcessScreen(
+                    ticketId,
+                    ticket_number
+                )
+            )
 
         val viewModel: TicketInfoVM = koinInject()
 
-
         val viewState by viewModel.state.collectAsState()
         var isClickable by remember { mutableStateOf(true) }
-
-
 
         LaunchedEffect(Unit) {
             viewModel.getInitialForm(ticket_number)
             viewModel.updateTicketNumber(ticket_number)
             viewModel.updateTicketId(ticketId)
         }
-
-
-
-
 
         BaseScreen(
             viewModel = viewModel,
@@ -91,7 +89,11 @@ class TicketInfoScreen(
                     ), onClick = {
                         if (isClickable) {
                             isClickable = false
-                            navigator.push(TicketProcessScreen(viewModel.ticketId.value,viewModel.ticketNumber.value))
+                            navigator.push(
+                                TicketInfoScreen(
+                                    viewModel.ticketId.value, viewModel.ticketNumber.value
+                                )
+                            )
                             scope.launch {
                                 delay(500)
                                 isClickable = true
@@ -112,7 +114,7 @@ class TicketInfoScreen(
                 ) {
                     items(viewModel.initFormsState) { item ->
 
-                        SimpleEditable(item.key,item.value)
+                        SimpleEditable(item.key, item.value)
                     }
                 }
 
