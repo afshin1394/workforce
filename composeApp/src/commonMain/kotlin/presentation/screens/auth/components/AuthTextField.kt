@@ -1,6 +1,5 @@
 package presentation.screens.auth.components
 
-
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -20,14 +19,8 @@ import presentation.theme.surfaceDefault
 import presentation.theme.textPlaceHolder
 import dev.icerock.moko.resources.ImageResource
 import dev.icerock.moko.resources.compose.painterResource
-import io.github.aakira.napier.LogLevel
-import io.github.aakira.napier.Napier
 import irancell.nwg.wfm.MR
 import presentation.theme.body_large
-
-
-
-
 
 @Composable
 fun AuthTextField(
@@ -114,10 +107,8 @@ fun AuthTextField(
                         modifier.clickable {
                             visualTransformation = PasswordVisualTransformation()
                         })
-
                 }
             }
-
         }
     }
 
