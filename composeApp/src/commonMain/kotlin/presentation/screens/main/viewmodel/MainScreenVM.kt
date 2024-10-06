@@ -163,7 +163,14 @@ class MainScreenVM(
                     }
 
                     else -> {
-                        updateAvailabilityState(if (_availability.value) AvailabilityStatus.Available else AvailabilityStatus.Unavailable)
+                        val serviceRunning = BackgroundServiceApp.isServiceRunning()
+                        if (_availability.value) {
+                            updateAvailabilityState(
+                                if (serviceRunning) AvailabilityStatus.Available else AvailabilityStatus.NotRunning
+                            )
+                        } else {
+                            updateAvailabilityState(AvailabilityStatus.Unavailable)
+                        }
                     }
                 }
             }
