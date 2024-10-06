@@ -283,7 +283,7 @@ class TicketProcessScreen(
 
                                   }else{
                                       scope.launch {
-                                          val errors = validateComponents(viewModel.tempComponentList) {
+                                          val errors = validateComponents(viewModel.tempComponentList,false) {
                                               viewModel.updateTempComponentList(it)
                                           }
                                           if (errors.isNotEmpty()) {
@@ -454,7 +454,10 @@ class TicketProcessScreen(
                     ) else Modifier
                 ) {
                     processBar(stepDetails, currentLevelState)
+
                     if (reloadState) {
+
+
                         initialize(
                             isChild = false,
                             scrollingState = scrollingState.value,

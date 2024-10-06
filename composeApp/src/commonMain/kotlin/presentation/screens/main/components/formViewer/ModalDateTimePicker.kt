@@ -93,6 +93,7 @@ import utils.getLocalDateTimeFromLong
 fun ModalDateTimePicker(
     readOnly : Boolean,
     disable : Boolean,
+    showErrorMessageValidation:Boolean,
     processLogicDomain: ProcessLogicDomain,
     title: String,
     titleDatePiker: String,
@@ -160,7 +161,7 @@ fun ModalDateTimePicker(
                 ) {
                     append(titleDatePiker)
                 }
-                if (requiredLogic) {
+                if (requiredLogic||errorMessage.localized() != "") {
                     withStyle(style = SpanStyle(color = Color.Red, fontSize = 18.sp)) {
                         append(" *")
                     }
@@ -219,7 +220,7 @@ fun ModalDateTimePicker(
                     )
 
                 })
-            if (errorMessage.localized() != "") {
+            if (errorMessage.localized() != ""  && !showErrorMessageValidation) {
                 Text(
                     text = errorMessage.localized(),
                     color = Color.Red,

@@ -28,5 +28,7 @@ data class ValidateDomain(
     val domainList:String?=null,
     val validationType:String?=null,
     @Transient
-    val messageError: ResourceFormattedStringDesc? = null
-) 
+    val messageError: ResourceFormattedStringDesc? = null,
+    @Transient
+    val firstCheck: Boolean? = true
+)
