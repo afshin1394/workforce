@@ -41,6 +41,7 @@ import presentation.theme.textSecondary
 fun CheckList(
     readOnly : Boolean,
     disable : Boolean,
+    showErrorMessageValidation:Boolean,
     processLogicDomain: ProcessLogicDomain,
     title: String,
     errorMessage: ResourceFormattedStringDesc,
@@ -82,7 +83,7 @@ fun CheckList(
                 ) {
                     append(title)
                 }
-                if (requiredLogic) {
+                if (requiredLogic ||errorMessage.localized() != "") {
                     withStyle(style = SpanStyle(color = Color.Red, fontSize = 18.sp)) {
                         append(" *")
                     }
@@ -123,7 +124,7 @@ fun CheckList(
             }
 
 
-            if (currentErrorMessage.localized().isNotEmpty()) {
+            if (currentErrorMessage.localized().isNotEmpty() && !showErrorMessageValidation) {
                 Text(
                     text = currentErrorMessage.localized(),
                     color = Color.Red,
