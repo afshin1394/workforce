@@ -1,7 +1,9 @@
 package presentation.screens.main.compose
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -21,7 +23,6 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
-import androidx.compose.material.icons.Icons
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -67,6 +68,14 @@ import utils.BottomSheetTypes
 import utils.GpsState
 import utils.NetworkStates
 import utils.VpnDetectionStates
+import androidx.compose.foundation.clickable
+import androidx.compose.material.Card
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.draw.clip
+import irancell.nwg.wfm.BackgroundServiceApp
+import irancell.nwg.wfm.openInternetSettings
+import utils.ServiceState
+
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
@@ -102,6 +111,7 @@ fun <T : BaseViewModel> BaseScreen(
     val scope = rememberCoroutineScope()
     val vpnScaffoldState = rememberBottomSheetScaffoldState()
     val networkState by viewModel.networkState.collectAsState()
+    val serviceState by viewModel.serviceState.collectAsState()
 
     OnLifecycleEvent { _, event ->
         when (event) {
@@ -285,26 +295,25 @@ fun <T : BaseViewModel> BaseScreen(
                                     viewModel.updateState(ViewStates.Default)
                                 }
 
-
-                                is ViewStates.UnAuthorized -> {
+                                else -> {}
+                            }
+                            when (serviceState) {
+                                is ServiceState.Faulty -> {
                                     val key = navigator.items[navigator.items.lastIndex].key
                                     if (key != loginScreen.key && key != verifyScreen.key && key != splashScreen.key) {
                                         val message =
-                                            stringResource((state as ViewStates.UnAuthorized).message)
-
-                                        LaunchedEffect(Unit) {
+                                            stringResource((serviceState as ServiceState.Faulty).message)
+                                        scope.launch {
                                             scaffoldState.snackbarHostState.showSnackbar(message = message)
-
                                             delay(200)
-                                            navigator.popAll()
-                                            navigator.push(loginScreen)
+                                            if (navigator.items[navigator.items.lastIndex].key != loginScreen.key) {
+                                                navigator.popAll()
+                                                navigator.push(loginScreen)
+                                            }
                                         }
                                     }
                                 }
-
-                                else -> {
-
-                                }
+                                else -> {}
                             }
                         }
 
@@ -350,11 +359,8 @@ fun <T : BaseViewModel> BaseScreen(
                         modifier = Modifier.fillMaxWidth().fillMaxHeight().background(
                             backgroundBackground3
                         )
-
                     ) {
-
                         content(scaffoldState.snackbarHostState)
-
                         BackButtonHandler.backPress(onBackPressed = {
                             println("checkkkkvalueeee")
                             if (vpnDetectionStates !is VpnDetectionStates.ShowBottomSheet) {
@@ -363,12 +369,9 @@ fun <T : BaseViewModel> BaseScreen(
                         })
 
                         when (gpsState) {
-                            GpsState.Default -> {}
                             GpsState.Disabled -> {
                                 GPS.enableGpsDialog(provideAppContext())
                             }
-
-                            GpsState.Enabled -> {}
                             else -> {}
                         }
 
@@ -431,54 +434,173 @@ fun <T : BaseViewModel> BaseScreen(
                                 viewModel.updateState(ViewStates.Default)
                             }
 
+                            else -> {}
+                        }
 
-                            is ViewStates.UnAuthorized -> {
+                        when (serviceState) {
+                            is ServiceState.Faulty -> {
                                 val key = navigator.items[navigator.items.lastIndex].key
-
                                 if (key != loginScreen.key && key != verifyScreen.key && key != splashScreen.key) {
                                     val message =
-                                        stringResource((state as ViewStates.UnAuthorized).message)
-
-
-                                    LaunchedEffect(Unit) {
+                                        stringResource((serviceState as ServiceState.Faulty).message)
+                                    scope.launch {
                                         scaffoldState.snackbarHostState.showSnackbar(message = message)
-
                                         delay(200)
                                         if (navigator.items[navigator.items.lastIndex].key != loginScreen.key) {
                                             navigator.popAll()
                                             navigator.push(loginScreen)
                                         }
                                     }
+
                                 }
                             }
 
                             else -> {}
                         }
                     }
-
                 }
             }
         }
 
         AnimatedVisibility(
-            visible = networkState == NetworkStates.NetworkConnectionNONE,
+            visible = networkState == NetworkStates.NetworkConnectionNONE || serviceState is ServiceState.NotRunning,
+            enter = slideInHorizontally(
+                initialOffsetX = { it },
+                animationSpec = tween(durationMillis = 500)
+            ),
+            exit = slideOutHorizontally(
+                targetOffsetX = { it },
+                animationSpec = tween(durationMillis = 500)
+            ),
             modifier = Modifier
                 .align(Alignment.BottomEnd)
                 .padding(bottom = 24.dp)
         ) {
-            Napier.log(LogLevel.ASSERT, "GHiyooo", message = networkState.toString())
-            Card(
+            Box(
                 modifier = Modifier
-                    .height(60.dp),
-                shape = RoundedCornerShape(topStart = 30.dp, bottomStart = 30.dp),
-                elevation = 22.dp,
-                backgroundColor = Color.White
+                    .fillMaxSize()
+                    .padding(bottom = 24.dp),
+                contentAlignment = Alignment.BottomEnd
             ) {
-                Image(
-                    painter = painterResource(MR.images.warning),
-                    contentDescription = "No Connection",
-                    modifier = Modifier.size(50.dp).padding(12.dp)
-                )
+                var showTooltip by remember { mutableStateOf(false) }
+                var showServiceTooltip by remember { mutableStateOf(false) }
+
+                Card(
+                    modifier = Modifier
+                        .height(60.dp),
+                    shape = RoundedCornerShape(topStart = 30.dp, bottomStart = 30.dp),
+                    elevation = 22.dp,
+                    backgroundColor = Color.White
+                ) {
+                    Row(
+                        modifier = Modifier.padding(end = 16.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        if (networkState == NetworkStates.NetworkConnectionNONE) {
+                            Box(
+                                contentAlignment = Alignment.Center,
+                                modifier = Modifier
+                                    .size(60.dp)
+                                    .padding(8.dp)
+                            ) {
+                                Image(
+                                    painter = painterResource(MR.images.circle_red_warning),
+                                    contentDescription = "No Connection",
+                                    modifier = Modifier
+                                        .size(30.dp)
+                                        .clip(CircleShape)
+                                        .background(Color.LightGray)
+                                        .clickable {
+                                            showServiceTooltip = false
+                                            showTooltip = true
+                                        }
+                                )
+                                CircularProgressIndicator(
+                                    modifier = Modifier
+                                        .size(46.dp),
+                                    color = Color(0xFFE50000),
+                                    strokeWidth = 3.dp
+                                )
+                            }
+                        }
+
+                        if (serviceState is ServiceState.NotRunning) {
+                            Box(
+                                contentAlignment = Alignment.Center,
+                                modifier = Modifier
+                                    .size(60.dp)
+                                    .padding(8.dp)
+                            ) {
+                                Image(
+                                    painter = painterResource(MR.images.circle_orange_warning),
+                                    contentDescription = "Service Status",
+                                    modifier = Modifier
+                                        .size(30.dp)
+                                        .clip(CircleShape)
+                                        .background(Color.LightGray)
+                                        .clickable {
+                                            showTooltip = false
+                                            showServiceTooltip = true
+                                        }
+                                )
+                                CircularProgressIndicator(
+                                    modifier = Modifier
+                                        .size(46.dp),
+                                    color = Color(0xFFFFA500),
+                                    strokeWidth = 3.dp
+                                )
+                            }
+                        }
+                    }
+                }
+
+                AnimatedVisibility(visible = showTooltip) {
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.BottomEnd)
+                            .offset(y = (-60).dp, x = (-10).dp)
+                            .background(Color.Black, shape = CircleShape)
+                            .padding(18.dp)
+                    ) {
+                        Text(
+                            text = stringResource(MR.strings.internet_unavailable),
+                            color = Color.White,
+                            style = MaterialTheme.typography.body2
+                        )
+                    }
+                }
+
+                AnimatedVisibility(visible = showServiceTooltip) {
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.BottomEnd)
+                            .offset(y = (-60).dp, x = (-10).dp)
+                            .background(Color.Black, shape = CircleShape)
+                            .padding(18.dp)
+                    ) {
+                        Text(
+                            text = stringResource(MR.strings.service_unavailable),
+                            color = Color.White,
+                            style = MaterialTheme.typography.body2
+                        )
+                    }
+                }
+
+                LaunchedEffect(showTooltip) {
+                    if (showTooltip) {
+                        delay(1000)
+                        showTooltip = false
+                        openInternetSettings()
+                    }
+                }
+
+                LaunchedEffect(showServiceTooltip) {
+                    if (showServiceTooltip) {
+                        delay(1000)
+                        showServiceTooltip = false
+                        BackgroundServiceApp.startBackgroundService()
+                    }
+                }
             }
         }
     }

@@ -11,11 +11,12 @@ import kotlin.math.tan
 
 fun validateComponents(
     components: List<ComponentDomain>,
+    firstCheck:Boolean,
     clearTempComponentListCallback: (List<ComponentDomain>) -> Unit
 ): Map<String, List<StringDesc>> {
     val errors = mutableMapOf<String, List<ResourceFormattedStringDesc>>()
     Napier.log(LogLevel.ASSERT, tag = "validateComponent", message = components.toList().toString())
-
+    println("haniiiiiiiivalidateComponents  ${firstCheck}")
     fun updateComponentsRecursively(component: ComponentDomain): ComponentDomain {
         return when (component.type) {
             FormViewerTypes.TextField -> {
@@ -31,9 +32,11 @@ fun validateComponents(
                         }
                         component.copy(
                             validate = component.validate?.copy(
-                                messageError = validationErrors
+                                messageError = validationErrors,
+                                firstCheck = firstCheck
                             ) ?: ValidateDomain(
-                                messageError = validationErrors
+                                messageError = validationErrors,
+                                firstCheck = firstCheck
                             )
                         )
                     } ?: run {
@@ -59,9 +62,11 @@ fun validateComponents(
                         }
                         component.copy(
                             validate = component.validate?.copy(
-                                messageError = validationErrors
+                                messageError = validationErrors,
+                                firstCheck = firstCheck
                             ) ?: ValidateDomain(
-                                messageError = validationErrors
+                                messageError = validationErrors,
+                                firstCheck = firstCheck
                             )
                         )
                     } ?: run {
@@ -92,9 +97,11 @@ fun validateComponents(
 
                         component.copy(
                             validate = component.validate?.copy(
-                                messageError = validationErrors
+                                messageError = validationErrors,
+                                firstCheck = firstCheck
                             ) ?: ValidateDomain(
-                                messageError = validationErrors
+                                messageError = validationErrors,
+                                firstCheck = firstCheck
                             )
                         )
                     } ?: run {
@@ -119,9 +126,11 @@ fun validateComponents(
                         }
                         return component.copy(
                             validate = component.validate?.copy(
-                                messageError = validationErrors
+                                messageError = validationErrors,
+                                firstCheck = firstCheck
                             ) ?: ValidateDomain(
-                                messageError = validationErrors
+                                messageError = validationErrors,
+                                firstCheck = firstCheck
                             )
                         )
                     } ?: run {
@@ -151,9 +160,11 @@ fun validateComponents(
 
                         component.copy(
                             validate = component.validate?.copy(
-                                messageError = validationErrors
+                                messageError = validationErrors,
+                                firstCheck = firstCheck
                             ) ?: ValidateDomain(
-                                messageError = validationErrors
+                                messageError = validationErrors,
+                                firstCheck = firstCheck
                             )
                         )
                     } ?: run {
@@ -181,9 +192,11 @@ fun validateComponents(
 
                         component.copy(
                             validate = component.validate?.copy(
-                                messageError = validationErrors
+                                messageError = validationErrors,
+                                firstCheck = firstCheck
                             ) ?: ValidateDomain(
-                                messageError = validationErrors
+                                messageError = validationErrors,
+                                firstCheck = firstCheck
                             )
                         )
                     } ?: run {
@@ -211,9 +224,11 @@ fun validateComponents(
                         }
                         component.copy(
                             validate = component.validate?.copy(
-                                messageError = validationErrors
+                                messageError = validationErrors,
+                                firstCheck = firstCheck
                             ) ?: ValidateDomain(
-                                messageError = validationErrors
+                                messageError = validationErrors,
+                                firstCheck = firstCheck
                             )
                         )
                     } ?: run { return component }
@@ -241,9 +256,11 @@ fun validateComponents(
                     }
                     component.copy(
                         validate = component.validate?.copy(
-                            messageError = validationErrors
+                            messageError = validationErrors,
+                            firstCheck = firstCheck
                         ) ?: ValidateDomain(
-                            messageError = validationErrors
+                            messageError = validationErrors,
+                            firstCheck = firstCheck
                         )
                     )
                 } ?: run {
@@ -272,9 +289,11 @@ fun validateComponents(
                     }
                     component.copy(
                         validate = component.validate?.copy(
-                            messageError = validationErrors
+                            messageError = validationErrors,
+                            firstCheck = firstCheck
                         ) ?: ValidateDomain(
-                            messageError = validationErrors
+                            messageError = validationErrors,
+                            firstCheck = firstCheck
                         )
                     )
                 } ?: run {

@@ -43,6 +43,7 @@ fun Editable(
     type: TypeEditable,
     processLogicDomain: ProcessLogicDomain,
     value: String,
+    showErrorMessageValidation:Boolean,
     placeholder: String,
     imeAction: ImeAction,
     keyboardType: KeyboardType,
@@ -67,7 +68,7 @@ fun Editable(
     val requiredLogic = processLogicDomain.required
     val validateLogic = processLogicDomain.validate
     val errorMessageValidateLogic = processLogicDomain.errorMessage
-    val textFieldBackground = if (errorMessage.localized() != "" || validateLogic) {
+    val textFieldBackground = if (errorMessage.localized() != "" && !showErrorMessageValidation|| validateLogic) {
         Color.Red
     } else if (readOnlyLogic || disableLogic) {
         surfaceBrandDisabled
@@ -88,7 +89,7 @@ fun Editable(
                 ) {
                     append(placeholder)
                 }
-                if (requiredLogic) {
+                if (requiredLogic||errorMessage.localized() != "") {
                     withStyle(style = SpanStyle(color = Color.Red, fontSize = 18.sp)) {
                         append(" *")
                     }
@@ -138,7 +139,7 @@ fun Editable(
 
 
                 )
-            if (errorMessage.localized() != "") {
+            if (errorMessage.localized() != "" && !showErrorMessageValidation) {
                 Text(
                     text = errorMessage.localized(),
                     color = Color.Red,

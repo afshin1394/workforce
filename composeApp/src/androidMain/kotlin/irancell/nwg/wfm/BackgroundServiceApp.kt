@@ -15,46 +15,32 @@ import android.os.Build
 import android.os.IBinder
 import android.os.SystemClock
 import android.util.Log
-import androidx.compose.runtime.*
-import androidx.compose.runtime.remember
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.plusmobileapps.konnectivity.Konnectivity
 import com.plusmobileapps.konnectivity.NetworkConnection
 import database.entity.GeneralLocationEntity
-import domain.models.LiveLocationDomain
 import domain.usecase.ResultStatus
-
 import domain.usecase.usecase.location.SendLocationToServerUseCase
 import domain.usecase.usecase.location.StoreLocationDataUseCase
 import domain.usecase.usecase.steps.UpdateStepsUseCase
 import domain.usecase.usecase.ticket.UpdateTaskUseCase
 import io.github.aakira.napier.LogLevel
 import io.github.aakira.napier.Napier
-
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonObject
-import kotlinx.serialization.serializer
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import utils.AlarmAction
 import utils.AsyncStatus
-import utils.AvailabilityObjectId
-import utils.NetworkStates
 import utils.ServiceState
-import utils.TicketNumber
-import utils.ViewStates
 import utils.getCurrentDate
 import java.util.concurrent.TimeUnit
 
@@ -74,7 +60,6 @@ internal actual class BackgroundServiceApp : Service(), KoinComponent {
     private val REQUEST_CODE_1 = 1
     private val REQUEST_CODE_2 = 2
     private val REQUEST_CODE_3 = 3
-
 
     val konnectivity: Konnectivity = Konnectivity()
     private val _networkState = MutableStateFlow(false)
@@ -104,7 +89,7 @@ internal actual class BackgroundServiceApp : Service(), KoinComponent {
 
         }
 
-        fun isServiceRunning(): Boolean {
+        actual fun isServiceRunning(): Boolean {
             val activityManager =
                 (provideAppContext() as Context).getSystemService(ACTIVITY_SERVICE) as ActivityManager
             for (service in activityManager.getRunningServices(Int.MAX_VALUE)) {
@@ -141,7 +126,11 @@ internal actual class BackgroundServiceApp : Service(), KoinComponent {
 
         /*getSharedPref().put(isRunningGPS, true)*/
         val notification =
-            createNotification(applicationContext, "Ready to work", "iTicket is running on you device")
+            createNotification(
+                applicationContext,
+                "Ready to work",
+                "iTicket is running on you device"
+            )
         val intent1 = Intent(this, BackgroundServiceApp::class.java)
         intent1.setAction(AlarmAction.UPDATE.title)
 
@@ -186,27 +175,26 @@ internal actual class BackgroundServiceApp : Service(), KoinComponent {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-
-
         try {
             scope.launch(Dispatchers.Main) {
+                println("YOYOYO Wusssuppp ${isServiceRunning().toString()}")
+                println("YOYOYO Wusssuppp ${_serviceState.value}")
+                if (_serviceState.value != ServiceState.Suspend && _serviceState.value !is ServiceState.Faulty) {
+                    val newState =
+                        if (isServiceRunning()) ServiceState.Normal else ServiceState.NotRunning
+                    updateServiceState(newState)
+                }
                 val data = telephonyData.getTelephonyData()
-
                 println("service action${intent?.action}")
-
                 when (intent?.action) {
-
-
                     AlarmAction.SEND_LOCATION.title -> {
                         startSendLocationAlarm()
                         sendLocationToServer()
-
                     }
 
                     AlarmAction.STORE_LOCATION.title -> {
                         startStoreLocationAlarm()
                         storeLocation(data)
-
                     }
 
                     AlarmAction.UPDATE.title -> {
@@ -218,22 +206,17 @@ internal actual class BackgroundServiceApp : Service(), KoinComponent {
                         }
                     }
                 }
-
-
             }
 
         } catch (e: Exception) {
 
         }
-
-
-
         return START_STICKY
     }
 
     private suspend fun BackgroundServiceApp.storeLocation(data: JsonObject) {
 
-        Log.i("networkState", "storeLocation: "+_networkState.value)
+        Log.i("networkState", "storeLocation: " + _networkState.value)
 
         val networkInfo: String = when (_networkState.value) {
             true -> {
@@ -244,8 +227,6 @@ internal actual class BackgroundServiceApp : Service(), KoinComponent {
                 Json.encodeToString(JsonObject.serializer(), createEmptyTelephonyData())
             }
         }
-
-
 
         storeLocationDataUseCase(
             GeneralLocationEntity(
@@ -260,20 +241,13 @@ internal actual class BackgroundServiceApp : Service(), KoinComponent {
                 AsyncStatus.ERROR -> {
                     val errorMessage = it.message!!
                     println("checkGpsPerAction storeLocationDataUseCase Error")
-
-                }
-
-                AsyncStatus.EMPTY -> {
-
-                }
-
-                AsyncStatus.LOADING -> {
                 }
 
                 AsyncStatus.SUCCESS -> {
                     println("checkGpsPerAction sustoreLocationDataUseCaseccess")
-
                 }
+
+                else -> {}
             }
         }
     }
@@ -285,19 +259,10 @@ internal actual class BackgroundServiceApp : Service(), KoinComponent {
             when (it.status) {
                 AsyncStatus.ERROR -> {
                     if (it.resultStatus is ResultStatus.CLIENT_EXCEPTION.UNATHORIZED || it.resultStatus is ResultStatus.CLIENT_EXCEPTION.FORBIDDEN)
-                        _serviceState.update { ServiceState.Faulty }
-
+                        _serviceState.update { ServiceState.Faulty(MR.strings.unauthorized) }
                 }
 
-                AsyncStatus.LOADING -> {
-                }
-
-                AsyncStatus.EMPTY -> {
-                }
-
-                AsyncStatus.SUCCESS -> {
-
-                }
+                else -> {}
             }
         }
     }
@@ -306,25 +271,17 @@ internal actual class BackgroundServiceApp : Service(), KoinComponent {
         konnectivity.currentNetworkConnectionState.collect { connection ->
             when (connection) {
                 NetworkConnection.NONE -> {
-
                     _networkState.update { false }
-
                 }
 
                 NetworkConnection.WIFI -> {
-
                     _networkState.update { true }
-
                 }
 
                 NetworkConnection.CELLULAR -> {
-
                     _networkState.update { true }
-
                 }
             }
-
-
         }
     }
 
@@ -334,15 +291,8 @@ internal actual class BackgroundServiceApp : Service(), KoinComponent {
                 when (it.status) {
                     AsyncStatus.ERROR -> {
                         if (it.resultStatus is ResultStatus.CLIENT_EXCEPTION.UNATHORIZED || it.resultStatus is ResultStatus.CLIENT_EXCEPTION.FORBIDDEN)
-                            _serviceState.update { ServiceState.Faulty }
+                            _serviceState.update { ServiceState.Faulty(MR.strings.unauthorized) }
                         println("TaskCallApi${"ERROR"}")
-                    }
-
-                    AsyncStatus.LOADING -> {
-                    }
-
-                    AsyncStatus.EMPTY -> {
-
                     }
 
                     AsyncStatus.SUCCESS -> {
@@ -350,6 +300,8 @@ internal actual class BackgroundServiceApp : Service(), KoinComponent {
                         println("TaskCallApi${"SUCCESS"}")
                         Log.i("getAllTask", "onStartCommand: CallApi" + it.data)
                     }
+
+                    else -> {}
                 }
             }
     }
@@ -358,43 +310,30 @@ internal actual class BackgroundServiceApp : Service(), KoinComponent {
         updateStepsUseCase(Unit).collect {
             when (it.status) {
                 AsyncStatus.ERROR -> {
-
-
                     Napier.log(
                         LogLevel.ASSERT,
                         "updateSteps",
                         message = "ERROR: " + it.message
                     )
-
                 }
 
                 AsyncStatus.EMPTY -> {
                     Napier.log(LogLevel.ASSERT, "updateSteps", message = "EMPTY : ")
-
                 }
 
                 AsyncStatus.LOADING -> {
                     Napier.log(LogLevel.ASSERT, "updateSteps", message = "LOADING: ")
-
                 }
 
                 AsyncStatus.SUCCESS -> {
-
-
                     Napier.log(
                         LogLevel.ASSERT,
                         "updateSteps",
                         message = "SUCCESS: " + it.data
                     )
-
-
                 }
-
-
             }
         }
-
-
     }
 
     private fun startUpdateAlarm() {
@@ -456,10 +395,8 @@ internal actual class BackgroundServiceApp : Service(), KoinComponent {
         with(NotificationManagerCompat.from(this)) {
             notify(Notification_ID, notification)
         }
-
         return notification
     }
-
 
     private fun createNotificationChannel(name: String, content: String) {
 
@@ -485,7 +422,6 @@ internal actual class BackgroundServiceApp : Service(), KoinComponent {
     private fun createEmptyTelephonyData(): JsonObject {
         val jsonArray = Json.decodeFromString<JsonArray>("[]")
         val jsonObject = JsonObject(mapOf("info" to jsonArray))
-
         val wrappedJsonString = Json.encodeToString(JsonObject.serializer(), jsonObject)
 
         return Json.parseToJsonElement(wrappedJsonString).jsonObject

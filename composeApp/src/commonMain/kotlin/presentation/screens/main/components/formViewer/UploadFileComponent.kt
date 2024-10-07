@@ -53,6 +53,7 @@ fun UploadFileComponent(
     index : Int,
     item : ComponentDomain,
     label : String,
+    showErrorMessageValidation:Boolean,
     errorMessage: ResourceFormattedStringDesc,
     modifier: Modifier,
     uploadList: List<ValueDomain>,
@@ -68,7 +69,7 @@ fun UploadFileComponent(
     val validateLogic = item.processLogicDomain.validate
     val errorMessageValidateLogic = item.processLogicDomain.errorMessage
 
-    val backgroundColor = if (errorMessage.localized() != "" || validateLogic) {
+    val backgroundColor = if (errorMessage.localized() != ""  && !showErrorMessageValidation|| validateLogic) {
         Color.Red
     } else if (readOnlyLogic || disableLogic) {
         surfaceBrandDisabled
@@ -126,7 +127,7 @@ fun UploadFileComponent(
         ) {
             append(label)
         }
-        if (requiredLogic) {
+        if (requiredLogic ||errorMessage.localized() != "") {
             withStyle(style = SpanStyle(color = Color.Red, fontSize = 18.sp)) {
                 append(" *")
             }
@@ -216,11 +217,16 @@ fun UploadFileComponent(
 
 
             errorMessage.localized().let {
-                Text(
-                    text = it,
-                    color = Color.Red,
-                    modifier = Modifier.padding(end = 14.dp, start = 14.dp)
-                )
+
+                if (!showErrorMessageValidation){
+                    Text(
+                        text = it,
+                        color = Color.Red,
+                        modifier = Modifier.padding(end = 14.dp, start = 14.dp)
+                    )
+
+                }
+
             }
             if (validateLogic) {
                 errorMessageValidateLogic?.let {

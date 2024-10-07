@@ -125,7 +125,7 @@ fun TicketListScreen(
                     Napier.log(LogLevel.ASSERT, "refreshing", message = refreshing.toString())
                     itemsIndexed(items = filteredList,
                         key = { index, item ->
-                            if (index == 0) index else item.basic_info.ticket_number
+                            if (index == 0) index else item.basic_info.ticket_id
                                 ?: (0..Int.MAX_VALUE).random()
                         }
                     ) { _: Int, item: TaskDomain ->

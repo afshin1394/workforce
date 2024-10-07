@@ -73,6 +73,7 @@ import presentation.theme.textSecondary
 fun DropDownMultiChoice(
     readOnly: Boolean,
     disable: Boolean,
+    showErrorMessageValidation:Boolean,
     processLogicDomain: ProcessLogicDomain,
     titleDropDown: String,
     errorMessage: ResourceFormattedStringDesc,
@@ -121,7 +122,7 @@ fun DropDownMultiChoice(
                 ) {
                     append(titleDropDown)
                 }
-                if (requiredLogic) {
+                if (requiredLogic ||errorMessage.localized() != "") {
                     withStyle(style = SpanStyle(color = Color.Red, fontSize = 18.sp)) {
                         append(" *")
                     }
@@ -238,7 +239,7 @@ fun DropDownMultiChoice(
 
             }
 
-            if (errorMessage.localized() != "") {
+            if (errorMessage.localized() != "" && !showErrorMessageValidation) {
                 Text(
                     text = errorMessage.localized(),
                     color = Color.Red,

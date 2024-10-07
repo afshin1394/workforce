@@ -41,6 +41,7 @@ import presentation.theme.textSecondary
 fun Radio(
     readOnly: Boolean,
     disable: Boolean,
+    showErrorMessageValidation:Boolean,
     processLogicDomain: ProcessLogicDomain,
     title: String,
     errorMessage: ResourceFormattedStringDesc,
@@ -71,7 +72,7 @@ fun Radio(
                 ) {
                     append(title)
                 }
-                if (requiredLogic) {
+                if (requiredLogic ||errorMessage.localized() != "") {
                     withStyle(style = SpanStyle(color = Color.Red, fontSize = 18.sp)) {
                         append(" *")
                     }
@@ -105,7 +106,7 @@ fun Radio(
 
                 }
             }
-            if (errorMessage.localized() != "") {
+            if (errorMessage.localized() != "" && !showErrorMessageValidation) {
                 Text(
                     text = errorMessage.localized(),
                     color = Color.Red,

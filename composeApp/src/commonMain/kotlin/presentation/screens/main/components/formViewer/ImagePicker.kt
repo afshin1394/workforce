@@ -43,6 +43,7 @@ fun ImagePicker(
     itemIndex : Int,
     item : ComponentDomain,
     componentId: String,
+    showErrorMessageValidation:Boolean,
     errorMessage: ResourceFormattedStringDesc,
     photoDomainList: List<PhotoDomain>,
     onTakePhoto: (obj : Any?,resultTakePhoto: String) -> Unit,
@@ -58,7 +59,7 @@ fun ImagePicker(
     val validateLogic = item.processLogicDomain.validate
     val errorMessageValidateLogic =item.processLogicDomain.errorMessage
 
-    val backgroundColor = if (errorMessage.localized() != "" || validateLogic) {
+    val backgroundColor = if (errorMessage.localized() != "" &&!showErrorMessageValidation || validateLogic) {
         Color.Red
     } else if (readOnlyLogic || disableLogic) {
         surfaceBrandDisabled
@@ -109,7 +110,7 @@ fun ImagePicker(
                 ) {
                     append(item.label?:"")
                 }
-                if (requiredLogic) {
+                if (requiredLogic  ||errorMessage.localized() != "") {
                     withStyle(style = SpanStyle(color = Color.Red, fontSize = 18.sp)) {
                         append(" *")
                     }
@@ -136,11 +137,16 @@ fun ImagePicker(
             }
             Spacer(modifier = Modifier.height(6.dp))
             errorMessage.localized().let {
-                Text(
-                    text = it,
-                    color = Color.Red,
-                    modifier = Modifier
-                )
+
+                if (!showErrorMessageValidation){
+                    Text(
+                        text = it,
+                        color = Color.Red,
+                        modifier = Modifier
+                    )
+
+                }
+
             }
 
             if (validateLogic) {

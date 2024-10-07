@@ -175,6 +175,7 @@ fun initialize(
                             processLogicDomain = item.processLogicDomain,
                             type = TypeEditable.NUMBER,
                             value = valueState.value,
+                            showErrorMessageValidation = item.validate?.firstCheck?:true,
                             placeholder = item.label.toString(),
                             imeAction = ImeAction.None,
                             errorMessage = if (errorMessageState.value == initialMessageError) errorMessageState.value else initialMessageError,
@@ -220,6 +221,7 @@ fun initialize(
                             processLogicDomain = item.processLogicDomain,
                             type = TypeEditable.TEXTAREA,
                             value = valueState.value,
+                            showErrorMessageValidation = item.validate?.firstCheck?:true,
                             placeholder = item.label.toString(),
                             imeAction = ImeAction.None,
                             errorMessage = if (errorMessageState.value == initialMessageError) errorMessageState.value else initialMessageError,
@@ -262,6 +264,7 @@ fun initialize(
                             processLogicDomain = item.processLogicDomain,
                             type = TypeEditable.SHORT_TEXT,
                             value = valueState.value,
+                            showErrorMessageValidation = item.validate?.firstCheck?:true,
                             placeholder = item.label.toString(),
                             imeAction = ImeAction.None,
                             errorMessage = if (errorMessageState.value == initialMessageError) errorMessageState.value else initialMessageError,
@@ -307,6 +310,7 @@ fun initialize(
                             processLogicDomain = item.processLogicDomain,
                             type = TypeEditable.LATLONG,
                             value = valueState.value,
+                            showErrorMessageValidation = item.validate?.firstCheck?:true,
                             placeholder = item.label.toString(),
                             imeAction = ImeAction.None,
                             errorMessage = if (errorMessageState.value == initialMessageError) errorMessageState.value else initialMessageError,
@@ -352,6 +356,7 @@ fun initialize(
                             processLogicDomain = item.processLogicDomain,
                             type = TypeEditable.PHONE,
                             value = valueState.value,
+                            showErrorMessageValidation = item.validate?.firstCheck?:true,
                             placeholder = item.label.toString(),
                             imeAction = ImeAction.None,
                             errorMessage = if (errorMessageState.value == initialMessageError) errorMessageState.value else initialMessageError,
@@ -397,6 +402,7 @@ fun initialize(
                             processLogicDomain = item.processLogicDomain,
                             type = TypeEditable.EMAIL,
                             value = valueState.value,
+                            showErrorMessageValidation = item.validate?.firstCheck?:true,
                             placeholder = item.label.toString(),
                             imeAction = ImeAction.None,
                             keyboardType = KeyboardType.Email,
@@ -448,6 +454,7 @@ fun initialize(
                         ModalDateTimePicker(
                             readOnly = item.readOnly,
                             disable = item.disabled,
+                            showErrorMessageValidation = item.validate?.firstCheck?:true,
                             processLogicDomain = item.processLogicDomain,
                             selectedDateState.value,
                             item.label.toString(),
@@ -482,6 +489,7 @@ fun initialize(
                         ModalDatePicker(
                             item.readOnly,
                             item.disabled,
+                            item.validate?.firstCheck?:true,
                             item.processLogicDomain,
                             selectedDateState.value,
                             item.label.toString(),
@@ -519,6 +527,7 @@ fun initialize(
                         ModalTimePicker(
                             item.readOnly,
                             item.disabled,
+                            item.validate?.firstCheck?:true,
                             item.processLogicDomain,
                             selectedDateState.value,
                             item.label.toString(),
@@ -564,6 +573,7 @@ fun initialize(
                             index = index,
                             item = item,
                             label = item.key ?: "",
+                            showErrorMessageValidation = item.validate?.firstCheck?:true,
                             errorMessage = if (errorMessage.value == initialMessageError) errorMessage.value else initialMessageError,
                             modifier = Modifier,
                             uploadList = uploadDomainList.value,
@@ -647,6 +657,7 @@ fun initialize(
                             index,
                             item,
                             taskID,
+                            showErrorMessageValidation = item.validate?.firstCheck?:true,
                             if (errorMessageState.value == initialMessageError) errorMessageState.value else initialMessageError,
                             findPhotosByComponentId(photoDomainList, item.id, item.key),
                             onTakePhoto = { obj, resultTakePhoto ->
@@ -698,9 +709,11 @@ fun initialize(
                             mutableStateListOf(*item.values?.toTypedArray() ?: arrayOf())
                         }
 
+
                         Radio(
                             item.readOnly,
                             item.disabled,
+                            item.validate?.firstCheck?:true,
                             item.processLogicDomain ?: ProcessLogicDomain().copy(),
                             componentLabel.toString(),
                             if (errorMessageState.value == initialMessageError) errorMessageState.value else initialMessageError,
@@ -742,6 +755,7 @@ fun initialize(
                             CheckList(
                                 item.readOnly,
                                 item.disabled,
+                                showErrorMessageValidation = item.validate?.firstCheck?:true,
                                 item.processLogicDomain,
                                 componentLabel.toString(),
                                 if (errorMessageState.value == initialMessageError) errorMessageState.value else initialMessageError,
@@ -786,6 +800,7 @@ fun initialize(
                                 DropDownMultiChoice(
                                     item.readOnly,
                                     item.disabled,
+                                    showErrorMessageValidation = item.validate?.firstCheck?:true,
                                     item.processLogicDomain,
                                     componentLabel.toString(),
                                     if (errorMessageState.value == initialMessageError) errorMessageState.value else initialMessageError,
@@ -834,6 +849,7 @@ fun initialize(
                         DropDownSingleChoice(
                             item.readOnly,
                             item.disabled,
+                            showErrorMessageValidation = item.validate?.firstCheck?:true,
                             item.processLogicDomain,
                             componentLabel.toString(),
                             if (errorMessageState.value == initialMessageError) errorMessageState.value else initialMessageError,
@@ -960,7 +976,7 @@ fun updateNumberValidationError(
             emptyList()
         )
     errorMessageState.value = messageError
-    val updatedValidate = item.validate?.copy(messageError = messageError)
+    val updatedValidate = item.validate?.copy(messageError = messageError, firstCheck = false)
     item.validate = updatedValidate
 }
 
@@ -975,7 +991,7 @@ fun updateTextareaValidationError(
             emptyList()
         )
     errorMessageState.value = messageError
-    val updatedValidate = item.validate?.copy(messageError = messageError)
+    val updatedValidate = item.validate?.copy(messageError = messageError, firstCheck = false)
     item.validate = updatedValidate
 }
 
@@ -991,7 +1007,7 @@ fun updateShortTextValidationError(
             emptyList()
         )
     errorMessageState.value = messageError
-    val updatedValidate = item.validate?.copy(messageError = messageError)
+    val updatedValidate = item.validate?.copy(messageError = messageError, firstCheck = false)
     item.validate = updatedValidate
 }
 
@@ -1007,7 +1023,7 @@ fun updateLatLongValidationError(
             emptyList()
         )
     errorMessageState.value = messageError
-    val updatedValidate = item.validate?.copy(messageError = messageError)
+    val updatedValidate = item.validate?.copy(messageError = messageError, firstCheck = false)
     item.validate = updatedValidate
 }
 
@@ -1023,7 +1039,7 @@ fun updatePhoneValidationError(
             emptyList()
         )
     errorMessageState.value = messageError
-    val updatedValidate = item.validate?.copy(messageError = messageError)
+    val updatedValidate = item.validate?.copy(messageError = messageError, firstCheck = false)
     item.validate = updatedValidate
 }
 
@@ -1038,7 +1054,8 @@ fun updateEmailValidationError(
             emptyList()
         )
     errorMessageState.value = messageError
-    val updatedValidate = item.validate?.copy(messageError = messageError)
+    val updatedValidate = item.validate?.copy(messageError = messageError,
+        firstCheck = false)
     item.validate = updatedValidate
 }
 
@@ -1054,7 +1071,8 @@ fun updateDateTimeValidationError(
             emptyList()
         )
     errorMessageState.value = messageError
-    val updatedValidate = item.validate?.copy(messageError = messageError)
+    val updatedValidate = item.validate?.copy(messageError = messageError,
+        firstCheck = false)
     item.validate = updatedValidate
 
 }
@@ -1099,7 +1117,8 @@ fun updateFileUploadValidationError(
 
                 errorMessageState.value = tempErrorMessage
                 val updatedValidate = item.validate?.copy(
-                    messageError = tempErrorMessage
+                    messageError = tempErrorMessage,
+                    firstCheck = false
                 )
                 item.validate = updatedValidate
             }
@@ -1118,7 +1137,7 @@ fun updateImageViewValidationError(
             emptyList()
         )
     errorMessageState.value = messageError
-    val updatedValidate = item.validate?.copy(messageError = messageError)
+    val updatedValidate = item.validate?.copy(messageError = messageError, firstCheck = false)
 
     item.validate = updatedValidate
 }
@@ -1136,7 +1155,7 @@ fun updateSelectedComponentValidationError(
             emptyList()
         )
     errorMessageState.value = messageError
-    val updatedValidate = item.validate?.copy(messageError = messageError)
+    val updatedValidate = item.validate?.copy(messageError = messageError,firstCheck = false)
     item.validate = updatedValidate
 }
 
