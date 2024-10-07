@@ -22,12 +22,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 
 import com.irancell.nwg.wfm.presentation.theme.*
 import dev.icerock.moko.resources.ImageResource
+import dev.icerock.moko.resources.StringResource
 import dev.icerock.moko.resources.compose.painterResource
+import dev.icerock.moko.resources.compose.stringResource
 import io.github.aakira.napier.Napier
 import irancell.nwg.wfm.MR
 import kotlinx.coroutines.launch
@@ -394,5 +399,81 @@ fun customBottomSheetWithImage(
                     }
             )
         }
+    }
+}
+
+
+@Composable
+fun bottomSheetDoubleActionWithMessage(
+    bottomSheetDoubleActionModel: BottomSheetActionModel,
+    title: StringResource,
+    message:StringResource,
+    onFirstButtonClick: () -> Unit = {},
+    onSecondButtonClick: () -> Unit = {}
+) {
+    val titleDialog = stringResource(title)
+    val messageDialog= stringResource(message)
+
+    Column(
+        modifier = Modifier
+
+            .padding(6.dp),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+
+        Text(
+            text = titleDialog,
+            style = TextStyle(
+                fontWeight = FontWeight.Bold,
+                fontSize = 16.sp
+            ),
+            modifier = Modifier.padding(bottom = 16.dp, top = 16.dp)
+        )
+
+        Text(
+            text = messageDialog,
+            textAlign = TextAlign.Center,
+            style = TextStyle(
+                fontWeight = FontWeight.Normal,
+                fontSize = 14.sp
+            ),
+            modifier = Modifier.padding(end = 6.dp, start = 6.dp)
+        )
+
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(surfaceDefault)
+                .padding(vertical = spacing3X, horizontal = spacing2X),
+            verticalAlignment = Alignment.Bottom,
+            horizontalArrangement = Arrangement.Center
+        ) {
+            CustomButton(
+                customButtonData = CustomButtonData(
+                    title = bottomSheetDoubleActionModel.firstButtonText,
+                    textColor = bottomSheetDoubleActionModel.firstButtonTextColor,
+                    bottomSheetDoubleActionModel.firstButtonColor
+                ),
+                modifier = Modifier
+                    .weight(1f).clickable {
+                        onFirstButtonClick()
+                    }
+            )
+            Spacer(modifier = Modifier.padding(horizontal = spacing2X))
+            CustomButton(
+                customButtonData = CustomButtonData(
+                    title = bottomSheetDoubleActionModel.secondButtonText,
+                    textColor = bottomSheetDoubleActionModel.secondColorTextColor,
+                    bottomSheetDoubleActionModel.secondButtonColor
+                ), modifier = Modifier
+                    .weight(1f).clickable {
+                        onSecondButtonClick()
+                    }
+            )
+
+        }
+
     }
 }

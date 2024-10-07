@@ -5,7 +5,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 
 actual class GPS {
     actual companion object {
-        @Composable
+
         actual fun enableGpsDialog(context: Any) {
         }
 

@@ -43,6 +43,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
@@ -59,10 +60,14 @@ import irancell.nwg.wfm.LifecycleEvent
 import irancell.nwg.wfm.MR
 import irancell.nwg.wfm.OnLifecycleEvent
 import irancell.nwg.wfm.openVpnSettings
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import presentation.model.BottomSheetActionModel
+import presentation.screens.main.events.MainEvent
 import presentation.theme.surfaceBrandDefault
+import presentation.theme.textInverse
+import presentation.theme.textInverseDisabled
 import utils.BottomSheetTypes
 import utils.GpsState
 import utils.NetworkStates
@@ -101,7 +106,9 @@ fun <T : BaseViewModel> BaseScreen(
     val isDrawerInitialized = remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
     val vpnScaffoldState = rememberBottomSheetScaffoldState()
+    val gpsScaffoldState = rememberBottomSheetScaffoldState()
     val networkState by viewModel.networkState.collectAsState()
+
 
     OnLifecycleEvent { _, event ->
         when (event) {
@@ -167,6 +174,8 @@ fun <T : BaseViewModel> BaseScreen(
                 drawerContent = {
                     drawerContent()
                 }) {
+
+
                 BottomSheetScaffold(modifier = Modifier.onGloballyPositioned {
                     if (!isDrawerInitialized.value) {
                         isDrawerInitialized.value = true
@@ -175,34 +184,86 @@ fun <T : BaseViewModel> BaseScreen(
                         }
                     }
                 },
-                    scaffoldState = if (vpnDetectionStates == VpnDetectionStates.ShowBottomSheet) vpnScaffoldState else scaffoldState,
+                    scaffoldState = when {
+                        vpnDetectionStates == VpnDetectionStates.ShowBottomSheet -> {
+                            vpnScaffoldState
+                        }
+                        gpsState == GpsState.Disabled -> {
+                            gpsScaffoldState
+                        }
+                        else -> {
+                            scaffoldState
+                        }
+                    },
                     topBar = { topBar() },
                     sheetPeekHeight = 0.dp,
                     sheetGesturesEnabled = false,
                     sheetShape = RoundedCornerShape(topEnd = radius, topStart = radius),
                     sheetContent = {
-                        if (vpnDetectionStates is VpnDetectionStates.ShowBottomSheet) {
-                            showVpnBottomSheetHandler()
-                        } else {
-                            CustomBottomSheet(scaffoldState.bottomSheetState,
-                                hasHeader = bottomSheetHasHeader,
-                                title = bottomSheetTitle,
-                                showClose = isShwCloseBtnBottomSheet,
-                                type = typeBottomSheet,
-                                content = {
-                                    bottomSheetContent(scaffoldState.bottomSheetState)
-                                },
-                                onClose = {
-                                    onCloseBottomSheet()
-                                },
-                                bottomBar = {
-                                    bottomBarBottomSheetContent(scaffoldState.bottomSheetState)
-                                })
+                        when {
+                            vpnDetectionStates is VpnDetectionStates.ShowBottomSheet -> {
+                                showVpnBottomSheetHandler()
+                            }
+                            gpsState is GpsState.Disabled -> {
+
+
+
+                                bottomSheetDoubleActionWithMessage(
+                                    BottomSheetActionModel(
+                                        stringResource(MR.strings.cancel),
+                                        Color.Transparent,
+                                        textInverseDisabled,
+                                        stringResource(MR.strings.enable),
+                                        surfaceBrandDefault,
+                                        textInverse
+                                    ),
+                                    MR.strings.GPS_Permission,
+                                    MR.strings.disc_gps_permission,
+
+                                    onFirstButtonClick = {
+                                        scope.launch {
+                                            gpsScaffoldState.bottomSheetState.collapse()
+                                        }
+                                    },
+                                    onSecondButtonClick = {
+                                        GPS.enableGpsDialog(provideAppContext())
+                                    }
+                                )
+
+                                LaunchedEffect(gpsScaffoldState.bottomSheetState.isCollapsed) {
+                                    if (gpsState is GpsState.Disabled && gpsScaffoldState.bottomSheetState.isCollapsed) {
+                                        delay(300)
+                                        gpsScaffoldState.bottomSheetState.expand()
+                                    }
+                                }
+
+                            }
+                            else -> {
+                                CustomBottomSheet(
+                                    scaffoldState.bottomSheetState,
+                                    hasHeader = bottomSheetHasHeader,
+                                    title = bottomSheetTitle,
+                                    showClose = isShwCloseBtnBottomSheet,
+                                    type = typeBottomSheet,
+                                    content = {
+                                        bottomSheetContent(scaffoldState.bottomSheetState)
+                                    },
+                                    onClose = {
+                                        onCloseBottomSheet()
+                                    },
+                                    bottomBar = {
+                                        bottomBarBottomSheetContent(scaffoldState.bottomSheetState)
+                                    }
+                                )
+                            }
                         }
-                    }) {
+                    }
+                ) {
                     Column(
-                        modifier = if (scaffoldState.bottomSheetState.isCollapsed) Modifier.fillMaxSize()
-                        else Modifier.fillMaxSize().blur(7.dp)
+                        modifier = if (scaffoldState.bottomSheetState.isCollapsed && gpsScaffoldState.bottomSheetState.isCollapsed)
+                            Modifier.fillMaxSize()
+                        else
+                            Modifier.fillMaxSize().blur(7.dp)
                     ) {
 
                         Box(
@@ -217,13 +278,24 @@ fun <T : BaseViewModel> BaseScreen(
                                 }
                             })
                             when (gpsState) {
-                                GpsState.Default -> {}
-
-                                GpsState.Disabled -> {
-                                    GPS.enableGpsDialog(provideAppContext())
+                                GpsState.Default -> {
+                                    scope.launch {
+                                        gpsScaffoldState.bottomSheetState.collapse()
+                                    }
                                 }
 
-                                GpsState.Enabled -> {}
+                                GpsState.Disabled -> {
+
+
+
+                                }
+
+                                GpsState.Enabled -> {
+                                    scope.launch {
+                                        gpsScaffoldState.bottomSheetState.collapse()
+                                    }
+
+                                }
                                 else -> {}
                             }
                             when (state) {
@@ -313,7 +385,17 @@ fun <T : BaseViewModel> BaseScreen(
             }
         } else {
             BottomSheetScaffold(modifier = Modifier.background(color = backgroundBackground3),
-                scaffoldState = if (vpnDetectionStates == VpnDetectionStates.ShowBottomSheet) vpnScaffoldState else scaffoldState,
+                scaffoldState = when {
+                    vpnDetectionStates == VpnDetectionStates.ShowBottomSheet -> {
+                        vpnScaffoldState
+                    }
+                    gpsState == GpsState.Disabled -> {
+                        gpsScaffoldState
+                    }
+                    else -> {
+                        scaffoldState
+                    }
+                },
                 topBar = {
                     topBar()
                 },
@@ -321,28 +403,67 @@ fun <T : BaseViewModel> BaseScreen(
                 sheetGesturesEnabled = false,
                 sheetShape = RoundedCornerShape(topEnd = radius, topStart = radius),
                 sheetContent = {
-                    if (vpnDetectionStates is VpnDetectionStates.ShowBottomSheet) {
-                        showVpnBottomSheetHandler()
-                    } else {
-                        CustomBottomSheet(scaffoldState.bottomSheetState,
-                            hasHeader = bottomSheetHasHeader,
-                            title = bottomSheetTitle,
-                            showClose = isShwCloseBtnBottomSheet,
-                            type = typeBottomSheet,
-                            content = {
-                                bottomSheetContent(scaffoldState.bottomSheetState)
-                            },
-                            onClose = {
-                                onCloseBottomSheet()
-                            },
-                            bottomBar = {
-                                bottomBarBottomSheetContent(scaffoldState.bottomSheetState)
-                            })
+                    when {
+                        vpnDetectionStates is VpnDetectionStates.ShowBottomSheet -> {
+                            showVpnBottomSheetHandler()
+                        }
+                        gpsState is GpsState.Disabled -> {
+
+
+
+                            bottomSheetDoubleActionWithMessage(
+                                BottomSheetActionModel(
+                                    stringResource(MR.strings.cancel),
+                                    Color.Transparent,
+                                    textInverseDisabled,
+                                    stringResource(MR.strings.enable),
+                                    surfaceBrandDefault,
+                                    textInverse
+                                ),
+                                MR.strings.GPS_Permission,
+                                MR.strings.disc_gps_permission,
+
+                                onFirstButtonClick = {
+                                    scope.launch {
+                                        gpsScaffoldState.bottomSheetState.collapse()
+                                    }
+                                },
+                                onSecondButtonClick = {
+                                    GPS.enableGpsDialog(provideAppContext())
+                                }
+                            )
+
+                            LaunchedEffect(gpsScaffoldState.bottomSheetState.isCollapsed) {
+                                if (gpsState is GpsState.Disabled && gpsScaffoldState.bottomSheetState.isCollapsed) {
+                                    delay(300)
+                                    gpsScaffoldState.bottomSheetState.expand()
+                                }
+                            }
+
+                        }
+                        else -> {
+                            CustomBottomSheet(
+                                scaffoldState.bottomSheetState,
+                                hasHeader = bottomSheetHasHeader,
+                                title = bottomSheetTitle,
+                                showClose = isShwCloseBtnBottomSheet,
+                                type = typeBottomSheet,
+                                content = {
+                                    bottomSheetContent(scaffoldState.bottomSheetState)
+                                },
+                                onClose = {
+                                    onCloseBottomSheet()
+                                },
+                                bottomBar = {
+                                    bottomBarBottomSheetContent(scaffoldState.bottomSheetState)
+                                }
+                            )
+                        }
                     }
                 }) {
 
                 Column(
-                    modifier = if (scaffoldState.bottomSheetState.isExpanded && shouldBlurOnBottomSheetExpansion) Modifier.fillMaxSize()
+                    modifier = if ((scaffoldState.bottomSheetState.isExpanded || gpsScaffoldState.bottomSheetState.isExpanded) && shouldBlurOnBottomSheetExpansion) Modifier.fillMaxSize()
                         .blur(7.dp) else Modifier.fillMaxSize()
                 ) {
 
@@ -365,10 +486,14 @@ fun <T : BaseViewModel> BaseScreen(
                         when (gpsState) {
                             GpsState.Default -> {}
                             GpsState.Disabled -> {
-                                GPS.enableGpsDialog(provideAppContext())
                             }
 
-                            GpsState.Enabled -> {}
+                            GpsState.Enabled -> {
+
+                                scope.launch {
+                                    gpsScaffoldState.bottomSheetState.collapse()
+                                }
+                            }
                             else -> {}
                         }
 

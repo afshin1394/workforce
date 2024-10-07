@@ -61,18 +61,21 @@ actual class GPS {
             return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
         }
 
-        @Composable
+
         actual fun enableGpsDialog(context: Any) {
 
             Napier.log(LogLevel.ASSERT,"GPSPermission", message = "enableGPS")
+            val intent = Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            (context as Context).startActivity(intent)
 
-            CustomDialog(true, message =  MR.strings.disc_gps_permission, title = MR.strings.GPS_Permission,
-                onConfirm = {
-                    val intent = Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
-                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    (context as Context).startActivity(intent)
-
-                }, onDismiss = {}, titleButton = MR.strings.enable)
+//            CustomDialog(true, message =  MR.strings.disc_gps_permission, title = MR.strings.GPS_Permission,
+//                onConfirm = {
+//                    val intent = Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
+//                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//                    (context as Context).startActivity(intent)
+//
+//                }, onDismiss = {}, titleButton = MR.strings.enable)
 
         }
     }
