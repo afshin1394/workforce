@@ -18,7 +18,7 @@ interface TaskDao {
     @Query("DELETE FROM TaskEntity")
     suspend fun deleteAll()
 
-    @Query("SELECT * FROM TaskEntity")
+    @Query("SELECT * FROM TaskEntity ORDER BY ticket_id DESC")
     suspend fun selectAll(): List<TaskEntity>
 
     @Query("UPDATE TaskEntity SET ticket_state = :ticketState WHERE ticket_number = :ticketNumber")
