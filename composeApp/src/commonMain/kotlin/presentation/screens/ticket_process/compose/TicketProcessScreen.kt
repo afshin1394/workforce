@@ -40,6 +40,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
+import presentation.components.TicketProcessTopBar
 import presentation.model.BottomSheetActionModel
 import presentation.model.SingleButtonActionModel
 import presentation.nav.Screen.Main.Menu
@@ -76,7 +77,6 @@ class TicketProcessScreen(
         var indexPhotoSelected by remember { mutableStateOf(0) }
         var componentKey by remember { mutableStateOf("0") }
         var componentId by remember { mutableStateOf("0") }
-
         val positionSelectedPhotoForEdit by viewModel.positionSelected.collectAsState()
         var isBottomSheetOpen by remember { mutableStateOf(true) }
         val events by viewModel.events
@@ -87,18 +87,11 @@ class TicketProcessScreen(
         val state by viewModel.state.collectAsState()
         val savedIndex by viewModel.savedIndex.collectAsState()
         val savedParentIndex by viewModel.savedParentIndex.collectAsState()
-
         var isClickable by remember { mutableStateOf(true) }
         val mainScreen = rememberScreen(Menu.MyTickets)
-
         val ticketFlowCompletedState = viewModel.ticketFlowCompleted.collectAsState()
-
         val updateTaskCompleteState = viewModel.updateTasksComplete.collectAsState()
         val scrollingState = viewModel.scrollingPosition.collectAsState()
-
-
-
-
 
         LaunchedEffect(Unit) {
             viewModel.updateTicketId(ticketId)
@@ -158,9 +151,7 @@ class TicketProcessScreen(
 
 
         fun backClick() {
-
             if (viewModel.events.value == TicketProcessEvent.Default) {
-
                 scope.launch {
                     async { viewModel.saveAndDeletePhotoByComponentKey() }.await()
                     if (state is ViewStates.Success) {
@@ -200,7 +191,14 @@ class TicketProcessScreen(
             typeBottomSheet = if (viewModel.events.value == TicketProcessEvent.TicketFlowCompleted) "Success" else "Default",
             bottomSheetHasHeader = viewModel.events.value != TicketProcessEvent.Default,
             topBar = {
-                MenuItemsTopBar(stringResource(MR.strings.ticket_process)) {
+                TicketProcessTopBar(stringResource(MR.strings.ticket_process), onInfoClick = {
+                    navigator.push(
+                        TicketInfoScreen(
+                            ticketId = viewModel.ticketId.value,
+                            ticket_number = viewModel.ticketNumber.value
+                        )
+                    )
+                }, onBackClick = {
                     Napier.log(
                         LogLevel.ASSERT,
                         tag = "backButtonEvent",
@@ -214,14 +212,11 @@ class TicketProcessScreen(
                             isClickable = true
                         }
                     }
-                }
+                })
             },
             bottomSheetTitle = bottomSheetTitle,
-
             bottomBarBottomSheetContent = {
-
                 when (events) {
-
                     TicketProcessEvent.PhotoPreview -> {
 
                     }
@@ -248,72 +243,59 @@ class TicketProcessScreen(
                                     componentKey,
                                     componentId
                                 )
-
-
                             })
                         scope.launch {
                             scaffoldState.bottomSheetState.expand()
                         }
-
-
                     }
 
                     TicketProcessEvent.Default -> {
-
                         bottomSingleActionComponent(
                             SingleButtonActionModel(
                                 stringResource(MR.strings.resume),
                                 surfaceBrandDefault,
                                 textInverse
                             ), onClick = {
-
-
                                 viewModel.handleLogics {
-                                  if (it.size>0){
+                                    if (it.size > 0) {
 
 
-                                      scope.launch {
-                                          val errors = mutableMapOf<String, List<ResourceFormattedStringDesc>>()
+                                        scope.launch {
+                                            val errors =
+                                                mutableMapOf<String, List<ResourceFormattedStringDesc>>()
 
-                                          it.forEach {
-                                              errors[it.componentId] = arrayListOf()
-                                          }
-                                          viewModel.showFirstError(errors)
-                                      }
+                                            it.forEach {
+                                                errors[it.componentId] = arrayListOf()
+                                            }
+                                            viewModel.showFirstError(errors)
+                                        }
 
-                                  }else{
-                                      scope.launch {
-                                          val errors = validateComponents(viewModel.tempComponentList,false) {
-                                              viewModel.updateTempComponentList(it)
-                                          }
-                                          if (errors.isNotEmpty()) {
-                                              viewModel.showFirstError(errors)
-                                          }
+                                    } else {
+                                        scope.launch {
+                                            val errors = validateComponents(
+                                                viewModel.tempComponentList,
+                                                false
+                                            ) {
+                                                viewModel.updateTempComponentList(it)
+                                            }
+                                            if (errors.isNotEmpty()) {
+                                                viewModel.showFirstError(errors)
+                                            }
 
-                                          if (errors.isEmpty()) {
-                                              async { viewModel.saveAndDeletePhotoByComponentKey() }.await()
-                                              if (state is ViewStates.Success) {
-                                                  viewModel.updateLevel(PROCEED.NEXT)
-                                              }
-                                          }
-                                      }
-
-                                  }
-
+                                            if (errors.isEmpty()) {
+                                                async { viewModel.saveAndDeletePhotoByComponentKey() }.await()
+                                                if (state is ViewStates.Success) {
+                                                    viewModel.updateLevel(PROCEED.NEXT)
+                                                }
+                                            }
+                                        }
+                                    }
                                 }
-
-
-
-
-
-
-
                             })
 
                         scope.launch {
                             scaffoldState.bottomSheetState.expand()
                         }
-
                     }
 
                     TicketProcessEvent.InProgress -> {
@@ -345,9 +327,7 @@ class TicketProcessScreen(
 
             },
             bottomSheetContent = {
-
                 when (events) {
-
                     TicketProcessEvent.PhotoPreview -> {
                         PhotoPreviewComponent(viewModel.findPhotosByComponentId(
                             componentId,
@@ -360,26 +340,19 @@ class TicketProcessScreen(
                                 viewModel.events.value = TicketProcessEvent.EditPhoto
                             },
                             onDeletePhoto = {
-
                                 viewModel.updatePositionSelected(it)
                                 viewModel.events.value = TicketProcessEvent.DeletePhoto
-
-
                             },
                             onSaveChangeAngle = {
-
                                 viewModel.events.value = TicketProcessEvent.Default
-
                             })
 
                         scope.launch {
                             scaffoldState.bottomSheetState.expand()
                         }
-
                     }
 
                     TicketProcessEvent.EditPhoto -> {
-
                         EditPhotoComponent(
                             angle = 0.0F,
                             id = componentId,
@@ -397,12 +370,11 @@ class TicketProcessScreen(
                                     componentKey,
                                     componentId
                                 )
-
                             })
-
                     }
 
                     TicketProcessEvent.DeletePhoto -> {
+
 
                         Text(
                             text = stringResource(MR.strings.sure_delete_photo),
@@ -454,10 +426,7 @@ class TicketProcessScreen(
                     ) else Modifier
                 ) {
                     processBar(stepDetails, currentLevelState)
-
                     if (reloadState) {
-
-
                         initialize(
                             isChild = false,
                             scrollingState = scrollingState.value,
@@ -478,7 +447,7 @@ class TicketProcessScreen(
 
                             onChanges = { component, listValueDomain ->
 
-                                viewModel.handleLogics{
+                                viewModel.handleLogics {
                                     viewModel.extractLogicsModel.clear()
 
                                 }
@@ -567,7 +536,8 @@ class TicketProcessScreen(
                 }
 
 
-            }, shouldBlurOnBottomSheetExpansion = false)
+            }, shouldBlurOnBottomSheetExpansion = false
+        )
 
 
     }

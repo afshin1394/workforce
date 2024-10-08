@@ -22,16 +22,65 @@ import utils.Language
 
 
 @Composable
-fun MenuItemsTopBar (title : String = "About",onBackClick : () -> Unit = {}){
- Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center, modifier = Modifier.background(
-     surfaceDefault
- ).padding(horizontal =
-     spacing075X)) {
-     Image(painter =   if (getSharedPref().getString(Language)=="en")painterResource(MR.images.arrow_left) else
-         painterResource(MR.images.arrow_right), contentDescription = "", modifier = Modifier.weight(.1f).clickable {
-         onBackClick()
-     })
-     Text(text = title, style = h4, modifier = Modifier.padding(vertical = 15.dp).weight(.8f), textAlign = TextAlign.Center)
-     Text("", modifier = Modifier.weight(.1f))
- }
+fun MenuItemsTopBar(title: String = "About", onBackClick: () -> Unit = {}) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Center,
+        modifier = Modifier.background(
+            surfaceDefault
+        ).padding(
+            horizontal =
+            spacing075X
+        )
+    ) {
+        Image(painter = if (getSharedPref().getString(Language) == "en") painterResource(MR.images.arrow_left) else
+            painterResource(MR.images.arrow_right),
+            contentDescription = "",
+            modifier = Modifier.weight(.1f).clickable {
+                onBackClick()
+            })
+        Text(
+            text = title,
+            style = h4,
+            modifier = Modifier.padding(vertical = 15.dp).weight(.8f),
+            textAlign = TextAlign.Center
+        )
+        Text("", modifier = Modifier.weight(.1f))
+    }
+}
+
+@Composable
+fun TicketProcessTopBar(
+    title: String = "",
+    onBackClick: () -> Unit = {},
+    onInfoClick: () -> Unit = {}
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Center,
+        modifier = Modifier.background(
+            surfaceDefault
+        ).padding(
+            horizontal =
+            spacing075X
+        )
+    ) {
+        Image(painter = if (getSharedPref().getString(Language) == "en") painterResource(MR.images.arrow_left) else
+            painterResource(MR.images.arrow_right),
+            contentDescription = "",
+            modifier = Modifier.weight(.1f).clickable {
+                onBackClick()
+            })
+        Text(
+            text = title,
+            style = h4,
+            modifier = Modifier.padding(vertical = 15.dp).weight(.8f),
+            textAlign = TextAlign.Center
+        )
+        Image(painter = painterResource(MR.images.information),
+            contentDescription = "TicketInfo",
+            modifier = Modifier.weight(.1f).clickable {
+                onInfoClick()
+            })
+    }
 }

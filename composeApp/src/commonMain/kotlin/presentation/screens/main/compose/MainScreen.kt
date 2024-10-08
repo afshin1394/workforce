@@ -51,7 +51,6 @@ import presentation.screens.main.components.MoreOptions
 import presentation.screens.main.components.PhotoPreviewComponent
 import presentation.screens.main.components.SuspendTicketBottomBarComponent
 import presentation.screens.main.components.SuspendTicketContentComponent
-import presentation.screens.ticket_process.compose.TicketInfoScreen
 import presentation.screens.ticket_process.compose.TicketProcessScreen
 import presentation.theme.body_large
 import presentation.theme.body_small

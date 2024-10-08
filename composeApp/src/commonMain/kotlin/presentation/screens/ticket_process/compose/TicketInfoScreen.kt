@@ -19,6 +19,8 @@ import com.irancell.nwg.wfm.presentation.theme.spacing15X
 import presentation.components.MenuItemsTopBar
 import presentation.screens.main.compose.BaseScreen
 import dev.icerock.moko.resources.compose.stringResource
+import io.github.aakira.napier.LogLevel
+import io.github.aakira.napier.Napier
 import irancell.nwg.wfm.MR
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.delay
@@ -39,6 +41,19 @@ class TicketInfoScreen(
     @OptIn(ExperimentalMaterialApi::class, FlowPreview::class)
     @Composable
     override fun Content() {
+
+
+        Napier.log(
+            LogLevel.ASSERT,
+            tag = "Infoooo",
+            message = ticketId
+        )
+
+        Napier.log(
+            LogLevel.ASSERT,
+            tag = "Infoooo",
+            message = ticket_number
+        )
 
         val scope = rememberCoroutineScope()
         val scaffoldState = rememberBottomSheetScaffoldState()
@@ -89,11 +104,7 @@ class TicketInfoScreen(
                     ), onClick = {
                         if (isClickable) {
                             isClickable = false
-                            navigator.push(
-                                TicketInfoScreen(
-                                    viewModel.ticketId.value, viewModel.ticketNumber.value
-                                )
-                            )
+                            navigator.pop()
                             scope.launch {
                                 delay(500)
                                 isClickable = true
@@ -104,7 +115,6 @@ class TicketInfoScreen(
                 scope.launch {
                     scaffoldState.bottomSheetState.expand()
                 }
-
             },
             content = {
                 LazyColumn(
@@ -119,20 +129,13 @@ class TicketInfoScreen(
                 }
 
             },
-
-
             onCloseBottomSheet = {
-
 
             }, onBackPressed = {
                 navigator.pop()
             }, shouldBlurOnBottomSheetExpansion = false
-
         )
-
     }
-
-
 }
 
 
