@@ -2,7 +2,6 @@ package domain.usecase.usecase.profile
 
 import domain.mappers.toProfileDomain
 import domain.mappers.toProfileEntity
-import domain.mappers.toRoleDomain
 import domain.mappers.toRoleEntityList
 import domain.models.ProfileDomain
 import domain.repository.IProfileRepository

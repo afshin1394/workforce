@@ -20,11 +20,11 @@ class UpdateTaskUseCase(
         Napier.log(LogLevel.ASSERT, tag = "UpdateTaskUseCase", message = tasks.toString())
         val initialTasks = arrayListOf<InitialFormEntity>()
         tasks.details.forEach {
-            it.initial_form?.let { initialForm ->
+            it.initial_form?.let { _ ->
                 initialTasks.add(
                     InitialFormEntity(
-                        it.basic_info.ticket_number ?: "",
-                        it.initial_form
+                        ticket_number = it.basic_info.ticket_number ?: "",
+                        initFormList = it.initial_form
                     )
                 )
             }

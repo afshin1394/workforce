@@ -5,11 +5,11 @@ import androidx.room.PrimaryKey
 
 
 @Entity
- data class GeneralLocationEntity(
-    @PrimaryKey(autoGenerate = true) val id: Int = 0,
+data class GeneralLocationEntity(
+    @PrimaryKey(autoGenerate = true) val pk: Long = 0,
     val latitude: String,
     val longitude: String,
     val datetime: String,
     val isSent: Long?,
-    val networkInfo : String,
+    val networkInfo: String,
 )

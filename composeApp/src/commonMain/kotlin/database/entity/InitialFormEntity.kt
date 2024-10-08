@@ -6,6 +6,7 @@ import data.network.response.task.task.InitForm
 
 @Entity
  data class InitialFormEntity(
-    @PrimaryKey val ticket_number: String,
+    @PrimaryKey(autoGenerate = true) val pk: Long = 0,
+    val ticket_number: String,
     val initFormList: List<InitForm>
 )

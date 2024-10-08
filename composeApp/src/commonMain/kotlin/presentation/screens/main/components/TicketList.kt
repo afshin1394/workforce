@@ -119,11 +119,22 @@ fun TicketListScreen(
                 }
                 Napier.log(LogLevel.ASSERT, "selectState", message = selectState)
                 if (!refreshing) {
+                    val keySet = mutableSetOf<Any>()
+
                     Napier.log(LogLevel.ASSERT, "refreshing", message = refreshing.toString())
                     itemsIndexed(items = filteredList,
                         key = { index, item ->
-                            if (index == 0) index else item.basic_info.ticket_id
-                                ?: ((0..Int.MAX_VALUE).random() + (0..Int.MAX_VALUE).random())
+                            var key = if (index == 0) index else item.basic_info.ticket_id!!
+                            if (!keySet.add(key)) {
+                                Napier.log(
+                                    LogLevel.ERROR,
+                                    "Duplicate Key Detected",
+                                    message = "Duplicate key: $key found at index: $index"
+                                )
+                                keySet.add("unique_${item.basic_info.ticket_id}")
+                                key = item.basic_info.ticket_id + index
+                            }
+                            key
                         }
                     ) { _: Int, item: TaskDomain ->
                         ticketCard(modifier = Modifier.animateItemPlacement(tween(1500))
