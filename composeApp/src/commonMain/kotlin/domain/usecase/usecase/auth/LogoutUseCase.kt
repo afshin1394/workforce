@@ -49,14 +49,7 @@ class LogoutUseCase(
                 InternalStorage.clearCache(provideAppContext())
                 Napier.log(LogLevel.ASSERT, "Logout", message = "App data folders deleted")
                 Napier.log(LogLevel.ASSERT, "Logout", message = "pairLogout")
-
-
             }
-
         }
-
-
     }
-
-
 }

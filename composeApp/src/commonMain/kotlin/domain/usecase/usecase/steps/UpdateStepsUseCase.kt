@@ -23,7 +23,7 @@ class UpdateStepsUseCase(
     override suspend fun run(params: Unit) {
         val editedTickets = try {
             iSendStepsRepository.getEditedTickets()
-        } catch (_:Exception){
+        } catch (_: Exception) {
             arrayListOf()
         }
 
@@ -35,8 +35,14 @@ class UpdateStepsUseCase(
                 try {
                     val stepList = iStepsRepository.fetch(task.basic_info.ticket_number)
                     stepEntities.addAll(stepList.toStepDetailsEntity(ticketNumber))
-                    stepPointerEntities.add(StepPointerEntity(ticketNumber, 0, false))
-                }catch (e:Exception){
+                    stepPointerEntities.add(
+                        StepPointerEntity(
+                            ticketNumber = ticketNumber,
+                            activeActivity = 0,
+                            edited = false
+                        )
+                    )
+                } catch (e: Exception) {
                     Napier.log(LogLevel.ASSERT, tag = "exceotuon", message = e.toString())
                 }
             }
@@ -48,19 +54,34 @@ class UpdateStepsUseCase(
 //            .toHashSet().toList()
         iStepsRepository.deleteAll(editedTickets)
         iStepsRepository.resetEntitySequence()
-        iStepsRepository.insertAll(getInsertingValues(editedTickets, stepEntities.sortedBy { it.activityId  }))
+        iStepsRepository.insertAll(
+            getInsertingValues(
+                editedTickets,
+                stepEntities.sortedBy { it.activityId })
+        )
         iSendStepsRepository.deleteAll(editedTickets)
         iSendStepsRepository.resetEntitySequence()
-        iSendStepsRepository.insertAll(getSendInsertingValues(editedTickets, stepEntities.sortedBy { it.activityId  }.toSendStepEntity()))
+        iSendStepsRepository.insertAll(
+            getSendInsertingValues(
+                editedTickets,
+                stepEntities.sortedBy { it.activityId }.toSendStepEntity()
+            )
+        )
         iStepPointerRepository.deleteAll(editedTickets)
         iStepPointerRepository.resetEntitySequence()
-        iStepPointerRepository.insertAll(getInsertingPointerValues(editedTickets,stepPointerEntities))
+        iStepPointerRepository.insertAll(
+            getInsertingPointerValues(
+                editedTickets,
+                stepPointerEntities
+            )
+        )
 
     }
+
     private fun getInsertingPointerValues(
         editedTicketNumbers: List<String>,
         stepPointerEntities: List<StepPointerEntity>
-        ) = stepPointerEntities.filter { it.ticketNumber !in editedTicketNumbers }
+    ) = stepPointerEntities.filter { it.ticketNumber !in editedTicketNumbers }
 
     private fun getInsertingValues(
         editedTicketNumbers: List<String>,

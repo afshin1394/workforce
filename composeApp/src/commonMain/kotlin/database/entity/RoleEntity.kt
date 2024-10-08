@@ -20,7 +20,7 @@ import androidx.room.PrimaryKey
 )
 
 data class RoleEntity(
-    @PrimaryKey(autoGenerate = true) val pk:Int=0,
+    @PrimaryKey(autoGenerate = true) val pk: Long = 0,
     val profilePk: String,
     val code: Long,
     val name: String,

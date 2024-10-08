@@ -32,7 +32,6 @@ import domain.models.form_struct.logic.ConditionDomain
 import domain.models.form_struct.ConditionalDomain
 import domain.models.form_struct.logic.ExpressionDomain
 import domain.models.form_struct.InitialFormDomain
-import domain.models.form_struct.FormStructDomain
 import domain.models.form_struct.LayoutDomain
 import domain.models.form_struct.OperatorDomain
 import domain.models.form_struct.ValidateDomain
@@ -40,9 +39,7 @@ import domain.models.form_struct.ValueDate
 import domain.models.form_struct.ValueDomain
 import domain.models.form_struct.logic.TicketAutoFillOptionDomain
 import domain.models.task.InitFormDomain
-import irancell.nwg.wfm.nullIfAllPropertiesNull
 
-import kotlinx.serialization.json.Json
 
 private fun mapSubtypeToType(subtype: String?): String? {
     return when (subtype) {
@@ -133,7 +130,7 @@ fun Layout.toLayoutDomain(): LayoutDomain {
 }
 
 fun Validate.toValidateDomain(): ValidateDomain? {
-    return if (this.nullIfAllPropertiesNull() == null) {
+    return if (this.areAllMembersNull()) {
         null
     } else {
         ValidateDomain(

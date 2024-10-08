@@ -49,6 +49,7 @@ import utils.PROCEED
 import utils.ServiceState
 import utils.ViewStates
 import utils.updateValueDomain
+import utils.validateComponents
 
 class TicketProcessVM(
     private val updateStepFormUseCase: UpdateStepFormUseCase,
@@ -158,6 +159,9 @@ class TicketProcessVM(
                             )
                             tempComponentList.clear()
                             tempComponentList.addAll(it.toList())
+                            validateComponents(tempComponentList,true) {
+                               updateTempComponentList(it)
+                            }
 
                         }
 

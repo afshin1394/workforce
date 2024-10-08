@@ -26,52 +26,46 @@ import io.ktor.http.HttpStatusCode.Companion.Unauthorized
 import io.ktor.utils.io.errors.IOException
 import irancell.nwg.wfm.SentryLog
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.retry
 import utils.AsyncResult
 import utils.BASE_USECASE
+import utils.BASE_USECASE.INITIAL_RETRY_DELAY
+import utils.BASE_USECASE.MAX_RETRY_COUNT
 
 abstract class BaseUseCase<out Type, in Params> {
-    private var retryAttempt = 0
-    private var retryDelay = BASE_USECASE.INITIAL_RETRY_DELAY
+
     abstract suspend fun run(params: Params): Type
     suspend operator fun invoke(params: Params) = flow {
-
         emit(AsyncResult.Loading(null, isLoading = true))
-        while (retryAttempt <= BASE_USECASE.MAX_RETRY_COUNT + 1) {
 
-            try {
-                val result = run(params)
-                if (result is List<*> && result.isEmpty()) {
-                    emit(AsyncResult.Empty(null, false))
-                } else {
-                    emit(AsyncResult.Success(result, ResultStatus.SUCCESS))
-                }
-                return@flow
+        val result = run(params)
 
-            } catch (exception: Exception) {
-                if (retryAttempt <= BASE_USECASE.MAX_RETRY_COUNT) {
-                    delay(retryDelay)
-                    retryAttempt++
-                    retryDelay *= 2
-                }else{
-                exception.message?.let {
-
-                    val resultStatus = exception.handleError()
-
-                    Napier.log(LogLevel.ASSERT, tag = "UnitOfWork", message = "ERROR "+it)
-
-                    emit(AsyncResult.Error(it, resultStatus))
-                    SentryLog(exception.stackTraceToString())
-                } ?: run {
-                    emit(AsyncResult.Error("no message", exception.handleError()))
-                }
-                return@flow // Exit after maximum retries reached
-            }
-            }
-
+        if (result is List<*> && result.isEmpty()) {
+            emit(AsyncResult.Empty(null, false))
+        } else {
+            emit(AsyncResult.Success(result, ResultStatus.SUCCESS))
+        }
+    }.retry(retries = MAX_RETRY_COUNT.toLong()) { cause ->
+        if (cause is Exception) {
+            Napier.log(LogLevel.ASSERT, tag = "UnitOfWork", message = "ERROR ${cause.message}")
+            delay(INITIAL_RETRY_DELAY) // Wait for 4000 ms before retrying
+            true // Continue retrying
+        } else {
+            false // Stop retrying if it's not an exception
+        }
+    }.catch { exception ->
+        val exception = exception as? Exception
+        // Handle error after max retries
+        exception?.message?.let {
+            val resultStatus = exception.handleError()
+            emit(AsyncResult.Error(it, resultStatus))
+            SentryLog(exception.stackTraceToString())
+        } ?:run {
+            emit(AsyncResult.Error("no message", ResultStatus.EXCEPTION))
         }
     }
-
 
 
     private fun Exception.handleError(): ResultStatus {

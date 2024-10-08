@@ -6,7 +6,8 @@ import androidx.room.PrimaryKey
 
 @Entity
 data class SuspendTaskEntity(
-    @PrimaryKey val ticket_number: String,
+    @PrimaryKey(autoGenerate = true) val pk: Long = 0,
+    val ticket_number: String,
     val reason: String,
     val description: String,
     val attachmentsUri: String,

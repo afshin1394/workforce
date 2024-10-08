@@ -19,7 +19,7 @@ class AccountScreenVM(
         getProfile()
     }
 
-    private val _profileDomain = MutableStateFlow<ProfileDomain>(
+    private val _profileDomain = MutableStateFlow(
         ProfileDomain(
             UserDomain("", "", ""),
             role = listOf(RoleDomain(0, "")),

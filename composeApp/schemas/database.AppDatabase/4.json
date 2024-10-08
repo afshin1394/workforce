@@ -1,8 +1,8 @@
 {
   "formatVersion": 1,
   "database": {
-    "version": 3,
-    "identityHash": "d43cea2b8c8591821355ad551463439d",
+    "version": 4,
+    "identityHash": "c5cfbb7e79f1e0de4f37a787d6462d42",
     "entities": [
       {
         "tableName": "ProfileEntity",
@@ -132,11 +132,11 @@
       },
       {
         "tableName": "GeneralLocationEntity",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `latitude` TEXT NOT NULL, `longitude` TEXT NOT NULL, `datetime` TEXT NOT NULL, `isSent` INTEGER, `networkInfo` TEXT NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `latitude` TEXT NOT NULL, `longitude` TEXT NOT NULL, `datetime` TEXT NOT NULL, `isSent` INTEGER, `networkInfo` TEXT NOT NULL)",
         "fields": [
           {
-            "fieldPath": "pk",
-            "columnName": "pk",
+            "fieldPath": "id",
+            "columnName": "id",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -173,13 +173,13 @@
         "primaryKey": {
           "autoGenerate": true,
           "columnNames": [
-            "pk"
+            "id"
           ]
         }
       },
       {
         "tableName": "TaskEntity",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `ticket_id` TEXT NOT NULL, `ticket_number` TEXT NOT NULL, `ticket_state` TEXT NOT NULL, `level` TEXT NOT NULL, `location` TEXT NOT NULL, `site` TEXT NOT NULL, `region` TEXT NOT NULL, `province` TEXT NOT NULL, `city` TEXT NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `ticket_id` TEXT NOT NULL, `ticket_number` TEXT NOT NULL, `ticket_state` TEXT NOT NULL, `level` TEXT NOT NULL, `location` TEXT NOT NULL, `site` TEXT NOT NULL, `region` TEXT NOT NULL, `province` TEXT NOT NULL, `city` TEXT NOT NULL, `status` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "pk",
@@ -240,6 +240,12 @@
             "columnName": "city",
             "affinity": "TEXT",
             "notNull": true
+          },
+          {
+            "fieldPath": "status",
+            "columnName": "status",
+            "affinity": "INTEGER",
+            "notNull": true
           }
         ],
         "primaryKey": {
@@ -251,14 +257,8 @@
       },
       {
         "tableName": "SuspendTaskEntity",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `ticket_number` TEXT NOT NULL, `reason` TEXT NOT NULL, `description` TEXT NOT NULL, `attachmentsUri` TEXT NOT NULL, `isSent` INTEGER NOT NULL, `datetime` TEXT NOT NULL, `latitude` TEXT NOT NULL, `longitude` TEXT NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`ticket_number` TEXT NOT NULL, `reason` TEXT NOT NULL, `description` TEXT NOT NULL, `attachmentsUri` TEXT NOT NULL, `isSent` INTEGER NOT NULL, `datetime` TEXT NOT NULL, `latitude` TEXT NOT NULL, `longitude` TEXT NOT NULL, PRIMARY KEY(`ticket_number`))",
         "fields": [
-          {
-            "fieldPath": "pk",
-            "columnName": "pk",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
           {
             "fieldPath": "ticket_number",
             "columnName": "ticket_number",
@@ -309,22 +309,16 @@
           }
         ],
         "primaryKey": {
-          "autoGenerate": true,
+          "autoGenerate": false,
           "columnNames": [
-            "pk"
+            "ticket_number"
           ]
         }
       },
       {
         "tableName": "InitialFormEntity",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `ticket_number` TEXT NOT NULL, `initFormList` TEXT NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`ticket_number` TEXT NOT NULL, `initFormList` TEXT NOT NULL, PRIMARY KEY(`ticket_number`))",
         "fields": [
-          {
-            "fieldPath": "pk",
-            "columnName": "pk",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
           {
             "fieldPath": "ticket_number",
             "columnName": "ticket_number",
@@ -339,9 +333,9 @@
           }
         ],
         "primaryKey": {
-          "autoGenerate": true,
+          "autoGenerate": false,
           "columnNames": [
-            "pk"
+            "ticket_number"
           ]
         }
       },
@@ -473,14 +467,8 @@
       },
       {
         "tableName": "StepPointerEntity",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `ticketNumber` TEXT NOT NULL, `activeActivity` INTEGER NOT NULL, `edited` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`ticketNumber` TEXT NOT NULL, `activeActivity` INTEGER NOT NULL, `edited` INTEGER NOT NULL, PRIMARY KEY(`ticketNumber`))",
         "fields": [
-          {
-            "fieldPath": "pk",
-            "columnName": "pk",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
           {
             "fieldPath": "ticketNumber",
             "columnName": "ticketNumber",
@@ -501,9 +489,9 @@
           }
         ],
         "primaryKey": {
-          "autoGenerate": true,
+          "autoGenerate": false,
           "columnNames": [
-            "pk"
+            "ticketNumber"
           ]
         }
       },
@@ -576,7 +564,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'd43cea2b8c8591821355ad551463439d')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'c5cfbb7e79f1e0de4f37a787d6462d42')"
     ]
   }
 }

@@ -4,7 +4,7 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 @Entity(tableName = "SendStepsEntity")
 data class SendStepsEntity(
-    @PrimaryKey(autoGenerate = true) val pk: Long,
+    @PrimaryKey(autoGenerate = true) val pk: Long = 0,
     val ticketNumber:String,
     val wi: Long,
     val title : String,

@@ -1,35 +1,24 @@
 package presentation.components
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
-
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-
-
 import com.irancell.nwg.wfm.presentation.theme.*
-import dev.icerock.moko.resources.compose.painterResource
 import dev.icerock.moko.resources.compose.stringResource
 import domain.models.task.TaskDomain
 import irancell.nwg.wfm.MR
-
 import presentation.theme.body_large
 import presentation.theme.body_large_strong
 import presentation.theme.body_small
-import presentation.theme.caption
 import presentation.theme.strokeDefaultLight
 import presentation.theme.subtleDefault
 import presentation.theme.surfaceBrandDefault
@@ -39,22 +28,20 @@ import presentation.theme.textBrand
 import presentation.theme.textError
 import presentation.theme.textInverse
 import presentation.theme.textPrimary
-import presentation.theme.textWarning
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ticketCard(
-    modifier: Modifier = Modifier, task: TaskDomain,
+    modifier: Modifier,
+    task: TaskDomain,
     onActionClick: () -> Unit = {},
     onMoreOptionsClick: () -> Unit = {}
 ) =
-
     Card(
         colors = CardDefaults.cardColors(surfaceDefault),
-        modifier = modifier.fillMaxWidth().padding(top = spacing15X)
+        modifier = modifier
     ) {
         Column(
-            modifier = Modifier.padding(12.dp),
+            modifier = modifier.padding(12.dp),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.Start,
         ) {
@@ -63,13 +50,13 @@ fun ticketCard(
                     text = task.basic_info.ticket_number ?: "",
                     style = body_large_strong,
                     maxLines = 1,
-                    modifier = modifier
+                    modifier = Modifier
                         .fillMaxWidth()
                         .height(22.dp),
                     color = textPrimary
                 )
             }
-            Spacer(modifier = modifier.padding(vertical = spacing05X))
+            Spacer(modifier = Modifier.padding(vertical = spacing05X))
 
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -77,7 +64,7 @@ fun ticketCard(
             ) {
                 Card(
                     colors = CardDefaults.cardColors(surfaceErrorLight),
-                    modifier = modifier
+                    modifier = Modifier
                         .background(
                             color = surfaceErrorLight,
                             shape = RoundedCornerShape(size = radius)
@@ -96,11 +83,11 @@ fun ticketCard(
                         color = textError
                     )
                 }
-                Spacer(modifier = modifier.padding(spacing15X))
+                Spacer(modifier = Modifier.padding(spacing15X))
 
                 Card(
                     colors = CardDefaults.cardColors(subtleDefault),
-                    modifier = modifier
+                    modifier = Modifier
                         .background(
                             color = subtleDefault,
                             shape = RoundedCornerShape(size = radius)
@@ -118,11 +105,11 @@ fun ticketCard(
                         style = body_small, color = textBrand
                     )
                 }
-                Spacer(modifier = modifier.padding(spacing15X))
+                Spacer(modifier = Modifier.padding(spacing15X))
 
 
             }
-            Spacer(modifier = modifier.padding(vertical = spacing05X))
+            Spacer(modifier = Modifier.padding(vertical = spacing05X))
 
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -130,7 +117,7 @@ fun ticketCard(
             ) {
                 Card(
                     colors = CardDefaults.cardColors(subtleDefault),
-                    modifier = modifier
+                    modifier = Modifier
                         .background(
                             color = subtleDefault,
                             shape = RoundedCornerShape(size = radius)
@@ -147,9 +134,8 @@ fun ticketCard(
                         style = body_small, color = textBrand
                     )
                 }
-
             }
-            Spacer(modifier = modifier.padding(vertical = spacing05X))
+            Spacer(modifier = Modifier.padding(vertical = spacing05X))
 
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Card(

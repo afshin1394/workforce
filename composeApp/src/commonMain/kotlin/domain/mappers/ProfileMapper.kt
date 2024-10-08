@@ -10,7 +10,7 @@ import domain.models.RoleDomain
 import domain.models.UserDomain
 
 
-fun RoleEntity.toRoleDomain() : RoleDomain{
+fun RoleEntity.toRoleDomain(): RoleDomain {
     return RoleDomain(
         this.code.toInt(),
         this.name
@@ -18,8 +18,8 @@ fun RoleEntity.toRoleDomain() : RoleDomain{
 }
 
 
-fun  List<RoleEntity>.toRoleDomain() : List<RoleDomain>{
-    return map{
+fun List<RoleEntity>.toRoleDomain(): List<RoleDomain> {
+    return map {
         RoleDomain(
             it.code.toInt(),
             it.name
@@ -27,21 +27,21 @@ fun  List<RoleEntity>.toRoleDomain() : List<RoleDomain>{
     }
 }
 
-fun ProfileEntity.toProfileDomain(roles : List<RoleEntity>) : ProfileDomain {
+fun ProfileEntity.toProfileDomain(roles: List<RoleEntity>): ProfileDomain {
 
     return ProfileDomain(
-         user = UserDomain(this.pk,this.username,this.email),
-         role = roles.toRoleDomain(),
+        user = UserDomain(this.pk.toString(), this.username, this.email),
+        role = roles.toRoleDomain(),
         firstName = first_name,
-        lastName= last_name,
+        lastName = last_name,
         company = company,
-        organization= organization,
+        organization = organization,
         nationalId = national_id,
         phoneNumber = phone_number,
     )
 }
 
-fun ProfileNetworkResponse.toProfileEntity() : ProfileEntity {
+fun ProfileNetworkResponse.toProfileEntity(): ProfileEntity {
 
     return ProfileEntity(
         pk = this.user?.pk.toString(),
@@ -56,13 +56,13 @@ fun ProfileNetworkResponse.toProfileEntity() : ProfileEntity {
     )
 }
 
-fun List<Role>.toRoleEntityList(pk : String) : List<RoleEntity> {
+fun List<Role>.toRoleEntityList(pk: String): List<RoleEntity> {
 
     return map {
         RoleEntity(
             profilePk = pk,
-           code =  it.code?.toLong() ?: 0,
-           name =  it.name.toString()
+            code = it.code?.toLong() ?: 0,
+            name = it.name.toString()
         )
     }
 }

@@ -1,12 +1,9 @@
 package presentation.screens.main.compose
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -15,9 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.blur
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.registry.rememberScreen
 import cafe.adriel.voyager.core.screen.Screen
@@ -56,7 +51,7 @@ import presentation.screens.main.components.MoreOptions
 import presentation.screens.main.components.PhotoPreviewComponent
 import presentation.screens.main.components.SuspendTicketBottomBarComponent
 import presentation.screens.main.components.SuspendTicketContentComponent
-import presentation.screens.ticket_process.compose.TicketInfoScreen
+import presentation.screens.ticket_process.compose.TicketProcessScreen
 import presentation.theme.body_large
 import presentation.theme.body_small
 import presentation.theme.surfaceBrandDefault
@@ -95,6 +90,7 @@ class MainScreen(
         val eventsState by viewModel.events.collectAsState()
         var hasDrawer by mutableStateOf(false)
         var showContent by remember { mutableStateOf(false) }
+        val availabilityStatus by viewModel.availabilityStatus.collectAsState()
 
         LaunchedEffect(true) {
             showContent = true
@@ -177,6 +173,13 @@ class MainScreen(
             viewModel.updateSuspendTicketImageUri(uri.toString())
         }
 
+        Napier.log(
+            LogLevel.ASSERT,
+            tag = "availabilityStatus",
+            message = availabilityStatus.toString()
+        )
+
+
         if (showContent) {
             hasDrawer = true
             BaseScreen(
@@ -187,17 +190,15 @@ class MainScreen(
                 isShwCloseBtnBottomSheet = viewModel.events.value != MainEvent.ShowAcceptTicketDialog,
                 hasSwipeDrawer = viewModel.events.value != MainEvent.PhotoPreview && viewModel.events.value != MainEvent.EditPhoto,
                 topBar = {
-                    CustomTopAppBar(availability,
+                    CustomTopAppBar(availabilityStatus,
                         stringResource(MR.strings.ticket_list),
                         onNavigationItemClick = {
                             scope.launch {
-
                                 Napier.log(
                                     LogLevel.ASSERT,
                                     tag = "drawerState",
                                     message = drawerState.isOpen.toString()
                                 )
-
                                 if (drawerState.isOpen) drawerState.close()
                                 else drawerState.open()
                             }
@@ -738,14 +739,13 @@ class MainScreen(
 
                         LaunchedEffect(Unit) {
                             navigator.push(
-                                TicketInfoScreen(
+                                TicketProcessScreen(
                                     viewModel.selectedTask.value?.basic_info?.ticket_id.toString(),
-                                    viewModel.selectedTask.value?.basic_info?.ticket_number.toString()
+                                    viewModel.ticketNumber.value
                                 )
                             )
                         }
                     }
-
 
                     if (viewModel.events.value == MainEvent.PhotoPreview) {
                         Napier.log(
@@ -757,7 +757,6 @@ class MainScreen(
                         scope.launch {
                             drawerState.close()
                         }
-
                     }
 
                     if (openCamera) {
@@ -779,52 +778,51 @@ class MainScreen(
                         if (reloadState) {
                             viewModel.getTasks()
                         }
-                            TicketListScreen(
-                                searchText = "",
-                                onEvent = { mainEvent: MainEvent, task: TaskDomain? ->
-                                    if (isClickable) {
-                                        isClickable = false
-                                        viewModel.updateState(mainEvent)
-                                        viewModel.selectedTask.value = task
-                                        viewModel.resetSuspendTask()
-                                        scope.launch {
-                                            delay(500)
-                                            isClickable = true
-                                        }
+                        TicketListScreen(
+                            searchText = "",
+                            onEvent = { mainEvent: MainEvent, task: TaskDomain? ->
+                                if (isClickable) {
+                                    isClickable = false
+                                    viewModel.updateState(mainEvent)
+                                    viewModel.selectedTask.value = task
+                                    viewModel.resetSuspendTask()
+                                    scope.launch {
+                                        delay(500)
+                                        isClickable = true
                                     }
-                                    Napier.i("TicketListScreen")
+                                }
+                                Napier.i("TicketListScreen")
 
-                                },
-                                tasks = ArrayList(viewModel.tasks.toList()),
-                                onAccept = {
-                                    if (isClickable) {
-                                        BackgroundServiceApp.updateServiceState(ServiceState.Suspend)
-                                        isClickable = false
-                                        viewModel.checkIfTicketIsEdited()
-                                        viewModel.selectedTask.value = it
-                                        viewModel.resetSuspendTask()
-                                        scope.launch {
-                                            delay(500)
-                                            isClickable = true
-                                        }
+                            },
+                            tasks = ArrayList(viewModel.tasks.toList()),
+                            onAccept = {
+                                if (isClickable) {
+                                    BackgroundServiceApp.updateServiceState(ServiceState.Suspend)
+                                    isClickable = false
+                                    viewModel.checkIfTicketIsEdited()
+                                    viewModel.selectedTask.value = it
+                                    viewModel.resetSuspendTask()
+                                    scope.launch {
+                                        delay(500)
+                                        isClickable = true
                                     }
-                                },
-                                viewModel = viewModel
-                            )
-                            if (viewModel.showAcceptDialog.value) {
+                                }
+                            },
+                            viewModel = viewModel
+                        )
+                        if (viewModel.showAcceptDialog.value) {
 
-                                if (isTicketEditedState) {
-                                    viewModel.selectedTask.value?.let {
-                                        viewModel.updateShowAcceptDialog(false)
-                                        viewModel.updateState(MainEvent.Default)
-
-                                    }
-                                } else {
-                                    viewModel.updateState(MainEvent.ShowAcceptTicketDialog)
+                            if (isTicketEditedState) {
+                                viewModel.selectedTask.value?.let {
+                                    viewModel.updateShowAcceptDialog(false)
+                                    viewModel.updateState(MainEvent.Default)
 
                                 }
-                            }
+                            } else {
+                                viewModel.updateState(MainEvent.ShowAcceptTicketDialog)
 
+                            }
+                        }
 
 
                     }

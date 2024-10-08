@@ -19,6 +19,8 @@ import com.irancell.nwg.wfm.presentation.theme.spacing15X
 import presentation.components.MenuItemsTopBar
 import presentation.screens.main.compose.BaseScreen
 import dev.icerock.moko.resources.compose.stringResource
+import io.github.aakira.napier.LogLevel
+import io.github.aakira.napier.Napier
 import irancell.nwg.wfm.MR
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.delay
@@ -33,37 +35,48 @@ import presentation.theme.textInverse
 
 
 class TicketInfoScreen(
-    private val ticketId : String,
+    private val ticketId: String,
     private val ticket_number: String
 ) : Screen {
     @OptIn(ExperimentalMaterialApi::class, FlowPreview::class)
     @Composable
     override fun Content() {
 
+
+        Napier.log(
+            LogLevel.ASSERT,
+            tag = "Infoooo",
+            message = ticketId
+        )
+
+        Napier.log(
+            LogLevel.ASSERT,
+            tag = "Infoooo",
+            message = ticket_number
+        )
+
         val scope = rememberCoroutineScope()
         val scaffoldState = rememberBottomSheetScaffoldState()
         val navigator = LocalNavigator.currentOrThrow
 
         val ticketProcessScreen =
-            rememberScreen(presentation.nav.Screen.TicketProcess.TicketProcessScreen(ticketId,ticket_number))
+            rememberScreen(
+                presentation.nav.Screen.TicketProcess.TicketProcessScreen(
+                    ticketId,
+                    ticket_number
+                )
+            )
 
         val viewModel: TicketInfoVM = koinInject()
 
-
         val viewState by viewModel.state.collectAsState()
         var isClickable by remember { mutableStateOf(true) }
-
-
 
         LaunchedEffect(Unit) {
             viewModel.getInitialForm(ticket_number)
             viewModel.updateTicketNumber(ticket_number)
             viewModel.updateTicketId(ticketId)
         }
-
-
-
-
 
         BaseScreen(
             viewModel = viewModel,
@@ -91,7 +104,7 @@ class TicketInfoScreen(
                     ), onClick = {
                         if (isClickable) {
                             isClickable = false
-                            navigator.push(TicketProcessScreen(viewModel.ticketId.value,viewModel.ticketNumber.value))
+                            navigator.pop()
                             scope.launch {
                                 delay(500)
                                 isClickable = true
@@ -102,7 +115,6 @@ class TicketInfoScreen(
                 scope.launch {
                     scaffoldState.bottomSheetState.expand()
                 }
-
             },
             content = {
                 LazyColumn(
@@ -112,25 +124,18 @@ class TicketInfoScreen(
                 ) {
                     items(viewModel.initFormsState) { item ->
 
-                        SimpleEditable(item.key,item.value)
+                        SimpleEditable(item.key, item.value)
                     }
                 }
 
             },
-
-
             onCloseBottomSheet = {
-
 
             }, onBackPressed = {
                 navigator.pop()
             }, shouldBlurOnBottomSheetExpansion = false
-
         )
-
     }
-
-
 }
 
 

@@ -16,7 +16,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.material.pullrefresh.PullRefreshIndicator
 import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
-
 import com.irancell.nwg.wfm.presentation.components.CustomSearchBar
 import com.irancell.nwg.wfm.presentation.components.FilterRow
 import presentation.components.ticketCard
@@ -62,7 +61,6 @@ fun TicketListScreen(
     var selectState by remember {
         mutableStateOf("")
     }
-
 
     Column(
         verticalArrangement = Arrangement.Center,
@@ -116,21 +114,33 @@ fun TicketListScreen(
                                 ?.contains(searchTextState.lowercase()) == true ||
                             it.basic_info.region?.lowercase()
                                 ?.contains(searchTextState.lowercase()) == true
-
                 }.filter {
                     it.basic_info.instanceStateId.toString().contains(selectState.lowercase())
-                }.sortedByDescending { it.basic_info.ticket_id?.toLong() ?: (0..Long.MAX_VALUE).random() }
+                }
                 Napier.log(LogLevel.ASSERT, "selectState", message = selectState)
                 if (!refreshing) {
+                    val keySet = mutableSetOf<Any>()
+
                     Napier.log(LogLevel.ASSERT, "refreshing", message = refreshing.toString())
                     itemsIndexed(items = filteredList,
                         key = { index, item ->
-                            if (index == 0) index else item.basic_info.ticket_number
-                                ?: (0..Int.MAX_VALUE).random()
+                            var key = if (index == 0) index else item.basic_info.ticket_id!!
+                            if (!keySet.add(key)) {
+                                Napier.log(
+                                    LogLevel.ERROR,
+                                    "Duplicate Key Detected",
+                                    message = "Duplicate key: $key found at index: $index"
+                                )
+                                keySet.add("unique_${item.basic_info.ticket_id}")
+                                key = item.basic_info.ticket_id + index
+                            }
+                            key
                         }
                     ) { _: Int, item: TaskDomain ->
-                        ticketCard(modifier = Modifier.wrapContentHeight()
-                            .animateItemPlacement(tween(400)),
+                        ticketCard(modifier = Modifier.animateItemPlacement(tween(1500))
+                            .wrapContentHeight()
+                            .fillMaxWidth()
+                            .padding(top = spacing15X),
                             task = item,
                             onActionClick = {
                                 Napier.log(

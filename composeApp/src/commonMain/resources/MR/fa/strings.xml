@@ -17,6 +17,8 @@
     <string name="name">نام</string>
     <string name="go_to_setting">رفتن به تنظیمات</string>
     <string name="vpn_detected">فیلترشکن شناسایی شد</string>
+    <string name="service_unavailable">سرویس از دسترس خارج شده است</string>
+    <string name="internet_unavailable">اینترنت در دسترس نیست</string>
     <string name="vpn_detected_description">برای ادامه اتصال فیلترشکن خود را قطع نمایید</string>
     <string name="openInMap">باز کردن در نقشه</string>
     <string name="expertise">تخصص</string>
