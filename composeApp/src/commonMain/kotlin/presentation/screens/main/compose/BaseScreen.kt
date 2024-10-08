@@ -188,6 +188,9 @@ fun <T : BaseViewModel> BaseScreen(
                     scaffoldState = when {
                         vpnDetectionStates == VpnDetectionStates.ShowBottomSheet -> {
                             vpnScaffoldState
+
+
+
                         }
                         gpsState == GpsState.Disabled -> {
                             gpsScaffoldState
