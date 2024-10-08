@@ -1,5 +1,10 @@
 package presentation.screens.ticket_process.components
 
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -15,13 +20,21 @@ import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.irancell.nwg.wfm.presentation.theme.radiusLarge
 
 import com.irancell.nwg.wfm.presentation.theme.spacing05X
+import com.irancell.nwg.wfm.presentation.theme.spacing15X
 import domain.usecase.usecase.steps.StepDetail
 import presentation.theme.body_large
 import presentation.theme.strokeDefaultLight
@@ -78,14 +91,29 @@ fun ProcessStepSelected(
     levelText: String ,
 ) {
 
+    var scaleState by remember { mutableStateOf(1f) }
 
+    val scale by animateFloatAsState(
+        targetValue = scaleState,
+        animationSpec = infiniteRepeatable(
+            animation = tween(
+                durationMillis = 800,
+                easing = FastOutSlowInEasing
+            ),
+            repeatMode = RepeatMode.Reverse
+        )
+    )
+
+    LaunchedEffect(Unit) {
+        scaleState = 1.2f
+    }
     Column(
-        modifier = modifier.wrapContentSize(),
+        modifier = modifier.wrapContentSize().padding(top = spacing05X),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Box(
-            modifier = Modifier.size(30.dp)
+            modifier = Modifier.size(30.dp) .scale(scale)
                 .clip(
                     CircleShape
                 )
