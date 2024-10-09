@@ -459,6 +459,8 @@ class TicketProcessScreen(
                                 }
                             },
                             onAddItem = { component, indexChild, scrollCallback ->
+                                Napier.log(LogLevel.ASSERT, tag = "componentDDDDD", message = component.toString())
+                                Napier.log(LogLevel.ASSERT, tag = "indexChild", message = indexChild.toString())
                                 scope.launch {
                                     viewModel.addOrRemoveComponentDomainRepeatableToList(
                                         component,
