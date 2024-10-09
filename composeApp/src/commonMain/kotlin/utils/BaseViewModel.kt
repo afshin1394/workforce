@@ -21,6 +21,12 @@ import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
+sealed class TicketListStatus {
+    data object UnRecognized : TicketListStatus()
+    data object Filled : TicketListStatus()
+    data object Empty : TicketListStatus()
+}
+
 sealed class AvailabilityStatus {
     data object NotRunning : AvailabilityStatus()
     data object Available : AvailabilityStatus()
@@ -65,9 +71,7 @@ sealed class NetworkStates {
 
 open class BaseViewModel : ViewModel(), KoinComponent {
     private val ipDetectionUseCase: IpDetectionUseCase by inject()
-
     val loading = MutableStateFlow(false)
-
     private val _state = MutableStateFlow<ViewStates>(ViewStates.Default)
     private val _serviceState = MutableStateFlow<ServiceState>(ServiceState.Normal)
     private val _networkState = MutableStateFlow<NetworkStates>(NetworkStates.Default)
@@ -76,7 +80,6 @@ open class BaseViewModel : ViewModel(), KoinComponent {
     private val _gpsState = MutableStateFlow<GpsState>(GpsState.Default)
     private val _lifeCycleEvent = MutableStateFlow(LifecycleEvent.ON_ANY)
     val lifeCycleEvent = _lifeCycleEvent.asStateFlow()
-
     val state = _state.asStateFlow()
     val serviceState = _serviceState.asStateFlow()
     val networkState = _networkState.asStateFlow()
@@ -86,11 +89,19 @@ open class BaseViewModel : ViewModel(), KoinComponent {
     private val _availabilityStatus =
         MutableStateFlow<AvailabilityStatus>(AvailabilityStatus.Unavailable)
     val availabilityStatus = _availabilityStatus.asStateFlow()
+    private val _ticketListStatus =
+        MutableStateFlow<TicketListStatus>(TicketListStatus.UnRecognized)
+    val ticketListStatus = _ticketListStatus.asStateFlow()
 
     init {
         traceNetwork()
         traceLocation()
         collectServiceState()
+        collectTicketListState()
+    }
+
+    fun updateTicketListState(ticketListStatus: TicketListStatus) {
+        _ticketListStatus.update { ticketListStatus }
     }
 
     fun updateAvailabilityState(availabilityStatus: AvailabilityStatus) {
@@ -119,6 +130,28 @@ open class BaseViewModel : ViewModel(), KoinComponent {
                     else -> {}
                 }
             }
+
+        }
+    }
+
+    private fun collectTicketListState() {
+        viewModelScope.launch {
+            BackgroundServiceApp.ticketListState.collect {
+                when (it) {
+                    TicketListStatus.Filled -> {
+                        _ticketListStatus.update { TicketListStatus.Filled }
+                    }
+
+                    TicketListStatus.Empty -> {
+                        _ticketListStatus.update { TicketListStatus.Empty }
+                    }
+
+                    else -> {
+                        _ticketListStatus.update { TicketListStatus.UnRecognized }
+                    }
+                }
+            }
+
         }
     }
 

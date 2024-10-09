@@ -19,8 +19,8 @@ class UpdateStepsUseCase(
     private val iTaskRepository: ITaskRepository,
     private val iStepPointerRepository: IStepPointerRepository,
     private val iSendStepsRepository: ISendStepsRepository
-) : BaseUseCase<Unit, Unit>() {
-    override suspend fun run(params: Unit) {
+) : BaseUseCase<List<StepsEntity>, Unit>() {
+    override suspend fun run(params: Unit)  : List<StepsEntity>{
         val editedTickets = try {
             iSendStepsRepository.getEditedTickets()
         } catch (_: Exception) {
@@ -75,6 +75,9 @@ class UpdateStepsUseCase(
                 stepPointerEntities
             )
         )
+        return      getInsertingValues(
+            editedTickets,
+            stepEntities.sortedBy { it.activityId })
 
     }
 

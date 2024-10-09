@@ -1,8 +1,6 @@
 package presentation.screens.main.viewmodel
 
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import com.irancell.nwg.wfm.presentation.components.FilterSectionItem
@@ -11,13 +9,11 @@ import com.irancell.nwg.wfm.presentation.model.SelectableItem
 import com.plusmobileapps.konnectivity.Konnectivity
 import com.plusmobileapps.konnectivity.NetworkConnection
 import database.entity.GeneralLocationEntity
-import dev.icerock.moko.resources.StringResource
 import domain.models.LiveLocationDomain
 import domain.models.PhotoDomain
 import presentation.model.StateFilter
 import presentation.screens.main.events.MainEvent
 import domain.models.SuspendTaskDomain
-import domain.models.task.InitFormDomain
 import domain.models.task.TaskDomain
 import domain.usecase.usecase.auth.LogoutUseCase
 import domain.usecase.usecase.availability.ChangeServerAvailabilityUseCase
@@ -56,18 +52,17 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
-import presentation.screens.main.components.AvailabilityStatus
 import utils.AsyncResult
-
 import utils.AsyncStatus
 import utils.AvailabilityObjectId
 import utils.AvailabilityStatus
 import utils.BaseViewModel
-import utils.NetworkStates
 import utils.ServiceState
+import utils.TicketListStatus
 import utils.TicketNumber
 import utils.ViewStates
 import utils.getCurrentDate
+
 
 class MainScreenVM(
     private val getAvailabilityUseCase: GetAvailabilityUseCase,
@@ -93,54 +88,30 @@ class MainScreenVM(
 ) : BaseViewModel() {
     private val _availability = MutableStateFlow(false)
     val availability = _availability.asStateFlow()
-
     private val _openCamera = MutableStateFlow(false)
     val openCamera = _openCamera.asStateFlow()
     val tasks = mutableStateListOf<TaskDomain>()
-
     private val _profileName = MutableStateFlow("")
     val profileName = _profileName.asStateFlow()
-
     private val _reload = MutableStateFlow(false)
     val reload = _reload.asStateFlow()
-
-
     private val _positionSelected = MutableStateFlow(0)
     val positionSelected = _positionSelected.asStateFlow()
-
-
     private val _ticketIsEdited = MutableStateFlow<Boolean>(false)
     var ticketIsEdited = _ticketIsEdited.asStateFlow()
-
-
     private val _ticketNumber =
-        MutableStateFlow<String>(getSharedPref().getString(TicketNumber).orEmpty())
+        MutableStateFlow(getSharedPref().getString(TicketNumber).orEmpty())
     var ticketNumber = _ticketNumber.asStateFlow()
     var selectedTask: MutableState<TaskDomain?> = mutableStateOf(null)
-
     private val _events = MutableStateFlow<MainEvent>(MainEvent.Default)
     var events = _events.asStateFlow()
-
-    var enableSuspendSubmit = mutableStateOf(false)
     var enableCancelSubmit = mutableStateOf(false)
-
     var suspendReason = mutableStateOf("")
     var cancelReason = mutableStateOf("")
-
-
-    var suspendDescription = mutableStateOf("")
-    var cancelDescription = mutableStateOf("")
-
-
     private val _showAcceptDialog = MutableStateFlow(false)
     var showAcceptDialog = _showAcceptDialog.asStateFlow()
-
-
     val generalLocationList = mutableStateListOf<GeneralLocationEntity>()
-    val initFormsState = mutableStateListOf<InitFormDomain>()
-
     private val konnectivity: Konnectivity = Konnectivity()
-
 
     init {
         traceNetwork()
@@ -335,7 +306,6 @@ class MainScreenVM(
 
                     AsyncStatus.SUCCESS -> {
                         updateState(ViewStates.Success())
-
                         println("testtttttttavaliblity ${it.data}")
                         it.data?.let { available ->
                             updateAvailabilityState(if (available) AvailabilityStatus.Available else AvailabilityStatus.Unavailable)
@@ -790,8 +760,6 @@ class MainScreenVM(
                             }
                         }
                     }
-
-                    else -> {}
                 }
             }
         }
@@ -943,8 +911,6 @@ class MainScreenVM(
                         updateState(ViewStates.Loading)
                     }
 
-                    AsyncStatus.EMPTY -> {}
-
                     AsyncStatus.SUCCESS -> {
                         checkIfTicketIsEdited()
                     }
@@ -982,7 +948,13 @@ class MainScreenVM(
 
                 AsyncStatus.SUCCESS -> {
                     updateSteps()
+                    updateTicketListState(TicketListStatus.Filled)
                     println("PullToRefreshCallApi${"SUCCESS"}")
+                }
+
+                AsyncStatus.EMPTY -> {
+                    updateTicketListState(TicketListStatus.Empty)
+                    Napier.log(LogLevel.ASSERT, "OnTasksEmpty", message = "TaskIsEmpty")
                 }
 
                 else -> {}

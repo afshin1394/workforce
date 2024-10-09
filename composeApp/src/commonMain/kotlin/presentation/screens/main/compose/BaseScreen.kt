@@ -74,7 +74,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.draw.clip
 import irancell.nwg.wfm.BackgroundServiceApp
 import irancell.nwg.wfm.openInternetSettings
+import utils.AvailabilityStatus
 import utils.ServiceState
+import utils.TicketListStatus
 
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -112,6 +114,8 @@ fun <T : BaseViewModel> BaseScreen(
     val vpnScaffoldState = rememberBottomSheetScaffoldState()
     val networkState by viewModel.networkState.collectAsState()
     val serviceState by viewModel.serviceState.collectAsState()
+    val ticketListStatus by viewModel.ticketListStatus.collectAsState()
+    val availabilityStatus by viewModel.availabilityStatus.collectAsState()
 
     OnLifecycleEvent { _, event ->
         when (event) {
@@ -234,30 +238,31 @@ fun <T : BaseViewModel> BaseScreen(
                                 }
 
                                 GpsState.Enabled -> {}
-                                else -> {}
                             }
                             when (state) {
                                 ViewStates.EMPTY -> {
-                                    Column(
-                                        modifier = Modifier.fillMaxSize()
-                                            .wrapContentSize(Alignment.Center),
-                                        horizontalAlignment = Alignment.CenterHorizontally,
-                                        verticalArrangement = Arrangement.Center
-                                    ) {
-                                        Image(
-                                            painter = painterResource(MR.images.ic_empty),
-                                            contentDescription = "empty",
-                                            modifier = Modifier.width(150.dp).height(120.dp)
-                                        )
+                                    if (ticketListStatus == TicketListStatus.Empty) {
+                                        Column(
+                                            modifier = Modifier.fillMaxSize()
+                                                .wrapContentSize(Alignment.Center),
+                                            horizontalAlignment = Alignment.CenterHorizontally,
+                                            verticalArrangement = Arrangement.Center
+                                        ) {
+                                            Image(
+                                                painter = painterResource(MR.images.ic_empty),
+                                                contentDescription = "empty",
+                                                modifier = Modifier.width(150.dp).height(120.dp)
+                                            )
 
-                                        Spacer(modifier = Modifier.height(16.dp))
-                                        Text(
-                                            text = stringResource(MR.strings.empty_list),
-                                            style = TextStyle(
-                                                fontSize = 16.sp, fontWeight = FontWeight.Bold
-                                            ),
-                                            modifier = Modifier.wrapContentSize()
-                                        )
+                                            Spacer(modifier = Modifier.height(16.dp))
+                                            Text(
+                                                text = stringResource(MR.strings.empty_list),
+                                                style = TextStyle(
+                                                    fontSize = 16.sp, fontWeight = FontWeight.Bold
+                                                ),
+                                                modifier = Modifier.wrapContentSize()
+                                            )
+                                        }
                                     }
                                 }
 
@@ -313,6 +318,7 @@ fun <T : BaseViewModel> BaseScreen(
                                         }
                                     }
                                 }
+
                                 else -> {}
                             }
                         }
@@ -372,32 +378,51 @@ fun <T : BaseViewModel> BaseScreen(
                             GpsState.Disabled -> {
                                 GPS.enableGpsDialog(provideAppContext())
                             }
+
                             else -> {}
                         }
 
                         when (state) {
-                            ViewStates.EMPTY -> {
-                                Column(
-                                    modifier = Modifier.fillMaxSize()
-                                        .wrapContentSize(Alignment.Center),
-                                    horizontalAlignment = Alignment.CenterHorizontally,
-                                    verticalArrangement = Arrangement.Center
-                                ) {
-                                    Image(
-                                        painter = painterResource(MR.images.ic_empty),
-                                        contentDescription = "empty",
-                                        modifier = Modifier.width(150.dp).height(120.dp)
-                                    )
-                                    Spacer(modifier = Modifier.height(12.dp))
-                                    Text(
-                                        text = stringResource(MR.strings.empty_list),
-                                        style = TextStyle(
-                                            fontSize = 16.sp, fontWeight = FontWeight.Bold
-                                        ),
-                                        modifier = Modifier.wrapContentSize()
-                                    )
-                                }
-                            }
+//                            ViewStates.EMPTY -> {
+//                                if (ticketListStatus == TicketListStatus.Empty) {
+//                                    Column(
+//                                        modifier = Modifier.fillMaxSize()
+//                                            .wrapContentSize(Alignment.Center),
+//                                        horizontalAlignment = Alignment.CenterHorizontally,
+//                                        verticalArrangement = Arrangement.Center
+//                                    ) {
+//                                        Image(
+//                                            painter = painterResource(MR.images.ic_empty),
+//                                            contentDescription = "empty",
+//                                            modifier = Modifier.width(150.dp).height(120.dp)
+//                                        )
+//
+//                                        Spacer(modifier = Modifier.height(16.dp))
+//                                        Text(
+//                                            text = stringResource(MR.strings.empty_list),
+//                                            style = TextStyle(
+//                                                fontSize = 16.sp, fontWeight = FontWeight.Bold
+//                                            ),
+//                                            modifier = Modifier.wrapContentSize()
+//                                        )
+//                                    }
+//                                } else {
+//                                    Box(modifier = Modifier.fillMaxSize()
+//                                        .background(Color.LightGray.copy(alpha = 0.5f))
+//                                        .pointerInput(Unit) {
+//                                            awaitPointerEventScope {
+//                                                while (true) {
+//                                                    awaitPointerEvent()
+//                                                }
+//                                            }
+//                                        }) {
+//                                        CircularProgressIndicator(
+//                                            modifier = Modifier.align(Alignment.Center),
+//                                            color = surfaceBrandDefault
+//                                        )
+//                                    }
+//                                }
+//                            }
 
                             is ViewStates.Error -> {
                                 val errorMessage =

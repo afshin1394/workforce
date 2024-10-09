@@ -43,6 +43,7 @@ abstract class BaseUseCase<out Type, in Params> {
         val result = run(params)
 
         if (result is List<*> && result.isEmpty()) {
+            Napier.log(LogLevel.ASSERT, tag = "BaseUseCase", message = "BaseUseCase ${(result as List<*>).size}")
             emit(AsyncResult.Empty(null, false))
         } else {
             emit(AsyncResult.Success(result, ResultStatus.SUCCESS))

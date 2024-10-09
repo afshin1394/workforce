@@ -41,6 +41,7 @@ import org.koin.core.component.inject
 import utils.AlarmAction
 import utils.AsyncStatus
 import utils.ServiceState
+import utils.TicketListStatus
 import utils.getCurrentDate
 import java.util.concurrent.TimeUnit
 
@@ -70,6 +71,9 @@ internal actual class BackgroundServiceApp : Service(), KoinComponent {
     actual companion object {
         private val _serviceState: MutableStateFlow<ServiceState> =
             MutableStateFlow(ServiceState.Normal)
+
+        private val _ticketListState: MutableStateFlow<TicketListStatus> =
+            MutableStateFlow(TicketListStatus.UnRecognized)
 
         actual fun updateServiceState(serviceState: ServiceState) {
             _serviceState.update { serviceState }
@@ -114,9 +118,11 @@ internal actual class BackgroundServiceApp : Service(), KoinComponent {
         actual val serviceState: MutableStateFlow<ServiceState>
             get() = _serviceState
 
+        actual val ticketListState: MutableStateFlow<TicketListStatus>
+            get() = _ticketListState
+
 
     }
-
 
     override fun onCreate() {
         super.onCreate()
@@ -177,8 +183,6 @@ internal actual class BackgroundServiceApp : Service(), KoinComponent {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         try {
             scope.launch(Dispatchers.Main) {
-                println("YOYOYO Wusssuppp ${isServiceRunning().toString()}")
-                println("YOYOYO Wusssuppp ${_serviceState.value}")
                 if (_serviceState.value != ServiceState.Suspend && _serviceState.value !is ServiceState.Faulty) {
                     val newState =
                         if (isServiceRunning()) ServiceState.Normal else ServiceState.NotRunning
@@ -297,8 +301,12 @@ internal actual class BackgroundServiceApp : Service(), KoinComponent {
 
                     AsyncStatus.SUCCESS -> {
                         updateSteps()
-                        println("TaskCallApi${"SUCCESS"}")
-                        Log.i("getAllTask", "onStartCommand: CallApi" + it.data)
+                        println("TaskCallApiiii${"SUCCESS"}")
+                    }
+
+                    AsyncStatus.EMPTY -> {
+                        println("TaskCallApiiii${"ERROR"}")
+
                     }
 
                     else -> {}
@@ -318,6 +326,7 @@ internal actual class BackgroundServiceApp : Service(), KoinComponent {
                 }
 
                 AsyncStatus.EMPTY -> {
+                    _ticketListState.update { TicketListStatus.Empty }
                     Napier.log(LogLevel.ASSERT, "updateSteps", message = "EMPTY : ")
                 }
 
@@ -326,6 +335,7 @@ internal actual class BackgroundServiceApp : Service(), KoinComponent {
                 }
 
                 AsyncStatus.SUCCESS -> {
+                    _ticketListState.update { TicketListStatus.Filled }
                     Napier.log(
                         LogLevel.ASSERT,
                         "updateSteps",

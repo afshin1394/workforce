@@ -1,6 +1,5 @@
 package domain.usecase.usecase.ticket
 
-import data.network.response.task.FormStruct
 import database.entity.InitialFormEntity
 import domain.mappers.toTaskDomainList
 import domain.mappers.toTaskEntityList
@@ -9,7 +8,6 @@ import domain.repository.ITaskRepository
 import domain.usecase.BaseUseCase
 import io.github.aakira.napier.LogLevel
 import io.github.aakira.napier.Napier
-import kotlinx.serialization.json.Json
 
 class UpdateTaskUseCase(
     private val iTaskRepository: ITaskRepository,
@@ -51,6 +49,7 @@ class UpdateTaskUseCase(
         Napier.log(LogLevel.ASSERT, tag = "UpdateTaskUseCase", message = "insertAll")
 
         val domainList = iTaskRepository.getAll().toTaskDomainList()
+
         Napier.log(LogLevel.ASSERT, tag = "UpdateTaskUseCase", message = "domainList")
 
         Napier.log(LogLevel.ASSERT, tag = "domainList", message = domainList.toString())

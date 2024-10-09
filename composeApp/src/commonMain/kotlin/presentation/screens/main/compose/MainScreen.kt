@@ -59,6 +59,7 @@ import presentation.theme.surfaceDefault
 import presentation.theme.textInverse
 import presentation.theme.textInverseDisabled
 import presentation.theme.textPrimary
+import utils.AvailabilityStatus
 import utils.ServiceState
 
 class MainScreen(
@@ -204,7 +205,9 @@ class MainScreen(
                             }
                         },
                         onAvailabilityClick = {
-                            viewModel.updateState(MainEvent.AvailabilityStatus)
+                            if (availabilityStatus == AvailabilityStatus.Available || availabilityStatus == AvailabilityStatus.Unavailable) {
+                                viewModel.updateState(MainEvent.AvailabilityStatus)
+                            }
                         },
                         onNotificationClick = {
                             scope.launch {
@@ -221,7 +224,6 @@ class MainScreen(
                                 tag = "drawerState",
                                 message = drawerState.isOpen.toString()
                             )
-
                             if (drawerState.isOpen) drawerState.close()
                             else drawerState.open()
                         }
@@ -241,7 +243,7 @@ class MainScreen(
                             when (it) {
                                 Menu.About -> {
 //                                    scope.launch {
-//                                        scaffoldState.snackbarHostState.showSnackbar(message = underDevelopment )
+//                                        scaffoldState.snackbarHostState.showSnackbar(message = underDevelopment)
 //                                    }
                                     navigator.push(aboutScreen)
                                 }
@@ -355,8 +357,6 @@ class MainScreen(
                             scope.launch {
                                 scaffoldState.bottomSheetState.expand()
                             }
-
-
                         }
 
                         MainEvent.CancelTicket -> {
@@ -423,7 +423,6 @@ class MainScreen(
                                     }
                                 }, onSecondButtonClick = {
                                     ExitApp()
-
                                 })
                             scope.launch {
                                 scaffoldState.bottomSheetState.expand()
@@ -445,25 +444,18 @@ class MainScreen(
                                         viewModel.updateState(MainEvent.Default)
                                         viewModel.updateShowAcceptDialog(false)
                                     }
-
-
                                 }, onSecondButtonClick = {
                                     scope.launch {
                                         viewModel.selectedTask.value?.let {
                                             viewModel.updateEdited(true)
                                             viewModel.updateState(MainEvent.Default)
                                         }
-
                                     }
-
-
                                 })
                             scope.launch {
                                 scaffoldState.bottomSheetState.expand()
                             }
-
                         }
-
 
                         else -> {}
                     }
@@ -558,7 +550,6 @@ class MainScreen(
                                 ticketNumber = viewModel.selectedTask.value!!.basic_info.ticket_number
                                     ?: "0",
                                 photoDomainList = viewModel.photoDomainList,
-
                                 suspendTaskDomain = suspendTaskState,
                                 onSelectReason = {
                                     viewModel.updateState(MainEvent.SuspendReason)
@@ -567,13 +558,11 @@ class MainScreen(
                                     viewModel.updateSuspendTicketDescription(description)
                                 }, onCameraClick = {
                                     viewModel.openCamera()
-
                                 }, onImageClick = {
                                     indexPhotoSelected = it
                                     viewModel.updateState(MainEvent.PhotoPreview)
                                 }
                             )
-
 
                             scope.launch {
                                 scaffoldState.bottomSheetState.expand()
@@ -627,12 +616,9 @@ class MainScreen(
                             scope.launch {
                                 scaffoldState.bottomSheetState.expand()
                             }
-
-
                         }
 
                         MainEvent.SuspendReason -> {
-
                             SelectableComponentPreview(suspendItems, { index, selectableItem ->
                                 suspendItems[index] = selectableItem
                                 suspendItems.filter { it.id != selectableItem.id }.map {
@@ -714,13 +700,11 @@ class MainScreen(
 
                         }
 
-
                         else -> {}
                     }
 
                 },
                 content = {
-
                     if (eventsState == MainEvent.NoLocationFound) {
                         val noLocationFoundMessage = stringResource(MR.strings.noLocationFound)
                         LaunchedEffect(Unit) {
@@ -823,10 +807,7 @@ class MainScreen(
 
                             }
                         }
-
-
                     }
-
                 },
                 onCloseBottomSheet = {
 
