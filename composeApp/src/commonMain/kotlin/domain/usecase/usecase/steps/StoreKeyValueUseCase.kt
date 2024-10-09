@@ -41,7 +41,7 @@ class StoreKeyValueUseCase(
                     }
                 }
             }
-            componentDomain.components?.getKeysAndValues()
+            componentDomain.components.value?.getKeysAndValues()
         }
     }
 

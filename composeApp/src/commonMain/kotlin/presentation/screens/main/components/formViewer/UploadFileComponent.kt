@@ -37,6 +37,7 @@ import dev.icerock.moko.resources.compose.localized
 import dev.icerock.moko.resources.compose.painterResource
 import dev.icerock.moko.resources.desc.ResourceFormattedStringDesc
 import domain.models.form_struct.ComponentDomain
+import domain.models.form_struct.ProcessLogicDomain
 import domain.models.form_struct.ValueDomain
 import irancell.nwg.wfm.FilePicker
 import irancell.nwg.wfm.MR
@@ -50,6 +51,9 @@ import presentation.theme.textSecondary
 
 @Composable
 fun UploadFileComponent(
+    disable : Boolean,
+    readOnly : Boolean,
+    processLogicDomain: ProcessLogicDomain,
     index : Int,
     item : ComponentDomain,
     label : String,
@@ -62,12 +66,12 @@ fun UploadFileComponent(
     onRemoveFile: (ValueDomain) -> Unit
 ) {
 
-    val disableLogic = item.processLogicDomain.disabled
-    val hideLogic = item.processLogicDomain.shouldHide
-    val readOnlyLogic = item.processLogicDomain.readOnly || item.readOnly
-    val requiredLogic = item.processLogicDomain.required
-    val validateLogic = item.processLogicDomain.validate
-    val errorMessageValidateLogic = item.processLogicDomain.errorMessage
+    val hideLogic = processLogicDomain.shouldHide
+    val disableLogic = processLogicDomain.disabled || disable
+    val readOnlyLogic = processLogicDomain.readOnly || readOnly
+    val requiredLogic = processLogicDomain.required
+    val validateLogic = processLogicDomain.validate
+    val errorMessageValidateLogic =processLogicDomain.errorMessage
 
     val backgroundColor = if (errorMessage.localized() != ""  && !showErrorMessageValidation|| validateLogic) {
         Color.Red

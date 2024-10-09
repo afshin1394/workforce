@@ -213,7 +213,7 @@ class UpdateStepFormUseCase(
             if (it.removable == true && it.type != FormViewerTypes.Group)
                 removableWithParent.add(it)
 
-            it.components?.findRemovables(removableWithParent)
+            it.components.value?.findRemovables(removableWithParent)
         }
     }
 
@@ -232,7 +232,7 @@ class UpdateStepFormUseCase(
             }
 
             // Recursively search in the children
-            val found = component.components?.findComponentByKey(key)
+            val found = component.components.value?.findComponentByKey(key)
             if (found != null) {
                 return found
             }
@@ -419,7 +419,7 @@ class UpdateStepFormUseCase(
 
                 }
             }
-            componentDomain.components?.getKeysAndValues(dict)
+            componentDomain.components.value?.getKeysAndValues(dict)
         }
     }
 
@@ -430,7 +430,7 @@ class UpdateStepFormUseCase(
             }
 
             // Recursively search in the children
-            val found = component.components?.findComponentByKey(key)
+            val found = component.components.value?.findComponentByKey(key)
             if (found != null) {
                 return found
             }
@@ -444,14 +444,14 @@ class UpdateStepFormUseCase(
 
 
             // Recursively search in the children
-            return component.components?.hasRemovableObject(component) ?: false
+            return component.components.value?.hasRemovableObject(component) ?: false
         }
         return false
     }
 
     fun List<ComponentDomain>.findComponentsByType(type: String): List<ComponentDomain> {
         return this.flatMap { component ->
-            listOf(component).plus(component.components?.findComponentsByType(type) ?: emptyList())
+            listOf(component).plus(component.components.value?.findComponentsByType(type) ?: emptyList())
         }.filter { it.type == type }
     }
 
@@ -483,7 +483,7 @@ class UpdateStepFormUseCase(
 
         for (cmp in componentsCopy) {
             logicCalculation.extractLogics(componentsCopy, cmp)
-            cmp.components?.let { cmps ->
+            cmp.components.value?.let { cmps ->
                 if (cmps.isNotEmpty()) {
                     checkLogicsForAll(logicCalculation,cmps)
 

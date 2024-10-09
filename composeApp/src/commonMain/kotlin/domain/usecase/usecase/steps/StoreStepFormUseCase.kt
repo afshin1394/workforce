@@ -177,7 +177,7 @@ class StoreStepFormUseCase(
 
                 }
             }
-            componentDomain.components?.getKeysAndValues(dict)
+            componentDomain.components.value?.getKeysAndValues(dict)
         }
     }
 
@@ -188,7 +188,7 @@ class StoreStepFormUseCase(
             }
 
             // Recursively search in the children
-            val found = component.components?.findComponentByKey(key)
+            val found = component.components.value?.findComponentByKey(key)
             if (found != null) {
                 return found
             }
@@ -203,7 +203,7 @@ class StoreStepFormUseCase(
             }
 
             // Recursively search in the children
-            val found = component.components?.findComponentByKey(key)
+            val found = component.components.value?.findComponentByKey(key)
             if (found != null) {
                 return found
             }
@@ -214,7 +214,7 @@ class StoreStepFormUseCase(
 
     fun List<ComponentDomain>.findComponentsByType(type: String): List<ComponentDomain> {
         return this.flatMap { component ->
-            listOf(component).plus(component.components?.let { it.findComponentsByType(type) }
+            listOf(component).plus(component.components?.let { it.value?.findComponentsByType(type) }
                 ?: emptyList())
         }.filter { it.type == type }
     }
@@ -248,7 +248,7 @@ class StoreStepFormUseCase(
             if (it.removable == true && it.type != FormViewerTypes.Group)
                 removableWithParent.add(it)
 
-            it.components?.findRemovables(removableWithParent)
+            it.components.value?.findRemovables(removableWithParent)
         }
     }
 
@@ -371,7 +371,7 @@ class StoreStepFormUseCase(
 
         for (cmp in componentsCopy) {
             logicCalculation.extractLogics(componentsCopy, cmp)
-            cmp.components?.let { cmps ->
+            cmp.components.value?.let { cmps ->
                 if (cmps.isNotEmpty()) {
                     checkLogicsForAll(logicCalculation,cmps)
 

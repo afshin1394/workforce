@@ -33,7 +33,7 @@ class GetInitialFormByTask(
             val newType = mapSubtypeToType(component.subType) ?: component.type
             component.copy(
                 type = newType,
-                components = updateComponentTypes(component.components)
+                _components = updateComponentTypes(component.components.value)
             )
         }
     }

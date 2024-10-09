@@ -370,6 +370,7 @@ fun DropDownMultiChoice(
 
                                         if (isSelected) {
                                             selectedItems.remove(label)
+                                            onItemSelected(selectedItems, label)
                                         } else {
                                             //expanded = false
                                             selectedItems.add(label)

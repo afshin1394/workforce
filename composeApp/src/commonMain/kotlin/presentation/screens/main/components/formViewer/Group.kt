@@ -17,7 +17,9 @@ import androidx.compose.material.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -46,6 +48,8 @@ import utils.initialize
 
 @Composable
 fun groupComponent(
+    disable : Boolean,
+    readOnly : Boolean,
     processLogicDomain: ProcessLogicDomain,
     isChild:Boolean,
     scrollingState : Pair<Int,Int>,
@@ -60,13 +64,14 @@ fun groupComponent(
     onClickImage: (indexPhotoSelected: Int, componentKey: String, componentId: String,componentDomain: ComponentDomain) -> Unit,
     currentParentIndex: List<Int> = listOf(),
     item: ComponentDomain,
+    nestedItems : List<ComponentDomain>?,
     onAddClick: () -> Unit,
     onDeleteClick: () -> Unit,
 ) {
 
-    val disableLogic = processLogicDomain.disabled
+    val disableLogic = processLogicDomain.disabled || disable
     val hideLogic = processLogicDomain.shouldHide
-    val readOnlyLogic = processLogicDomain.readOnly
+    val readOnlyLogic = processLogicDomain.readOnly || readOnly
     val requiredLogic = processLogicDomain.required
     val validateLogic = processLogicDomain.validate
     val errorMessageValidateLogic = processLogicDomain.errorMessage
@@ -129,7 +134,7 @@ fun groupComponent(
                     }
                 }
             }
-            item.components?.let {
+            nestedItems?.let {
                 initialize(
                     isChild,
                     scrollingState,
@@ -138,7 +143,7 @@ fun groupComponent(
                     taskID,
                     modifier.heightIn(0.dp, 1000.dp),
                     photoDomainList,
-                    it,
+                    nestedItems,
                     onChanges as (ComponentDomain, List<ValueDomain>?) -> Unit,
                     onAddItem as (componentDomain: ComponentDomain, indexChild: Int, onComplete: (position: Int) -> Unit) -> Unit,
                     onRemoveItem as (ComponentDomain, Int, onComplete: (position: Int) -> Unit) -> Unit,
@@ -146,6 +151,7 @@ fun groupComponent(
                     currentParentIndex,
                 )
             }
+
             if (validateLogic) {
                 errorMessageValidateLogic?.let {
                     Text(

@@ -47,13 +47,12 @@ class LogicCalculation(
                     val cmp = allComponents.findComponentById(component.id)
                     Napier.log(LogLevel.ASSERT, "Hide", message = cmp.toString())
 
-                    cmp?.processLogicDomain?.shouldHide =
-                        expressionSatisfied
                     if(expressionSatisfied){
+                        cmp?.updateProcessLogicDomain(cmp.processLogicDomain.value.copy(shouldHide = expressionSatisfied))
                         cmp.clearValues()
                     }
-                    cmp?.components?.forEach {
-                        it.processLogicDomain.shouldHide = expressionSatisfied
+                    cmp?.components?.value?.forEach {
+                        it.updateProcessLogicDomain(cmp.processLogicDomain.value.copy(shouldHide = expressionSatisfied))
                         if(expressionSatisfied)
                            it.clearValues()
                     }
@@ -69,8 +68,9 @@ class LogicCalculation(
                     val expressionSatisfied = evaluateLogics(components, it)
                     val cmp = allComponents.findComponentById(component.id)
                     idCmp=component.id?:""
-                    cmp?.processLogicDomain?.required =
-                        expressionSatisfied
+                    cmp?.updateProcessLogicDomain(cmp.processLogicDomain.value.copy(required = expressionSatisfied))
+
+
                     hasLogic = expressionSatisfied
                 }
 
@@ -78,8 +78,7 @@ class LogicCalculation(
                     typeLogic = LogicType.Disable
                     val expressionSatisfied = evaluateLogics(components, it)
                     val cmp = allComponents.findComponentById(component.id)
-                    cmp?.processLogicDomain?.disabled =
-                        expressionSatisfied
+                    cmp?.updateProcessLogicDomain(cmp.processLogicDomain.value.copy(disabled = expressionSatisfied))
                     hasLogic = expressionSatisfied
                 }
 
@@ -87,8 +86,8 @@ class LogicCalculation(
                     typeLogic = LogicType.ReadOnly
                     val expressionSatisfied = evaluateLogics(components, it)
                     val cmp = allComponents.findComponentById(component.id)
-                    cmp?.processLogicDomain?.readOnly =
-                        expressionSatisfied
+                    cmp?.updateProcessLogicDomain(cmp.processLogicDomain.value.copy(readOnly = expressionSatisfied))
+
                     hasLogic = expressionSatisfied
                 }
 
@@ -103,7 +102,7 @@ class LogicCalculation(
                             result
                         )
                         cmp?.values = listOf(updatedValueDomain)
-                        cmp?.processLogicDomain?.calculatedValue = result
+                        cmp?.updateProcessLogicDomain(cmp.processLogicDomain.value.copy(calculatedValue = result))
                         hasLogic = result.isNotEmpty()
 
                     } ?: run {
@@ -112,7 +111,7 @@ class LogicCalculation(
                             ""
                         )
                         cmp?.values = listOf(updatedValueDomain)
-                        cmp?.processLogicDomain?.calculatedValue = ""
+                        cmp?.updateProcessLogicDomain(cmp.processLogicDomain.value.copy(calculatedValue = ""))
                     }
 
                 }
@@ -132,12 +131,11 @@ class LogicCalculation(
 
                     cmp?.let {
                         expressionSatisfied?.let {
-                            cmp.processLogicDomain.validate =
-                                expressionSatisfied.result
-                            cmp.processLogicDomain.errorMessage = expressionSatisfied.message
+                            cmp.updateProcessLogicDomain(cmp.processLogicDomain.value.copy(validate = expressionSatisfied.result, errorMessage = expressionSatisfied.message))
                         } ?: run {
-                            cmp.processLogicDomain.validate =
-                                false
+                            cmp.updateProcessLogicDomain(cmp.processLogicDomain.value.copy(validate = false, errorMessage = null))
+
+
                         }
                         hasLogic = expressionSatisfied?.result?:false
                     }
@@ -160,7 +158,8 @@ class LogicCalculation(
                             listOfBinding[0]
                         )
                         cmp?.values = listOf(updatedValueDomain)
-                        cmp?.processLogicDomain?.calculatedValue = listOfBinding[0]
+                        cmp?.processLogicDomain?.value?.copy(calculatedValue = listOfBinding[0])
+                            ?.let { it1 -> cmp.updateProcessLogicDomain(it1) }
 
                         hasLogic = true
                     } else {
@@ -169,7 +168,8 @@ class LogicCalculation(
                             ""
                         )
                         cmp?.values = listOf(updatedValueDomain)
-                        cmp?.processLogicDomain?.calculatedValue = ""
+                        cmp?.processLogicDomain?.value?.copy(calculatedValue = "")
+                            ?.let { it1 -> cmp.updateProcessLogicDomain(it1) }
                     }
 
 
@@ -226,9 +226,14 @@ class LogicCalculation(
                                                                 )
                                                             component?.values = listOf(updatedValueDomain)
 
+                                                            component?.processLogicDomain?.value?.copy(calculatedValue = value)
+                                                                ?.let { it1 ->
+                                                                    component?.updateProcessLogicDomain(
+                                                                        it1
+                                                                    )
+                                                                }
 
-                                                            component?.processLogicDomain?.calculatedValue = value
-                                                            Napier.log(LogLevel.INFO, tag = "insideLogiices", message = component?.processLogicDomain?.calculatedValue.toString())
+                                                            Napier.log(LogLevel.INFO, tag = "insideLogiices", message = component?.processLogicDomain?.value?.calculatedValue.toString())
                                                             hasLogic = true
                                                         }
 
@@ -687,7 +692,7 @@ class LogicCalculation(
             if (component.key == firstFieldKey) {
                 return component
             }
-            component.components?.findComponentByKey(firstFieldKey)?.let { return it }
+            component.components.value?.findComponentByKey(firstFieldKey)?.let { return it }
         }
         return null
     }
@@ -697,7 +702,7 @@ class LogicCalculation(
             if (component.id == id) {
                 return component
             }
-            component.components?.findComponentByKey(id)?.let { return it }
+            component.components.value?.findComponentByKey(id)?.let { return it }
         }
         return null
     }

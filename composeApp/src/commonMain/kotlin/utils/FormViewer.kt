@@ -69,6 +69,7 @@ fun initialize(
     currentParentIndex: List<Int> = listOf(),
 ) {
 
+
     Napier.log(LogLevel.ASSERT, tag = "indexFile", message = "indexFile${savedIndex}")
     val indexChildSaveable = rememberSaveable { mutableStateOf(savedIndex) }
     val indexParentSaveable = rememberSaveable { mutableStateOf<Int?>(null) }
@@ -79,6 +80,8 @@ fun initialize(
 
     val listState = rememberLazyListState()
     val scope = rememberCoroutineScope()
+
+
 
     LaunchedEffect(scrollingState) {
         Napier.log(
@@ -101,6 +104,8 @@ fun initialize(
         contentPadding = PaddingValues(bottom = 100.dp)
     ) {
         itemsIndexed(components, key = { index, _ -> index }) { index, item ->
+            val nestedComponentsState by remember { item.components }
+            val processLogicDomainState by remember { item.processLogicDomain }
 
             val updatedParentIndex = currentParentIndex + index
 
@@ -112,7 +117,9 @@ fun initialize(
 
 
                         groupComponent(
-                            item.processLogicDomain,
+                            disable = item.disabled,
+                            readOnly =  item.readOnly,
+                            processLogicDomainState,
                             true,
                             scrollingState = scrollingState,
                             parentIndex = savedParentIndex,
@@ -126,14 +133,21 @@ fun initialize(
                             onClickImage,
                             updatedParentIndex,
                             item,
-
+                            nestedComponentsState,
                             onAddClick = {
 
-                                val newComponents =
-                                    copyComponentWithValues(item, uuid4().toString())
-                                onAddItem(newComponents, index) { position ->
-                                    scope.launch {
-                                        listState.animateScrollToItem(index + position)
+                                val newComponents = nestedComponentsState?.let {
+                                    copyComponentWithValues(
+                                        item,
+                                        nestedComponentsState,
+                                        uuid4().toString()
+                                    )
+                                }
+                                newComponents?.let {
+                                    onAddItem(newComponents, index) { position ->
+                                        scope.launch {
+                                            listState.animateScrollToItem(index + position)
+                                        }
                                     }
                                 }
 
@@ -172,7 +186,7 @@ fun initialize(
 
 
                         Editable(
-                            processLogicDomain = item.processLogicDomain,
+                            processLogicDomain = processLogicDomainState,
                             type = TypeEditable.NUMBER,
                             value = valueState.value,
                             showErrorMessageValidation = item.validate?.firstCheck?:true,
@@ -218,7 +232,7 @@ fun initialize(
                             remember { mutableStateOf(item.values?.get(0)?.value ?: "") }
 
                         Editable(
-                            processLogicDomain = item.processLogicDomain,
+                            processLogicDomain = processLogicDomainState,
                             type = TypeEditable.TEXTAREA,
                             value = valueState.value,
                             showErrorMessageValidation = item.validate?.firstCheck?:true,
@@ -261,7 +275,7 @@ fun initialize(
                             remember { mutableStateOf(item.values?.get(0)?.value ?: "") }
 
                         Editable(
-                            processLogicDomain = item.processLogicDomain,
+                            processLogicDomain = processLogicDomainState,
                             type = TypeEditable.SHORT_TEXT,
                             value = valueState.value,
                             showErrorMessageValidation = item.validate?.firstCheck?:true,
@@ -307,7 +321,7 @@ fun initialize(
 
 
                         Editable(
-                            processLogicDomain = item.processLogicDomain,
+                            processLogicDomain = processLogicDomainState,
                             type = TypeEditable.LATLONG,
                             value = valueState.value,
                             showErrorMessageValidation = item.validate?.firstCheck?:true,
@@ -353,7 +367,7 @@ fun initialize(
                             remember { mutableStateOf(item.values?.get(0)?.value ?: "") }
 
                         Editable(
-                            processLogicDomain = item.processLogicDomain,
+                            processLogicDomain = processLogicDomainState,
                             type = TypeEditable.PHONE,
                             value = valueState.value,
                             showErrorMessageValidation = item.validate?.firstCheck?:true,
@@ -399,7 +413,7 @@ fun initialize(
                             remember { mutableStateOf(item.values?.get(0)?.value ?: "") }
 
                         Editable(
-                            processLogicDomain = item.processLogicDomain,
+                            processLogicDomain = processLogicDomainState,
                             type = TypeEditable.EMAIL,
                             value = valueState.value,
                             showErrorMessageValidation = item.validate?.firstCheck?:true,
@@ -455,7 +469,7 @@ fun initialize(
                             readOnly = item.readOnly,
                             disable = item.disabled,
                             showErrorMessageValidation = item.validate?.firstCheck?:true,
-                            processLogicDomain = item.processLogicDomain,
+                            processLogicDomain = processLogicDomainState,
                             selectedDateState.value,
                             item.label.toString(),
                             if (errorMessageState.value == initialMessageError) errorMessageState.value else initialMessageError,
@@ -490,7 +504,7 @@ fun initialize(
                             item.readOnly,
                             item.disabled,
                             item.validate?.firstCheck?:true,
-                            item.processLogicDomain,
+                            processLogicDomainState,
                             selectedDateState.value,
                             item.label.toString(),
                             if (errorMessageState.value == initialMessageError) errorMessageState.value else initialMessageError,
@@ -528,7 +542,7 @@ fun initialize(
                             item.readOnly,
                             item.disabled,
                             item.validate?.firstCheck?:true,
-                            item.processLogicDomain,
+                            processLogicDomainState,
                             selectedDateState.value,
                             item.label.toString(),
                             if (errorMessageState.value == initialMessageError) errorMessageState.value else initialMessageError,
@@ -570,6 +584,9 @@ fun initialize(
                         val errorMessage = remember { mutableStateOf(initialMessageError) }
 
                         UploadFileComponent(
+                            item.readOnly,
+                            item.disabled,
+                            processLogicDomainState,
                             index = index,
                             item = item,
                             label = item.key ?: "",
@@ -654,6 +671,9 @@ fun initialize(
                         val errorMessageState = remember { mutableStateOf(initialMessageError) }
 
                         ImagePicker(
+                            item.disabled,
+                            item.readOnly,
+                            processLogicDomainState,
                             index,
                             item,
                             taskID,
@@ -714,7 +734,7 @@ fun initialize(
                             item.readOnly,
                             item.disabled,
                             item.validate?.firstCheck?:true,
-                            item.processLogicDomain ?: ProcessLogicDomain().copy(),
+                            processLogicDomainState ?: ProcessLogicDomain().copy(),
                             componentLabel.toString(),
                             if (errorMessageState.value == initialMessageError) errorMessageState.value else initialMessageError,
                             valuesState,
@@ -756,7 +776,7 @@ fun initialize(
                                 item.readOnly,
                                 item.disabled,
                                 showErrorMessageValidation = item.validate?.firstCheck?:true,
-                                item.processLogicDomain,
+                                processLogicDomainState,
                                 componentLabel.toString(),
                                 if (errorMessageState.value == initialMessageError) errorMessageState.value else initialMessageError,
                                 valuesState.value,
@@ -801,7 +821,7 @@ fun initialize(
                                     item.readOnly,
                                     item.disabled,
                                     showErrorMessageValidation = item.validate?.firstCheck?:true,
-                                    item.processLogicDomain,
+                                    processLogicDomainState,
                                     componentLabel.toString(),
                                     if (errorMessageState.value == initialMessageError) errorMessageState.value else initialMessageError,
                                     "",
@@ -850,7 +870,7 @@ fun initialize(
                             item.readOnly,
                             item.disabled,
                             showErrorMessageValidation = item.validate?.firstCheck?:true,
-                            item.processLogicDomain,
+                            processLogicDomainState,
                             componentLabel.toString(),
                             if (errorMessageState.value == initialMessageError) errorMessageState.value else initialMessageError,
                             valuesState,
@@ -894,8 +914,11 @@ private fun updateValuesForSelectType(values: List<ValueDomain>, selectedItems: 
 
 fun copyComponentWithValues(
     component: ComponentDomain,
+    nestedComponents: List<ComponentDomain>? ,
     uuid: String = uuid4().toString()
 ): ComponentDomain {
+
+    // Update the validation message
     val updatedValidate = component.validate?.copy(
         messageError = ResourceFormattedStringDesc(
             MR.strings.empty_error_message,
@@ -903,27 +926,34 @@ fun copyComponentWithValues(
         )
     )
 
-    val values =
-        if (component.type == FormViewerTypes.Select || component.type == FormViewerTypes.Multi || component.type == FormViewerTypes.Checklist || component.type == FormViewerTypes.Radio) {
+    // Determine values based on component type
+    val values = when (component.type) {
+        FormViewerTypes.Select,
+        FormViewerTypes.Multi,
+        FormViewerTypes.Checklist,
+        FormViewerTypes.Radio -> {
             component.values?.map { value ->
-                value.copy(isSelected = false)
+                value.copy(isSelected = false) // Reset selection for these types
             }
-        } else {
-            null
         }
+        else -> null
+    }
 
-    val copiedComponents = component.components?.map { subComponent ->
-        copyComponentWithValues(subComponent, uuid4().toString())
-    }?.toMutableList()
+    // Create copies of nested components that are directly related to the current component
+    val copiedComponents = component.components.value?.map { subComponent ->
+        copyComponentWithValues(subComponent, subComponent.components.value, uuid4().toString()) // Recursive call with relevant nested components
+    }?.toMutableList() ?: mutableListOf() // Default to empty list if no components
 
+    // Return a new instance of ComponentDomain with updated properties
     return component.copy(
-        id = "${component.id}copy$uuid",
-        components = copiedComponents,
-        values = values?.toMutableList(),
-        removable = true,
-        validate = updatedValidate
+        id = "${component.id}copy$uuid", // Unique ID for the copied component
+        _components = copiedComponents, // Updated nested components
+        values = values?.toMutableList(), // Updated values list
+        removable = true, // Mark as removable
+        validate = updatedValidate // Updated validation
     )
 }
+
 
 fun removeComponentById(components: List<ComponentDomain>, id: String): ComponentDomain? {
     val mutableComponents = components.toMutableList()
