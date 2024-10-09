@@ -50,12 +50,12 @@ class LogicCalculation(
                     cmp?.processLogicDomain?.shouldHide =
                         expressionSatisfied
                     if(expressionSatisfied){
-                        cmp?.values =null
+                        cmp.clearValues()
                     }
                     cmp?.components?.forEach {
                         it.processLogicDomain.shouldHide = expressionSatisfied
                         if(expressionSatisfied)
-                        it.values = null
+                           it.clearValues()
                     }
 
 
@@ -1440,16 +1440,18 @@ class LogicCalculation(
         }
     }
 
-    fun ComponentDomain.isSelectableValue(): Boolean {
-        return when (type) {
-            FormViewerTypes.Select, FormViewerTypes.Multi -> isMulti
-            FormViewerTypes.Checklist -> true
-            else -> false
-        }
-    }
+    fun ComponentDomain.isSelectableValue() =
+        this.type == FormViewerTypes.Checklist || this.type == FormViewerTypes.Radio || this.type == FormViewerTypes.Select || this.type == FormViewerTypes.Multi
+
 
     fun ticketId(ticketId: String) {
         this.ticketId = ticketId
+    }
+    private fun ComponentDomain?.clearValues() {
+        if(this?.isSelectableValue() == true)
+            this.values?.forEach { it.isSelected = false }
+        else
+            this?.values =null
     }
 }
 
