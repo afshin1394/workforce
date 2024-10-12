@@ -39,6 +39,7 @@ import presentation.model.BottomSheetActionModel
 import presentation.model.SingleButtonActionModel
 import presentation.screens.auth.components.AuthAlertText
 import presentation.screens.auth.components.AuthAlertTextItem
+import presentation.screens.auth.components.AuthVerificationCodeRow
 import presentation.screens.auth.viewmodel.VerifyScreenVM
 import presentation.screens.main.compose.BaseScreen
 import presentation.screens.splash.events.CheckVersionEvent
@@ -49,7 +50,6 @@ import presentation.theme.textBrand
 import presentation.theme.textInverse
 import presentation.theme.textInverseDisabled
 import utils.ButtonState
-import utils.ViewStates
 import utils.startDownloadFileApk
 
 class VerifyScreen(private val phoneNumber: String = "") : Screen {
@@ -305,21 +305,16 @@ class VerifyScreen(private val phoneNumber: String = "") : Screen {
                                         fontWeight = FontWeight.SemiBold,
                                         fontSize = 16.sp
                                     )
-                                ) {
-
-                                }
+                                ) {}
                             }
-
                         }
                         )
-
                         Spacer(modifier = Modifier.height(spacing3X))
                         AuthVerificationCodeRow(
                             otpText = smsCode,
                             onOtpTextChange = { otp, boolean ->
                                 viewModel.updateOtp(otp)
                             })
-
                         Spacer(modifier = Modifier.height(spacing3X))
                         if (!finishTimer)
                             Text(text = "${stringResource(MR.strings.waiting_time_receive)} : $remainTime")
@@ -331,7 +326,6 @@ class VerifyScreen(private val phoneNumber: String = "") : Screen {
                                     textColor = textBrand
                                 )
                             ) {
-                                //onClick
                                 viewModel.resendCode(onError = {
                                     navigator.pop()
                                 })
