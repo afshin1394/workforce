@@ -78,6 +78,7 @@ import presentation.theme.textInverseDisabled
 import utils.BottomSheetTypes
 import utils.GpsState
 import utils.NetworkStates
+import utils.OrientationState
 import utils.ServiceState
 import utils.VpnDetectionStates
 
@@ -117,6 +118,9 @@ fun <T : BaseViewModel> BaseScreen(
     val gpsScaffoldState = rememberBottomSheetScaffoldState()
     val networkState by viewModel.networkState.collectAsState()
     val serviceState by viewModel.serviceState.collectAsState()
+    val orientationState by viewModel.orientationState.collectAsState()
+    val isCloseMenuForOrientation = remember { mutableStateOf(false) }
+    var previousOrientation by remember { mutableStateOf<OrientationState>(OrientationState.Default) }
 
 
     OnLifecycleEvent { _, event ->
@@ -287,6 +291,45 @@ fun <T : BaseViewModel> BaseScreen(
                                     onBackPressed()
                                 }
                             })
+
+
+                            when (orientationState) {
+                                OrientationState.Default -> {
+
+                                }
+                                OrientationState.Landscape -> {
+
+
+                                    if (previousOrientation == OrientationState.Portrait) {
+
+                                        isCloseMenuForOrientation.value = true
+                                        scope.launch {
+                                            drawerState.close()
+                                            delay(200)
+                                            isCloseMenuForOrientation.value = false
+                                        }
+                                    }
+                                    previousOrientation = OrientationState.Landscape
+                                }
+
+                                OrientationState.Portrait -> {
+
+                                    if (previousOrientation == OrientationState.Landscape) {
+
+                                        isCloseMenuForOrientation.value = true
+                                        scope.launch {
+                                            drawerState.close()
+                                            delay(200)
+                                            isCloseMenuForOrientation.value = false
+                                        }
+                                    }
+
+                                    previousOrientation = OrientationState.Portrait
+                                }
+                            }
+
+
+
                             when (gpsState) {
                                 GpsState.Default -> {
                                     scope.launch {
@@ -500,6 +543,38 @@ fun <T : BaseViewModel> BaseScreen(
                                 onBackPressed()
                             }
                         })
+
+                        when (orientationState) {
+                            OrientationState.Default -> {
+
+                            }
+                            OrientationState.Landscape -> {
+
+                                if (previousOrientation == OrientationState.Portrait) {
+                                    isCloseMenuForOrientation.value = true
+                                    scope.launch {
+                                        drawerState.close()
+                                        delay(200)
+                                        isCloseMenuForOrientation.value = false
+                                    }
+                                }
+                                previousOrientation = OrientationState.Landscape
+                            }
+
+                            OrientationState.Portrait -> {
+                                if (previousOrientation == OrientationState.Landscape) {
+                                    isCloseMenuForOrientation.value = true
+                                    scope.launch {
+                                        drawerState.close()
+                                        delay(200)
+                                        isCloseMenuForOrientation.value = false
+                                    }
+                                }
+
+                                previousOrientation = OrientationState.Portrait
+                            }
+                        }
+
 
                         when (gpsState) {
                             GpsState.Default -> {}

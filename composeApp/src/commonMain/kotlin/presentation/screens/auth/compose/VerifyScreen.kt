@@ -3,6 +3,8 @@ package presentation.screens.auth.compose
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.rememberBottomSheetScaffoldState
 import androidx.compose.material3.Text
@@ -260,10 +262,9 @@ class VerifyScreen(private val phoneNumber: String = "") : Screen {
 
             content = {
                 Column(
-                    modifier = if (events == CheckVersionEvent.NormalUpdate || events == CheckVersionEvent.ForceUpdate) Modifier.blur(
-                        7.dp
-                    ) else Modifier
+                    modifier = Modifier
                         .fillMaxSize()
+                        .verticalScroll(rememberScrollState())
                         .background(color = backgroundBackground3),
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.CenterHorizontally
@@ -274,13 +275,12 @@ class VerifyScreen(private val phoneNumber: String = "") : Screen {
                         modifier = Modifier
                             .width(82.dp)
                             .height(82.dp)
-                            .weight(2f)
+
                             .wrapContentSize()
                     )
                     Column(
                         modifier = Modifier
-                            .fillMaxSize()
-                            .weight(4f)
+                            .fillMaxWidth()
                             .padding(spacing2X)
                     ) {
 

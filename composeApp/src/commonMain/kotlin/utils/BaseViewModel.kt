@@ -12,6 +12,8 @@ import irancell.nwg.wfm.BackgroundServiceApp
 import irancell.nwg.wfm.GPS
 import irancell.nwg.wfm.LifecycleEvent
 import irancell.nwg.wfm.MR
+import irancell.nwg.wfm.Orientation
+import irancell.nwg.wfm.getOrientation
 import irancell.nwg.wfm.provideAppContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -63,6 +65,12 @@ sealed class NetworkStates {
 }
 
 
+sealed interface OrientationState {
+    data object Default : OrientationState
+    data object Landscape : OrientationState
+    data object Portrait : OrientationState
+}
+
 open class BaseViewModel : ViewModel(), KoinComponent {
     private val ipDetectionUseCase: IpDetectionUseCase by inject()
 
@@ -75,6 +83,8 @@ open class BaseViewModel : ViewModel(), KoinComponent {
         MutableStateFlow<VpnDetectionStates>(VpnDetectionStates.Default)
     private val _gpsState = MutableStateFlow<GpsState>(GpsState.Default)
     private val _lifeCycleEvent = MutableStateFlow(LifecycleEvent.ON_ANY)
+    private val _orientationState = MutableStateFlow<OrientationState>(OrientationState.Default)
+
     val lifeCycleEvent = _lifeCycleEvent.asStateFlow()
 
     val state = _state.asStateFlow()
@@ -82,6 +92,8 @@ open class BaseViewModel : ViewModel(), KoinComponent {
     val networkState = _networkState.asStateFlow()
     val vpnDetectionStates = _vpnDetectionState.asStateFlow()
     val gpsState = _gpsState.asStateFlow()
+
+    val orientationState=_orientationState.asStateFlow()
     private val konnectivity: Konnectivity = Konnectivity()
     private val _availabilityStatus =
         MutableStateFlow<AvailabilityStatus>(AvailabilityStatus.Unavailable)
@@ -91,6 +103,8 @@ open class BaseViewModel : ViewModel(), KoinComponent {
         traceNetwork()
         traceLocation()
         collectServiceState()
+        traceOrientation()
+
     }
 
     fun updateAvailabilityState(availabilityStatus: AvailabilityStatus) {
@@ -178,7 +192,27 @@ open class BaseViewModel : ViewModel(), KoinComponent {
         }
     }
 
-    private fun traceNetwork() {
+
+    private fun  traceOrientation(){
+
+Orientation.orientationState(provideAppContext()){
+    when(it){
+        "landscape"->{
+            _orientationState.update { OrientationState.Landscape }
+
+        }
+        "portrait"->{
+            _orientationState.update { OrientationState.Portrait }
+        }
+    }
+
+}
+
+
+    }
+
+
+    private fun   traceNetwork() {
         viewModelScope.launch(Dispatchers.Main) {
             konnectivity.currentNetworkConnectionState.collect { connection ->
                 when (connection) {
@@ -197,7 +231,6 @@ open class BaseViewModel : ViewModel(), KoinComponent {
             }
         }
     }
-
     fun updateState(viewStates: ViewStates) {
         _state.update { viewStates }
     }

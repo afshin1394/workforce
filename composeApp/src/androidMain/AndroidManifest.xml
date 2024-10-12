@@ -51,6 +51,13 @@
                 <action android:name="android.location.PROVIDERS_CHANGED" />
             </intent-filter>
         </receiver>
+
+        <receiver android:name=".ChangeOrientationReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.CONFIGURATION_CHANGED" />
+            </intent-filter>
+        </receiver>
         <receiver
             android:name=".SMSBroadcastReceiver"
             android:exported="true"
