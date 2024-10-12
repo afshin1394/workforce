@@ -61,7 +61,6 @@ import domain.usecase.usecase.profile.StoreProfileUseCase
 import domain.usecase.usecase.steps.SendStepsOfTicketToServerUseCase
 import domain.usecase.usecase.steps.StoreKeyValueUseCase
 import domain.usecase.usecase.steps.UpdateIsEditedTicketUseCase
-import domain.usecase.usecase.steps.UpdateStepsUseCase
 import domain.usecase.usecase.suspendTask.DeleteByTaskIdUseCase
 import domain.usecase.usecase.suspendTask.GetSuspendTaskByIdUseCase
 import domain.usecase.usecase.suspendTask.StoreSuspendTaskUseCase
@@ -105,7 +104,6 @@ import utils.DeploymentBASEURL
 import utils.DevelopmentBASEURL
 import utils.ProductionBASEURL
 import utils.Token
-
 
 fun repositoryModule() = module {
     //Repositories
@@ -158,7 +156,7 @@ fun useCaseModule() = module {
     single { GetAvailabilityObjectIdUseCase() }
     single { LoginUseCase(get()) }
     single { GetTasksUseCase(get()) }
-    single { UpdateTaskUseCase(get(), get()) }
+    single { UpdateTaskUseCase(get(), get(), get(), get(), get()) }
     single { LoginUseCase(get()) }
     single { VerifyUseCase(get()) }
     single { ResendUseCase(get()) }
@@ -173,7 +171,6 @@ fun useCaseModule() = module {
     single { GetPhotoByComponentKeyUseCase(get()) }
     single { DeleteByComponentKeyUseCase(get()) }
     single { DeletePhotoByComponentKeyAndIdUseCase(get()) }
-    single { UpdateStepsUseCase(get(), get(), get(), get()) }
     single { UpdateStepFormUseCase(get(), get(), get(), get()) }
     single { StoreStepFormUseCase(get(), get(), get(), get()) }
     single { CheckForEditedTicketUseCase(get()) }
@@ -342,7 +339,6 @@ fun viewModelModule() = module {
             get(),
             get(),
             get(),
-            get(),
         )
     }
     viewModelDefinition { SettingScreenVM() }
@@ -351,7 +347,7 @@ fun viewModelModule() = module {
     viewModelDefinition { VerifyScreenVM(get(), get(), get(), get(), get()) }
     viewModelDefinition { SplashScreenVM(get(), get()) }
     viewModelDefinition { TicketInfoVM(get()) }
-    viewModelDefinition { TicketProcessVM(get(), get(), get(), get(), get(), get(), get(), get()) }
+    viewModelDefinition { TicketProcessVM(get(), get(), get(), get(), get(), get(), get()) }
     viewModelDefinition { FormViewerScreenVM(get(), get()) }
     viewModelDefinition { MapVM() }
     viewModelDefinition { AccountScreenVM(get()) }

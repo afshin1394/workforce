@@ -1,8 +1,6 @@
 package presentation.screens.main.viewmodel
 
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import com.irancell.nwg.wfm.presentation.components.FilterSectionItem
@@ -11,7 +9,6 @@ import com.irancell.nwg.wfm.presentation.model.SelectableItem
 import com.plusmobileapps.konnectivity.Konnectivity
 import com.plusmobileapps.konnectivity.NetworkConnection
 import database.entity.GeneralLocationEntity
-import dev.icerock.moko.resources.StringResource
 import domain.models.LiveLocationDomain
 import domain.models.PhotoDomain
 import presentation.model.StateFilter
@@ -33,7 +30,6 @@ import domain.usecase.usecase.photo.GetPhotoByComponentKeyUseCase
 import domain.usecase.usecase.photo.InsertPhotoUseCase
 import domain.usecase.usecase.profile.GetProfileUseCase
 import domain.usecase.usecase.steps.UpdateIsEditedTicketUseCase
-import domain.usecase.usecase.steps.UpdateStepsUseCase
 import domain.usecase.usecase.suspendTask.DeleteByTaskIdUseCase
 import domain.usecase.usecase.suspendTask.GetSuspendTaskByIdUseCase
 import domain.usecase.usecase.suspendTask.StoreSuspendTaskUseCase
@@ -56,14 +52,11 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
-import presentation.screens.main.components.AvailabilityStatus
 import utils.AsyncResult
-
 import utils.AsyncStatus
 import utils.AvailabilityObjectId
 import utils.AvailabilityStatus
 import utils.BaseViewModel
-import utils.NetworkStates
 import utils.ServiceState
 import utils.TicketNumber
 import utils.ViewStates
@@ -88,7 +81,6 @@ class MainScreenVM(
     private val updateUnSendLocationUseCase: UpdateUnSendLocationUseCase,
     private val deleteSendLocationUseCase: DeleteSendLocationUseCase,
     private val updateTaskUseCase: UpdateTaskUseCase,
-    private val updateStepsUseCase: UpdateStepsUseCase,
     private val getInitialFormByTask: GetInitialFormByTask,
 ) : BaseViewModel() {
     private val _availability = MutableStateFlow(false)
@@ -981,7 +973,7 @@ class MainScreenVM(
                 }
 
                 AsyncStatus.SUCCESS -> {
-                    updateSteps()
+                    getTasks()
                     println("PullToRefreshCallApi${"SUCCESS"}")
                 }
 
@@ -990,31 +982,31 @@ class MainScreenVM(
         }
     }
 
-    private suspend fun updateSteps() {
-        updateStepsUseCase(Unit).collect {
-            when (it.status) {
-                AsyncStatus.ERROR -> {
-                    Napier.log(
-                        LogLevel.ASSERT, "updateSteps", message = "ERROR: " + it.message
-                    )
-                }
-
-                AsyncStatus.LOADING -> {
-                    Napier.log(LogLevel.ASSERT, "updateSteps", message = "LOADING: ")
-                }
-
-                AsyncStatus.SUCCESS -> {
-                    getTasks()
-
-                    Napier.log(
-                        LogLevel.ASSERT, "" + "", message = "SUCCESS: " + it.data
-                    )
-                }
-
-                else -> {}
-            }
-        }
-    }
+//    private suspend fun updateSteps() {
+//        updateStepsUseCase(Unit).collect {
+//            when (it.status) {
+//                AsyncStatus.ERROR -> {
+//                    Napier.log(
+//                        LogLevel.ASSERT, "updateSteps", message = "ERROR: " + it.message
+//                    )
+//                }
+//
+//                AsyncStatus.LOADING -> {
+//                    Napier.log(LogLevel.ASSERT, "updateSteps", message = "LOADING: ")
+//                }
+//
+//                AsyncStatus.SUCCESS -> {
+//                    getTasks()
+//
+//                    Napier.log(
+//                        LogLevel.ASSERT, "" + "", message = "SUCCESS: " + it.data
+//                    )
+//                }
+//
+//                else -> {}
+//            }
+//        }
+//    }
 
     fun openInMapHandler() {
         viewModelScope.launch {

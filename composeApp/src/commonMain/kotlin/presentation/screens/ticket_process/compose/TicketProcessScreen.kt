@@ -23,7 +23,6 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.irancell.nwg.wfm.presentation.components.bottomSheetDoubleActionBottomBar
 import com.irancell.nwg.wfm.presentation.components.bottomSingleActionComponent
-import presentation.components.MenuItemsTopBar
 import com.irancell.nwg.wfm.presentation.theme.spacing2X
 import presentation.screens.ticket_process.viewModel.TicketProcessVM
 import presentation.screens.ticket_process.components.processBar
@@ -38,7 +37,6 @@ import irancell.nwg.wfm.provideAppContext
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import presentation.components.TicketProcessTopBar
@@ -49,7 +47,6 @@ import presentation.screens.main.components.EditPhotoComponent
 import presentation.screens.main.components.PhotoPreviewComponent
 import presentation.screens.main.compose.BaseScreen
 import presentation.screens.main.events.TicketProcessEvent
-
 import presentation.screens.ticket_process.events.StepEvent
 import presentation.theme.body_large
 import presentation.theme.surfaceBrandDefault
@@ -61,7 +58,6 @@ import utils.PROCEED
 import utils.ViewStates
 import utils.initialize
 import utils.validateComponents
-
 
 class TicketProcessScreen(
     private val ticketId: String,
@@ -81,7 +77,6 @@ class TicketProcessScreen(
         val positionSelectedPhotoForEdit by viewModel.positionSelected.collectAsState()
         var isBottomSheetOpen by remember { mutableStateOf(true) }
         val events by viewModel.events
-        var changeState = MutableStateFlow(0)
         val stepDetails by viewModel.stepDetails.collectAsState()
         val stepEvent by viewModel.stepEvent.collectAsState()
         val reloadState by viewModel.reloadState.collectAsState()
@@ -90,7 +85,6 @@ class TicketProcessScreen(
         val savedParentIndex by viewModel.savedParentIndex.collectAsState()
         var isClickable by remember { mutableStateOf(true) }
         val mainScreen = rememberScreen(Menu.MyTickets)
-        val ticketFlowCompletedState = viewModel.ticketFlowCompleted.collectAsState()
         val updateTaskCompleteState = viewModel.updateTasksComplete.collectAsState()
         val scrollingState = viewModel.scrollingPosition.collectAsState()
 
@@ -176,10 +170,8 @@ class TicketProcessScreen(
 
                     else -> {
                         viewModel.events.value = TicketProcessEvent.Default
-
                     }
                 }
-
             }
         }
 
@@ -259,8 +251,6 @@ class TicketProcessScreen(
                             ), onClick = {
                                 viewModel.handleLogics {
                                     if (it.size > 0) {
-
-
                                         scope.launch {
                                             val errors =
                                                 mutableMapOf<String, List<ResourceFormattedStringDesc>>()
@@ -306,7 +296,6 @@ class TicketProcessScreen(
                     }
 
                     TicketProcessEvent.TicketFlowCompleted -> {
-
                         bottomSingleActionComponent(
                             SingleButtonActionModel(
                                 stringResource(MR.strings.submit),
@@ -315,14 +304,11 @@ class TicketProcessScreen(
                             ), onClick = {
                                 viewModel.updateTicketFlowState(false)
                                 viewModel.updateTasks()
-
-
                             })
 
                         scope.launch {
                             scaffoldState.bottomSheetState.expand()
                         }
-
                     }
                 }
 
@@ -376,7 +362,6 @@ class TicketProcessScreen(
 
                     TicketProcessEvent.DeletePhoto -> {
 
-
                         Text(
                             text = stringResource(MR.strings.sure_delete_photo),
                             style = body_large,
@@ -385,7 +370,6 @@ class TicketProcessScreen(
                         scope.launch {
                             scaffoldState.bottomSheetState.expand()
                         }
-
                     }
 
                     TicketProcessEvent.Default -> {
@@ -408,11 +392,8 @@ class TicketProcessScreen(
                         scope.launch {
                             scaffoldState.bottomSheetState.expand()
                         }
-
                     }
                 }
-
-
             },
             content = {
                 LaunchedEffect(updateTaskCompleteState.value) {
@@ -459,8 +440,16 @@ class TicketProcessScreen(
                                 }
                             },
                             onAddItem = { component, indexChild, scrollCallback ->
-                                Napier.log(LogLevel.ASSERT, tag = "componentDDDDD", message = component.toString())
-                                Napier.log(LogLevel.ASSERT, tag = "indexChild", message = indexChild.toString())
+                                Napier.log(
+                                    LogLevel.ASSERT,
+                                    tag = "componentDDDDD",
+                                    message = component.toString()
+                                )
+                                Napier.log(
+                                    LogLevel.ASSERT,
+                                    tag = "indexChild",
+                                    message = indexChild.toString()
+                                )
                                 scope.launch {
                                     viewModel.addOrRemoveComponentDomainRepeatableToList(
                                         component,
@@ -479,11 +468,8 @@ class TicketProcessScreen(
                                         scrollCallBack
                                     )
                                 }
-
-
                             },
                         )
-
                     }
                 }
                 /*    CompleteFlowDialog(
@@ -537,14 +523,8 @@ class TicketProcessScreen(
                         isClickable = true
                     }
                 }
-
-
             }, shouldBlurOnBottomSheetExpansion = false
         )
-
-
     }
-
-
 }
 
