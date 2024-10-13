@@ -46,9 +46,9 @@ class LogicCalculation(
                     val expressionSatisfied = evaluateLogics(components, it)
                     val cmp = allComponents.findComponentById(component.id)
                     Napier.log(LogLevel.ASSERT, "Hide", message = cmp.toString())
+                    cmp?.updateProcessLogicDomain(cmp.processLogicDomain.value.copy(shouldHide = expressionSatisfied))
 
                     if(expressionSatisfied){
-                        cmp?.updateProcessLogicDomain(cmp.processLogicDomain.value.copy(shouldHide = expressionSatisfied))
                         cmp.clearValues()
                     }
                     cmp?.components?.value?.forEach {

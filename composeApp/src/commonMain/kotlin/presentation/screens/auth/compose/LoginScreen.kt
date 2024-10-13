@@ -4,6 +4,8 @@ package presentation.screens.auth.compose
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Text
 import androidx.compose.material.rememberBottomSheetScaffoldState
@@ -96,6 +98,7 @@ class LoginScreen() : Screen {
                     Column(
                         modifier = Modifier
                             .fillMaxSize()
+                            .verticalScroll(rememberScrollState())
                             .weight(4f)
                             .padding(spacing2X)
                     ) {

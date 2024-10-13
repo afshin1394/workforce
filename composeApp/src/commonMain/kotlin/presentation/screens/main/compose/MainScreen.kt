@@ -35,6 +35,8 @@ import irancell.nwg.wfm.DrawController
 import irancell.nwg.wfm.ExitApp
 import irancell.nwg.wfm.InternalStorage
 import irancell.nwg.wfm.MR
+import irancell.nwg.wfm.getOrientation
+import irancell.nwg.wfm.getSharedPref
 import irancell.nwg.wfm.provideAppContext
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -59,6 +61,7 @@ import presentation.theme.surfaceDefault
 import presentation.theme.textInverse
 import presentation.theme.textInverseDisabled
 import presentation.theme.textPrimary
+import utils.ORIENTATION
 import utils.AvailabilityStatus
 import utils.ServiceState
 
@@ -90,11 +93,16 @@ class MainScreen(
         val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
         val eventsState by viewModel.events.collectAsState()
         var hasDrawer by mutableStateOf(false)
-        var showContent by remember { mutableStateOf(false) }
         val availabilityStatus by viewModel.availabilityStatus.collectAsState()
+        var showContent by remember { mutableStateOf(false) }
+
+
+
 
         LaunchedEffect(true) {
+
             showContent = true
+
         }
 
         val suspendItems by lazy {
@@ -182,6 +190,7 @@ class MainScreen(
 
 
         if (showContent) {
+
             hasDrawer = true
             BaseScreen(
                 viewModel = viewModel,

@@ -23,7 +23,6 @@ import database.entity.GeneralLocationEntity
 import domain.usecase.ResultStatus
 import domain.usecase.usecase.location.SendLocationToServerUseCase
 import domain.usecase.usecase.location.StoreLocationDataUseCase
-import domain.usecase.usecase.steps.UpdateStepsUseCase
 import domain.usecase.usecase.ticket.UpdateTaskUseCase
 import io.github.aakira.napier.LogLevel
 import io.github.aakira.napier.Napier
@@ -51,7 +50,6 @@ internal actual class BackgroundServiceApp : Service(), KoinComponent {
     val storeLocationDataUseCase: StoreLocationDataUseCase by inject()
     val sendLocationToServerUseCase: SendLocationToServerUseCase by inject()
     val updateTaskUseCase: UpdateTaskUseCase by inject()
-    val updateStepsUseCase: UpdateStepsUseCase by inject()
 
     private lateinit var pendingIntentUpdate: PendingIntent
     private lateinit var pendingIntentStoreLocation: PendingIntent
@@ -300,13 +298,8 @@ internal actual class BackgroundServiceApp : Service(), KoinComponent {
                     }
 
                     AsyncStatus.SUCCESS -> {
-                        updateSteps()
-                        println("TaskCallApiiii${"SUCCESS"}")
-                    }
-
-                    AsyncStatus.EMPTY -> {
-                        println("TaskCallApiiii${"ERROR"}")
-
+                        println("TaskCallApi${"SUCCESS"}")
+                        Log.i("getAllTask", "onStartCommand: CallApi" + it.data)
                     }
 
                     else -> {}
@@ -314,37 +307,35 @@ internal actual class BackgroundServiceApp : Service(), KoinComponent {
             }
     }
 
-    private suspend fun updateSteps() {
-        updateStepsUseCase(Unit).collect {
-            when (it.status) {
-                AsyncStatus.ERROR -> {
-                    Napier.log(
-                        LogLevel.ASSERT,
-                        "updateSteps",
-                        message = "ERROR: " + it.message
-                    )
-                }
-
-                AsyncStatus.EMPTY -> {
-                    _ticketListState.update { TicketListStatus.Empty }
-                    Napier.log(LogLevel.ASSERT, "updateSteps", message = "EMPTY : ")
-                }
-
-                AsyncStatus.LOADING -> {
-                    Napier.log(LogLevel.ASSERT, "updateSteps", message = "LOADING: ")
-                }
-
-                AsyncStatus.SUCCESS -> {
-                    _ticketListState.update { TicketListStatus.Filled }
-                    Napier.log(
-                        LogLevel.ASSERT,
-                        "updateSteps",
-                        message = "SUCCESS: " + it.data
-                    )
-                }
-            }
-        }
-    }
+//    private suspend fun updateSteps() {
+//        updateStepsUseCase(Unit).collect {
+//            when (it.status) {
+//                AsyncStatus.ERROR -> {
+//                    Napier.log(
+//                        LogLevel.ASSERT,
+//                        "updateSteps",
+//                        message = "ERROR: " + it.message
+//                    )
+//                }
+//
+//                AsyncStatus.EMPTY -> {
+//                    Napier.log(LogLevel.ASSERT, "updateSteps", message = "EMPTY : ")
+//                }
+//
+//                AsyncStatus.LOADING -> {
+//                    Napier.log(LogLevel.ASSERT, "updateSteps", message = "LOADING: ")
+//                }
+//
+//                AsyncStatus.SUCCESS -> {
+//                    Napier.log(
+//                        LogLevel.ASSERT,
+//                        "updateSteps",
+//                        message = "SUCCESS: " + it.data
+//                    )
+//                }
+//            }
+//        }
+//    }
 
     private fun startUpdateAlarm() {
         val alarmManager = getSystemService(ALARM_SERVICE) as AlarmManager

@@ -29,7 +29,6 @@ import domain.usecase.usecase.photo.GetPhotoByComponentKeyUseCase
 import domain.usecase.usecase.photo.InsertPhotoUseCase
 import domain.usecase.usecase.profile.GetProfileUseCase
 import domain.usecase.usecase.steps.UpdateIsEditedTicketUseCase
-import domain.usecase.usecase.steps.UpdateStepsUseCase
 import domain.usecase.usecase.suspendTask.DeleteByTaskIdUseCase
 import domain.usecase.usecase.suspendTask.GetSuspendTaskByIdUseCase
 import domain.usecase.usecase.suspendTask.StoreSuspendTaskUseCase
@@ -83,7 +82,6 @@ class MainScreenVM(
     private val updateUnSendLocationUseCase: UpdateUnSendLocationUseCase,
     private val deleteSendLocationUseCase: DeleteSendLocationUseCase,
     private val updateTaskUseCase: UpdateTaskUseCase,
-    private val updateStepsUseCase: UpdateStepsUseCase,
     private val getInitialFormByTask: GetInitialFormByTask,
 ) : BaseViewModel() {
     private val _availability = MutableStateFlow(false)
@@ -947,6 +945,7 @@ class MainScreenVM(
                 }
 
                 AsyncStatus.SUCCESS -> {
+                    getTasks()
                     updateSteps()
                     updateTicketListState(TicketListStatus.Filled)
                     println("PullToRefreshCallApi${"SUCCESS"}")
@@ -962,31 +961,31 @@ class MainScreenVM(
         }
     }
 
-    private suspend fun updateSteps() {
-        updateStepsUseCase(Unit).collect {
-            when (it.status) {
-                AsyncStatus.ERROR -> {
-                    Napier.log(
-                        LogLevel.ASSERT, "updateSteps", message = "ERROR: " + it.message
-                    )
-                }
-
-                AsyncStatus.LOADING -> {
-                    Napier.log(LogLevel.ASSERT, "updateSteps", message = "LOADING: ")
-                }
-
-                AsyncStatus.SUCCESS -> {
-                    getTasks()
-
-                    Napier.log(
-                        LogLevel.ASSERT, "" + "", message = "SUCCESS: " + it.data
-                    )
-                }
-
-                else -> {}
-            }
-        }
-    }
+//    private suspend fun updateSteps() {
+//        updateStepsUseCase(Unit).collect {
+//            when (it.status) {
+//                AsyncStatus.ERROR -> {
+//                    Napier.log(
+//                        LogLevel.ASSERT, "updateSteps", message = "ERROR: " + it.message
+//                    )
+//                }
+//
+//                AsyncStatus.LOADING -> {
+//                    Napier.log(LogLevel.ASSERT, "updateSteps", message = "LOADING: ")
+//                }
+//
+//                AsyncStatus.SUCCESS -> {
+//                    getTasks()
+//
+//                    Napier.log(
+//                        LogLevel.ASSERT, "" + "", message = "SUCCESS: " + it.data
+//                    )
+//                }
+//
+//                else -> {}
+//            }
+//        }
+//    }
 
     fun openInMapHandler() {
         viewModelScope.launch {

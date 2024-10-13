@@ -3,6 +3,8 @@ package presentation.screens.auth.compose
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.rememberBottomSheetScaffoldState
 import androidx.compose.material3.Text
@@ -39,6 +41,7 @@ import presentation.model.BottomSheetActionModel
 import presentation.model.SingleButtonActionModel
 import presentation.screens.auth.components.AuthAlertText
 import presentation.screens.auth.components.AuthAlertTextItem
+import presentation.screens.auth.components.AuthVerificationCodeRow
 import presentation.screens.auth.viewmodel.VerifyScreenVM
 import presentation.screens.main.compose.BaseScreen
 import presentation.screens.splash.events.CheckVersionEvent
@@ -49,7 +52,6 @@ import presentation.theme.textBrand
 import presentation.theme.textInverse
 import presentation.theme.textInverseDisabled
 import utils.ButtonState
-import utils.ViewStates
 import utils.startDownloadFileApk
 
 class VerifyScreen(private val phoneNumber: String = "") : Screen {
@@ -260,10 +262,9 @@ class VerifyScreen(private val phoneNumber: String = "") : Screen {
 
             content = {
                 Column(
-                    modifier = if (events == CheckVersionEvent.NormalUpdate || events == CheckVersionEvent.ForceUpdate) Modifier.blur(
-                        7.dp
-                    ) else Modifier
+                    modifier = Modifier
                         .fillMaxSize()
+                        .verticalScroll(rememberScrollState())
                         .background(color = backgroundBackground3),
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.CenterHorizontally
@@ -274,13 +275,12 @@ class VerifyScreen(private val phoneNumber: String = "") : Screen {
                         modifier = Modifier
                             .width(82.dp)
                             .height(82.dp)
-                            .weight(2f)
+
                             .wrapContentSize()
                     )
                     Column(
                         modifier = Modifier
-                            .fillMaxSize()
-                            .weight(4f)
+                            .fillMaxWidth()
                             .padding(spacing2X)
                     ) {
 
@@ -305,21 +305,16 @@ class VerifyScreen(private val phoneNumber: String = "") : Screen {
                                         fontWeight = FontWeight.SemiBold,
                                         fontSize = 16.sp
                                     )
-                                ) {
-
-                                }
+                                ) {}
                             }
-
                         }
                         )
-
                         Spacer(modifier = Modifier.height(spacing3X))
                         AuthVerificationCodeRow(
                             otpText = smsCode,
                             onOtpTextChange = { otp, boolean ->
                                 viewModel.updateOtp(otp)
                             })
-
                         Spacer(modifier = Modifier.height(spacing3X))
                         if (!finishTimer)
                             Text(text = "${stringResource(MR.strings.waiting_time_receive)} : $remainTime")
@@ -331,7 +326,6 @@ class VerifyScreen(private val phoneNumber: String = "") : Screen {
                                     textColor = textBrand
                                 )
                             ) {
-                                //onClick
                                 viewModel.resendCode(onError = {
                                     navigator.pop()
                                 })
