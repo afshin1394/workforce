@@ -120,7 +120,7 @@ fun <T : BaseViewModel> BaseScreen(
     val serviceState by viewModel.serviceState.collectAsState()
     val orientationState by viewModel.orientationState.collectAsState()
     val isCloseMenuForOrientation = remember { mutableStateOf(false) }
-    var previousOrientation by remember { mutableStateOf<OrientationState>(OrientationState.Default) }
+    var previousOrientation by remember { mutableStateOf<OrientationState>(OrientationState.Portrait) }
 
 
     OnLifecycleEvent { _, event ->
@@ -295,6 +295,7 @@ fun <T : BaseViewModel> BaseScreen(
 
                             when (orientationState) {
                                 OrientationState.Default -> {
+
 
                                 }
                                 OrientationState.Landscape -> {
