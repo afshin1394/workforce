@@ -1,20 +1,13 @@
 package presentation.screens.ticket_process.viewModel
 
-
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
-import arrow.core.Tuple4
 import arrow.core.Tuple5
 import arrow.core.Tuple6
-import com.irancell.nwg.wfm.presentation.model.View
-import data.network.response.task.Component
-import data.network.response.task.Value
 import dev.icerock.moko.resources.desc.StringDesc
 import domain.models.PhotoDomain
 import domain.models.form_struct.ComponentDomain
 import domain.models.form_struct.ValueDomain
-import domain.usecase.ResultStatus
 import domain.usecase.usecase.photo.DeleteByComponentKeyUseCase
 import domain.usecase.usecase.steps.UpdateStepFormUseCase
 import domain.usecase.usecase.steps.StepDetail
@@ -22,7 +15,6 @@ import domain.usecase.usecase.steps.StoreStepFormUseCase
 import domain.usecase.usecase.photo.GetPhotoByComponentKeyUseCase
 import domain.usecase.usecase.photo.InsertPhotoUseCase
 import domain.usecase.usecase.steps.SendStepsOfTicketToServerUseCase
-import domain.usecase.usecase.steps.UpdateStepsUseCase
 import domain.usecase.usecase.ticket.UpdateTaskUseCase
 import io.github.aakira.napier.LogLevel
 import io.github.aakira.napier.Napier
@@ -31,9 +23,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -43,12 +33,9 @@ import presentation.screens.main.events.TicketProcessEvent
 import presentation.screens.ticket_process.events.StepEvent
 import utils.AsyncStatus
 import utils.BaseViewModel
-import utils.FormViewerTypes
 import utils.LogicCalculation
 import utils.PROCEED
-import utils.ServiceState
 import utils.ViewStates
-import utils.updateValueDomain
 import utils.validateComponents
 
 class TicketProcessVM(
@@ -59,7 +46,6 @@ class TicketProcessVM(
     private val insertPhotoUseCase: InsertPhotoUseCase,
     private val sendStepsOfTicketToServerUseCase: SendStepsOfTicketToServerUseCase,
     private val updateTaskUseCase: UpdateTaskUseCase,
-    private val updateStepUseCase: UpdateStepsUseCase
 ) : BaseViewModel() {
     private val _scrollingPosition = MutableStateFlow(Pair(-1, -1))
     val scrollingPosition = _scrollingPosition.asStateFlow()
@@ -346,10 +332,7 @@ class TicketProcessVM(
                 }
             }
         }
-
-
     }
-
 
     fun handleLogics(onResult: (MutableList<ExtractLogicsModel>) -> Unit) {
 
@@ -357,9 +340,7 @@ class TicketProcessVM(
         viewModelScope.launch {
             try {
                 withContext(Dispatchers.IO) { checkLogicsForAll(tempComponentList) }
-
                 withContext(Dispatchers.Main) {
-
                     arrayListOf<ComponentDomain>().apply {
                         this.addAll(tempComponentList)
                         tempComponentList.clear()
@@ -367,10 +348,7 @@ class TicketProcessVM(
                     }
                     onResult(extractLogicsModel)
                 }
-
-
             } catch (_: Exception) {
-
                 async { checkLogicsForAll(tempComponentList) }.await()
                 withContext(Dispatchers.Main) {
                     arrayListOf<ComponentDomain>().apply {
@@ -379,11 +357,8 @@ class TicketProcessVM(
                         tempComponentList.addAll(this)
                     }
                     onResult(extractLogicsModel)
-
                 }
-
             }
-
         }
     }
 
@@ -399,22 +374,18 @@ class TicketProcessVM(
             val tempComponent = arrayListOf<ComponentDomain>()
             if (compD.removable == true) {
                 withContext(Dispatchers.Main) {
-
                     tempComponent.addAll(tempComponentList.apply {
                         add(indexChild + createdIndex, compD)
                     })
-
                     scrollCallBack(createdIndex)
                 }
             } else {
                 withContext(Dispatchers.Main) {
-
-                    tempComponentList.get(indexChild).components.value?.map { it.updateValues(
-                        emptyList())  }
-
-
-
-
+                    tempComponentList.get(indexChild).components.value?.map {
+                        it.updateValues(
+                            emptyList()
+                        )
+                    }
                     scrollCallBack(indexChild)
                 }
             }
@@ -499,15 +470,10 @@ class TicketProcessVM(
                                 photoDomainList.add(photoDomain.value)
                             }
                         }
-
-
                     }
-
                 }
             }
         }
-
-
     }
 
     private fun updatePhotoDomain(id: String, key: String, imgUri: String) {
@@ -641,7 +607,6 @@ class TicketProcessVM(
         }
     }
 
-
     private suspend fun insertNewPhoto() {
 
 
@@ -678,13 +643,9 @@ class TicketProcessVM(
 
 
                     }
-
                 }
             }
-
-
         }
-
     }
 
     private fun List<ComponentDomain>.findComponentByKey(key: String): ComponentDomain? {
@@ -736,57 +697,56 @@ class TicketProcessVM(
                     }
 
                     AsyncStatus.SUCCESS -> {
-                        updateSteps()
+                        _updateTasksComplete.update { true }
+                        updateState(ViewStates.Success())
                         println("TaskCallApi${"SUCCESS"}")
                     }
                 }
             }
     }
 
-    private suspend fun updateSteps() {
-        updateStepUseCase(Unit).collect {
-            when (it.status) {
-                AsyncStatus.ERROR -> {
-
-                    handleError(it.resultStatus)
-                    Napier.log(
-                        LogLevel.ASSERT,
-                        "updateSteps",
-                        message = "ERROR: " + it.message
-                    )
-
-                }
-
-                AsyncStatus.EMPTY -> {
-
-                }
-
-                AsyncStatus.LOADING -> {
-                    Napier.log(LogLevel.ASSERT, "updateSteps", message = "LOADING: ")
-
-                }
-
-                AsyncStatus.SUCCESS -> {
-
-                    _updateTasksComplete.update { true }
-                    updateState(ViewStates.Success())
-
-                    Napier.log(
-                        LogLevel.ASSERT,
-                        "" +
-                                "",
-                        message = "SUCCESS: " + it.data
-                    )
-
-
-                }
-
-
-            }
-        }
-
-
-    }
+//    private suspend fun updateSteps() {
+//        updateStepUseCase(Unit).collect {
+//            when (it.status) {
+//                AsyncStatus.ERROR -> {
+//
+//                    handleError(it.resultStatus)
+//                    Napier.log(
+//                        LogLevel.ASSERT,
+//                        "updateSteps",
+//                        message = "ERROR: " + it.message
+//                    )
+//
+//                }
+//
+//                AsyncStatus.EMPTY -> {
+//
+//                }
+//
+//                AsyncStatus.LOADING -> {
+//                    Napier.log(LogLevel.ASSERT, "updateSteps", message = "LOADING: ")
+//
+//                }
+//
+//                AsyncStatus.SUCCESS -> {
+//
+//
+//                    Napier.log(
+//                        LogLevel.ASSERT,
+//                        "" +
+//                                "",
+//                        message = "SUCCESS: " + it.data
+//                    )
+//
+//
+//                }
+//
+//
+//            }
+//        }
+//
+//
+//    }
 
     suspend fun showFirstError(errors: Map<String, List<StringDesc>>) {
         errors.keys.toList()[0].let {
@@ -816,7 +776,8 @@ class TicketProcessVM(
 
                 // Recursive search in the children's children
 
-                val childResult = childComponent.components.value?.let { findComponentById(it, targetId) }
+                val childResult =
+                    childComponent.components.value?.let { findComponentById(it, targetId) }
                 if (childResult != null) {
                     return parentIndex to childIndex
                 }
@@ -836,7 +797,7 @@ class TicketProcessVM(
     }
 
     fun updateReloadState(reload: Boolean) {
-      _reloadState.update { reload }
+        _reloadState.update { reload }
     }
 //
 //    fun updateReloadState(reload: Boolean) {
