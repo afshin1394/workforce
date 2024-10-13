@@ -15,6 +15,7 @@ const val isRunningGPS = "isRunningGPS"
 const val ModeApp = "modeApp"
 const val IsScrollDateTimePickerInList = "isScrollDateTimePickerInList"
 const val TicketNumber = "TicketNumber"
+const val ORIENTATION = "orientation"
 
 const val DeploymentBASEURL = "http://mobile.ios.mtnirancell.ir/api/"
 const val ProductionBASEURL = "https://ios.mtnirancell.ir/api/"
