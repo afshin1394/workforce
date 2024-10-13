@@ -1,4 +1,4 @@
-package com.irancell.nwg.wfm.presentation.screens.auth.components
+package presentation.screens.auth.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -14,50 +14,10 @@ import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
-
 import androidx.compose.ui.unit.dp
 import com.irancell.nwg.wfm.presentation.theme.*
 import presentation.theme.body_large_strong
 import presentation.theme.surfaceDefault
-
-
-@Composable
-fun AuthVerificationCodeBox(modifier: Modifier = Modifier, index: Int, otpValue: String = "") {
-
-    Row(
-        modifier
-            .width(48.dp)
-            .height(48.dp)
-            .background(
-                color = surfaceDefault, shape = RoundedCornerShape(
-                    radiusLarge
-                )
-            ),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.Center
-
-    ) {
-        val char = when {
-            index >= otpValue.length -> ""
-            else -> otpValue[index].toString()
-        }
-        Text(
-            modifier = modifier
-                .wrapContentSize()
-                .align(Alignment.CenterVertically),
-            text = char,
-            style = body_large_strong,
-
-            textAlign = TextAlign.Center
-
-        )
-    }
-}
-
-
-
-
-
 
 @Composable
 fun AuthVerificationCodeRow(
@@ -82,20 +42,41 @@ fun AuthVerificationCodeRow(
         },
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
         decorationBox = {
-            Row(horizontalArrangement = Arrangement.Center) {
-
-                repeat(otpCount) { index ->
-                    AuthVerificationCodeBox(
-                        index = index,
-                        otpValue = otpText
-                    )
-                    Spacer(modifier = Modifier.width(spacing15X))
+            Box(
+                modifier = Modifier.fillMaxWidth(),
+                contentAlignment = Alignment.Center
+            ) {
+                Row(
+                    modifier = Modifier
+                        .padding(horizontal = 16.dp)
+                        .widthIn(max = 400.dp),
+                    horizontalArrangement = Arrangement.spacedBy(spacing15X)
+                ) {
+                    repeat(otpCount) { index ->
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                                .aspectRatio(1f)
+                                .background(
+                                    color = surfaceDefault,
+                                    shape = RoundedCornerShape(radiusLarge)
+                                ),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            val char =
+                                if (index >= otpText.length) "" else otpText[index].toString()
+                            Text(
+                                text = char,
+                                style = body_large_strong,
+                                textAlign = TextAlign.Center
+                            )
+                        }
+                    }
                 }
             }
         }
     )
 }
-
 
 
 @Composable
