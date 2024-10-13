@@ -3,11 +3,14 @@ package presentation.screens.main.components.formViewer
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -50,6 +53,7 @@ import androidx.compose.foundation.selection.toggleable
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.withStyle
@@ -171,14 +175,20 @@ fun DropDownMultiChoice(
                                     color = subtleDefault
                                 ) {
                                     Row(
-                                        modifier = Modifier.toggleable(
+                                        modifier = Modifier
+                                            .toggleable(
                                             value = false,
                                             onValueChange = {}
                                         )
                                     ) {
                                         Text(
                                             text = selectedItem.label!!,
-                                            modifier = Modifier.padding(all = 8.dp),
+                                            modifier = Modifier.padding(all = 8.dp).clickable {
+                                                if (!(disableLogic || readOnlyLogic)) {
+                                                    expanded = !expanded
+                                                    searchedText = ""
+                                                }
+                                            },
                                             style = TextStyle(color = if (disableLogic || readOnlyLogic) textInverseDisabled else textSecondary)
                                         )
                                     }
@@ -187,23 +197,28 @@ fun DropDownMultiChoice(
                         }
                     }
                 } else {
-                    TextField(
-                        value = " ",
-                        textStyle = TextStyle(color = if (disableLogic || readOnlyLogic) textInverseDisabled else textSecondary),
-                        shape = RoundedCornerShape(15.dp),
-                        onValueChange = { },
-                        readOnly = true,
-                        modifier = Modifier.weight(1f),
-                        colors = TextFieldDefaults.colors(
-                            focusedIndicatorColor = Color.Transparent,
-                            disabledIndicatorColor = Color.Transparent,
-                            unfocusedIndicatorColor = Color.Transparent,
-                            focusedContainerColor = Color.White,
-                            unfocusedContainerColor = Color.White,
-                            disabledContainerColor = Color.White
+
+                        Text(
+                            text = "",
+                            style = TextStyle(
+                                color = if (disableLogic || readOnlyLogic) textInverseDisabled else textSecondary,
+                                fontSize = 14.sp
+                            ),
+                            modifier = Modifier.clickable {
+                                if (!(disableLogic || readOnlyLogic)) {
+                                    expanded = !expanded
+                                    searchedText = ""
+                                }
+                            }
+                                .weight(1f)
+                                .fillMaxWidth()
+                                .fillMaxHeight()
+                                .background(color = Color.Transparent)
+                                .padding(19.dp),
+                            color = if (disableLogic || readOnlyLogic) textInverseDisabled else textSecondary
                         )
-                    )
-                }
+                    }
+
 
                 Spacer(modifier = Modifier.padding(2.dp))
 
