@@ -831,7 +831,7 @@ fun initialize(
                                         updateValuesForSelectType(values, selectedItems)
 
 
-                                        valuesState.value = oneItem.value ?: ""
+                                        valuesState.value = oneItem?.value ?: ""
 
                                         updateSelectedComponentValidationError(
                                             item,

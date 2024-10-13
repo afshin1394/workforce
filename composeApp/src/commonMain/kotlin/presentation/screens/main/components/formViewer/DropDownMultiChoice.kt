@@ -80,7 +80,7 @@ fun DropDownMultiChoice(
     searchText: String,
     selectItem: String,
     itemList: List<ValueDomain>,
-    onItemSelected: (List<ValueDomain>, ValueDomain) -> Unit,
+    onItemSelected: (List<ValueDomain>, ValueDomain?) -> Unit,
     onSearchButtonClicked: (query: String) -> Unit
 ) {
 
@@ -218,6 +218,7 @@ fun DropDownMultiChoice(
                         .clickable {
                             selectedItems.clear()
                             itemList.forEach { it.isSelected = false }
+                            onItemSelected(selectedItems, null)
 
                         }
                 )
