@@ -41,9 +41,11 @@ import androidx.compose.ui.unit.dp
 import com.irancell.nwg.wfm.presentation.theme.spacing05X
 import com.skydoves.landscapist.ImageOptions
 import com.skydoves.landscapist.coil3.CoilImage
+import dev.icerock.moko.resources.compose.stringResource
 import domain.models.PhotoDomain
 import io.github.aakira.napier.LogLevel
 import io.github.aakira.napier.Napier
+import irancell.nwg.wfm.MR
 import irancell.nwg.wfm.ParseUri
 import irancell.nwg.wfm.UriToImageBitmap
 import irancell.nwg.wfm.getDpi
@@ -147,8 +149,9 @@ fun PhotoPreviewComponent(
 
 
         Spacer(modifier = Modifier.weight(1f))
+        val of = stringResource(MR.strings.of)
         Text(
-            text = "${selectedItemImage + 1} of ${photoDomainList.size}",
+            text = "${selectedItemImage + 1} $of ${photoDomainList.size}",
             textAlign = TextAlign.Center,
             modifier = Modifier.padding(bottom = 12.dp)
         )
