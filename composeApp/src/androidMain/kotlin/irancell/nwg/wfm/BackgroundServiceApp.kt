@@ -302,6 +302,10 @@ internal actual class BackgroundServiceApp : Service(), KoinComponent {
                         Log.i("getAllTask", "onStartCommand: CallApi" + it.data)
                     }
 
+                    AsyncStatus.EMPTY ->{
+                        _ticketListState.update { TicketListStatus.Empty }
+                    }
+
                     else -> {}
                 }
             }

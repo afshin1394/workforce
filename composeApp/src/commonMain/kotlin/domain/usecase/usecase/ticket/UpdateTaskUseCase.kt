@@ -4,6 +4,7 @@ import database.entity.InitialFormEntity
 import database.entity.SendStepsEntity
 import database.entity.StepPointerEntity
 import database.entity.StepsEntity
+import database.entity.TaskEntity
 import domain.mappers.toTaskDomainList
 import domain.mappers.toTaskEntityList
 import domain.repository.IInitialFormRepository
@@ -23,8 +24,8 @@ class UpdateTaskUseCase(
     private val iStepsRepository: IStepsRepository,
     private val iStepPointerRepository: IStepPointerRepository,
     private val iSendStepsRepository: ISendStepsRepository
-) : BaseUseCase<Unit, Unit>() {
-    override suspend fun run(params: Unit) {
+) : BaseUseCase<List<TaskEntity>, Unit>() {
+    override suspend fun run(params: Unit): List<TaskEntity> {
         val tasks = iTaskRepository.fetchWorks()
         Napier.log(LogLevel.ASSERT, tag = "UpdateTaskUseCase", message = tasks.toString())
         val initialTasks = arrayListOf<InitialFormEntity>()
@@ -120,6 +121,7 @@ class UpdateTaskUseCase(
             )
         )
 
+        return tasks.details.toTaskEntityList()
     }
 
     private fun getInsertingPointerValues(

@@ -421,6 +421,7 @@ fun <T : BaseViewModel> BaseScreen(
                                         }
                                     }
                                 }
+
                                 else -> {}
                             }
 

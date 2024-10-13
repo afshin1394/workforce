@@ -159,6 +159,8 @@ class MainScreenVM(
     }
 
 
+
+
     private fun getGeneralUnSendLocationList(): List<LiveLocationDomain> {
         viewModelScope.launch {
             generalLocationListUseCase(
@@ -946,7 +948,6 @@ class MainScreenVM(
 
                 AsyncStatus.SUCCESS -> {
                     getTasks()
-                    updateSteps()
                     updateTicketListState(TicketListStatus.Filled)
                     println("PullToRefreshCallApi${"SUCCESS"}")
                 }
