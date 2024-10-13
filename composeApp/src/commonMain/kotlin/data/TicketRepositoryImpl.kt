@@ -12,8 +12,11 @@ import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.client.statement.bodyAsText
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.contentOrNull
+import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 
@@ -29,7 +32,13 @@ class TicketRepositoryImpl(
         map.mapValues {
           val temp  = it.value.jsonObject.toMutableMap()
             temp.mapValues { value->
-                val content = value.value.jsonPrimitive.contentOrNull
+                val content : String? = if(value.value is JsonPrimitive)
+                 value.value.jsonPrimitive.contentOrNull
+                else
+                    (value.value as JsonArray)
+                        .jsonArray
+                        .map { it.jsonPrimitive.contentOrNull }
+                        .joinToString(",")
                 content?.let {
                     finalMap.put(value.key,content)
                 }

@@ -140,14 +140,7 @@ class UpdateStepFormUseCase(
         } catch (_: Exception) {
 
         }
-        data.form.form_structure.components?.let {
-            val logicCalculation = LogicCalculation(
-                CoroutineScope(Dispatchers.IO),
-                it
-            )
-            logicCalculation.ticketId = params.sixth
-            checkLogicsForAll(logicCalculation,it)
-        }
+
 
         params.third.createRepeatableSectionStructure(
             ticketNumber = params.first,

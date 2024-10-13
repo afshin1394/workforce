@@ -62,14 +62,7 @@ class StoreStepFormUseCase(
         } catch (e: Exception) {
 
         }
-        params.second.let {
-            val logicCalculation = LogicCalculation(
-                CoroutineScope(Dispatchers.IO),
-                it
-            )
-            logicCalculation.ticketId = params.fifth
-            checkLogicsForAll(logicCalculation,it)
-        }
+
 
 
         params.second.createRepeatableSectionStructure(params.first,removablesWithParent,dict,dictImages)
