@@ -1,7 +1,6 @@
 package presentation.screens.main.compose
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
@@ -25,7 +24,6 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
-import androidx.compose.material.icons.Icons
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -75,10 +73,11 @@ import utils.BottomSheetTypes
 import utils.GpsState
 import utils.NetworkStates
 import utils.VpnDetectionStates
-import androidx.compose.foundation.clickable
 import androidx.compose.material.Card
-
-
+import presentation.theme.textInverse
+import presentation.theme.textInverseDisabled
+import utils.ServiceState
+import utils.TicketListStatus
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
@@ -117,8 +116,6 @@ fun <T : BaseViewModel> BaseScreen(
     val networkState by viewModel.networkState.collectAsState()
     val serviceState by viewModel.serviceState.collectAsState()
     val ticketListStatus by viewModel.ticketListStatus.collectAsState()
-    val availabilityStatus by viewModel.availabilityStatus.collectAsState()
-
 
     OnLifecycleEvent { _, event ->
         when (event) {
@@ -195,13 +192,12 @@ fun <T : BaseViewModel> BaseScreen(
                     scaffoldState = when {
                         vpnDetectionStates == VpnDetectionStates.ShowBottomSheet -> {
                             vpnScaffoldState
-
-
-
                         }
+
                         gpsState == GpsState.Disabled -> {
                             gpsScaffoldState
                         }
+
                         else -> {
                             scaffoldState
                         }
@@ -215,10 +211,8 @@ fun <T : BaseViewModel> BaseScreen(
                             vpnDetectionStates is VpnDetectionStates.ShowBottomSheet -> {
                                 showVpnBottomSheetHandler()
                             }
+
                             gpsState is GpsState.Disabled -> {
-
-
-
                                 bottomSheetDoubleActionWithMessage(
                                     BottomSheetActionModel(
                                         stringResource(MR.strings.cancel),
@@ -249,6 +243,7 @@ fun <T : BaseViewModel> BaseScreen(
                                 }
 
                             }
+
                             else -> {
                                 CustomBottomSheet(
                                     scaffoldState.bottomSheetState,
@@ -274,7 +269,7 @@ fun <T : BaseViewModel> BaseScreen(
                         modifier = if (scaffoldState.bottomSheetState.isCollapsed && gpsScaffoldState.bottomSheetState.isCollapsed)
                             Modifier.fillMaxSize()
                         else
-                            Modifier.fillMaxSize().blur(7.dp).clickable(enabled = false) {  }
+                            Modifier.fillMaxSize().blur(7.dp).clickable(enabled = false) { }
                     ) {
 
                         Box(
@@ -295,19 +290,12 @@ fun <T : BaseViewModel> BaseScreen(
                                     }
                                 }
 
-                                GpsState.Disabled -> {
-
-
-
-                                }
-
                                 GpsState.Enabled -> {
                                     scope.launch {
                                         gpsScaffoldState.bottomSheetState.collapse()
                                     }
-
-                                GpsState.Enabled -> {}
                                 }
+
                                 else -> {}
                             }
                             when (state) {
@@ -389,7 +377,6 @@ fun <T : BaseViewModel> BaseScreen(
                                         }
                                     }
                                 }
-
                                 else -> {}
                             }
 
@@ -402,7 +389,6 @@ fun <T : BaseViewModel> BaseScreen(
                                 )
                             }
                         }
-
                     }
                 }
             }
@@ -412,9 +398,11 @@ fun <T : BaseViewModel> BaseScreen(
                     vpnDetectionStates == VpnDetectionStates.ShowBottomSheet -> {
                         vpnScaffoldState
                     }
+
                     gpsState == GpsState.Disabled -> {
                         gpsScaffoldState
                     }
+
                     else -> {
                         scaffoldState
                     }
@@ -430,8 +418,8 @@ fun <T : BaseViewModel> BaseScreen(
                         vpnDetectionStates is VpnDetectionStates.ShowBottomSheet -> {
                             showVpnBottomSheetHandler()
                         }
-                        gpsState is GpsState.Disabled -> {
 
+                        gpsState is GpsState.Disabled -> {
 
 
                             bottomSheetDoubleActionWithMessage(
@@ -464,6 +452,7 @@ fun <T : BaseViewModel> BaseScreen(
                             }
 
                         }
+
                         else -> {
                             CustomBottomSheet(
                                 scaffoldState.bottomSheetState,
@@ -507,12 +496,7 @@ fun <T : BaseViewModel> BaseScreen(
                         })
 
                         when (gpsState) {
-                            GpsState.Default -> {}
-                            GpsState.Disabled -> {
-                            }
-
                             GpsState.Enabled -> {
-
                                 scope.launch {
                                     gpsScaffoldState.bottomSheetState.collapse()
                                 }
