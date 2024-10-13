@@ -59,9 +59,9 @@ class TicketProcessVM(
     private val insertPhotoUseCase: InsertPhotoUseCase,
     private val sendStepsOfTicketToServerUseCase: SendStepsOfTicketToServerUseCase,
     private val updateTaskUseCase: UpdateTaskUseCase,
-    private val updateStepUseCase : UpdateStepsUseCase
+    private val updateStepUseCase: UpdateStepsUseCase
 ) : BaseViewModel() {
-    private val _scrollingPosition = MutableStateFlow(Pair(-1,-1))
+    private val _scrollingPosition = MutableStateFlow(Pair(-1, -1))
     val scrollingPosition = _scrollingPosition.asStateFlow()
 
     private val _currentLevel = MutableStateFlow(0)
@@ -102,96 +102,97 @@ class TicketProcessVM(
     private val _ticketFlowCompleted = MutableStateFlow(false)
     var ticketFlowCompleted = _ticketFlowCompleted.asStateFlow()
 
-    fun updateTicketFlowState(completed : Boolean){
+    fun updateTicketFlowState(completed: Boolean) {
         _ticketFlowCompleted.update { completed }
     }
 
     private val _savedIndex = MutableStateFlow(0)
-    var savedIndex =  _savedIndex.asStateFlow()
+    var savedIndex = _savedIndex.asStateFlow()
 
     private val _savedParentIndex = MutableStateFlow(0)
-    var savedParentIndex =  _savedParentIndex.asStateFlow()
+    var savedParentIndex = _savedParentIndex.asStateFlow()
 
     private val _updateTasksComplete = MutableStateFlow(false)
     var updateTasksComplete = _updateTasksComplete.asStateFlow()
 
 
-    val logicCalculation: LogicCalculation = LogicCalculation(viewModelScope,tempComponentList)
+    val logicCalculation: LogicCalculation = LogicCalculation(viewModelScope, tempComponentList)
     var extractLogicsModel = mutableListOf<ExtractLogicsModel>()
 
-     fun getMokStepsForm(proceed: String) {
+    fun getMokStepsForm(proceed: String) {
         events.value = TicketProcessEvent.InProgress
         viewModelScope.launch(Dispatchers.Main) {
-        updateStepFormUseCase(
-            Tuple6(
-                _ticketNumber.value,
-                proceed,
-                tempComponentList.toList(),
-                photoDomainList.toList(),
-                _currentLevel.value,
-                _ticketId.value
-            )
-        ).collect {
-            when (it.status) {
-                AsyncStatus.ERROR -> {
-                    handleError(it.resultStatus)
-                    events.value = TicketProcessEvent.Default
-
-                }
-
-                AsyncStatus.LOADING -> {
-                    updateState(ViewStates.Loading)
-                }
-
-                AsyncStatus.EMPTY->{
-
-
-                }
-                AsyncStatus.SUCCESS -> {
-
-                    it.data?.let { data ->
-
-                        data.activityDomain.form.form_structure.components?.let {
-                            Napier.log(
-                                LogLevel.ASSERT,
-                                "form_structure.components",
-                                message = it.toString()
-                            )
-                            tempComponentList.clear()
-                            tempComponentList.addAll(it.toList())
-                            validateComponents(tempComponentList,true) {
-                               updateTempComponentList(it)
-                            }
-
-                        }
-
-
-
-
-                        Napier.log(
-                            LogLevel.ASSERT,
-                            "data.stepCounter",
-                            message = data.stepCounter.toString()
-                        )
-                        Napier.log(
-                            LogLevel.ASSERT,
-                            "data.stepCounter",
-                            message = data.stepTitle
-                        )
-
-                        _currentLevel.update { data.stepCounter }
-                        _currentLevelName.update { data.stepTitle }
-                        _stepDetails.update { data.stepDetails }
-                        _reloadState.update { true }
-                        _stepEvent.update { StepEvent.IN_PROCESS }
+            updateStepFormUseCase(
+                Tuple6(
+                    _ticketNumber.value,
+                    proceed,
+                    tempComponentList.toList(),
+                    photoDomainList.toList(),
+                    _currentLevel.value,
+                    _ticketId.value
+                )
+            ).collect {
+                when (it.status) {
+                    AsyncStatus.ERROR -> {
+                        handleError(it.resultStatus)
                         events.value = TicketProcessEvent.Default
 
-                        updateState(ViewStates.Success())
-                        getPhotoByComponentKey()
+                    }
+
+                    AsyncStatus.LOADING -> {
+                        updateState(ViewStates.Loading)
+                    }
+
+                    AsyncStatus.EMPTY -> {
+
+
+                    }
+
+                    AsyncStatus.SUCCESS -> {
+
+                        it.data?.let { data ->
+
+                            data.activityDomain.form.form_structure.components?.let {
+                                Napier.log(
+                                    LogLevel.ASSERT,
+                                    "form_structure.components",
+                                    message = it.toString()
+                                )
+                                tempComponentList.clear()
+                                tempComponentList.addAll(it.toList())
+                                validateComponents(tempComponentList, true) {
+                                    updateTempComponentList(it)
+                                }
+
+                            }
+
+
+
+
+                            Napier.log(
+                                LogLevel.ASSERT,
+                                "data.stepCounter",
+                                message = data.stepCounter.toString()
+                            )
+                            Napier.log(
+                                LogLevel.ASSERT,
+                                "data.stepCounter",
+                                message = data.stepTitle
+                            )
+
+                            _currentLevel.update { data.stepCounter }
+                            _currentLevelName.update { data.stepTitle }
+                            _stepDetails.update { data.stepDetails }
+                            _reloadState.update { true }
+                            _stepEvent.update { StepEvent.IN_PROCESS }
+                            events.value = TicketProcessEvent.Default
+
+                            updateState(ViewStates.Success())
+                            getPhotoByComponentKey()
+                        }
                     }
                 }
             }
-        }
 
         }
     }
@@ -240,7 +241,8 @@ class TicketProcessVM(
                     AsyncStatus.LOADING -> {
                         updateState(ViewStates.Loading)
                     }
-                    AsyncStatus.EMPTY->{
+
+                    AsyncStatus.EMPTY -> {
                     }
 
                     AsyncStatus.SUCCESS -> {
@@ -269,7 +271,7 @@ class TicketProcessVM(
                     AsyncStatus.SUCCESS -> {
 
                         _ticketFlowCompleted.update { true }
-                        events.value=TicketProcessEvent.TicketFlowCompleted
+                        events.value = TicketProcessEvent.TicketFlowCompleted
                         updateState(ViewStates.Success())
 
                     }
@@ -323,7 +325,6 @@ class TicketProcessVM(
     }
 
 
-
     fun updateTempComponentList(newList: List<ComponentDomain>) {
         tempComponentList.clear()
         tempComponentList.addAll(newList)
@@ -337,8 +338,8 @@ class TicketProcessVM(
         val componentsCopy = components.toMutableList()
 
         for (cmp in componentsCopy) {
-            extractLogicsModel.addAll( logicCalculation.extractLogics(componentsCopy, cmp))
-            cmp.components?.let { cmps ->
+            extractLogicsModel.addAll(logicCalculation.extractLogics(componentsCopy, cmp))
+            cmp.components.value?.let { cmps ->
                 if (cmps.isNotEmpty()) {
                     checkLogicsForAll(cmps)
 
@@ -350,7 +351,7 @@ class TicketProcessVM(
     }
 
 
-    fun handleLogics(onResult:(MutableList<ExtractLogicsModel>) -> Unit) {
+    fun handleLogics(onResult: (MutableList<ExtractLogicsModel>) -> Unit) {
 
 
         viewModelScope.launch {
@@ -358,6 +359,7 @@ class TicketProcessVM(
                 withContext(Dispatchers.IO) { checkLogicsForAll(tempComponentList) }
 
                 withContext(Dispatchers.Main) {
+
                     arrayListOf<ComponentDomain>().apply {
                         this.addAll(tempComponentList)
                         tempComponentList.clear()
@@ -385,42 +387,49 @@ class TicketProcessVM(
         }
     }
 
-  suspend  fun addOrRemoveComponentDomainRepeatableToList(
-        compD:ComponentDomain,
+    suspend fun addOrRemoveComponentDomainRepeatableToList(
+        compD: ComponentDomain,
         indexChild: Int,
-        scrollCallBack:(position:Int)->Unit
+        scrollCallBack: (position: Int) -> Unit
     ) {
-      withContext(Dispatchers.IO) {
+        withContext(Dispatchers.IO) {
 
-          val createdIndex = tempComponentList.findComponentsWithKey(compD).size
-          Napier.log(LogLevel.ASSERT, "createdIndex", message = createdIndex.toString())
-          val tempComponent = arrayListOf<ComponentDomain>()
-          if (compD.removable == true) {
+            val createdIndex = tempComponentList.findComponentsWithKey(compD).size
+            Napier.log(LogLevel.ASSERT, "createdIndex", message = createdIndex.toString())
+            val tempComponent = arrayListOf<ComponentDomain>()
+            if (compD.removable == true) {
+                withContext(Dispatchers.Main) {
 
-              tempComponent.addAll(tempComponentList.apply {
-                  add(indexChild + createdIndex, compD)
-              })
-              tempComponentList.clear()
-              tempComponentList.addAll(tempComponent)
-              scrollCallBack(createdIndex)
+                    tempComponent.addAll(tempComponentList.apply {
+                        add(indexChild + createdIndex, compD)
+                    })
 
-          } else {
-              tempComponent.addAll(tempComponentList.apply {
-                  removeAt(indexChild)
-              })
-              tempComponentList.clear()
-              tempComponentList.addAll(tempComponent)
-              scrollCallBack(indexChild)
+                    scrollCallBack(createdIndex)
+                }
+            } else {
+                withContext(Dispatchers.Main) {
+
+                    tempComponentList.get(indexChild).components.value?.map { it.updateValues(
+                        emptyList())  }
 
 
-          }
-      }
-  }
+
+
+                    scrollCallBack(indexChild)
+                }
+            }
+        }
+    }
 
     private fun List<ComponentDomain>.findComponentsWithKey(componentDomain: ComponentDomain): List<ComponentDomain> {
         return this.flatMap { component ->
-            listOf(component).plus(component.components?.findComponentsWithKey(componentDomain) ?: emptyList())
-        }.filter { it.key == componentDomain.key }
+            listOf(component).plus(
+                component.components.value?.findComponentsWithKey(componentDomain) ?: emptyList()
+            )
+        }.filter {
+            componentDomain.id?.split("copy")?.intersect((it.id?.split("copy") ?: listOf()).toSet())
+                ?.isNotEmpty() == true
+        }
     }
 
 
@@ -429,7 +438,7 @@ class TicketProcessVM(
 
     private val photoDomain = MutableStateFlow<PhotoDomain>(
         PhotoDomain(
-            ticketNumber.value ?: "0","0",
+            ticketNumber.value ?: "0", "0",
             "0",
             0,
             "",
@@ -439,7 +448,7 @@ class TicketProcessVM(
     )
 
 
-    fun findPhotosByComponentId(id: String?,key: String?): MutableList<PhotoDomain> {
+    fun findPhotosByComponentId(id: String?, key: String?): MutableList<PhotoDomain> {
         val list: MutableList<PhotoDomain> = arrayListOf()
         photoDomainList.forEach {
             if (it.component_key == key && it.componentId == id) {
@@ -501,19 +510,26 @@ class TicketProcessVM(
 
     }
 
-   private fun updatePhotoDomain(id: String,key: String, imgUri: String) {
-        Napier.log(LogLevel.ASSERT,"updatePhotoDomain", message = key)
+    private fun updatePhotoDomain(id: String, key: String, imgUri: String) {
+        Napier.log(LogLevel.ASSERT, "updatePhotoDomain", message = key)
         photoDomain.value = PhotoDomain(
-            ticket_number = ticketNumber.value, id,key, (photoDomainList.size + 1L), imgUri, "", "0"
+            ticket_number = ticketNumber.value,
+            id,
+            key,
+            (photoDomainList.size + 1L),
+            imgUri,
+            "",
+            "0"
         )
         photoDomainList.add(photoDomain.value)
 
     }
 
 
-    fun findPhotoIndexByIdAndPosition(key: String,id : String, position: Int): Int? {
+    fun findPhotoIndexByIdAndPosition(key: String, id: String, position: Int): Int? {
 
-        val filteredList = photoDomainList.filter { it.component_key == key && it.componentId == id }
+        val filteredList =
+            photoDomainList.filter { it.component_key == key && it.componentId == id }
 
         if (filteredList.isNotEmpty()) {
             if (position in filteredList.indices) {
@@ -537,7 +553,8 @@ class TicketProcessVM(
         }
 
         // Filtering the photo list based on component key and ID
-        val filteredList = photoDomainList.filter { it.component_key == key && it.componentId == id }
+        val filteredList =
+            photoDomainList.filter { it.component_key == key && it.componentId == id }
         val currentComponent = tempComponent.value
 
         // Updating the list of component values based on whether there are photos or not
@@ -559,10 +576,10 @@ class TicketProcessVM(
     }
 
 
-    fun updateImageUriForEditPhoto(editUri: String, po: Int, key: String,id : String) {
+    fun updateImageUriForEditPhoto(editUri: String, po: Int, key: String, id: String) {
 
 
-        val itemIndex = findPhotoIndexByIdAndPosition(key,id,po)
+        val itemIndex = findPhotoIndexByIdAndPosition(key, id, po)
         itemIndex?.let { index ->
 
 
@@ -579,9 +596,10 @@ class TicketProcessVM(
     fun updatePositionSelected(position: Int) {
         _positionSelected.update { position }
     }
-    fun updateUriPhotoComponent(component : ComponentDomain,newValue : List<ValueDomain>){
+
+    fun updateUriPhotoComponent(component: ComponentDomain, newValue: List<ValueDomain>) {
         val imgUri =
-            newValue.find { it.label == "${component.type}:${component.id}" }?.value?:""
+            newValue.find { it.label == "${component.type}:${component.id}" }?.value ?: ""
 
         component.key?.let {
             component.id?.let {
@@ -589,8 +607,6 @@ class TicketProcessVM(
             }
         }
     }
-
-
 
 
     suspend fun saveAndDeletePhotoByComponentKey() {
@@ -678,7 +694,7 @@ class TicketProcessVM(
             }
 
             // Recursively search in the children
-            val found = component.components?.findComponentByKey(key)
+            val found = component.components.value?.findComponentByKey(key)
             if (found != null) {
                 return found
             }
@@ -691,15 +707,15 @@ class TicketProcessVM(
             if (component.id == id) {
                 return component
             }
-            component.components?.findComponentById(id)?.let { return it }
+            component.components.value?.findComponentById(id)?.let { return it }
         }
         return null
     }
 
     fun updateTasks() {
-       viewModelScope.launch{
-           updateTask()
-       }
+        viewModelScope.launch {
+            updateTask()
+        }
     }
 
     private suspend fun updateTask() {
@@ -771,17 +787,18 @@ class TicketProcessVM(
 
 
     }
-   suspend fun showFirstError(errors: Map<String, List<StringDesc>>) {
-       errors.keys.toList()[0].let {
-          val pair = findComponentById(tempComponentList,it)
-           pair?.let {
-               withContext(Dispatchers.Main) {
-                   _scrollingPosition.update { pair }
-                   delay(1000)
-                   _scrollingPosition.update { Pair(-1,-1) }
-               }
-           }
-       }
+
+    suspend fun showFirstError(errors: Map<String, List<StringDesc>>) {
+        errors.keys.toList()[0].let {
+            val pair = findComponentById(tempComponentList, it)
+            pair?.let {
+                withContext(Dispatchers.Main) {
+                    _scrollingPosition.update { pair }
+                    delay(1000)
+                    _scrollingPosition.update { Pair(-1, -1) }
+                }
+            }
+        }
     }
 
     fun findComponentById(components: List<ComponentDomain>, targetId: String): Pair<Int, Int>? {
@@ -792,14 +809,14 @@ class TicketProcessVM(
             }
 
             // Search in the children of the parent component recursively
-            parentComponent.components?.forEachIndexed { childIndex, childComponent ->
+            parentComponent.components.value?.forEachIndexed { childIndex, childComponent ->
                 if (childComponent.id == targetId) {
                     return parentIndex to childIndex
                 }
 
                 // Recursive search in the children's children
 
-                val childResult = childComponent.components?.let{ findComponentById(it, targetId)}
+                val childResult = childComponent.components.value?.let { findComponentById(it, targetId) }
                 if (childResult != null) {
                     return parentIndex to childIndex
                 }
@@ -808,14 +825,18 @@ class TicketProcessVM(
         return null // Not found
     }
 
-    fun updateScrollingState(pair: Pair<Int,Int>) {
-      _scrollingPosition.update { pair }
+    fun updateScrollingState(pair: Pair<Int, Int>) {
+        _scrollingPosition.update { pair }
     }
 
     fun updateTicketId(ticketId: String) {
         _ticketId.update { ticketId }
         logicCalculation.ticketId(ticketId)
 
+    }
+
+    fun updateReloadState(reload: Boolean) {
+      _reloadState.update { reload }
     }
 //
 //    fun updateReloadState(reload: Boolean) {

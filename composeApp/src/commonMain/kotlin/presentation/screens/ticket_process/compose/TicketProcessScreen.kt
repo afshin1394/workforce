@@ -38,6 +38,7 @@ import irancell.nwg.wfm.provideAppContext
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import presentation.components.TicketProcessTopBar
@@ -449,7 +450,6 @@ class TicketProcessScreen(
 
                                 viewModel.handleLogics {
                                     viewModel.extractLogicsModel.clear()
-
                                 }
 
                                 listValueDomain?.let { listValues ->
@@ -459,6 +459,8 @@ class TicketProcessScreen(
                                 }
                             },
                             onAddItem = { component, indexChild, scrollCallback ->
+                                Napier.log(LogLevel.ASSERT, tag = "componentDDDDD", message = component.toString())
+                                Napier.log(LogLevel.ASSERT, tag = "indexChild", message = indexChild.toString())
                                 scope.launch {
                                     viewModel.addOrRemoveComponentDomainRepeatableToList(
                                         component,
@@ -481,6 +483,7 @@ class TicketProcessScreen(
 
                             },
                         )
+
                     }
                 }
                 /*    CompleteFlowDialog(

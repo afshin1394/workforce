@@ -40,6 +40,9 @@ import presentation.theme.textSecondary
 
 @Composable
 fun ImagePicker(
+    disable : Boolean,
+    readOnly : Boolean,
+    processLogicDomain: ProcessLogicDomain,
     itemIndex : Int,
     item : ComponentDomain,
     componentId: String,
@@ -51,13 +54,12 @@ fun ImagePicker(
     onImageClick: (index: Int) -> Unit
 ) {
 
-
-    val disableLogic = item.processLogicDomain.disabled
-    val hideLogic = item.processLogicDomain.shouldHide
-    val readOnlyLogic = item.processLogicDomain.readOnly || item.readOnly
-    val requiredLogic = item.processLogicDomain.required
-    val validateLogic = item.processLogicDomain.validate
-    val errorMessageValidateLogic =item.processLogicDomain.errorMessage
+    val disableLogic = processLogicDomain.disabled || disable
+    val hideLogic = processLogicDomain.shouldHide
+    val readOnlyLogic = processLogicDomain.readOnly || readOnly
+    val requiredLogic = processLogicDomain.required
+    val validateLogic = processLogicDomain.validate
+    val errorMessageValidateLogic = processLogicDomain.errorMessage
 
     val backgroundColor = if (errorMessage.localized() != "" &&!showErrorMessageValidation || validateLogic) {
         Color.Red

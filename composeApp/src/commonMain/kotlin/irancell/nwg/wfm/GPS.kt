@@ -4,7 +4,7 @@ import androidx.compose.runtime.Composable
 
 expect class GPS {
     companion object {
-        @Composable
+
         fun enableGpsDialog(context: Any)
 
         fun getLocationsState(): Boolean

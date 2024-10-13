@@ -1,11 +1,15 @@
 package domain.models.form_struct
 
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.Saver
 import cafe.adriel.voyager.core.lifecycle.JavaSerializable
 import data.network.response.task.logic.LogicDomain
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 import kotlinx.serialization.json.Json
+
 
 @Serializable
 data class ComponentDomain(
@@ -19,7 +23,7 @@ data class ComponentDomain(
     var validate : ValidateDomain?= null,
     var values: List<ValueDomain>?= null,
     val conditional : ConditionalDomain?= null,
-    var components : List<ComponentDomain>?= null,
+    var _components : List<ComponentDomain>?= null,
     val logics : List<LogicDomain>?= null,
     val repeatable:Boolean=false,
     val removable:Boolean?=null,
@@ -28,10 +32,28 @@ data class ComponentDomain(
     val disabled : Boolean = false,
 
     //in app properties
-    var processLogicDomain : ProcessLogicDomain=ProcessLogicDomain().copy()
+    var _processLogicDomain : ProcessLogicDomain=ProcessLogicDomain().copy()
 
 
     )  {
+    // Use MutableState for UI components
+    var components: MutableState<List<ComponentDomain>?> = mutableStateOf(_components)
+    var processLogicDomain : MutableState<ProcessLogicDomain> = mutableStateOf(_processLogicDomain)
+    var valuesState : MutableState<List<ValueDomain>?> = mutableStateOf(values)
+
+    // Method to create a new instance with updated components
+    fun updateComponents(newComponents: List<ComponentDomain>): ComponentDomain {
+        components.value = newComponents // Update the MutableState
+        return this.copy(_components = newComponents) // Return a new instance for serialization
+    }
+    fun updateProcessLogicDomain(newProcessLogicDomain: ProcessLogicDomain): ComponentDomain {
+        this.processLogicDomain.value = newProcessLogicDomain // Update the MutableState
+        return this.copy(_processLogicDomain = newProcessLogicDomain) // Return a new instance for serialization
+    }
+    fun updateValues(newValues: List<ValueDomain>): ComponentDomain {
+        valuesState.value = newValues // Update the MutableState
+        return this.copy(values = newValues) // Return a new instance for serialization
+    }
 
 
     fun ComponentDomain.copy() : ComponentDomain{

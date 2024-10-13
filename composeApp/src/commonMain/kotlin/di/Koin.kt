@@ -205,7 +205,7 @@ fun httpModule() = module {
             }
             configure()
             defaultRequest {
-                url(DeploymentBASEURL)
+                url(ProductionBASEURL)
                 contentType(ContentType.Application.Json)
                 headers {
                     append(
@@ -240,10 +240,9 @@ fun httpModule() = module {
             }
             configure()
             defaultRequest {
-                url(DeploymentBASEURL)
+                url(ProductionBASEURL)
                 contentType(ContentType.Application.Json)
                 headers {
-
                     append("Content-Type", "application/json")
                     append("accept", "application/json")
                 }
@@ -256,7 +255,6 @@ fun httpModule() = module {
                 socketTimeoutMillis = 15000
             }
             addDefaultResponseValidation()
-
             install(Logging) {
                 logger = Logger.DEFAULT
                 level = LogLevel.ALL

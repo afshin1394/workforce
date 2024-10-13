@@ -153,7 +153,7 @@ class SendStepsOfTicketToServerUseCase(
 
     private fun List<ComponentDomain>.findComponentsByType(type: String): List<ComponentDomain> {
         return this.flatMap { component ->
-            listOf(component).plus(component.components?.findComponentsByType(type) ?: emptyList())
+            listOf(component).plus(component.components.value?.findComponentsByType(type) ?: emptyList())
         }.filter { it.type == type }
     }
 }

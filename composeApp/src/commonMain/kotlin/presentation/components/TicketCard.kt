@@ -41,7 +41,7 @@ fun ticketCard(
         modifier = modifier
     ) {
         Column(
-            modifier = modifier.padding(12.dp),
+            modifier = modifier.padding(top =  spacing05X, start = spacing15X, end = spacing15X, bottom = spacing15X),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.Start,
         ) {

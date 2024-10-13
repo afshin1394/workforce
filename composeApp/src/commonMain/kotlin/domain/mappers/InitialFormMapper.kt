@@ -68,7 +68,7 @@ private fun List<ComponentDomain>.updateComponentTypes(): List<ComponentDomain> 
         val newType = mapSubtypeToType(component.subType) ?: component.type
         component.copy(
             type = newType,
-            components = component.components?.updateComponentTypes()
+            _components = component.components.value?.updateComponentTypes()
         )
     }
 }
@@ -118,7 +118,7 @@ fun List<Component>.toComponentDomain(): List<ComponentDomain> {
             validate = it.validate?.toValidateDomain(),
             values = it.values?.toValueDomain(),
             conditional = it.conditional?.toConditionalDomain(),
-            components = it.components?.toComponentDomain(),
+            _components = it.components?.toComponentDomain(),
             logics = it.logics?.toLogicDomain()
         )
     }.updateComponentTypes()
@@ -277,7 +277,7 @@ fun List<ComponentDomain>.toComponent(): List<Component> {
             validate = it.validate?.toValidate(),
             values = it.values?.toValue(),
             conditional = it.conditional?.toConditional(),
-            components = it.components?.toComponent(),
+            components = it.components.value?.toComponent(),
             logics = it.logics?.toLogic()
         )
     }.updateComponentTypesReverse()
