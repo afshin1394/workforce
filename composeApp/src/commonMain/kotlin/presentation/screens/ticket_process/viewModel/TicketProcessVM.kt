@@ -384,14 +384,15 @@ class TicketProcessVM(
                     })
                     scrollCallBack(createdIndex)
                 }
-            } else {
+            }else {
                 withContext(Dispatchers.Main) {
-                    tempComponentList.get(indexChild).components.value?.map {
-                        it.updateValues(
-                            emptyList()
-                        )
-                    }
+                    tempComponent.addAll(tempComponentList.apply {
+                        removeAt(indexChild)
+                    })
+                    tempComponentList.clear()
+                    tempComponentList.addAll(tempComponent)
                     scrollCallBack(indexChild)
+
                 }
             }
         }
