@@ -94,7 +94,7 @@ open class BaseViewModel : ViewModel(), KoinComponent {
     val networkState = _networkState.asStateFlow()
     val vpnDetectionStates = _vpnDetectionState.asStateFlow()
     val gpsState = _gpsState.asStateFlow()
-    val orientationState=_orientationState.asStateFlow()
+    val orientationState = _orientationState.asStateFlow()
     private val konnectivity: Konnectivity = Konnectivity()
     private val _availabilityStatus =
         MutableStateFlow<AvailabilityStatus>(AvailabilityStatus.Unavailable)
@@ -126,19 +126,41 @@ open class BaseViewModel : ViewModel(), KoinComponent {
                     is ServiceState.Faulty -> {
                         _serviceState.update { ServiceState.Faulty(MR.strings.unauthorized) }
                         BackgroundServiceApp.stopBackgroundService()
+                        Napier.log(
+                            LogLevel.ASSERT,
+                            tag = "ServiceState",
+                            message = "isFaulty"
+                        )
                     }
 
                     ServiceState.NotRunning -> {
                         _serviceState.update { ServiceState.NotRunning }
                         updateAvailabilityState(AvailabilityStatus.NotRunning)
+                        Napier.log(
+                            LogLevel.ASSERT,
+                            tag = "ServiceState",
+                            message = "isNotRunning"
+                        )
                     }
 
                     ServiceState.Normal -> {
                         _serviceState.update { ServiceState.Normal }
                         updateAvailabilityState(AvailabilityStatus.Available)
+                        Napier.log(
+                            LogLevel.ASSERT,
+                            tag = "ServiceState",
+                            message = "isNormal"
+                        )
                     }
 
-                    else -> {}
+                    ServiceState.Suspend -> {
+                        Napier.log(
+                            LogLevel.ASSERT,
+                            tag = "ServiceState",
+                            message = "isSuspend"
+                        )
+                    }
+
                 }
             }
 
@@ -223,26 +245,27 @@ open class BaseViewModel : ViewModel(), KoinComponent {
     }
 
 
-    private fun  traceOrientation(){
+    private fun traceOrientation() {
 
-Orientation.orientationState(provideAppContext()){
-    when(it){
-        "landscape"->{
-            _orientationState.update { OrientationState.Landscape }
+        Orientation.orientationState(provideAppContext()) {
+            when (it) {
+                "landscape" -> {
+                    _orientationState.update { OrientationState.Landscape }
+
+                }
+
+                "portrait" -> {
+                    _orientationState.update { OrientationState.Portrait }
+                }
+            }
 
         }
-        "portrait"->{
-            _orientationState.update { OrientationState.Portrait }
-        }
-    }
-
-}
 
 
     }
 
 
-    private fun   traceNetwork() {
+    private fun traceNetwork() {
         viewModelScope.launch(Dispatchers.Main) {
             konnectivity.currentNetworkConnectionState.collect { connection ->
                 when (connection) {
@@ -261,6 +284,7 @@ Orientation.orientationState(provideAppContext()){
             }
         }
     }
+
     fun updateState(viewStates: ViewStates) {
         _state.update { viewStates }
     }

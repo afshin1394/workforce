@@ -159,8 +159,6 @@ class MainScreenVM(
     }
 
 
-
-
     private fun getGeneralUnSendLocationList(): List<LiveLocationDomain> {
         viewModelScope.launch {
             generalLocationListUseCase(

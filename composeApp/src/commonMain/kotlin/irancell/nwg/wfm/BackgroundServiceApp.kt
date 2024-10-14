@@ -7,8 +7,8 @@ import utils.TicketListStatus
 internal expect class BackgroundServiceApp {
 
     companion object {
-        val serviceState : MutableStateFlow<ServiceState>
-        val ticketListState : MutableStateFlow<TicketListStatus>
+        val serviceState: MutableStateFlow<ServiceState>
+        val ticketListState: MutableStateFlow<TicketListStatus>
         fun updateServiceState(serviceState: ServiceState)
         fun startBackgroundService()
         fun stopBackgroundService()

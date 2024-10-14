@@ -48,13 +48,19 @@ class SendStepsOfTicketToServerUseCase(
         val listOfString = arrayListOf<String>()
         sendStepsEntity.forEachIndexed { index, sendStepsEntity ->
             try {
-                val map = jsonToMap(
-                    sendStepsEntity.key_value_image_structure
-                )
-
+                val map = jsonToMap(sendStepsEntity.key_value_image_structure)
                 listOfString.addAll(mapToList(map))
             } catch (e: Exception) {
-                Napier.log(LogLevel.ASSERT, tag = "listOfString", message = e.toString())
+                Napier.log(
+                    LogLevel.ERROR,
+                    tag = "jsonExceptionPlusTurbo",
+                    message = e.toString()
+                )
+                Napier.log(
+                    LogLevel.INFO,
+                    tag = "jsonExceptionPlusTurbo",
+                    message = sendStepsEntity.key_value_image_structure
+                )
             }
         }
         val uploadDomains = arrayListOf<UploadDomain>()
@@ -83,15 +89,20 @@ class SendStepsOfTicketToServerUseCase(
                         item.key_value_structure.replace("}\"", "}").replace("\"{", "{")
                             .replace("\\", "")
                     )
-
                     updateCommonKeys(map, imageMap)
-
-
-
                     submitAllRequest.steps
                         .add(StepRequest(item.activityId.toInt(), map.mutableToJson(), 0))
-                } catch (_: Exception) {
-
+                } catch (e: Exception) {
+                    Napier.log(
+                        LogLevel.ERROR,
+                        tag = "jsonExceptionPlusTurbo",
+                        message = e.toString()
+                    )
+                    Napier.log(
+                        LogLevel.INFO,
+                        tag = "jsonExceptionPlusTurbo",
+                        message = item.key_value_structure
+                    )
                 }
             } else {
                 try {
@@ -100,11 +111,7 @@ class SendStepsOfTicketToServerUseCase(
                             item.key_value_structure.replace("}\"", "}").replace("\"{", "{")
                                 .replace("\\", "")
                         )
-
                     updateCommonKeys(map, imageMap)
-
-
-
                     submitAllRequest.steps.add(
                         StepRequest(
                             item.activityId.toInt(),
@@ -112,8 +119,17 @@ class SendStepsOfTicketToServerUseCase(
                             item.wi.toInt()
                         )
                     )
-                } catch (_: Exception) {
-
+                } catch (e: Exception) {
+                    Napier.log(
+                        LogLevel.ERROR,
+                        tag = "jsonExceptionPlusTurbo",
+                        message = e.toString()
+                    )
+                    Napier.log(
+                        LogLevel.INFO,
+                        tag = "jsonExceptionPlusTurbo",
+                        message = item.key_value_structure
+                    )
                 }
             }
         }
@@ -153,7 +169,9 @@ class SendStepsOfTicketToServerUseCase(
 
     private fun List<ComponentDomain>.findComponentsByType(type: String): List<ComponentDomain> {
         return this.flatMap { component ->
-            listOf(component).plus(component.components.value?.findComponentsByType(type) ?: emptyList())
+            listOf(component).plus(
+                component.components.value?.findComponentsByType(type) ?: emptyList()
+            )
         }.filter { it.type == type }
     }
 }

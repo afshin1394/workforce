@@ -153,7 +153,6 @@ class TicketProcessVM(
                                 checkLogicsForAll(tempComponentList)
 
 
-
                             }
 
 
