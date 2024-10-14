@@ -24,6 +24,7 @@ import irancell.nwg.wfm.Location
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
+import kotlinx.coroutines.coroutineScope
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.koin.core.component.KoinComponent
@@ -117,6 +118,7 @@ class UpdateStepFormUseCase(
         ).toActivityDomain()
 
 
+
         try {
 
             val location = Location.getLastLocation()
@@ -136,6 +138,7 @@ class UpdateStepFormUseCase(
                 arrayListOf(ValueDomain("submitted_latitude", location.longitude))
             params.third.findComponentByKey("submitted_date")?.values =
                 arrayListOf(ValueDomain("submitted_date", location.datetime.parsGpsDateTime()))
+
 
         } catch (_: Exception) {
 
@@ -469,22 +472,7 @@ class UpdateStepFormUseCase(
         return imageComponents
     }
 
-    private suspend fun checkLogicsForAll(logicCalculation: LogicCalculation,components: List<ComponentDomain>) {
-
-        // Create a copy of the components list to iterate over
-        val componentsCopy = components.toMutableList()
-
-        for (cmp in componentsCopy) {
-            logicCalculation.extractLogics(componentsCopy, cmp)
-            cmp.components.value?.let { cmps ->
-                if (cmps.isNotEmpty()) {
-                    checkLogicsForAll(logicCalculation,cmps)
-
-                }
-            }
-        }
 
 
-    }
 
 }

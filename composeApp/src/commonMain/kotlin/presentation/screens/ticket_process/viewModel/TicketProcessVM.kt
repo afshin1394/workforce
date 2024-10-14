@@ -146,12 +146,12 @@ class TicketProcessVM(
                                 )
                                 tempComponentList.clear()
                                 tempComponentList.addAll(it.toList())
-                                validateComponents(tempComponentList, true) {
-                                    updateTempComponentList(it)
 
+                                handleLogics {
+                                    validateComponents(tempComponentList, true) {
+                                        updateTempComponentList(it)
+                                    }
                                 }
-                                checkLogicsForAll(tempComponentList)
-
 
 
                             }
@@ -338,31 +338,32 @@ class TicketProcessVM(
         }
     }
 
+
     fun handleLogics(onResult: (MutableList<ExtractLogicsModel>) -> Unit) {
 
 
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.Main) {
             try {
-                withContext(Dispatchers.IO) { checkLogicsForAll(tempComponentList) }
-                withContext(Dispatchers.Main) {
-                    arrayListOf<ComponentDomain>().apply {
-                        this.addAll(tempComponentList)
-                        tempComponentList.clear()
-                        tempComponentList.addAll(this)
-                    }
-                    onResult(extractLogicsModel)
+                checkLogicsForAll(tempComponentList)
+
+                arrayListOf<ComponentDomain>().apply {
+                    this.addAll(tempComponentList)
+                    tempComponentList.clear()
+                    tempComponentList.addAll(this)
                 }
+                onResult(extractLogicsModel)
+
             } catch (_: Exception) {
-                async { checkLogicsForAll(tempComponentList) }.await()
-                withContext(Dispatchers.Main) {
-                    arrayListOf<ComponentDomain>().apply {
-                        this.addAll(tempComponentList)
-                        tempComponentList.clear()
-                        tempComponentList.addAll(this)
-                    }
-                    onResult(extractLogicsModel)
+                checkLogicsForAll(tempComponentList)
+
+                arrayListOf<ComponentDomain>().apply {
+                    this.addAll(tempComponentList)
+                    tempComponentList.clear()
+                    tempComponentList.addAll(this)
                 }
+                onResult(extractLogicsModel)
             }
+
         }
     }
 
