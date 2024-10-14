@@ -14,7 +14,7 @@ fun validatePhone(component: ComponentDomain, validateDomain: ValidateDomain ,in
     val mobilePattern = "^09\\d{9}$".toRegex()
     val landlinePattern = "^[1-8]\\d{9}$".toRegex()
 
-    val value = component.values?.getOrNull(0)?.value ?: ""
+    val value = component.processLogicDomain.value.calculatedValue?:component.values?.getOrNull(0)?.value ?: ""
 
 
         if (required && value.isEmpty()){

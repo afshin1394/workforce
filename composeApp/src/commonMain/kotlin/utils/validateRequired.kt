@@ -12,7 +12,7 @@ fun validateRequired(component: ComponentDomain, validateDomain: ValidateDomain)
     val required = validateDomain.required ?: false
 
 
-    val value = component.values?.getOrNull(0)?.value ?: ""
+    val value = component.processLogicDomain.value.calculatedValue?:component.values?.getOrNull(0)?.value ?: ""
 
     if (required && value.trim().isEmpty()) {
         return StringDesc.ResourceFormatted(

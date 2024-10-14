@@ -14,7 +14,7 @@ fun validateShortText(component: ComponentDomain,validateDomain: ValidateDomain)
     val minLength =validateDomain.minLength ?: 0
     val pattern= validateDomain.pattern ?:""
 
-    val value = component.values?.getOrNull(0)?.value ?: ""
+    val value = component.processLogicDomain.value.calculatedValue?:component.values?.getOrNull(0)?.value ?: ""
 
     if (required && value.isEmpty()) {
         return StringDesc.ResourceFormatted(
