@@ -148,7 +148,11 @@ class TicketProcessVM(
                                 tempComponentList.addAll(it.toList())
                                 validateComponents(tempComponentList, true) {
                                     updateTempComponentList(it)
+
                                 }
+                                checkLogicsForAll(tempComponentList)
+
+
 
                             }
 
