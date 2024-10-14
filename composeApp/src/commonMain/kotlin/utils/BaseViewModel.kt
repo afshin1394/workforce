@@ -23,12 +23,6 @@ import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
-sealed class TicketListStatus {
-    data object UnRecognized : TicketListStatus()
-    data object Filled : TicketListStatus()
-    data object Empty : TicketListStatus()
-}
-
 sealed class AvailabilityStatus {
     data object NotRunning : AvailabilityStatus()
     data object Available : AvailabilityStatus()
@@ -94,25 +88,17 @@ open class BaseViewModel : ViewModel(), KoinComponent {
     val networkState = _networkState.asStateFlow()
     val vpnDetectionStates = _vpnDetectionState.asStateFlow()
     val gpsState = _gpsState.asStateFlow()
-    val orientationState=_orientationState.asStateFlow()
+    val orientationState = _orientationState.asStateFlow()
     private val konnectivity: Konnectivity = Konnectivity()
     private val _availabilityStatus =
         MutableStateFlow<AvailabilityStatus>(AvailabilityStatus.Unavailable)
     val availabilityStatus = _availabilityStatus.asStateFlow()
-    private val _ticketListStatus =
-        MutableStateFlow<TicketListStatus>(TicketListStatus.UnRecognized)
-    val ticketListStatus = _ticketListStatus.asStateFlow()
 
     init {
         traceNetwork()
         traceLocation()
         collectServiceState()
-        collectTicketListState()
         traceOrientation()
-    }
-
-    fun updateTicketListState(ticketListStatus: TicketListStatus) {
-        _ticketListStatus.update { ticketListStatus }
     }
 
     fun updateAvailabilityState(availabilityStatus: AvailabilityStatus) {
@@ -139,27 +125,6 @@ open class BaseViewModel : ViewModel(), KoinComponent {
                     }
 
                     else -> {}
-                }
-            }
-
-        }
-    }
-
-    private fun collectTicketListState() {
-        viewModelScope.launch {
-            BackgroundServiceApp.ticketListState.collect {
-                when (it) {
-                    TicketListStatus.Filled -> {
-                        _ticketListStatus.update { TicketListStatus.Filled }
-                    }
-
-                    TicketListStatus.Empty -> {
-                        _ticketListStatus.update { TicketListStatus.Empty }
-                    }
-
-                    else -> {
-                        _ticketListStatus.update { TicketListStatus.UnRecognized }
-                    }
                 }
             }
 
@@ -223,26 +188,21 @@ open class BaseViewModel : ViewModel(), KoinComponent {
     }
 
 
-    private fun  traceOrientation(){
+    private fun traceOrientation() {
+        Orientation.orientationState(provideAppContext()) {
+            when (it) {
+                "landscape" -> {
+                    _orientationState.update { OrientationState.Landscape }
+                }
 
-Orientation.orientationState(provideAppContext()){
-    when(it){
-        "landscape"->{
-            _orientationState.update { OrientationState.Landscape }
-
-        }
-        "portrait"->{
-            _orientationState.update { OrientationState.Portrait }
+                "portrait" -> {
+                    _orientationState.update { OrientationState.Portrait }
+                }
+            }
         }
     }
 
-}
-
-
-    }
-
-
-    private fun   traceNetwork() {
+    private fun traceNetwork() {
         viewModelScope.launch(Dispatchers.Main) {
             konnectivity.currentNetworkConnectionState.collect { connection ->
                 when (connection) {
@@ -261,6 +221,7 @@ Orientation.orientationState(provideAppContext()){
             }
         }
     }
+
     fun updateState(viewStates: ViewStates) {
         _state.update { viewStates }
     }
