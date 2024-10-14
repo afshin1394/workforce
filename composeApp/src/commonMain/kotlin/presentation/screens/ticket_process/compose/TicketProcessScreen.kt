@@ -262,7 +262,6 @@ class TicketProcessScreen(
                                             }
                                             viewModel.showFirstError(errors)
                                         }
-
                                     } else {
                                         scope.launch(Dispatchers.Main) {
                                             val errors = validateComponents(

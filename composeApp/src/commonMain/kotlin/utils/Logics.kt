@@ -45,6 +45,7 @@ class LogicCalculation(
         components: List<ComponentDomain>,
         component: ComponentDomain
     ): MutableList<ExtractLogicsModel> = coroutineScope {
+        validationErrorList.clear()
         var hasLogic = false
         var typeLogic = ""
         var idCmp = ""
@@ -57,13 +58,14 @@ class LogicCalculation(
                         val expressionSatisfied = evaluateLogics(components, it)
                         val cmp = allComponents.findComponentById(component.id)
                         Napier.log(LogLevel.ASSERT, "Hide", message = cmp.toString())
-//                        cmp?.processLogicDomain?.value?.shouldHide = expressionSatisfied
-                        cmp?.updateProcessLogicDomain(cmp.processLogicDomain.value.copy(shouldHide = expressionSatisfied))
+                        cmp?.processLogicDomain?.value?.shouldHide = expressionSatisfied
 
                         if (expressionSatisfied) {
                             cmp.clearValues()
                         }
                         cmp?.components?.value?.forEach {
+                            it?.processLogicDomain?.value?.shouldHide = expressionSatisfied
+
                             it.updateProcessLogicDomain(cmp.processLogicDomain.value.copy(shouldHide = expressionSatisfied))
                             if (expressionSatisfied)
                                 it.clearValues()
@@ -81,9 +83,10 @@ class LogicCalculation(
                         val cmp = allComponents.findComponentById(component.id)
                         idCmp = component.id ?: ""
                         cmp?.updateProcessLogicDomain(cmp.processLogicDomain.value.copy(required = expressionSatisfied))
-
-
                         hasLogic = expressionSatisfied
+                        val logicModel = ExtractLogicsModel(hasLogic, typeLogic, idCmp)
+                        if(hasLogic)
+                        validationErrorList.add(logicModel)
                     }
 
                     LogicType.Disable -> {
@@ -169,6 +172,9 @@ class LogicCalculation(
                             }
                             hasLogic = expressionSatisfied?.result ?: false
                         }
+                        val logicModel = ExtractLogicsModel(hasLogic, typeLogic, idCmp)
+                        if(hasLogic)
+                            validationErrorList.add(logicModel)
 
                     }
 
@@ -291,15 +297,7 @@ class LogicCalculation(
 
             }
         }.join()
-        val logicModel = ExtractLogicsModel(hasLogic, typeLogic, idCmp)
 
-
-
-        if (hasLogic && (typeLogic == LogicType.Required || typeLogic == LogicType.Validate)) {
-            validationErrorList.add(logicModel)
-        } else {
-            validationErrorList.clear()
-        }
         return@coroutineScope validationErrorList
     }
 

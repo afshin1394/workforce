@@ -323,7 +323,6 @@ class TicketProcessVM(
 
 
     private suspend fun checkLogicsForAll(components: List<ComponentDomain>) {
-
         // Create a copy of the components list to iterate over
         val componentsCopy = components.toMutableList()
 
@@ -343,6 +342,7 @@ class TicketProcessVM(
 
 
         viewModelScope.launch(Dispatchers.Main) {
+            extractLogicsModel.clear()
             try {
                 checkLogicsForAll(tempComponentList)
 
@@ -372,7 +372,7 @@ class TicketProcessVM(
         indexChild: Int,
         scrollCallBack: (position: Int) -> Unit
     ) {
-        withContext(Dispatchers.IO) {
+        withContext(Dispatchers.Main ) {
 
             val createdIndex = tempComponentList.findComponentsWithKey(compD).size
             Napier.log(LogLevel.ASSERT, "createdIndex", message = createdIndex.toString())
