@@ -52,6 +52,7 @@ fun validateComponents(
 
                     component.validate?.let { validate ->
 
+
                         val validationErrors =
                             validateTextarea(component, validate, true)
                         val listMessageError: ArrayList<ResourceFormattedStringDesc> = arrayListOf()

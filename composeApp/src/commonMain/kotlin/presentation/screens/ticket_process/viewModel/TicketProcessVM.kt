@@ -146,12 +146,12 @@ class TicketProcessVM(
                                 )
                                 tempComponentList.clear()
                                 tempComponentList.addAll(it.toList())
-                                validateComponents(tempComponentList, true) {
-                                    updateTempComponentList(it)
 
+                                handleLogics {
+                                    validateComponents(tempComponentList, true) {
+                                        updateTempComponentList(it)
+                                    }
                                 }
-                                checkLogicsForAll(tempComponentList)
-
 
                             }
 
@@ -322,7 +322,6 @@ class TicketProcessVM(
 
 
     private suspend fun checkLogicsForAll(components: List<ComponentDomain>) {
-
         // Create a copy of the components list to iterate over
         val componentsCopy = components.toMutableList()
 
@@ -337,31 +336,39 @@ class TicketProcessVM(
         }
     }
 
+
     fun handleLogics(onResult: (MutableList<ExtractLogicsModel>) -> Unit) {
 
 
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
+            extractLogicsModel.clear()
             try {
-                withContext(Dispatchers.IO) { checkLogicsForAll(tempComponentList) }
-                withContext(Dispatchers.Main) {
+                checkLogicsForAll(tempComponentList)
+                viewModelScope.launch(Dispatchers.Main) {
                     arrayListOf<ComponentDomain>().apply {
                         this.addAll(tempComponentList)
                         tempComponentList.clear()
                         tempComponentList.addAll(this)
                     }
                     onResult(extractLogicsModel)
+
                 }
+
+
             } catch (_: Exception) {
                 async { checkLogicsForAll(tempComponentList) }.await()
-                withContext(Dispatchers.Main) {
+                viewModelScope.launch(Dispatchers.Main) {
+
                     arrayListOf<ComponentDomain>().apply {
                         this.addAll(tempComponentList)
                         tempComponentList.clear()
                         tempComponentList.addAll(this)
                     }
+
                     onResult(extractLogicsModel)
                 }
             }
+
         }
     }
 
@@ -370,7 +377,7 @@ class TicketProcessVM(
         indexChild: Int,
         scrollCallBack: (position: Int) -> Unit
     ) {
-        withContext(Dispatchers.IO) {
+        withContext(Dispatchers.Main) {
 
             val createdIndex = tempComponentList.findComponentsWithKey(compD).size
             Napier.log(LogLevel.ASSERT, "createdIndex", message = createdIndex.toString())
@@ -384,12 +391,13 @@ class TicketProcessVM(
                 }
             } else {
                 withContext(Dispatchers.Main) {
-                    tempComponentList.get(indexChild).components.value?.map {
-                        it.updateValues(
-                            emptyList()
-                        )
-                    }
+                    tempComponent.addAll(tempComponentList.apply {
+                        removeAt(indexChild)
+                    })
+                    tempComponentList.clear()
+                    tempComponentList.addAll(tempComponent)
                     scrollCallBack(indexChild)
+
                 }
             }
         }

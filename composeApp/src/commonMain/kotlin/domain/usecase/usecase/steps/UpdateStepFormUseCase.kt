@@ -24,6 +24,7 @@ import irancell.nwg.wfm.Location
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
+import kotlinx.coroutines.coroutineScope
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.koin.core.component.KoinComponent
@@ -117,6 +118,7 @@ class UpdateStepFormUseCase(
         ).toActivityDomain()
 
 
+
         try {
 
             val location = Location.getLastLocation()
@@ -136,6 +138,7 @@ class UpdateStepFormUseCase(
                 arrayListOf(ValueDomain("submitted_latitude", location.longitude))
             params.third.findComponentByKey("submitted_date")?.values =
                 arrayListOf(ValueDomain("submitted_date", location.datetime.parsGpsDateTime()))
+
 
         } catch (_: Exception) {
 
@@ -158,13 +161,14 @@ class UpdateStepFormUseCase(
             dictImages.toJson()
         )
 
-        Napier.log(
-            LogLevel.ASSERT,
-            tag = "params.fifth",
-            message = stepPointerDomain.activeActivity.toString()
-        )
-        Napier.log(LogLevel.ASSERT, tag = "dict", message = dict.toJson())
+
+
         Location.stop()
+//        data.form.form_structure.components?.let {
+//            val logicCalculation = LogicCalculation(CoroutineScope(Dispatchers.IO),it)
+//            logicCalculation.ticketId = params.sixth
+//            checkLogicsForAll(logicCalculation,it)
+//        }
         return StructureActivity(
             nextIndex,
             stepListSorted[nextIndex].title,
@@ -469,22 +473,7 @@ class UpdateStepFormUseCase(
         return imageComponents
     }
 
-    private suspend fun checkLogicsForAll(logicCalculation: LogicCalculation,components: List<ComponentDomain>) {
-
-        // Create a copy of the components list to iterate over
-        val componentsCopy = components.toMutableList()
-
-        for (cmp in componentsCopy) {
-            logicCalculation.extractLogics(componentsCopy, cmp)
-            cmp.components.value?.let { cmps ->
-                if (cmps.isNotEmpty()) {
-                    checkLogicsForAll(logicCalculation,cmps)
-
-                }
-            }
-        }
 
 
-    }
 
 }

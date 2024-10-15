@@ -188,5 +188,6 @@
     <string name="noLocationFound">location is not available</string>
     <string name="online">Online</string>
     <string name="offline">Offline</string>
+    <string name="of">Of</string>
 
 </resources>

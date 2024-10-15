@@ -57,11 +57,16 @@ import utils.AvailabilityObjectId
 import utils.AvailabilityStatus
 import utils.BaseViewModel
 import utils.ServiceState
-import utils.TicketListStatus
 import utils.TicketNumber
 import utils.ViewStates
 import utils.getCurrentDate
 
+sealed class TicketListStatus {
+    data object UnRecognized : TicketListStatus()
+    data object Filled : TicketListStatus()
+    data object Empty : TicketListStatus()
+    data object Loading : TicketListStatus()
+}
 
 class MainScreenVM(
     private val getAvailabilityUseCase: GetAvailabilityUseCase,
@@ -110,6 +115,9 @@ class MainScreenVM(
     var showAcceptDialog = _showAcceptDialog.asStateFlow()
     val generalLocationList = mutableStateListOf<GeneralLocationEntity>()
     private val konnectivity: Konnectivity = Konnectivity()
+    private val _ticketListStatus =
+        MutableStateFlow<TicketListStatus>(TicketListStatus.UnRecognized)
+    val ticketListStatus = _ticketListStatus.asStateFlow()
 
     init {
         traceNetwork()
@@ -117,10 +125,36 @@ class MainScreenVM(
         getProfileName()
         getTasks()
         updateTicketNumber("")
+        collectTicketListState()
+    }
+
+    fun updateTicketListState(ticketListStatus: TicketListStatus) {
+        _ticketListStatus.update { ticketListStatus }
     }
 
     fun updateState(eventState: MainEvent) {
         _events.value = eventState
+    }
+
+    private fun collectTicketListState() {
+        viewModelScope.launch {
+            BackgroundServiceApp.ticketListState.collect {
+                when (it) {
+                    TicketListStatus.Filled -> {
+                        _ticketListStatus.update { TicketListStatus.Filled }
+                    }
+
+                    TicketListStatus.Empty -> {
+                        _ticketListStatus.update { TicketListStatus.Empty }
+                    }
+
+                    else -> {
+                        _ticketListStatus.update { TicketListStatus.UnRecognized }
+                    }
+                }
+            }
+
+        }
     }
 
     private fun traceNetwork() {

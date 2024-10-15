@@ -43,7 +43,7 @@ object BASE_USECASE {
 object AlarmAction {
     object UPDATE {
         const val title = "UPDATE"
-        const val interval = 3000L
+        const val interval = 5000L
     }
 
     object STORE_LOCATION {

@@ -118,6 +118,7 @@ fun Editable(
                     if (!disableLogic && !readOnlyLogic && it != valueChange.value) {
                         valueChange.value = it
                         onValueChange(valueChange.value)
+                        processLogicDomain.calculatedValue = it
                     }
                 },
                 modifier = Modifier

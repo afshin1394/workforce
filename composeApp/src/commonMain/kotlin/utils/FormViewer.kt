@@ -151,7 +151,6 @@ fun initialize(
                                     }
                                 }
 
-
                             },
                             onDeleteClick = {
 
@@ -205,9 +204,8 @@ fun initialize(
                                     newValue
                                 )
                                 item.values = listOf(updatedValueDomain)
+
                                 updateNumberValidationError(item, errorMessageState)
-
-
 
 
                                 onChanges(
@@ -251,6 +249,8 @@ fun initialize(
                                     newValue
                                 )
                                 item.values = listOf(updatedValueDomain)
+                                Napier.log(LogLevel.ASSERT, tag = "validateShortText", message =  item.label.toString())
+                                Napier.log(LogLevel.ASSERT, tag = "validateShortText", message =  item.values?.get(0).toString())
                                 updateTextareaValidationError(item, errorMessageState)
 
 
@@ -287,6 +287,7 @@ fun initialize(
                             disable = item.disabled,
                             maxLines = 1,
                             onValueChange = { newValue ->
+                                Napier.log(LogLevel.ASSERT, tag = "onValueChange", message = newValue)
                                 valueState.value = newValue
                                 val updatedValueDomain = updateValueDomain(
                                     item.values?.get(0) ?: ValueDomain(), newValue
@@ -433,6 +434,7 @@ fun initialize(
                                     newValue
                                 )
                                 item.values = listOf(updatedValueDomain)
+                                item.updateProcessLogicDomain(item._processLogicDomain.copy(calculatedValue = newValue))
 
 
                                 updateEmailValidationError(item, errorMessageState)
@@ -831,7 +833,7 @@ fun initialize(
                                         updateValuesForSelectType(values, selectedItems)
 
 
-                                        valuesState.value = oneItem.value ?: ""
+                                        valuesState.value = oneItem?.value ?: ""
 
                                         updateSelectedComponentValidationError(
                                             item,
@@ -1014,6 +1016,8 @@ fun updateTextareaValidationError(
     item: ComponentDomain,
     errorMessageState: MutableState<ResourceFormattedStringDesc>
 ) {
+    Napier.log(LogLevel.ASSERT, tag = "validateShortText", message =  item.label.toString())
+    Napier.log(LogLevel.ASSERT, tag = "validateShortText", message =  item.values?.get(0).toString())
     val validationErrors = validateTextarea(item, item.validate ?: ValidateDomain(), null)
     val messageError: ResourceFormattedStringDesc = validationErrors
         ?: ResourceFormattedStringDesc(
@@ -1029,6 +1033,9 @@ fun updateShortTextValidationError(
     item: ComponentDomain,
     errorMessageState: MutableState<ResourceFormattedStringDesc>
 ) {
+    Napier.log(LogLevel.ASSERT, tag = "validateShortText", message =  item.label.toString())
+    Napier.log(LogLevel.ASSERT, tag = "validateShortText", message =  item.values?.get(0).toString())
+
     val validationErrors =
         validateShortText(item, item.validate ?: ValidateDomain())
     val messageError: ResourceFormattedStringDesc = validationErrors

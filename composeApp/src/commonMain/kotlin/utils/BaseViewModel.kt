@@ -5,6 +5,7 @@ import com.plusmobileapps.konnectivity.NetworkConnection
 import dev.icerock.moko.mvvm.viewmodel.ViewModel
 import dev.icerock.moko.resources.StringResource
 import domain.usecase.ResultStatus
+import domain.usecase.usecase.auth.AutoLogoutUseCase
 import domain.usecase.usecase.ipDetection.IpDetectionUseCase
 import io.github.aakira.napier.LogLevel
 import io.github.aakira.napier.Napier
@@ -22,12 +23,6 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
-
-sealed class TicketListStatus {
-    data object UnRecognized : TicketListStatus()
-    data object Filled : TicketListStatus()
-    data object Empty : TicketListStatus()
-}
 
 sealed class AvailabilityStatus {
     data object NotRunning : AvailabilityStatus()
@@ -79,6 +74,7 @@ sealed interface OrientationState {
 
 open class BaseViewModel : ViewModel(), KoinComponent {
     private val ipDetectionUseCase: IpDetectionUseCase by inject()
+    private val autoLogoutUseCase : AutoLogoutUseCase by inject()
     val loading = MutableStateFlow(false)
     private val _state = MutableStateFlow<ViewStates>(ViewStates.Default)
     private val _serviceState = MutableStateFlow<ServiceState>(ServiceState.Normal)
@@ -99,20 +95,12 @@ open class BaseViewModel : ViewModel(), KoinComponent {
     private val _availabilityStatus =
         MutableStateFlow<AvailabilityStatus>(AvailabilityStatus.Unavailable)
     val availabilityStatus = _availabilityStatus.asStateFlow()
-    private val _ticketListStatus =
-        MutableStateFlow<TicketListStatus>(TicketListStatus.UnRecognized)
-    val ticketListStatus = _ticketListStatus.asStateFlow()
 
     init {
         traceNetwork()
         traceLocation()
         collectServiceState()
-        collectTicketListState()
         traceOrientation()
-    }
-
-    fun updateTicketListState(ticketListStatus: TicketListStatus) {
-        _ticketListStatus.update { ticketListStatus }
     }
 
     fun updateAvailabilityState(availabilityStatus: AvailabilityStatus) {
@@ -124,64 +112,32 @@ open class BaseViewModel : ViewModel(), KoinComponent {
             BackgroundServiceApp.serviceState.collect {
                 when (it) {
                     is ServiceState.Faulty -> {
-                        _serviceState.update { ServiceState.Faulty(MR.strings.unauthorized) }
-                        BackgroundServiceApp.stopBackgroundService()
-                        Napier.log(
-                            LogLevel.ASSERT,
-                            tag = "ServiceState",
-                            message = "isFaulty"
-                        )
+                        autoLogoutUseCase(Unit).collect{it ->
+                           val result = it
+                            when{
+                                result.status == AsyncStatus.SUCCESS->{
+                                    BackgroundServiceApp.stopBackgroundService()
+                                    Napier.log(LogLevel.ASSERT, tag = "autoLogoutUseCase", message = "result.status")
+                                    _serviceState.update { ServiceState.Faulty(MR.strings.unauthorized) }
+
+                                    Napier.log(LogLevel.ASSERT, tag = "autoLogoutUseCase", message = "unauthorized")
+                                }
+                            }
+                        }
+
                     }
 
                     ServiceState.NotRunning -> {
                         _serviceState.update { ServiceState.NotRunning }
                         updateAvailabilityState(AvailabilityStatus.NotRunning)
-                        Napier.log(
-                            LogLevel.ASSERT,
-                            tag = "ServiceState",
-                            message = "isNotRunning"
-                        )
                     }
 
                     ServiceState.Normal -> {
                         _serviceState.update { ServiceState.Normal }
                         updateAvailabilityState(AvailabilityStatus.Available)
-                        Napier.log(
-                            LogLevel.ASSERT,
-                            tag = "ServiceState",
-                            message = "isNormal"
-                        )
                     }
 
-                    ServiceState.Suspend -> {
-                        Napier.log(
-                            LogLevel.ASSERT,
-                            tag = "ServiceState",
-                            message = "isSuspend"
-                        )
-                    }
-
-                }
-            }
-
-        }
-    }
-
-    private fun collectTicketListState() {
-        viewModelScope.launch {
-            BackgroundServiceApp.ticketListState.collect {
-                when (it) {
-                    TicketListStatus.Filled -> {
-                        _ticketListStatus.update { TicketListStatus.Filled }
-                    }
-
-                    TicketListStatus.Empty -> {
-                        _ticketListStatus.update { TicketListStatus.Empty }
-                    }
-
-                    else -> {
-                        _ticketListStatus.update { TicketListStatus.UnRecognized }
-                    }
+                    else -> {}
                 }
             }
 
@@ -208,7 +164,9 @@ open class BaseViewModel : ViewModel(), KoinComponent {
                         Napier.log(LogLevel.ASSERT, tag = "get country", message = "LOADING")
                     }
 
-                    AsyncStatus.EMPTY -> {}
+                    AsyncStatus.EMPTY -> {
+
+                    }
                     AsyncStatus.SUCCESS -> {
                         if (it.data.toString() != "IR") {
                             _vpnDetectionState.update { VpnDetectionStates.ShowBottomSheet }
@@ -246,24 +204,18 @@ open class BaseViewModel : ViewModel(), KoinComponent {
 
 
     private fun traceOrientation() {
-
         Orientation.orientationState(provideAppContext()) {
             when (it) {
                 "landscape" -> {
                     _orientationState.update { OrientationState.Landscape }
-
                 }
 
                 "portrait" -> {
                     _orientationState.update { OrientationState.Portrait }
                 }
             }
-
         }
-
-
     }
-
 
     private fun traceNetwork() {
         viewModelScope.launch(Dispatchers.Main) {
@@ -337,5 +289,10 @@ open class BaseViewModel : ViewModel(), KoinComponent {
                 _state.update { ViewStates.Error(MR.strings.general_error) }
             }
         }
+    }
+
+    fun updateServiceState(serviceState: ServiceState) {
+
+     _serviceState.update { serviceState }
     }
 }

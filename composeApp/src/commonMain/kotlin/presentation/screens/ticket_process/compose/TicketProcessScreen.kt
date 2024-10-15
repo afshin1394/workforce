@@ -13,6 +13,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.graphics.Color
@@ -34,6 +35,7 @@ import irancell.nwg.wfm.DrawController
 import irancell.nwg.wfm.InternalStorage
 import irancell.nwg.wfm.MR
 import irancell.nwg.wfm.provideAppContext
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -251,7 +253,7 @@ class TicketProcessScreen(
                             ), onClick = {
                                 viewModel.handleLogics {
                                     if (it.size > 0) {
-                                        scope.launch {
+                                        scope.launch(Dispatchers.Main) {
                                             val errors =
                                                 mutableMapOf<String, List<ResourceFormattedStringDesc>>()
 
@@ -260,9 +262,8 @@ class TicketProcessScreen(
                                             }
                                             viewModel.showFirstError(errors)
                                         }
-
                                     } else {
-                                        scope.launch {
+                                        scope.launch(Dispatchers.Main) {
                                             val errors = validateComponents(
                                                 viewModel.tempComponentList,
                                                 false
@@ -331,6 +332,7 @@ class TicketProcessScreen(
                                 viewModel.events.value = TicketProcessEvent.DeletePhoto
                             },
                             onSaveChangeAngle = {
+                                viewModel.photoDomainList=it.toMutableStateList()
                                 viewModel.events.value = TicketProcessEvent.Default
                             })
 

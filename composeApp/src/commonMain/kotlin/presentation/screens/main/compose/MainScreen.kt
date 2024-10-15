@@ -1,19 +1,30 @@
 package presentation.screens.main.compose
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import cafe.adriel.voyager.core.registry.rememberScreen
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
@@ -53,6 +64,7 @@ import presentation.screens.main.components.MoreOptions
 import presentation.screens.main.components.PhotoPreviewComponent
 import presentation.screens.main.components.SuspendTicketBottomBarComponent
 import presentation.screens.main.components.SuspendTicketContentComponent
+import presentation.screens.main.viewmodel.TicketListStatus
 import presentation.screens.ticket_process.compose.TicketProcessScreen
 import presentation.theme.body_large
 import presentation.theme.body_small
@@ -63,6 +75,7 @@ import presentation.theme.textInverseDisabled
 import presentation.theme.textPrimary
 import utils.ORIENTATION
 import utils.AvailabilityStatus
+import utils.NetworkStates
 import utils.ServiceState
 
 class MainScreen(
@@ -95,8 +108,8 @@ class MainScreen(
         var hasDrawer by mutableStateOf(false)
         val availabilityStatus by viewModel.availabilityStatus.collectAsState()
         var showContent by remember { mutableStateOf(false) }
-
-
+        val ticketListStatus by viewModel.ticketListStatus.collectAsState()
+        val networkState by viewModel.networkState.collectAsState()
 
 
         LaunchedEffect(true) {
@@ -714,6 +727,34 @@ class MainScreen(
 
                 },
                 content = {
+
+                    when (ticketListStatus) {
+                        TicketListStatus.Empty -> {
+                            Column(
+                                modifier = Modifier.fillMaxSize()
+                                    .wrapContentSize(Alignment.Center),
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.Center
+                            ) {
+                                Image(
+                                    painter = painterResource(MR.images.ic_empty),
+                                    contentDescription = "empty",
+                                    modifier = Modifier.width(150.dp).height(120.dp)
+                                )
+
+                                Spacer(modifier = Modifier.height(16.dp))
+                                Text(
+                                    text = stringResource(MR.strings.empty_list),
+                                    style = TextStyle(
+                                        fontSize = 16.sp, fontWeight = FontWeight.Bold
+                                    ),
+                                    modifier = Modifier.wrapContentSize()
+                                )
+                            }
+                        }
+
+                        else -> {}
+                    }
                     if (eventsState == MainEvent.NoLocationFound) {
                         val noLocationFoundMessage = stringResource(MR.strings.noLocationFound)
                         LaunchedEffect(Unit) {
@@ -771,50 +812,61 @@ class MainScreen(
                         if (reloadState) {
                             viewModel.getTasks()
                         }
-                        TicketListScreen(
-                            searchText = "",
-                            onEvent = { mainEvent: MainEvent, task: TaskDomain? ->
-                                if (isClickable) {
-                                    isClickable = false
-                                    viewModel.updateState(mainEvent)
-                                    viewModel.selectedTask.value = task
-                                    viewModel.resetSuspendTask()
-                                    scope.launch {
-                                        delay(500)
-                                        isClickable = true
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth(),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            if (ticketListStatus == TicketListStatus.UnRecognized) {
+                                LinearProgressIndicator(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(1.5.dp),
+                                    color = if (networkState == NetworkStates.NetworkConnectionNONE) Color.Red else surfaceBrandDefault
+                                )
+                            }
+                            TicketListScreen(
+                                searchText = "",
+                                onEvent = { mainEvent: MainEvent, task: TaskDomain? ->
+                                    if (isClickable) {
+                                        isClickable = false
+                                        viewModel.updateState(mainEvent)
+                                        viewModel.selectedTask.value = task
+                                        viewModel.resetSuspendTask()
+                                        scope.launch {
+                                            delay(500)
+                                            isClickable = true
+                                        }
                                     }
-                                }
-                                Napier.i("TicketListScreen")
-
-                            },
-                            tasks = ArrayList(viewModel.tasks.toList()),
-                            onAccept = {
-                                if (isClickable) {
-                                    BackgroundServiceApp.updateServiceState(ServiceState.Suspend)
-                                    isClickable = false
-                                    viewModel.checkIfTicketIsEdited()
-                                    viewModel.selectedTask.value = it
-                                    viewModel.resetSuspendTask()
-                                    scope.launch {
-                                        delay(500)
-                                        isClickable = true
+                                },
+                                tasks = ArrayList(viewModel.tasks.toList()),
+                                onAccept = {
+                                    if (isClickable) {
+                                        BackgroundServiceApp.updateServiceState(ServiceState.Suspend)
+                                        isClickable = false
+                                        viewModel.checkIfTicketIsEdited()
+                                        viewModel.selectedTask.value = it
+                                        viewModel.resetSuspendTask()
+                                        scope.launch {
+                                            delay(500)
+                                            isClickable = true
+                                        }
                                     }
-                                }
-                            },
-                            viewModel = viewModel
-                        )
-                        if (viewModel.showAcceptDialog.value) {
+                                },
+                                viewModel = viewModel
+                            )
+                        }
+                    }
+                    if (viewModel.showAcceptDialog.value) {
 
-                            if (isTicketEditedState) {
-                                viewModel.selectedTask.value?.let {
-                                    viewModel.updateShowAcceptDialog(false)
-                                    viewModel.updateState(MainEvent.Default)
-
-                                }
-                            } else {
-                                viewModel.updateState(MainEvent.ShowAcceptTicketDialog)
+                        if (isTicketEditedState) {
+                            viewModel.selectedTask.value?.let {
+                                viewModel.updateShowAcceptDialog(false)
+                                viewModel.updateState(MainEvent.Default)
 
                             }
+                        } else {
+                            viewModel.updateState(MainEvent.ShowAcceptTicketDialog)
                         }
                     }
                 },
