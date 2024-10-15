@@ -161,13 +161,14 @@ class UpdateStepFormUseCase(
             dictImages.toJson()
         )
 
-        Napier.log(
-            LogLevel.ASSERT,
-            tag = "params.fifth",
-            message = stepPointerDomain.activeActivity.toString()
-        )
-        Napier.log(LogLevel.ASSERT, tag = "dict", message = dict.toJson())
+
+
         Location.stop()
+//        data.form.form_structure.components?.let {
+//            val logicCalculation = LogicCalculation(CoroutineScope(Dispatchers.IO),it)
+//            logicCalculation.ticketId = params.sixth
+//            checkLogicsForAll(logicCalculation,it)
+//        }
         return StructureActivity(
             nextIndex,
             stepListSorted[nextIndex].title,

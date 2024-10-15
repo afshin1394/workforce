@@ -64,11 +64,12 @@ class LogicCalculation(
                             cmp.clearValues()
                         }
                         cmp?.components?.value?.forEach {
-                            it?.processLogicDomain?.value?.shouldHide = expressionSatisfied
+                            it.processLogicDomain.value.shouldHide = expressionSatisfied
 
                             it.updateProcessLogicDomain(cmp.processLogicDomain.value.copy(shouldHide = expressionSatisfied))
-                            if (expressionSatisfied)
+                            if (expressionSatisfied) {
                                 it.clearValues()
+                            }
                         }
 
 
@@ -296,7 +297,7 @@ class LogicCalculation(
 
 
             }
-        }.join()
+        }
 
         return@coroutineScope validationErrorList
     }

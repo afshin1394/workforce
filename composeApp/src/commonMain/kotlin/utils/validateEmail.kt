@@ -19,7 +19,7 @@ fun validateEmail(
     val domainType = validateDomain.domainType ?: ""
     val emailPattern = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$".toRegex()
 
-    val value = component.processLogicDomain.value.calculatedValue?:component.values?.getOrNull(0)?.value ?: ""
+    val value = component.values?.getOrNull(0)?.value ?: ""
 
 
 

@@ -13,7 +13,7 @@ fun validateLatLong(component: ComponentDomain, validateDomain: ValidateDomain):
     val max = validateDomain.max ?: Int.MAX_VALUE
     val min = validateDomain.min ?: Int.MIN_VALUE
 
-    val valueStr = component.processLogicDomain.value.calculatedValue?:component.values?.getOrNull(0)?.value ?: ""
+    val valueStr = component.values?.getOrNull(0)?.value ?: ""
     val value = valueStr.toIntOrNull()
 
     if (required && valueStr.isEmpty()) {

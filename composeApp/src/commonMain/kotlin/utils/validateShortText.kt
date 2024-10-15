@@ -5,6 +5,8 @@ import dev.icerock.moko.resources.desc.ResourceFormattedStringDesc
 import dev.icerock.moko.resources.desc.StringDesc
 import domain.models.form_struct.ComponentDomain
 import domain.models.form_struct.ValidateDomain
+import io.github.aakira.napier.LogLevel
+import io.github.aakira.napier.Napier
 import irancell.nwg.wfm.MR
 
 fun validateShortText(component: ComponentDomain,validateDomain: ValidateDomain): ResourceFormattedStringDesc? {
@@ -14,7 +16,12 @@ fun validateShortText(component: ComponentDomain,validateDomain: ValidateDomain)
     val minLength =validateDomain.minLength ?: 0
     val pattern= validateDomain.pattern ?:""
 
-    val value = component.processLogicDomain.value.calculatedValue?:component.values?.getOrNull(0)?.value ?: ""
+    val value = component.values?.getOrNull(0)?.value ?: ""
+    Napier.log(LogLevel.ASSERT, tag = "validateShortText", message =  component.label.toString())
+
+    Napier.log(LogLevel.ASSERT, tag = "validateShortText", message =  value)
+
+    Napier.log(LogLevel.ASSERT, tag = "validateShortText", message = (required && value.isEmpty()).toString() )
 
     if (required && value.isEmpty()) {
         return StringDesc.ResourceFormatted(

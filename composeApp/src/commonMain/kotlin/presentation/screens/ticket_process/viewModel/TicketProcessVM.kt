@@ -153,7 +153,6 @@ class TicketProcessVM(
                                     }
                                 }
 
-
                             }
 
 
@@ -341,27 +340,33 @@ class TicketProcessVM(
     fun handleLogics(onResult: (MutableList<ExtractLogicsModel>) -> Unit) {
 
 
-        viewModelScope.launch(Dispatchers.Main) {
+        viewModelScope.launch(Dispatchers.IO) {
             extractLogicsModel.clear()
             try {
                 checkLogicsForAll(tempComponentList)
+                viewModelScope.launch(Dispatchers.Main) {
+                    arrayListOf<ComponentDomain>().apply {
+                        this.addAll(tempComponentList)
+                        tempComponentList.clear()
+                        tempComponentList.addAll(this)
+                    }
+                    onResult(extractLogicsModel)
 
-                arrayListOf<ComponentDomain>().apply {
-                    this.addAll(tempComponentList)
-                    tempComponentList.clear()
-                    tempComponentList.addAll(this)
                 }
-                onResult(extractLogicsModel)
+
 
             } catch (_: Exception) {
-                checkLogicsForAll(tempComponentList)
+                async { checkLogicsForAll(tempComponentList) }.await()
+                viewModelScope.launch(Dispatchers.Main) {
 
-                arrayListOf<ComponentDomain>().apply {
-                    this.addAll(tempComponentList)
-                    tempComponentList.clear()
-                    tempComponentList.addAll(this)
+                    arrayListOf<ComponentDomain>().apply {
+                        this.addAll(tempComponentList)
+                        tempComponentList.clear()
+                        tempComponentList.addAll(this)
+                    }
+
+                    onResult(extractLogicsModel)
                 }
-                onResult(extractLogicsModel)
             }
 
         }
@@ -372,7 +377,7 @@ class TicketProcessVM(
         indexChild: Int,
         scrollCallBack: (position: Int) -> Unit
     ) {
-        withContext(Dispatchers.Main ) {
+        withContext(Dispatchers.Main) {
 
             val createdIndex = tempComponentList.findComponentsWithKey(compD).size
             Napier.log(LogLevel.ASSERT, "createdIndex", message = createdIndex.toString())
@@ -384,7 +389,7 @@ class TicketProcessVM(
                     })
                     scrollCallBack(createdIndex)
                 }
-            }else {
+            } else {
                 withContext(Dispatchers.Main) {
                     tempComponent.addAll(tempComponentList.apply {
                         removeAt(indexChild)

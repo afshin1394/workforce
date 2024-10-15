@@ -357,23 +357,7 @@ class StoreStepFormUseCase(
         })
     }
 
-    private suspend fun checkLogicsForAll(logicCalculation: LogicCalculation, components: List<ComponentDomain>) {
 
-        // Create a copy of the components list to iterate over
-        val componentsCopy = components.toMutableList()
-
-        for (cmp in componentsCopy) {
-            logicCalculation.extractLogics(componentsCopy, cmp)
-            cmp.components.value?.let { cmps ->
-                if (cmps.isNotEmpty()) {
-                    checkLogicsForAll(logicCalculation,cmps)
-
-                }
-            }
-        }
-
-
-    }
 }
 
 
