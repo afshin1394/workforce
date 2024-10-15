@@ -1,11 +1,10 @@
 package irancell.nwg.wfm
 
 import kotlinx.coroutines.flow.MutableStateFlow
+import presentation.screens.main.viewmodel.TicketListStatus
 import utils.ServiceState
-import utils.TicketListStatus
 
 internal expect class BackgroundServiceApp {
-
     companion object {
         val serviceState : MutableStateFlow<ServiceState>
         val ticketListState : MutableStateFlow<TicketListStatus>

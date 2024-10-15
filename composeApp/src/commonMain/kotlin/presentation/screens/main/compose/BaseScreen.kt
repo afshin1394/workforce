@@ -78,7 +78,6 @@ import utils.VpnDetectionStates
 import androidx.compose.material.Card
 import presentation.theme.textInverse
 import presentation.theme.textInverseDisabled
-import utils.TicketListStatus
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
@@ -116,7 +115,6 @@ fun <T : BaseViewModel> BaseScreen(
     val gpsScaffoldState = rememberBottomSheetScaffoldState()
     val networkState by viewModel.networkState.collectAsState()
     val serviceState by viewModel.serviceState.collectAsState()
-    val ticketListStatus by viewModel.ticketListStatus.collectAsState()
     val orientationState by viewModel.orientationState.collectAsState()
     val isCloseMenuForOrientation = remember { mutableStateOf(false) }
     var previousOrientation by remember { mutableStateOf<OrientationState>(OrientationState.Portrait) }
@@ -295,6 +293,7 @@ fun <T : BaseViewModel> BaseScreen(
 
 
                                 }
+
                                 OrientationState.Landscape -> {
 
 
@@ -344,31 +343,7 @@ fun <T : BaseViewModel> BaseScreen(
                                 else -> {}
                             }
                             when (state) {
-                                ViewStates.EMPTY -> {
-                                    if (ticketListStatus == TicketListStatus.Empty) {
-                                        Column(
-                                            modifier = Modifier.fillMaxSize()
-                                                .wrapContentSize(Alignment.Center),
-                                            horizontalAlignment = Alignment.CenterHorizontally,
-                                            verticalArrangement = Arrangement.Center
-                                        ) {
-                                            Image(
-                                                painter = painterResource(MR.images.ic_empty),
-                                                contentDescription = "empty",
-                                                modifier = Modifier.width(150.dp).height(120.dp)
-                                            )
-
-                                            Spacer(modifier = Modifier.height(16.dp))
-                                            Text(
-                                                text = stringResource(MR.strings.empty_list),
-                                                style = TextStyle(
-                                                    fontSize = 16.sp, fontWeight = FontWeight.Bold
-                                                ),
-                                                modifier = Modifier.wrapContentSize()
-                                            )
-                                        }
-                                    }
-                                }
+                                ViewStates.EMPTY -> {}
 
                                 is ViewStates.Error -> {
                                     val errorMessage =
@@ -545,6 +520,7 @@ fun <T : BaseViewModel> BaseScreen(
                             OrientationState.Default -> {
 
                             }
+
                             OrientationState.Landscape -> {
 
                                 if (previousOrientation == OrientationState.Portrait) {

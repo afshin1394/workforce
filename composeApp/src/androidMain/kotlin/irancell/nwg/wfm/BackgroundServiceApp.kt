@@ -24,8 +24,6 @@ import domain.usecase.ResultStatus
 import domain.usecase.usecase.location.SendLocationToServerUseCase
 import domain.usecase.usecase.location.StoreLocationDataUseCase
 import domain.usecase.usecase.ticket.UpdateTaskUseCase
-import io.github.aakira.napier.LogLevel
-import io.github.aakira.napier.Napier
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -37,13 +35,12 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonObject
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
+import presentation.screens.main.viewmodel.TicketListStatus
 import utils.AlarmAction
 import utils.AsyncStatus
 import utils.ServiceState
-import utils.TicketListStatus
 import utils.getCurrentDate
 import java.util.concurrent.TimeUnit
-
 
 internal actual class BackgroundServiceApp : Service(), KoinComponent {
 
@@ -118,7 +115,6 @@ internal actual class BackgroundServiceApp : Service(), KoinComponent {
 
         actual val ticketListState: MutableStateFlow<TicketListStatus>
             get() = _ticketListState
-
 
     }
 
@@ -300,10 +296,15 @@ internal actual class BackgroundServiceApp : Service(), KoinComponent {
                     AsyncStatus.SUCCESS -> {
                         println("TaskCallApi${"SUCCESS"}")
                         Log.i("getAllTask", "onStartCommand: CallApi" + it.data)
+                        _ticketListState.update { TicketListStatus.Filled }
                     }
 
-                    AsyncStatus.EMPTY ->{
+                    AsyncStatus.EMPTY -> {
                         _ticketListState.update { TicketListStatus.Empty }
+                    }
+
+                    AsyncStatus.LOADING -> {
+                        _ticketListState.update { TicketListStatus.Loading }
                     }
 
                     else -> {}
