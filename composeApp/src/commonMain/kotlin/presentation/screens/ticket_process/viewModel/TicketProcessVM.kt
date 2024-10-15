@@ -389,12 +389,9 @@ class TicketProcessVM(
         indexChild: Int, scrollCallBack: (position: Int) -> Unit
     ) {
 
-       tempComponentList[indexChild] = tempComponentList[indexChild].updateComponents(emptyList())
-        val newList = tempComponentList.toMutableList()
-        newList.removeAt(indexChild)
-        tempComponentList.clear()
-       tempComponentList.addAll(newList)
-        scrollCallBack(indexChild)
+         tempComponentList[indexChild].updateComponents(emptyList())
+         tempComponentList.removeAt(indexChild)
+         scrollCallBack(indexChild)
 
     }
 

@@ -34,6 +34,7 @@ import domain.repository.ITaskRepository
 import domain.repository.ITicketRepository
 import domain.repository.IUploadRepository
 import domain.repository.IVersionRepository
+import domain.usecase.usecase.auth.AutoLogoutUseCase
 import domain.usecase.usecase.auth.LoginUseCase
 import domain.usecase.usecase.auth.LogoutUseCase
 import domain.usecase.usecase.auth.ResendUseCase
@@ -185,6 +186,7 @@ fun useCaseModule() = module {
     single { GetVersionOfServerUseCase(get()) }
     single { GetTicketDetailsUseCase(get()) }
     single { IpDetectionUseCase(get()) }
+    single { AutoLogoutUseCase(get()) }
 
 }
 

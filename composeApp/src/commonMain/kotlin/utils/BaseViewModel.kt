@@ -5,6 +5,7 @@ import com.plusmobileapps.konnectivity.NetworkConnection
 import dev.icerock.moko.mvvm.viewmodel.ViewModel
 import dev.icerock.moko.resources.StringResource
 import domain.usecase.ResultStatus
+import domain.usecase.usecase.auth.AutoLogoutUseCase
 import domain.usecase.usecase.ipDetection.IpDetectionUseCase
 import io.github.aakira.napier.LogLevel
 import io.github.aakira.napier.Napier
@@ -79,6 +80,7 @@ sealed interface OrientationState {
 
 open class BaseViewModel : ViewModel(), KoinComponent {
     private val ipDetectionUseCase: IpDetectionUseCase by inject()
+    private val autoLogoutUseCase : AutoLogoutUseCase by inject()
     val loading = MutableStateFlow(false)
     private val _state = MutableStateFlow<ViewStates>(ViewStates.Default)
     private val _serviceState = MutableStateFlow<ServiceState>(ServiceState.Normal)
@@ -124,8 +126,19 @@ open class BaseViewModel : ViewModel(), KoinComponent {
             BackgroundServiceApp.serviceState.collect {
                 when (it) {
                     is ServiceState.Faulty -> {
-                        _serviceState.update { ServiceState.Faulty(MR.strings.unauthorized) }
-                        BackgroundServiceApp.stopBackgroundService()
+                        autoLogoutUseCase(Unit).collect{it ->
+                           val result = it
+                            when{
+                                result.status == AsyncStatus.SUCCESS->{
+                                    BackgroundServiceApp.stopBackgroundService()
+                                    Napier.log(LogLevel.ASSERT, tag = "autoLogoutUseCase", message = "result.status")
+                                    _serviceState.update { ServiceState.Faulty(MR.strings.unauthorized) }
+
+                                    Napier.log(LogLevel.ASSERT, tag = "autoLogoutUseCase", message = "unauthorized")
+                                }
+                            }
+                        }
+
                     }
 
                     ServiceState.NotRunning -> {
@@ -186,7 +199,9 @@ open class BaseViewModel : ViewModel(), KoinComponent {
                         Napier.log(LogLevel.ASSERT, tag = "get country", message = "LOADING")
                     }
 
-                    AsyncStatus.EMPTY -> {}
+                    AsyncStatus.EMPTY -> {
+
+                    }
                     AsyncStatus.SUCCESS -> {
                         if (it.data.toString() != "IR") {
                             _vpnDetectionState.update { VpnDetectionStates.ShowBottomSheet }
@@ -313,5 +328,10 @@ Orientation.orientationState(provideAppContext()){
                 _state.update { ViewStates.Error(MR.strings.general_error) }
             }
         }
+    }
+
+    fun updateServiceState(serviceState: ServiceState) {
+
+     _serviceState.update { serviceState }
     }
 }
