@@ -381,22 +381,23 @@ class TicketProcessVM(
         withContext(Dispatchers.Main) {
             val createdIndex = tempComponentList.findComponentsWithKey(compD).size
             Napier.log(LogLevel.ASSERT, "createdIndex", message = createdIndex.toString())
-            val tempComponent = arrayListOf<ComponentDomain>()
+
             if (compD.removable == true) {
-                withContext(Dispatchers.Main) {
-                    tempComponent.addAll(tempComponentList.apply {
-                        add(indexChild + createdIndex, compD)
-                    })
-                    scrollCallBack(createdIndex)
-                }
-            }else {
-                withContext(Dispatchers.Main) {
-                    tempComponent.addAll(tempComponentList.apply {
-                        removeAt(indexChild)
-                    })
-                    tempComponentList.clear()
-                    tempComponentList.addAll(tempComponent)
-                    scrollCallBack(indexChild)
+                // Adding the component
+                tempComponentList.add(indexChild + createdIndex, compD)
+                scrollCallBack(createdIndex)
+            }
+        }
+    }
+
+    fun removeComponentDomainRepeatableToList(
+        compD: ComponentDomain,
+        indexChild: Int, scrollCallBack: (position: Int) -> Unit
+    ) {
+
+        tempComponentList[indexChild].updateComponents(emptyList())
+        tempComponentList.removeAt(indexChild)
+        scrollCallBack(indexChild)
 
     }
 
