@@ -60,7 +60,7 @@ fun ProcessStep(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Box(
-            modifier = Modifier.size(24.dp)
+            modifier = Modifier.size(26.dp)
                 .clip(
                     CircleShape
                 )
@@ -68,9 +68,6 @@ fun ProcessStep(
             , contentAlignment = Alignment.Center
         ) {
             Text(
-                modifier = modifier
-                    .fillMaxSize()
-                    .padding(top = 4.dp).align(Alignment.Center),
                 text = level.toString(),
                 style = body_small,
                 color = textInverse,

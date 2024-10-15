@@ -13,6 +13,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
@@ -29,6 +30,7 @@ import presentation.screens.ticket_process.viewModel.TicketProcessVM
 import presentation.screens.ticket_process.components.processBar
 import dev.icerock.moko.resources.compose.stringResource
 import dev.icerock.moko.resources.desc.ResourceFormattedStringDesc
+import domain.models.form_struct.ComponentDomain
 import io.github.aakira.napier.LogLevel
 import io.github.aakira.napier.Napier
 import irancell.nwg.wfm.DrawController
@@ -442,18 +444,9 @@ class TicketProcessScreen(
                                 }
                             },
                             onAddItem = { component, indexChild, scrollCallback ->
-                                Napier.log(
-                                    LogLevel.ASSERT,
-                                    tag = "componentDDDDD",
-                                    message = component.toString()
-                                )
-                                Napier.log(
-                                    LogLevel.ASSERT,
-                                    tag = "indexChild",
-                                    message = indexChild.toString()
-                                )
+
                                 scope.launch {
-                                    viewModel.addOrRemoveComponentDomainRepeatableToList(
+                                    viewModel.addComponentDomainRepeatableToList(
                                         component,
                                         indexChild,
                                         scrollCallback
@@ -463,30 +456,17 @@ class TicketProcessScreen(
 
                             },
                             onRemoveItem = { component, indexChild, scrollCallBack ->
-                                scope.launch {
-                                    viewModel.addOrRemoveComponentDomainRepeatableToList(
-                                        component,
-                                        indexChild,
-                                        scrollCallBack
-                                    )
-                                }
+
+                                           viewModel.removeComponentDomainRepeatableToList(
+                                               component,
+                                               indexChild,
+                                               scrollCallBack)
+
                             },
                         )
                     }
                 }
-                /*    CompleteFlowDialog(
-                        showDialog = ticketFlowCompletedState.value,
-                        message = MR.strings.data_sent_complete,
-                        titleButton = MR.strings.submit,
-                        onDismiss = {
-                            viewModel.updateTicketFlowState(false)
-                            navigator.popAll()
-                            navigator.push(mainScreen)
-                        },
-                        onConfirm = {
-    //                        viewModel.updateTicketFlowState(false)
-    //                        viewModel.updateTasks()
-                        })*/
+
 
             }, onCloseBottomSheet = {
                 when (viewModel.events.value) {

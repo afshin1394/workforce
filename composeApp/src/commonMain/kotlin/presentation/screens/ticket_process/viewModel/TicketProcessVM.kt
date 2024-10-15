@@ -367,38 +367,38 @@ class TicketProcessVM(
         }
     }
 
-    suspend fun addOrRemoveComponentDomainRepeatableToList(
+    suspend fun addComponentDomainRepeatableToList(
         compD: ComponentDomain,
         indexChild: Int,
         scrollCallBack: (position: Int) -> Unit
     ) {
-        withContext(Dispatchers.Main ) {
-
+        withContext(Dispatchers.Main) {
             val createdIndex = tempComponentList.findComponentsWithKey(compD).size
             Napier.log(LogLevel.ASSERT, "createdIndex", message = createdIndex.toString())
-            val tempComponent = arrayListOf<ComponentDomain>()
-            if (compD.removable == true) {
-                withContext(Dispatchers.Main) {
-                    tempComponent.addAll(tempComponentList.apply {
-                        add(indexChild + createdIndex, compD)
-                    })
-                    scrollCallBack(createdIndex)
-                }
-            }else {
-                withContext(Dispatchers.Main) {
-                    tempComponent.addAll(tempComponentList.apply {
-                        removeAt(indexChild)
-                    })
-                    tempComponentList.clear()
-                    tempComponentList.addAll(tempComponent)
-                    scrollCallBack(indexChild)
 
-                }
+            if (compD.removable == true) {
+                // Adding the component
+                tempComponentList.add(indexChild + createdIndex, compD)
+                scrollCallBack(createdIndex)
             }
         }
     }
 
-    private fun List<ComponentDomain>.findComponentsWithKey(componentDomain: ComponentDomain): List<ComponentDomain> {
+     fun removeComponentDomainRepeatableToList(
+        compD: ComponentDomain,
+        indexChild: Int, scrollCallBack: (position: Int) -> Unit
+    ) {
+
+       tempComponentList[indexChild] = tempComponentList[indexChild].updateComponents(emptyList())
+        val newList = tempComponentList.toMutableList()
+        newList.removeAt(indexChild)
+        tempComponentList.clear()
+       tempComponentList.addAll(newList)
+        scrollCallBack(indexChild)
+
+    }
+
+    fun List<ComponentDomain>.findComponentsWithKey(componentDomain: ComponentDomain): List<ComponentDomain> {
         return this.flatMap { component ->
             listOf(component).plus(
                 component.components.value?.findComponentsWithKey(componentDomain) ?: emptyList()
