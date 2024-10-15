@@ -9,6 +9,7 @@ import data.network.response.task.logic.LogicDomain
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 import kotlinx.serialization.json.Json
+import presentation.model.ExtractLogicsModel
 
 
 @Serializable
@@ -46,6 +47,7 @@ data class ComponentDomain(
         components.value = newComponents // Update the MutableState
         return this.copy(_components = newComponents) // Return a new instance for serialization
     }
+
     fun updateProcessLogicDomain(newProcessLogicDomain: ProcessLogicDomain): ComponentDomain {
         this.processLogicDomain.value = newProcessLogicDomain // Update the MutableState
         return this.copy(_processLogicDomain = newProcessLogicDomain) // Return a new instance for serialization

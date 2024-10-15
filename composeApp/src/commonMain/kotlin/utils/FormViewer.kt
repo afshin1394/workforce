@@ -154,16 +154,11 @@ fun initialize(
                             },
                             onDeleteClick = {
 
-                                val newComponents =
-                                    item.id?.let { it1 -> removeComponentById(components, it1) }
-                                newComponents?.let {
-                                    onRemoveItem(newComponents, index) {
+                                    onRemoveItem(item, index) {
                                         scope.launch {
                                             listState.animateScrollToItem(index - 1)
                                         }
                                     }
-
-                                }
 
 
                             })
@@ -956,19 +951,6 @@ fun copyComponentWithValues(
     )
 }
 
-
-fun removeComponentById(components: List<ComponentDomain>, id: String): ComponentDomain? {
-    val mutableComponents = components.toMutableList()
-    val iterator = mutableComponents.iterator()
-    while (iterator.hasNext()) {
-        val component = iterator.next()
-        if (component.id == id) {
-            iterator.remove()
-            return component.copy(removable = false)
-        }
-    }
-    return null
-}
 
 
 fun findPhotosByComponentId(

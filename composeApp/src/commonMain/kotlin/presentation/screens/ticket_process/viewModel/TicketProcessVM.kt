@@ -153,6 +153,7 @@ class TicketProcessVM(
                                     }
                                 }
 
+
                             }
 
 
@@ -372,13 +373,12 @@ class TicketProcessVM(
         }
     }
 
-    suspend fun addOrRemoveComponentDomainRepeatableToList(
+    suspend fun addComponentDomainRepeatableToList(
         compD: ComponentDomain,
         indexChild: Int,
         scrollCallBack: (position: Int) -> Unit
     ) {
         withContext(Dispatchers.Main) {
-
             val createdIndex = tempComponentList.findComponentsWithKey(compD).size
             Napier.log(LogLevel.ASSERT, "createdIndex", message = createdIndex.toString())
             val tempComponent = arrayListOf<ComponentDomain>()
@@ -389,7 +389,7 @@ class TicketProcessVM(
                     })
                     scrollCallBack(createdIndex)
                 }
-            } else {
+            }else {
                 withContext(Dispatchers.Main) {
                     tempComponent.addAll(tempComponentList.apply {
                         removeAt(indexChild)
@@ -398,12 +398,9 @@ class TicketProcessVM(
                     tempComponentList.addAll(tempComponent)
                     scrollCallBack(indexChild)
 
-                }
-            }
-        }
     }
 
-    private fun List<ComponentDomain>.findComponentsWithKey(componentDomain: ComponentDomain): List<ComponentDomain> {
+    fun List<ComponentDomain>.findComponentsWithKey(componentDomain: ComponentDomain): List<ComponentDomain> {
         return this.flatMap { component ->
             listOf(component).plus(
                 component.components.value?.findComponentsWithKey(componentDomain) ?: emptyList()
