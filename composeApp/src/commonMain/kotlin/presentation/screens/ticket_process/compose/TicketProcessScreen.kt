@@ -45,6 +45,7 @@ import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import presentation.components.TicketProcessTopBar
 import presentation.model.BottomSheetActionModel
+import presentation.model.ExtractLogicsModel
 import presentation.model.SingleButtonActionModel
 import presentation.nav.Screen.Main.Menu
 import presentation.screens.main.components.EditPhotoComponent
@@ -253,36 +254,58 @@ class TicketProcessScreen(
                                 surfaceBrandDefault,
                                 textInverse
                             ), onClick = {
-                                viewModel.handleLogics {
-                                    if (it.size > 0) {
-                                        scope.launch(Dispatchers.Main) {
+                                viewModel.handleLogics { extractLogicsModel->
+                                    scope.launch(Dispatchers.Main) {
+                                        if(extractLogicsModel.size>0) {
+                                            val itemsToRemove =
+                                                mutableListOf<ExtractLogicsModel>()  // Replace `YourItemType` with the actual type of items in `extractLogicsModel`
+
+                                            for (it in extractLogicsModel) {
+                                                val component =
+                                                    viewModel.tempComponentList.findComponentById(it.componentId)
+                                                if (component?.isSelectableValue() == true) {
+                                                    if (component.values?.any { it.isSelected } == true) {
+                                                        itemsToRemove.add(it)
+                                                    }
+                                                } else {
+                                                    if (component?.values?.get(0)?.value?.isNotEmpty() == true) {
+                                                        itemsToRemove.add(it)
+                                                    }
+                                                }
+                                            }
+                                            extractLogicsModel.removeAll(itemsToRemove)
+                                        }
+
+                                    if (extractLogicsModel.size > 0) {
+
+                                        if(extractLogicsModel.size>0) {
                                             val errors =
                                                 mutableMapOf<String, List<ResourceFormattedStringDesc>>()
 
-                                            it.forEach {
+                                            extractLogicsModel.forEach {
                                                 errors[it.componentId] = arrayListOf()
                                             }
                                             viewModel.showFirstError(errors)
                                         }
-                                    } else {
-                                        scope.launch(Dispatchers.Main) {
-                                            val errors = validateComponents(
-                                                viewModel.tempComponentList,
-                                                false
-                                            ) {
-                                                viewModel.updateTempComponentList(it)
-                                            }
-                                            if (errors.isNotEmpty()) {
-                                                viewModel.showFirstError(errors)
-                                            }
 
-                                            if (errors.isEmpty()) {
-                                                async { viewModel.saveAndDeletePhotoByComponentKey() }.await()
-                                                if (state is ViewStates.Success) {
+                                    } else {
+                                        val errors = validateComponents(
+                                            viewModel.tempComponentList,
+                                            false
+                                        ) {
+                                            viewModel.updateTempComponentList(it)
+                                        }
+                                        if (errors.isNotEmpty()) {
+                                            viewModel.showFirstError(errors)
+                                        }
+
+                                        if (errors.isEmpty()) {
+                                            async { viewModel.saveAndDeletePhotoByComponentKey() }.await()
+                                            if (state is ViewStates.Success) {
                                                     viewModel.updateLevel(PROCEED.NEXT)
-                                                }
                                             }
                                         }
+                                    }
                                     }
                                 }
                             })
@@ -432,10 +455,10 @@ class TicketProcessScreen(
 
 
                             onChanges = { component, listValueDomain ->
-
                                 viewModel.handleLogics {
                                     viewModel.extractLogicsModel.clear()
                                 }
+                                Napier.log(LogLevel.ASSERT, tag = "componentsListss", message = viewModel.tempComponentList.toList().toString() )
 
                                 listValueDomain?.let { listValues ->
                                     if (component.type == FormViewerTypes.ImageView) {
@@ -508,5 +531,17 @@ class TicketProcessScreen(
             }, shouldBlurOnBottomSheetExpansion = false
         )
     }
+    private fun List<ComponentDomain>.findComponentById(id: String?): ComponentDomain? {
+        for (component in this) {
+            if (component.id == id) {
+                return component
+            }
+            component.components.value?.findComponentById(id)?.let { return it }
+        }
+        return null
+    }
+    fun ComponentDomain.isSelectableValue() =
+        this.type == FormViewerTypes.Checklist || this.type == FormViewerTypes.Radio || this.type == FormViewerTypes.Select || this.type == FormViewerTypes.Multi
+
 }
 

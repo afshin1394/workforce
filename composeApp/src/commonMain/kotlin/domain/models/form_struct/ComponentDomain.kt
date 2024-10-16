@@ -52,7 +52,7 @@ data class ComponentDomain(
         this.processLogicDomain.value = newProcessLogicDomain // Update the MutableState
         return this.copy(_processLogicDomain = newProcessLogicDomain) // Return a new instance for serialization
     }
-    fun updateValues(newValues: List<ValueDomain>): ComponentDomain {
+    fun updateValues(newValues: List<ValueDomain>?): ComponentDomain {
         valuesState.value = newValues // Update the MutableState
         return this.copy(values = newValues) // Return a new instance for serialization
     }

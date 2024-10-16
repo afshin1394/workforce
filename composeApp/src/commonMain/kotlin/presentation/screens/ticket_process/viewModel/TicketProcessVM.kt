@@ -33,6 +33,7 @@ import presentation.screens.main.events.TicketProcessEvent
 import presentation.screens.ticket_process.events.StepEvent
 import utils.AsyncStatus
 import utils.BaseViewModel
+import utils.FormViewerTypes
 import utils.LogicCalculation
 import utils.PROCEED
 import utils.ViewStates
@@ -351,6 +352,8 @@ class TicketProcessVM(
                         tempComponentList.clear()
                         tempComponentList.addAll(this)
                     }
+
+
                     onResult(extractLogicsModel)
 
                 }
@@ -759,7 +762,7 @@ class TicketProcessVM(
 
     suspend fun showFirstError(errors: Map<String, List<StringDesc>>) {
         errors.keys.toList()[0].let {
-            val pair = findComponentById(tempComponentList, it)
+            val pair = findComponentPairById(tempComponentList, it)
             pair?.let {
                 withContext(Dispatchers.Main) {
                     _scrollingPosition.update { pair }
@@ -770,7 +773,7 @@ class TicketProcessVM(
         }
     }
 
-    fun findComponentById(components: List<ComponentDomain>, targetId: String): Pair<Int, Int>? {
+    fun findComponentPairById(components: List<ComponentDomain>, targetId: String): Pair<Int, Int>? {
         components.forEachIndexed { parentIndex, parentComponent ->
             // Check if the parent component itself matches the target ID
             if (parentComponent.id == targetId) {
@@ -786,7 +789,7 @@ class TicketProcessVM(
                 // Recursive search in the children's children
 
                 val childResult =
-                    childComponent.components.value?.let { findComponentById(it, targetId) }
+                    childComponent.components.value?.let { findComponentPairById(it, targetId) }
                 if (childResult != null) {
                     return parentIndex to childIndex
                 }
@@ -808,6 +811,10 @@ class TicketProcessVM(
     fun updateReloadState(reload: Boolean) {
         _reloadState.update { reload }
     }
+
+
+
+
 //
 //    fun updateReloadState(reload: Boolean) {
 //     _reloadState.update { reload }

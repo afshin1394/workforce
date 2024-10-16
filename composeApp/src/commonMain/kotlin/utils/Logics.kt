@@ -1,6 +1,7 @@
 package utils
 
 import androidx.compose.runtime.Composable
+import data.network.response.task.Component
 import data.network.response.task.logic.LogicDomain
 import dev.icerock.moko.resources.compose.localized
 import dev.icerock.moko.resources.desc.ResourceFormatted
@@ -35,8 +36,8 @@ class LogicCalculation(
 ) : KoinComponent {
     val getTicketDetailsUseCase: GetTicketDetailsUseCase by inject()
     lateinit var ticketId: String
-    val validationErrorList = mutableListOf<ExtractLogicsModel>()
 
+    val validationErrorList = mutableListOf<ExtractLogicsModel>()
 
 
 
@@ -55,18 +56,16 @@ class LogicCalculation(
                 when (it.logicType) {
                     LogicType.Hide -> {
                         typeLogic = LogicType.Hide
-                        val expressionSatisfied = evaluateLogics(components, it)
+                        val expressionSatisfied = evaluateLogics(component, it)
                         val cmp = allComponents.findComponentById(component.id)
                         Napier.log(LogLevel.ASSERT, "Hide", message = cmp.toString())
-                        cmp?.processLogicDomain?.value?.shouldHide = expressionSatisfied
+                        cmp?.updateProcessLogicDomain(cmp.processLogicDomain.value.copy(shouldHide = expressionSatisfied))
 
                         if (expressionSatisfied) {
                             cmp.clearValues()
                         }
                         cmp?.components?.value?.forEach {
-                            it.processLogicDomain.value.shouldHide = expressionSatisfied
-
-                            it.updateProcessLogicDomain(cmp.processLogicDomain.value.copy(shouldHide = expressionSatisfied))
+                            it.updateProcessLogicDomain(it.processLogicDomain.value.copy(shouldHide = expressionSatisfied))
                             if (expressionSatisfied) {
                                 it.clearValues()
                             }
@@ -80,7 +79,7 @@ class LogicCalculation(
 
                     LogicType.Required -> {
                         typeLogic = LogicType.Required
-                        val expressionSatisfied = evaluateLogics(components, it)
+                        val expressionSatisfied = evaluateLogics(component, it)
                         val cmp = allComponents.findComponentById(component.id)
                         idCmp = component.id ?: ""
                         cmp?.updateProcessLogicDomain(cmp.processLogicDomain.value.copy(required = expressionSatisfied))
@@ -92,7 +91,7 @@ class LogicCalculation(
 
                     LogicType.Disable -> {
                         typeLogic = LogicType.Disable
-                        val expressionSatisfied = evaluateLogics(components, it)
+                        val expressionSatisfied = evaluateLogics(component, it)
                         val cmp = allComponents.findComponentById(component.id)
                         cmp?.updateProcessLogicDomain(cmp.processLogicDomain.value.copy(disabled = expressionSatisfied))
                         hasLogic = expressionSatisfied
@@ -100,7 +99,7 @@ class LogicCalculation(
 
                     LogicType.ReadOnly -> {
                         typeLogic = LogicType.ReadOnly
-                        val expressionSatisfied = evaluateLogics(components, it)
+                        val expressionSatisfied = evaluateLogics(component, it)
                         val cmp = allComponents.findComponentById(component.id)
                         cmp?.updateProcessLogicDomain(cmp.processLogicDomain.value.copy(readOnly = expressionSatisfied))
 
@@ -297,7 +296,7 @@ class LogicCalculation(
 
 
             }
-        }
+        }.join()
 
         return@coroutineScope validationErrorList
     }
@@ -328,8 +327,8 @@ class LogicCalculation(
         return results.aggregateValidateLogicResult()
     }
 
-    fun evaluateLogics(components: List<ComponentDomain>, logicDomain: LogicDomain): Boolean {
-        val results = checkExpression(components, logicDomain)
+    fun evaluateLogics(component: ComponentDomain, logicDomain: LogicDomain): Boolean {
+        val results = checkExpression(component,logicDomain)
         Napier.log(LogLevel.ASSERT, tag = "evaluateLogics", message = results.toString())
         return results.calculateResult()
     }
@@ -434,7 +433,7 @@ class LogicCalculation(
 
 
     private fun checkExpression(
-        components: List<ComponentDomain>,
+        currentComponent: ComponentDomain,
         it: LogicDomain
     ): ArrayList<ArrayList<Boolean>> {
         val expressionResults: ArrayList<ArrayList<Boolean>> = arrayListOf()
@@ -689,8 +688,9 @@ class LogicCalculation(
                             if (component?.values?.filter { it.value?.isNotEmpty() == true && it.isSelected }
                                     ?.map { it.value }?.intersect(condition.values)
                                     ?.isNotEmpty() == true
-                            )
-                                expressionResults[i].add(true)
+                            ) {
+                                   expressionResults[i].add(true)
+                            }
                         }
 
                     }
@@ -1494,6 +1494,13 @@ class LogicCalculation(
             return null
         }
     }
+    private fun ComponentDomain.hasValue() : Boolean{
+        return if(this.isSelectableValue()){
+            this.values?.any { it.isSelected }?:false
+        }else{
+            this.values?.get(0)?.value?.isNotEmpty() == true
+        }
+    }
 
     fun ComponentDomain.isSelectableValue() =
         this.type == FormViewerTypes.Checklist || this.type == FormViewerTypes.Radio || this.type == FormViewerTypes.Select || this.type == FormViewerTypes.Multi
@@ -1504,10 +1511,15 @@ class LogicCalculation(
     }
 
     private fun ComponentDomain?.clearValues() {
-        if (this?.isSelectableValue() == true)
-            this.values?.forEach { it.isSelected = false }
+        if (this?.isSelectableValue() == true) {
+            val updatedValues = this.values?.map { value ->
+                value.isSelected = false  // Set isSelected to false
+                value  // Return the modified object
+            }?: arrayListOf()
+            this.updateValues(updatedValues)
+        }
         else
-            this?.values = null
+            this?.updateValues(null)
     }
 }
 
