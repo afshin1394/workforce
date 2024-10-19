@@ -60,7 +60,8 @@ class LogicCalculation(
                         val cmp = allComponents.findComponentById(component.id)
 
                         cmp?.updateProcessLogicDomain(cmp.processLogicDomain.value.copy(shouldHide = expressionSatisfied))
-
+                        cmp?.processLogicDomain?.value?.shouldHide = expressionSatisfied
+                        cmp?._processLogicDomain?.shouldHide = expressionSatisfied
                         if (expressionSatisfied) {
                             cmp.clearValues()
                         }

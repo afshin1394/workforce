@@ -21,6 +21,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.SpanStyle
@@ -87,7 +88,7 @@ fun groupComponent(
         withStyle(
             style = SpanStyle(
                 color = if (disableLogic || readOnlyLogic) textInverseDisabled else textSecondary,
-                fontSize = 14.sp
+                fontSize = 15.sp
             )
         ) {
             append(item.label)
@@ -109,7 +110,7 @@ fun groupComponent(
 
             Text(
                 text = styledString,
-                modifier = Modifier.fillMaxWidth().wrapContentHeight(),
+                modifier = Modifier.padding(spacing05X).fillMaxWidth().wrapContentHeight().align(Alignment.CenterHorizontally),
             )
             Spacer(modifier = Modifier.padding(top = spacing05X))
             Row(
