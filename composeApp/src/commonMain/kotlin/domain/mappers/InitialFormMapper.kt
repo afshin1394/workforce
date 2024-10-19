@@ -4,7 +4,6 @@ import data.network.response.task.Component
 import data.network.response.task.Condition
 import data.network.response.task.Conditional
 import data.network.response.task.Expression
-import data.network.response.task.FormStruct
 import data.network.response.task.Layout
 import data.network.response.task.Operator
 import data.network.response.task.Validate
@@ -24,7 +23,6 @@ import data.network.response.task.logic.LogicDomain
 import data.network.response.task.logic.TicketAutoFillLogic
 import data.network.response.task.logic.TicketAutoFillLogicDomain
 import data.network.response.task.logic.TicketAutoFillOption
-import data.network.response.task.task.Detail
 import data.network.response.task.task.InitForm
 import database.entity.InitialFormEntity
 import domain.models.form_struct.ComponentDomain
@@ -40,7 +38,6 @@ import domain.models.form_struct.ValueDomain
 import domain.models.form_struct.logic.TicketAutoFillOptionDomain
 import domain.models.task.InitFormDomain
 
-
 private fun mapSubtypeToType(subtype: String?): String? {
     return when (subtype) {
         "datetime" -> "datetime"
@@ -49,7 +46,6 @@ private fun mapSubtypeToType(subtype: String?): String? {
         "multi" -> "multi"
         else -> null
     }
-
 }
 
 private fun mapTypeToSubType(type: String?): String? {
@@ -60,7 +56,6 @@ private fun mapTypeToSubType(type: String?): String? {
         "multi" -> "select"
         else -> null
     }
-
 }
 
 private fun List<ComponentDomain>.updateComponentTypes(): List<ComponentDomain> {

@@ -41,7 +41,7 @@ import presentation.theme.textSecondary
 fun Radio(
     readOnly: Boolean,
     disable: Boolean,
-    showErrorMessageValidation:Boolean,
+    showErrorMessageValidation: Boolean,
     processLogicDomain: ProcessLogicDomain,
     title: String,
     errorMessage: ResourceFormattedStringDesc,
@@ -52,7 +52,7 @@ fun Radio(
 
     var select by remember { mutableStateOf(selectItem) }
     println("recomposeeee  radio ${processLogicDomain}")
-    val disableLogic = processLogicDomain.disabled ||disable
+    val disableLogic = processLogicDomain.disabled || disable
     val readOnlyLogic = processLogicDomain.readOnly || readOnly
     val validateLogic = processLogicDomain.validate
     val requiredLogic = processLogicDomain.required
@@ -72,7 +72,7 @@ fun Radio(
                 ) {
                     append(title)
                 }
-                if (requiredLogic ||errorMessage.localized() != "") {
+                if (requiredLogic || errorMessage.localized() != "") {
                     withStyle(style = SpanStyle(color = Color.Red, fontSize = 18.sp)) {
                         append(" *")
                     }
@@ -98,12 +98,8 @@ fun Radio(
                         onItemSelected = {
                             select = item.label ?: ""
                             onItemSelected(it)
-
-
                         }
-
                     )
-
                 }
             }
             if (errorMessage.localized() != "" && !showErrorMessageValidation) {

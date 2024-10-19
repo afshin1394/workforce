@@ -51,15 +51,14 @@ class UpdateStepFormUseCase(
     private val iStepPointerRepository: IStepPointerRepository,
     private val iSendStepsRepository: ISendStepsRepository,
     private val iPhotoRepository: IPhotoRepository,
-) : BaseUseCase<StructureActivity, Tuple6<String, String, List<ComponentDomain>, List<PhotoDomain>, Int,String>>(){
+) : BaseUseCase<StructureActivity, Tuple6<String, String, List<ComponentDomain>, List<PhotoDomain>, Int, String>>() {
 
-    override suspend fun run(params: Tuple6<String, String, List<ComponentDomain>, List<PhotoDomain>, Int,String>): StructureActivity {
+    override suspend fun run(params: Tuple6<String, String, List<ComponentDomain>, List<PhotoDomain>, Int, String>): StructureActivity {
         Location.start { }
 
         val removablesWithParent: ArrayList<ComponentDomain> = arrayListOf()
         val dict = mutableMapOf<String, Any>()
         val dictImages = mutableMapOf<String, Any>()
-
         Napier.log(LogLevel.ASSERT, tag = "processType", message = params.second)
         val stepList: List<ActivityDomain> =
             iStepsRepository.getStepsByTicketNumber(params.first).toActivityDomainList()
@@ -76,7 +75,6 @@ class UpdateStepFormUseCase(
                     FormStruct(components = (params.third.toComponent()))
                 ),
             )
-
         }
 
         val stepDetails = stepListSorted.mapIndexed { int, step ->
@@ -448,7 +446,9 @@ class UpdateStepFormUseCase(
 
     fun List<ComponentDomain>.findComponentsByType(type: String): List<ComponentDomain> {
         return this.flatMap { component ->
-            listOf(component).plus(component.components.value?.findComponentsByType(type) ?: emptyList())
+            listOf(component).plus(
+                component.components.value?.findComponentsByType(type) ?: emptyList()
+            )
         }.filter { it.type == type }
     }
 
@@ -472,8 +472,6 @@ class UpdateStepFormUseCase(
         }
         return imageComponents
     }
-
-
 
 
 }

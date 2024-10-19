@@ -7,38 +7,39 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class Component(
     @SerialName("id")
-    val id: String?= null,
+    val id: String? = null,
     @SerialName("key")
-    val key: String?=null,
+    val key: String? = null,
     @SerialName("hide")
-    val hide: String?= null,
+    val hide: String? = null,
     @SerialName("type")
-    val type: String= "default",
+    val type: String = "default",
     @SerialName("label")
-    val label: String?= null,
+    val label: String? = null,
     @SerialName("layout")
-    val layout: Layout?= null,
+    val layout: Layout? = null,
     @SerialName("subtype")
-    val subType : String?= null,
+    val subType: String? = null,
     @SerialName("isMulti")
-    val isMulti : Boolean?= null,
+    val isMulti: Boolean? = null,
     @SerialName("validate")
-    val validate : Validate?= null,
+    val validate: Validate? = null,
     @SerialName("values")
-    val values: List<Value>?= null,
+    val values: List<Value>? = null,
     @SerialName("conditional")
-    val conditional : Conditional?= null,
+    val conditional: Conditional? = null,
     @SerialName("components")
-    val components : List<Component>?= null,
+    val components: List<Component>? = null,
     @SerialName("readonly")
-    val readOnly : Boolean? = null,
+    val readOnly: Boolean? = null,
     @SerialName("repeatable")
-    val repeatable : Boolean? = null,
+    val repeatable: Boolean? = null,
     @SerialName("removable")
-    val removable : Boolean? = null,
+    val removable: Boolean? = null,
     @SerialName("disabled")
-    val disabled : Boolean? = null,
-
+    val disabled: Boolean? = null,
+    @SerialName("defaultValue")
+    val defaultValue: String? = null,
     @SerialName("logics")
-    val logics : List<Logic>?= null
+    val logics: List<Logic>? = null
 )

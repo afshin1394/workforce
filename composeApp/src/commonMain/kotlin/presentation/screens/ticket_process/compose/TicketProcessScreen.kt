@@ -254,9 +254,9 @@ class TicketProcessScreen(
                                 surfaceBrandDefault,
                                 textInverse
                             ), onClick = {
-                                viewModel.handleLogics { extractLogicsModel->
+                                viewModel.handleLogics { extractLogicsModel ->
                                     scope.launch(Dispatchers.Main) {
-                                        if(extractLogicsModel.size>0) {
+                                        if (extractLogicsModel.size > 0) {
                                             val itemsToRemove =
                                                 mutableListOf<ExtractLogicsModel>()  // Replace `YourItemType` with the actual type of items in `extractLogicsModel`
 
@@ -276,36 +276,36 @@ class TicketProcessScreen(
                                             extractLogicsModel.removeAll(itemsToRemove)
                                         }
 
-                                    if (extractLogicsModel.size > 0) {
+                                        if (extractLogicsModel.size > 0) {
 
-                                        if(extractLogicsModel.size>0) {
-                                            val errors =
-                                                mutableMapOf<String, List<ResourceFormattedStringDesc>>()
+                                            if (extractLogicsModel.size > 0) {
+                                                val errors =
+                                                    mutableMapOf<String, List<ResourceFormattedStringDesc>>()
 
-                                            extractLogicsModel.forEach {
-                                                errors[it.componentId] = arrayListOf()
+                                                extractLogicsModel.forEach {
+                                                    errors[it.componentId] = arrayListOf()
+                                                }
+                                                viewModel.showFirstError(errors)
                                             }
-                                            viewModel.showFirstError(errors)
-                                        }
 
-                                    } else {
-                                        val errors = validateComponents(
-                                            viewModel.tempComponentList,
-                                            false
-                                        ) {
-                                            viewModel.updateTempComponentList(it)
-                                        }
-                                        if (errors.isNotEmpty()) {
-                                            viewModel.showFirstError(errors)
-                                        }
+                                        } else {
+                                            val errors = validateComponents(
+                                                viewModel.tempComponentList,
+                                                false
+                                            ) {
+                                                viewModel.updateTempComponentList(it)
+                                            }
+                                            if (errors.isNotEmpty()) {
+                                                viewModel.showFirstError(errors)
+                                            }
 
-                                        if (errors.isEmpty()) {
-                                            async { viewModel.saveAndDeletePhotoByComponentKey() }.await()
-                                            if (state is ViewStates.Success) {
+                                            if (errors.isEmpty()) {
+                                                async { viewModel.saveAndDeletePhotoByComponentKey() }.await()
+                                                if (state is ViewStates.Success) {
                                                     viewModel.updateLevel(PROCEED.NEXT)
+                                                }
                                             }
                                         }
-                                    }
                                     }
                                 }
                             })
@@ -357,7 +357,7 @@ class TicketProcessScreen(
                                 viewModel.events.value = TicketProcessEvent.DeletePhoto
                             },
                             onSaveChangeAngle = {
-                                viewModel.photoDomainList=it.toMutableStateList()
+                                viewModel.photoDomainList = it.toMutableStateList()
                                 viewModel.events.value = TicketProcessEvent.Default
                             })
 
@@ -458,7 +458,11 @@ class TicketProcessScreen(
                                 viewModel.handleLogics {
                                     viewModel.extractLogicsModel.clear()
                                 }
-                                Napier.log(LogLevel.ASSERT, tag = "componentsListss", message = viewModel.tempComponentList.toList().toString() )
+                                Napier.log(
+                                    LogLevel.ASSERT,
+                                    tag = "componentsListss",
+                                    message = viewModel.tempComponentList.toList().toString()
+                                )
 
                                 listValueDomain?.let { listValues ->
                                     if (component.type == FormViewerTypes.ImageView) {
@@ -480,10 +484,11 @@ class TicketProcessScreen(
                             },
                             onRemoveItem = { component, indexChild, scrollCallBack ->
 
-                                           viewModel.removeComponentDomainRepeatableToList(
-                                               component,
-                                               indexChild,
-                                               scrollCallBack)
+                                viewModel.removeComponentDomainRepeatableToList(
+                                    component,
+                                    indexChild,
+                                    scrollCallBack
+                                )
 
                             },
                         )
@@ -531,6 +536,7 @@ class TicketProcessScreen(
             }, shouldBlurOnBottomSheetExpansion = false
         )
     }
+
     private fun List<ComponentDomain>.findComponentById(id: String?): ComponentDomain? {
         for (component in this) {
             if (component.id == id) {
@@ -540,6 +546,7 @@ class TicketProcessScreen(
         }
         return null
     }
+
     fun ComponentDomain.isSelectableValue() =
         this.type == FormViewerTypes.Checklist || this.type == FormViewerTypes.Radio || this.type == FormViewerTypes.Select || this.type == FormViewerTypes.Multi
 

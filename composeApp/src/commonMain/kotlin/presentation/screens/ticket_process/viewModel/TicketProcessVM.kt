@@ -153,12 +153,7 @@ class TicketProcessVM(
                                         updateTempComponentList(it)
                                     }
                                 }
-
-
                             }
-
-
-
 
                             Napier.log(
                                 LogLevel.ASSERT,
