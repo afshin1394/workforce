@@ -155,12 +155,7 @@ class TicketProcessVM(
 
                                     }
                                 }
-
-
                             }
-
-
-
 
                             Napier.log(
                                 LogLevel.ASSERT,

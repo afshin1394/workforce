@@ -114,6 +114,7 @@ fun repositoryModule() = module {
             get(named("tokenized"))
         )
     }
+
     single<IGeneralLocationRepository> {
         GeneralLocationRepositoryImpl(
             get(), get(named("tokenized"))
@@ -247,7 +248,6 @@ fun httpModule() = module {
                 }
             }
 
-
             install(HttpTimeout) {
                 requestTimeoutMillis = 15000
                 connectTimeoutMillis = 5000
@@ -297,12 +297,12 @@ fun httpModule() = module {
                 }
             }
 
-
             install(HttpTimeout) {
                 requestTimeoutMillis = 15000
                 connectTimeoutMillis = 5000
                 socketTimeoutMillis = 15000
             }
+
             addDefaultResponseValidation()
 
             install(Logging) {

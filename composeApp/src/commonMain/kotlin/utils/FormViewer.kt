@@ -65,7 +65,7 @@ fun initialize(
     onChanges: (componentDomain: ComponentDomain, listValueDomain: List<ValueDomain>?) -> Unit,
     onAddItem: (componentDomain: ComponentDomain, indexChild: Int, onComplete: (position: Int) -> Unit) -> Unit,
     onRemoveItem: (componentDomain: ComponentDomain, indexChild: Int, onComplete: (position: Int) -> Unit) -> Unit,
-    onClickImage: (indexPhotoSelected: Int, componentKey: String, componentId: String,componentDomain: ComponentDomain) -> Unit,
+    onClickImage: (indexPhotoSelected: Int, componentKey: String, componentId: String, componentDomain: ComponentDomain) -> Unit,
     currentParentIndex: List<Int> = listOf(),
 ) {
 
@@ -118,7 +118,7 @@ fun initialize(
 
                         groupComponent(
                             disable = item.disabled,
-                            readOnly =  item.readOnly,
+                            readOnly = item.readOnly,
                             processLogicDomainState,
                             true,
                             scrollingState = scrollingState,
@@ -154,11 +154,11 @@ fun initialize(
                             },
                             onDeleteClick = {
 
-                                    onRemoveItem(item, index) {
-                                        scope.launch {
-                                            listState.animateScrollToItem(index - 1)
-                                        }
+                                onRemoveItem(item, index) {
+                                    scope.launch {
+                                        listState.animateScrollToItem(index - 1)
                                     }
+                                }
 
 
                             })
@@ -183,7 +183,7 @@ fun initialize(
                             processLogicDomain = processLogicDomainState,
                             type = TypeEditable.NUMBER,
                             value = valueState.value,
-                            showErrorMessageValidation = item.validate?.firstCheck?:true,
+                            showErrorMessageValidation = item.validate?.firstCheck ?: true,
                             placeholder = item.label.toString(),
                             imeAction = ImeAction.None,
                             errorMessage = if (errorMessageState.value == initialMessageError) errorMessageState.value else initialMessageError,
@@ -228,7 +228,7 @@ fun initialize(
                             processLogicDomain = processLogicDomainState,
                             type = TypeEditable.TEXTAREA,
                             value = valueState.value,
-                            showErrorMessageValidation = item.validate?.firstCheck?:true,
+                            showErrorMessageValidation = item.validate?.firstCheck ?: true,
                             placeholder = item.label.toString(),
                             imeAction = ImeAction.None,
                             errorMessage = if (errorMessageState.value == initialMessageError) errorMessageState.value else initialMessageError,
@@ -244,8 +244,16 @@ fun initialize(
                                     newValue
                                 )
                                 item.values = listOf(updatedValueDomain)
-                                Napier.log(LogLevel.ASSERT, tag = "validateShortText", message =  item.label.toString())
-                                Napier.log(LogLevel.ASSERT, tag = "validateShortText", message =  item.values?.get(0).toString())
+                                Napier.log(
+                                    LogLevel.ASSERT,
+                                    tag = "validateShortText",
+                                    message = item.label.toString()
+                                )
+                                Napier.log(
+                                    LogLevel.ASSERT,
+                                    tag = "validateShortText",
+                                    message = item.values?.get(0).toString()
+                                )
                                 updateTextareaValidationError(item, errorMessageState)
 
 
@@ -273,7 +281,7 @@ fun initialize(
                             processLogicDomain = processLogicDomainState,
                             type = TypeEditable.SHORT_TEXT,
                             value = valueState.value,
-                            showErrorMessageValidation = item.validate?.firstCheck?:true,
+                            showErrorMessageValidation = item.validate?.firstCheck ?: true,
                             placeholder = item.label.toString(),
                             imeAction = ImeAction.None,
                             errorMessage = if (errorMessageState.value == initialMessageError) errorMessageState.value else initialMessageError,
@@ -282,7 +290,11 @@ fun initialize(
                             disable = item.disabled,
                             maxLines = 1,
                             onValueChange = { newValue ->
-                                Napier.log(LogLevel.ASSERT, tag = "onValueChange", message = newValue)
+                                Napier.log(
+                                    LogLevel.ASSERT,
+                                    tag = "onValueChange",
+                                    message = newValue
+                                )
                                 valueState.value = newValue
                                 val updatedValueDomain = updateValueDomain(
                                     item.values?.get(0) ?: ValueDomain(), newValue
@@ -320,7 +332,7 @@ fun initialize(
                             processLogicDomain = processLogicDomainState,
                             type = TypeEditable.LATLONG,
                             value = valueState.value,
-                            showErrorMessageValidation = item.validate?.firstCheck?:true,
+                            showErrorMessageValidation = item.validate?.firstCheck ?: true,
                             placeholder = item.label.toString(),
                             imeAction = ImeAction.None,
                             errorMessage = if (errorMessageState.value == initialMessageError) errorMessageState.value else initialMessageError,
@@ -366,7 +378,7 @@ fun initialize(
                             processLogicDomain = processLogicDomainState,
                             type = TypeEditable.PHONE,
                             value = valueState.value,
-                            showErrorMessageValidation = item.validate?.firstCheck?:true,
+                            showErrorMessageValidation = item.validate?.firstCheck ?: true,
                             placeholder = item.label.toString(),
                             imeAction = ImeAction.None,
                             errorMessage = if (errorMessageState.value == initialMessageError) errorMessageState.value else initialMessageError,
@@ -412,7 +424,7 @@ fun initialize(
                             processLogicDomain = processLogicDomainState,
                             type = TypeEditable.EMAIL,
                             value = valueState.value,
-                            showErrorMessageValidation = item.validate?.firstCheck?:true,
+                            showErrorMessageValidation = item.validate?.firstCheck ?: true,
                             placeholder = item.label.toString(),
                             imeAction = ImeAction.None,
                             keyboardType = KeyboardType.Email,
@@ -429,7 +441,11 @@ fun initialize(
                                     newValue
                                 )
                                 item.values = listOf(updatedValueDomain)
-                                item.updateProcessLogicDomain(item._processLogicDomain.copy(calculatedValue = newValue))
+                                item.updateProcessLogicDomain(
+                                    item._processLogicDomain.copy(
+                                        calculatedValue = newValue
+                                    )
+                                )
 
 
                                 updateEmailValidationError(item, errorMessageState)
@@ -465,7 +481,7 @@ fun initialize(
                         ModalDateTimePicker(
                             readOnly = item.readOnly,
                             disable = item.disabled,
-                            showErrorMessageValidation = item.validate?.firstCheck?:true,
+                            showErrorMessageValidation = item.validate?.firstCheck ?: true,
                             processLogicDomain = processLogicDomainState,
                             selectedDateState.value,
                             item.label.toString(),
@@ -500,7 +516,7 @@ fun initialize(
                         ModalDatePicker(
                             item.readOnly,
                             item.disabled,
-                            item.validate?.firstCheck?:true,
+                            item.validate?.firstCheck ?: true,
                             processLogicDomainState,
                             selectedDateState.value,
                             item.label.toString(),
@@ -538,7 +554,7 @@ fun initialize(
                         ModalTimePicker(
                             item.readOnly,
                             item.disabled,
-                            item.validate?.firstCheck?:true,
+                            item.validate?.firstCheck ?: true,
                             processLogicDomainState,
                             selectedDateState.value,
                             item.label.toString(),
@@ -587,7 +603,7 @@ fun initialize(
                             index = index,
                             item = item,
                             label = item.key ?: "",
-                            showErrorMessageValidation = item.validate?.firstCheck?:true,
+                            showErrorMessageValidation = item.validate?.firstCheck ?: true,
                             errorMessage = if (errorMessage.value == initialMessageError) errorMessage.value else initialMessageError,
                             modifier = Modifier,
                             uploadList = uploadDomainList.value,
@@ -674,7 +690,7 @@ fun initialize(
                             index,
                             item,
                             taskID,
-                            showErrorMessageValidation = item.validate?.firstCheck?:true,
+                            showErrorMessageValidation = item.validate?.firstCheck ?: true,
                             if (errorMessageState.value == initialMessageError) errorMessageState.value else initialMessageError,
                             findPhotosByComponentId(photoDomainList, item.id, item.key),
                             onTakePhoto = { obj, resultTakePhoto ->
@@ -700,7 +716,7 @@ fun initialize(
 
                             },
                             onImageClick = {
-                                onClickImage(it, item.key ?: "", item.id ?: "",item)
+                                onClickImage(it, item.key ?: "", item.id ?: "", item)
                             }, onCameraClick = { item ->
                                 itemState.value = item
                                 Napier.log(
@@ -730,14 +746,13 @@ fun initialize(
                         Radio(
                             item.readOnly,
                             item.disabled,
-                            item.validate?.firstCheck?:true,
+                            item.validate?.firstCheck ?: true,
                             processLogicDomainState ?: ProcessLogicDomain().copy(),
                             componentLabel.toString(),
                             if (errorMessageState.value == initialMessageError) errorMessageState.value else initialMessageError,
                             valuesState,
                             valuesState.firstOrNull { it.isSelected }?.label ?: ""
                         ) { selectedValue ->
-
                             valuesState.forEachIndexed { index, item ->
                                 valuesState[index] = if (item.label == selectedValue) {
                                     item.copy(isSelected = true)
@@ -746,45 +761,32 @@ fun initialize(
                                 }
                             }
                             item.values = valuesState
-
                             updateSelectedComponentValidationError(item, errorMessageState)
-
-
-
                             onChanges(item, valuesState)
                         }
                     }
 
                     FormViewerTypes.Checklist -> {
-
                         val initialMessageError: ResourceFormattedStringDesc =
                             item.validate?.messageError ?: ResourceFormattedStringDesc(
                                 MR.strings.empty_error_message,
                                 emptyList()
                             )
-
                         val errorMessageState = remember { mutableStateOf(initialMessageError) }
                         val valuesState = remember { mutableStateOf("") }
-
-
                         val componentLabel = item.label
                         item.values?.let { values ->
                             CheckList(
                                 item.readOnly,
                                 item.disabled,
-                                showErrorMessageValidation = item.validate?.firstCheck?:true,
+                                showErrorMessageValidation = item.validate?.firstCheck ?: true,
                                 processLogicDomainState,
                                 componentLabel.toString(),
                                 if (errorMessageState.value == initialMessageError) errorMessageState.value else initialMessageError,
                                 valuesState.value,
                                 values,
-
                                 onSelect = { valueDomain ->
-
-
                                     updateSelectedComponentValidationError(item, errorMessageState)
-
-
                                     valuesState.value = valueDomain.value ?: ""
                                     Napier.log(
                                         LogLevel.ASSERT,
@@ -800,15 +802,12 @@ fun initialize(
                         }
                     }
 
-
                     FormViewerTypes.Multi -> {
-
                         val initialMessageError: ResourceFormattedStringDesc =
                             item.validate?.messageError ?: ResourceFormattedStringDesc(
                                 MR.strings.empty_error_message,
                                 emptyList()
                             )
-
                         val errorMessageState = remember { mutableStateOf(initialMessageError) }
                         val valuesState = remember { mutableStateOf("") }
                         val componentLabel = item.label
@@ -817,24 +816,19 @@ fun initialize(
                                 DropDownMultiChoice(
                                     item.readOnly,
                                     item.disabled,
-                                    showErrorMessageValidation = item.validate?.firstCheck?:true,
+                                    showErrorMessageValidation = item.validate?.firstCheck ?: true,
                                     processLogicDomainState,
                                     componentLabel.toString(),
                                     if (errorMessageState.value == initialMessageError) errorMessageState.value else initialMessageError,
                                     "",
                                     valuesState.value,
                                     values, onItemSelected = { selectedItems, oneItem ->
-
                                         updateValuesForSelectType(values, selectedItems)
-
-
                                         valuesState.value = oneItem?.value ?: ""
-
                                         updateSelectedComponentValidationError(
                                             item,
                                             errorMessageState
                                         )
-
                                         onChanges(
                                             item,
                                             item.values
@@ -843,10 +837,8 @@ fun initialize(
                                     onSearchButtonClicked = {}
                                 )
                             }
-
                         }
                     }
-
 
                     FormViewerTypes.Select -> {
                         val initialMessageError: ResourceFormattedStringDesc =
@@ -866,7 +858,7 @@ fun initialize(
                         DropDownSingleChoice(
                             item.readOnly,
                             item.disabled,
-                            showErrorMessageValidation = item.validate?.firstCheck?:true,
+                            showErrorMessageValidation = item.validate?.firstCheck ?: true,
                             processLogicDomainState,
                             componentLabel.toString(),
                             if (errorMessageState.value == initialMessageError) errorMessageState.value else initialMessageError,
@@ -890,15 +882,10 @@ fun initialize(
                             {}
                         )
                     }
-
                 }
-
             }
         }
-
-
     }
-
 }
 
 
@@ -911,7 +898,7 @@ private fun updateValuesForSelectType(values: List<ValueDomain>, selectedItems: 
 
 fun copyComponentWithValues(
     component: ComponentDomain,
-    nestedComponents: List<ComponentDomain>? ,
+    nestedComponents: List<ComponentDomain>?,
     uuid: String = uuid4().toString()
 ): ComponentDomain {
 
@@ -933,12 +920,17 @@ fun copyComponentWithValues(
                 value.copy(isSelected = false) // Reset selection for these types
             }
         }
+
         else -> null
     }
 
     // Create copies of nested components that are directly related to the current component
     val copiedComponents = component.components.value?.map { subComponent ->
-        copyComponentWithValues(subComponent, subComponent.components.value, uuid4().toString()) // Recursive call with relevant nested components
+        copyComponentWithValues(
+            subComponent,
+            subComponent.components.value,
+            uuid4().toString()
+        ) // Recursive call with relevant nested components
     }?.toMutableList() ?: mutableListOf() // Default to empty list if no components
 
     // Return a new instance of ComponentDomain with updated properties
@@ -950,7 +942,6 @@ fun copyComponentWithValues(
         validate = updatedValidate // Updated validation
     )
 }
-
 
 
 fun findPhotosByComponentId(
@@ -998,8 +989,8 @@ fun updateTextareaValidationError(
     item: ComponentDomain,
     errorMessageState: MutableState<ResourceFormattedStringDesc>
 ) {
-    Napier.log(LogLevel.ASSERT, tag = "validateShortText", message =  item.label.toString())
-    Napier.log(LogLevel.ASSERT, tag = "validateShortText", message =  item.values?.get(0).toString())
+    Napier.log(LogLevel.ASSERT, tag = "validateShortText", message = item.label.toString())
+    Napier.log(LogLevel.ASSERT, tag = "validateShortText", message = item.values?.get(0).toString())
     val validationErrors = validateTextarea(item, item.validate ?: ValidateDomain(), null)
     val messageError: ResourceFormattedStringDesc = validationErrors
         ?: ResourceFormattedStringDesc(
@@ -1015,8 +1006,8 @@ fun updateShortTextValidationError(
     item: ComponentDomain,
     errorMessageState: MutableState<ResourceFormattedStringDesc>
 ) {
-    Napier.log(LogLevel.ASSERT, tag = "validateShortText", message =  item.label.toString())
-    Napier.log(LogLevel.ASSERT, tag = "validateShortText", message =  item.values?.get(0).toString())
+    Napier.log(LogLevel.ASSERT, tag = "validateShortText", message = item.label.toString())
+    Napier.log(LogLevel.ASSERT, tag = "validateShortText", message = item.values?.get(0).toString())
 
     val validationErrors =
         validateShortText(item, item.validate ?: ValidateDomain())
@@ -1073,8 +1064,10 @@ fun updateEmailValidationError(
             emptyList()
         )
     errorMessageState.value = messageError
-    val updatedValidate = item.validate?.copy(messageError = messageError,
-        firstCheck = false)
+    val updatedValidate = item.validate?.copy(
+        messageError = messageError,
+        firstCheck = false
+    )
     item.validate = updatedValidate
 }
 
@@ -1090,8 +1083,10 @@ fun updateDateTimeValidationError(
             emptyList()
         )
     errorMessageState.value = messageError
-    val updatedValidate = item.validate?.copy(messageError = messageError,
-        firstCheck = false)
+    val updatedValidate = item.validate?.copy(
+        messageError = messageError,
+        firstCheck = false
+    )
     item.validate = updatedValidate
 
 }
@@ -1174,7 +1169,7 @@ fun updateSelectedComponentValidationError(
             emptyList()
         )
     errorMessageState.value = messageError
-    val updatedValidate = item.validate?.copy(messageError = messageError,firstCheck = false)
+    val updatedValidate = item.validate?.copy(messageError = messageError, firstCheck = false)
     item.validate = updatedValidate
 }
 

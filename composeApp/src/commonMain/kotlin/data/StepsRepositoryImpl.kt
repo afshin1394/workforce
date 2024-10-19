@@ -20,24 +20,32 @@ import toActivityDomainList
 class StepsRepositoryImpl(
     private val httpClient: HttpClient,
     private val db: AppDatabase,
-    ) : IStepsRepository {
+) : IStepsRepository {
     override suspend fun fetch(queryParam: String): TaskStepResponse {
-      val request = httpClient.get("workforce_management/user/steps/") {
+        val request = httpClient.get("workforce_management/user/steps/") {
             parameter("search_p", queryParam)
         }
         if (request.status == HttpStatusCode.OK) {
             return try {
-                Napier.log(LogLevel.ASSERT,tag = "StepsRepositoryImpl", message =  request.body<TaskStepResponse>().toString())
+                Napier.log(
+                    LogLevel.ASSERT,
+                    tag = "StepsRepositoryImpl",
+                    message = request.body<TaskStepResponse>().toString()
+                )
                 request.body<TaskStepResponse>()
-            } catch (exception: Exception){
-                Napier.log(LogLevel.ASSERT,tag = "StepsRepositoryImpl", message =  exception.message.toString())
+            } catch (exception: Exception) {
+                Napier.log(
+                    LogLevel.ASSERT,
+                    tag = "StepsRepositoryImpl",
+                    message = exception.message.toString()
+                )
                 TaskStepResponse(listOf())
             }
         }
         throw Exception()
     }
 
-    override suspend fun insertAll(tasks : List<StepsEntity>) {
+    override suspend fun insertAll(tasks: List<StepsEntity>) {
         db.stepDao().insertAll(tasks)
     }
 
@@ -49,15 +57,21 @@ class StepsRepositoryImpl(
         db.stepDao().deleteAllSteps(ticketNumbers)
     }
 
-    override suspend fun getStepsByTicketNumber(ticketNumber: String) : List<StepsEntity> {
-       return db.stepDao().selectStepsByTicketNumber(ticketNumber)
+    override suspend fun getStepsByTicketNumber(ticketNumber: String): List<StepsEntity> {
+        return db.stepDao().selectStepsByTicketNumber(ticketNumber)
     }
 
-    override suspend fun getDataByTicketNumberAndStep(ticketNumber: String, activityId: Long) : StepsEntity {
-       return db.stepDao().selectStepsByTicketNumberAndActivityId(ticketNumber = ticketNumber, activityId = activityId)
+    override suspend fun getDataByTicketNumberAndStep(
+        ticketNumber: String,
+        activityId: Long
+    ): StepsEntity {
+        return db.stepDao().selectStepsByTicketNumberAndActivityId(
+            ticketNumber = ticketNumber,
+            activityId = activityId
+        )
     }
 
-    override suspend fun getEditedTickets() : List<String>{
+    override suspend fun getEditedTickets(): List<String> {
         val editedTickets = db.stepDao().selectEditedTickets()
         return HashSet(editedTickets).toList()
     }
@@ -71,7 +85,7 @@ class StepsRepositoryImpl(
         activityId: Long,
         formStructure: String,
     ) {
-        db.stepDao().updateFormStructure(ticketNumber,activityId, formStructure)
+        db.stepDao().updateFormStructure(ticketNumber, activityId, formStructure)
     }
 
 }
