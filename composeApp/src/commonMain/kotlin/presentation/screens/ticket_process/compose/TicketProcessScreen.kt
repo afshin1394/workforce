@@ -455,8 +455,11 @@ class TicketProcessScreen(
 
 
                             onChanges = { component, listValueDomain ->
+                                viewModel.updateState(ViewStates.Loading)
                                 viewModel.handleLogics {
                                     viewModel.extractLogicsModel.clear()
+                                    viewModel.updateState(ViewStates.Success())
+
                                 }
                                 Napier.log(LogLevel.ASSERT, tag = "componentsListss", message = viewModel.tempComponentList.toList().toString() )
 

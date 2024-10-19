@@ -14,33 +14,33 @@ import presentation.model.ExtractLogicsModel
 
 @Serializable
 data class ComponentDomain(
-    val id: String?= null,
-    val key: String?=null,
-    val hide: String?= null,
-    val type: String?= null,
-    val label: String?= null,
-    val layout: LayoutDomain?= null,
-    val subType : String?= null,
-    var validate : ValidateDomain?= null,
-    var values: List<ValueDomain>?= null,
-    val conditional : ConditionalDomain?= null,
-    var _components : List<ComponentDomain>?= null,
-    val logics : List<LogicDomain>?= null,
-    val repeatable:Boolean=false,
-    val removable:Boolean?=null,
-    val isMulti:Boolean=false,
-    val readOnly : Boolean = false,
-    val disabled : Boolean = false,
+    val id: String? = null,
+    val key: String? = null,
+    val hide: String? = null,
+    val type: String? = null,
+    val label: String? = null,
+    val layout: LayoutDomain? = null,
+    val subType: String? = null,
+    var validate: ValidateDomain? = null,
+    var values: List<ValueDomain>? = null,
+    val conditional: ConditionalDomain? = null,
+    var _components: List<ComponentDomain>? = null,
+    val logics: List<LogicDomain>? = null,
+    val repeatable: Boolean = false,
+    val removable: Boolean? = null,
+    val isMulti: Boolean = false,
+    val readOnly: Boolean = false,
+    val disabled: Boolean = false,
 
     //in app properties
-    var _processLogicDomain : ProcessLogicDomain=ProcessLogicDomain().copy()
+    var _processLogicDomain: ProcessLogicDomain = ProcessLogicDomain().copy()
 
 
-    )  {
+) {
     // Use MutableState for UI components
     var components: MutableState<List<ComponentDomain>?> = mutableStateOf(_components)
-    var processLogicDomain : MutableState<ProcessLogicDomain> = mutableStateOf(_processLogicDomain)
-    var valuesState : MutableState<List<ValueDomain>?> = mutableStateOf(values)
+    var processLogicDomain: MutableState<ProcessLogicDomain> = mutableStateOf(_processLogicDomain)
+    var valuesState: MutableState<List<ValueDomain>?> = mutableStateOf(values)
 
     // Method to create a new instance with updated components
     fun updateComponents(newComponents: List<ComponentDomain>): ComponentDomain {
@@ -52,15 +52,14 @@ data class ComponentDomain(
         this.processLogicDomain.value = newProcessLogicDomain // Update the MutableState
         return this.copy(_processLogicDomain = newProcessLogicDomain) // Return a new instance for serialization
     }
+
     fun updateValues(newValues: List<ValueDomain>?): ComponentDomain {
         valuesState.value = newValues // Update the MutableState
         return this.copy(values = newValues) // Return a new instance for serialization
     }
 
 
-    fun ComponentDomain.copy() : ComponentDomain{
-              return ComponentDomain(this.id)
-    }
+
 
     override fun toString(): String {
         return "ComponentDomain(id=$id, key=$key, hide=$hide, type=$type, label=$label, layout=$layout, subType=$subType, validate=$validate, values=$values, conditional=$conditional, components=$components, logics=$logics, repeatable=$repeatable, removable=$removable, isMulti=$isMulti, readOnly=$readOnly, processLogicDomain=$processLogicDomain)"

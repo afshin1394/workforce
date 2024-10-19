@@ -26,7 +26,9 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -97,6 +99,14 @@ fun DropDownSingleChoice(
     var textFieldSize by remember { mutableStateOf(Size.Zero) }
     val icon = if (expanded) Icons.Filled.KeyboardArrowUp
     else Icons.Filled.KeyboardArrowDown
+
+    LaunchedEffect(hideLogic){
+        if(hideLogic){
+           selectedText = ""
+        }
+    }
+
+
     println("recomposeeee ${"SingleChoice"}")
     if(!hideLogic) {
         Column(Modifier.padding(16.dp)) {

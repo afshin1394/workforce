@@ -151,6 +151,8 @@ class TicketProcessVM(
                                 handleLogics {
                                     validateComponents(tempComponentList, true) {
                                         updateTempComponentList(it)
+                                        updateState(ViewStates.Success())
+
                                     }
                                 }
 
@@ -178,7 +180,6 @@ class TicketProcessVM(
                             _stepEvent.update { StepEvent.IN_PROCESS }
                             events.value = TicketProcessEvent.Default
 
-                            updateState(ViewStates.Success())
                             getPhotoByComponentKey()
                         }
                     }

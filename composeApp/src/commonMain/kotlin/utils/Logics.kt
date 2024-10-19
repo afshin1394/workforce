@@ -29,7 +29,6 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import presentation.model.ExtractLogicsModel
 
-
 class LogicCalculation(
     private val viewModelScope: CoroutineScope,
     private val allComponents: List<ComponentDomain>
@@ -44,7 +43,8 @@ class LogicCalculation(
 
     suspend fun extractLogics(
         components: List<ComponentDomain>,
-        component: ComponentDomain
+        component: ComponentDomain,
+
     ): MutableList<ExtractLogicsModel> = coroutineScope {
         validationErrorList.clear()
         var hasLogic = false
@@ -58,7 +58,7 @@ class LogicCalculation(
                         typeLogic = LogicType.Hide
                         val expressionSatisfied = evaluateLogics(component, it)
                         val cmp = allComponents.findComponentById(component.id)
-                        Napier.log(LogLevel.ASSERT, "Hide", message = cmp.toString())
+
                         cmp?.updateProcessLogicDomain(cmp.processLogicDomain.value.copy(shouldHide = expressionSatisfied))
 
                         if (expressionSatisfied) {
@@ -212,84 +212,87 @@ class LogicCalculation(
                     }
 
                     LogicType.Ticket_Auto_Fill -> {
-                        it.ticketAutoFillLogicDomain?.options?.let { options ->
-                            for (option in options) {
-                                option.phaseName?.let { phaseName ->
-                                    option.property?.let { property ->
-                                        viewModelScope.launch {
-                                            getTicketDetailsUseCase(
-                                                Pair(
-                                                    ticketId,
-                                                    TicketDetailRequestDomain(
-                                                        listOf(
-                                                            PhaseDomain(phaseName, property)
-                                                        )
-                                                    )
-                                                )
-                                            ).collect { result ->
-                                                when (result.status) {
-                                                    AsyncStatus.EMPTY -> {
-                                                        // Handle empty case
-                                                    }
+                           it.ticketAutoFillLogicDomain?.options?.let { options ->
+                               for (option in options) {
+                                   option.phaseName?.let { phaseName ->
+                                       option.property?.let { property ->
+                                           viewModelScope.launch {
+                                               getTicketDetailsUseCase(
+                                                   Pair(
+                                                       ticketId,
+                                                       TicketDetailRequestDomain(
+                                                           listOf(
+                                                               PhaseDomain(phaseName, property)
+                                                           )
+                                                       )
+                                                   )
+                                               ).collect { result ->
+                                                   when (result.status) {
+                                                       AsyncStatus.EMPTY -> {
+                                                           // Handle empty case
+                                                       }
 
-                                                    AsyncStatus.ERROR -> {
-                                                        // Handle error case
-                                                    }
+                                                       AsyncStatus.ERROR -> {
+                                                           // Handle error case
+                                                       }
 
-                                                    AsyncStatus.LOADING -> {
-                                                        // Handle loading case
-                                                    }
+                                                       AsyncStatus.LOADING -> {
+                                                           // Handle loading case
+                                                       }
 
-                                                    AsyncStatus.SUCCESS -> {
-                                                        result.data?.keys?.forEach { key ->
-                                                            result.data[key]?.let { resultData ->
-                                                                var value = resultData
+                                                       AsyncStatus.SUCCESS -> {
+                                                           result.data?.keys?.forEach { key ->
+                                                               result.data[key]?.let { resultData ->
+                                                                   var value = resultData
 
-                                                                if (resultData.isNotEmpty()) {
+                                                                   if (resultData.isNotEmpty()) {
 
-                                                                    if (component.type == FormViewerTypes.Datetime ||
-                                                                        component.type == FormViewerTypes.Time ||
-                                                                        component.type == FormViewerTypes.Date
-                                                                    ) {
-                                                                        value =
-                                                                            resultData.parsServerDateTime()
-                                                                    }
-
-
-                                                                    val updatedValueDomain =
-                                                                        updateValueDomain(
-                                                                            component.values?.get(0)
-                                                                                ?: ValueDomain(),
-                                                                            value
-                                                                        )
-
-                                                                    component.updateValues(
-                                                                        listOf(
-                                                                            updatedValueDomain
-                                                                        )
-                                                                    )
-
-                                                                    component.updateProcessLogicDomain(
-                                                                        component.processLogicDomain.value.copy(
-                                                                            calculatedValue = value
-                                                                        )
-                                                                    )
+                                                                       if (component.type == FormViewerTypes.Datetime ||
+                                                                           component.type == FormViewerTypes.Time ||
+                                                                           component.type == FormViewerTypes.Date
+                                                                       ) {
+                                                                           value =
+                                                                               resultData.parsServerDateTime()
+                                                                       }
 
 
-                                                                }
-                                                            }
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        }.join()
-                                    }
+                                                                       val updatedValueDomain =
+                                                                           updateValueDomain(
+                                                                               component.values?.get(
+                                                                                   0
+                                                                               )
+                                                                                   ?: ValueDomain(),
+                                                                               value
+                                                                           )
+
+                                                                       component.updateValues(
+                                                                           listOf(
+                                                                               updatedValueDomain
+                                                                           )
+                                                                       )
+
+                                                                       component.updateProcessLogicDomain(
+                                                                           component.processLogicDomain.value.copy(
+                                                                               calculatedValue = value
+                                                                           )
+                                                                       )
 
 
-                                }
-                            }
+                                                                   }
+                                                               }
+                                                           }
+                                                       }
+                                                   }
+                                               }
+                                           }.join()
+                                       }
 
-                        }
+
+                                   }
+                               }
+
+                           }
+
                     }
 
                 }
@@ -1512,11 +1515,9 @@ class LogicCalculation(
 
     private fun ComponentDomain?.clearValues() {
         if (this?.isSelectableValue() == true) {
-            val updatedValues = this.values?.map { value ->
-                value.isSelected = false  // Set isSelected to false
-                value  // Return the modified object
-            }?: arrayListOf()
-            this.updateValues(updatedValues)
+            this.values?.forEach {
+                it.isSelected = false
+            }
         }
         else
             this?.updateValues(null)

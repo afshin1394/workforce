@@ -108,12 +108,15 @@ fun DropDownMultiChoice(
     var searchedText by remember { mutableStateOf(searchText) }
     val icon = if (expanded) Icons.Filled.KeyboardArrowUp else Icons.Filled.KeyboardArrowDown
 
-    val selectedItems = remember { mutableStateListOf<ValueDomain>() }
+    val selectedItems = remember {   mutableStateListOf<ValueDomain>().apply { addAll(itemList.filter { it.isSelected }) } }
+    LaunchedEffect(hideLogic){
+        if(hideLogic){
 
-    LaunchedEffect(itemList, selectItem) {
-        selectedItems.clear()
-        selectedItems.addAll(itemList.filter { it.isSelected })
+            selectedItems.clear()
+
+        }
     }
+
     if (!hideLogic) {
         Column(Modifier.padding(16.dp)) {
 
