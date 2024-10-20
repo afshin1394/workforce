@@ -176,7 +176,7 @@ fun initialize(
                         val errorMessageState = remember { mutableStateOf(initialMessageError) }
 
                         var valueState =
-                            remember { mutableStateOf(item.values?.get(0)?.value ?: "") }
+                            remember {    mutableStateOf(item.values?.get(0)?.value ?: "") }
 
 
                         Editable(
@@ -222,7 +222,7 @@ fun initialize(
 
                         val errorMessageState = remember { mutableStateOf(initialMessageError) }
                         var valueState =
-                             mutableStateOf(item.values?.get(0)?.value ?: "")
+                            remember {    mutableStateOf(item.values?.get(0)?.value ?: "") }
 
                         Editable(
                             processLogicDomain = processLogicDomainState,
@@ -275,7 +275,7 @@ fun initialize(
 
                         val errorMessageState = remember { mutableStateOf(initialMessageError) }
                         var valueState =
-                             mutableStateOf(item.values?.get(0)?.value ?: "")
+                            remember {    mutableStateOf(item.values?.get(0)?.value ?: "") }
 
                         Editable(
                             processLogicDomain = processLogicDomainState,
@@ -325,7 +325,7 @@ fun initialize(
 
                         val errorMessageState = remember { mutableStateOf(initialMessageError) }
                         var valueState =
-                            remember { mutableStateOf(item.values?.get(0)?.value ?: "") }
+                            remember {    mutableStateOf(item.values?.get(0)?.value ?: "") }
 
 
                         Editable(
@@ -372,7 +372,7 @@ fun initialize(
 
                         val errorMessageState = remember { mutableStateOf(initialMessageError) }
                         var valueState =
-                            remember { mutableStateOf(item.values?.get(0)?.value ?: "") }
+                          mutableStateOf(item.values?.get(0)?.value ?: "")
 
                         Editable(
                             processLogicDomain = processLogicDomainState,
@@ -418,7 +418,7 @@ fun initialize(
 
                         val errorMessageState = remember { mutableStateOf(initialMessageError) }
                         var valueState =
-                            remember { mutableStateOf(item.values?.get(0)?.value ?: "") }
+                           mutableStateOf(item.values?.get(0)?.value ?: "")
 
                         Editable(
                             processLogicDomain = processLogicDomainState,

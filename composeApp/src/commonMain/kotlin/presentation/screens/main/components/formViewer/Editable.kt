@@ -43,7 +43,7 @@ fun Editable(
     type: TypeEditable,
     processLogicDomain: ProcessLogicDomain,
     value: String,
-    showErrorMessageValidation:Boolean,
+    showErrorMessageValidation: Boolean,
     placeholder: String,
     imeAction: ImeAction,
     keyboardType: KeyboardType,
@@ -53,30 +53,38 @@ fun Editable(
     errorMessage: ResourceFormattedStringDesc,
     onValueChange: (value: String) -> Unit
 ) {
-    Napier.log(LogLevel.ASSERT, tag = "Editable Editable", message =  placeholder)
-    Napier.log(LogLevel.ASSERT, tag = "Editable calculatedValue", message =   processLogicDomain.calculatedValue.toString())
-    Napier.log(LogLevel.ASSERT, tag = "Editable value", message =   value)
-    var valueChange  = mutableStateOf(value)
-    LaunchedEffect(processLogicDomain) {
-        processLogicDomain.calculatedValue?.let {
-            if (it.isNotEmpty() && it != valueChange.value) {
-                valueChange.value = it
-            }
-        }
-    }
-    val disableLogic = processLogicDomain.disabled ||disable
+    Napier.log(LogLevel.ASSERT, tag = "Editable Editable", message = placeholder)
+    Napier.log(
+        LogLevel.ASSERT,
+        tag = "Editable calculatedValue",
+        message = processLogicDomain.calculatedValue.toString()
+    )
+    Napier.log(LogLevel.ASSERT, tag = "Editable value", message = value)
+    val valueChange =     mutableStateOf(processLogicDomain.calculatedValue?:value)
+//    LaunchedEffect(processLogicDomain.calculatedValue) {
+//        processLogicDomain.calculatedValue?.let {
+//
+//            if (it.isNotEmpty() && it != valueChange.value) {
+//                valueChange.value = it
+//            }
+//        }
+//    }
+
+
+    val disableLogic = processLogicDomain.disabled || disable
     val hideLogic = processLogicDomain.shouldHide
     val readOnlyLogic = processLogicDomain.readOnly || readOnly
     val requiredLogic = processLogicDomain.required
     val validateLogic = processLogicDomain.validate
     val errorMessageValidateLogic = processLogicDomain.errorMessage
-    val textFieldBackground = if (errorMessage.localized() != "" && !showErrorMessageValidation|| validateLogic) {
-        Color.Red
-    } else if (readOnlyLogic || disableLogic) {
-        surfaceBrandDisabled
-    } else {
-        strokeDefaultLight
-    }
+    val textFieldBackground =
+        if (errorMessage.localized() != "" && !showErrorMessageValidation || validateLogic) {
+            Color.Red
+        } else if (readOnlyLogic || disableLogic) {
+            surfaceBrandDisabled
+        } else {
+            strokeDefaultLight
+        }
 
     Napier.log(LogLevel.ASSERT, tag = "processLogicDomain", message = placeholder)
     Napier.log(LogLevel.ASSERT, tag = "processLogicDomain", message = processLogicDomain.toString())
@@ -96,7 +104,7 @@ fun Editable(
                 ) {
                     append(placeholder)
                 }
-                if (requiredLogic||errorMessage.localized() != "") {
+                if (requiredLogic || errorMessage.localized() != "") {
                     withStyle(style = SpanStyle(color = Color.Red, fontSize = 18.sp)) {
                         append(" *")
                     }
@@ -123,7 +131,6 @@ fun Editable(
                     if (!disableLogic && !readOnlyLogic && it != valueChange.value) {
                         valueChange.value = it
                         onValueChange(valueChange.value)
-                        processLogicDomain.calculatedValue = it
                     }
                 },
                 modifier = Modifier
