@@ -80,13 +80,15 @@ class UpdateTaskUseCase(
                 try {
                     val stepList = iStepsRepository.fetch(task.basic_info.ticket_number)
                     stepEntities.addAll(stepList.toStepDetailsEntity(ticketNumber))
-                    stepPointerEntities.add(
-                        StepPointerEntity(
-                            ticketNumber = ticketNumber,
-                            activeActivity = 0,
-                            edited = false
+                    stepList.stepDetails[0].acitivities[0].id?.let {
+                        stepPointerEntities.add(
+                            StepPointerEntity(
+                                ticketNumber = ticketNumber,
+                                activeActivity = it,
+                                edited = false
+                            )
                         )
-                    )
+                    }
                 } catch (e: Exception) {
                     Napier.log(LogLevel.ASSERT, tag = "exceotuon", message = e.toString())
                 }
