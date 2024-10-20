@@ -1,4 +1,5 @@
 package utils
+
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.encodeToString
@@ -17,8 +18,8 @@ fun Map<String, Any>.mutableToJson(): String {
     val jsonObject = buildJsonObject {
         this@mutableToJson.forEach { (key, value) ->
             var valuee = value
-            if(valuee is JsonPrimitive)
-                valuee  = valuee.content
+            if (valuee is JsonPrimitive)
+                valuee = valuee.content
             when (valuee) {
 
                 is String -> put(key, JsonPrimitive(valuee))
@@ -30,7 +31,7 @@ fun Map<String, Any>.mutableToJson(): String {
                 is List<*> -> {
                     val jsonArray = JsonArray(valuee.map { element ->
                         var elementt = element
-                        if(element is JsonPrimitive)
+                        if (element is JsonPrimitive)
                             elementt = element.content
                         when (elementt) {
                             is String -> JsonPrimitive(elementt)
@@ -38,7 +39,7 @@ fun Map<String, Any>.mutableToJson(): String {
                                 val nestedJsonArray = JsonArray(elementt.map { nestedElement ->
                                     var nestedElementt = nestedElement
 
-                                    if(nestedElement is JsonPrimitive)
+                                    if (nestedElement is JsonPrimitive)
                                         nestedElementt = nestedElement.content
                                     when (nestedElementt) {
                                         is String -> JsonPrimitive(nestedElementt)
@@ -47,18 +48,19 @@ fun Map<String, Any>.mutableToJson(): String {
                                 })
                                 nestedJsonArray
                             }
+
                             else -> throw IllegalArgumentException("Unsupported list element type")
                         }
                     })
                     put(key, jsonArray)
                 }
+
                 else -> throw IllegalArgumentException("Unsupported type")
             }
         }
     }
     return Json.encodeToString(jsonObject)
 }
-
 
 
 fun Map<String, Any>.toJson(): String {
@@ -84,11 +86,13 @@ fun Map<String, Any>.toJson(): String {
                                 })
                                 nestedJsonArray
                             }
+
                             else -> throw IllegalArgumentException("Unsupported list element type")
                         }
                     })
                     put(key, jsonArray)
                 }
+
                 else -> throw IllegalArgumentException("Unsupported type")
             }
         }
@@ -110,6 +114,11 @@ object AnySerializer : KSerializer<Any> {
             is List<*> -> JsonArray(value.map { JsonPrimitive(it.toString()) })
             is Map<*, *> -> JsonObject(value.mapKeys { it.key.toString() }
                 .mapValues { JsonPrimitive(it.value.toString()) })
+
+            is Long -> JsonPrimitive(value)
+            is Float -> JsonPrimitive(value)
+            is Double -> JsonPrimitive(value)
+            is Char -> JsonPrimitive(value.toString())
             else -> throw SerializationException("Unsupported type: ${value::class}")
         }
         jsonEncoder.encodeJsonElement(element)
@@ -128,6 +137,7 @@ object AnySerializer : KSerializer<Any> {
                     else -> throw SerializationException("Unsupported primitive type")
                 }
             }
+
             is JsonArray -> element.map { it.toString() }
             is JsonObject -> element.mapValues { it.value.toString() }
             else -> throw SerializationException("Unsupported JSON element")

@@ -10,6 +10,7 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 import kotlinx.serialization.json.Json
 import presentation.model.ExtractLogicsModel
+import utils.AnySerializer
 
 
 @Serializable
@@ -31,7 +32,8 @@ data class ComponentDomain(
     val isMulti: Boolean = false,
     val readOnly: Boolean = false,
     val disabled: Boolean = false,
-    val defaultValue: String? = null,
+    @Serializable(with = AnySerializer::class)
+    val defaultValue: Any? = null,
 
 
     //in app properties

@@ -65,9 +65,13 @@ fun TaskStepResponse.toStepDetailsEntity(ticketNumber: String): List<StepsEntity
             stepDetail.acitivities.map { activity ->
                 val updatedFormStruct = activity.form?.form_structure?.copy(
                     components = activity.form.form_structure.components?.map { component ->
-                        if (component.isSelectable() && !component.defaultValue.isNullOrEmpty()) {
+                        if (component.isSelectable() && component.defaultValue != null) {
+                            val defaultValueString = when (component.defaultValue) {
+                                is String -> component.defaultValue
+                                else -> component.defaultValue.toString()
+                            }
                             val updatedValues = component.values?.map { value ->
-                                if (value.value == component.defaultValue) {
+                                if (value.value == defaultValueString) {
                                     value.copy(isSelected = true)
                                 } else {
                                     value
@@ -77,10 +81,14 @@ fun TaskStepResponse.toStepDetailsEntity(ticketNumber: String): List<StepsEntity
                             component.copy(
                                 values = updatedValues
                             )
-                        } else if (!component.defaultValue.isNullOrEmpty()) {
+                        } else if (component.defaultValue != null) {
                             val existingValues = component.values ?: emptyList()
+                            val defaultValueString = when (component.defaultValue) {
+                                is String -> component.defaultValue
+                                else -> component.defaultValue.toString()
+                            }
                             component.copy(
-                                values = existingValues + Value(component.defaultValue)
+                                values = existingValues + Value(defaultValueString)
                             )
                         } else {
                             component
