@@ -53,15 +53,14 @@ class LogicCalculation(
                     LogicType.Hide -> {
                         typeLogic = LogicType.Hide
                         val expressionSatisfied = evaluateLogics(component, it)
-                        val cmp = allComponents.findComponentById(component.id)
 
-                        cmp?.updateProcessLogicDomain(cmp.processLogicDomain.value.copy(shouldHide = expressionSatisfied))
-                        cmp?.processLogicDomain?.value?.shouldHide = expressionSatisfied
-                        cmp?._processLogicDomain?.shouldHide = expressionSatisfied
+                        component.updateProcessLogicDomain(component.processLogicDomain.value.copy(shouldHide = expressionSatisfied))
+                        component.processLogicDomain.value.shouldHide = expressionSatisfied
+                        component._processLogicDomain.shouldHide = expressionSatisfied
                         if (expressionSatisfied) {
-                            cmp.clearValues()
+                            component.clearValues()
                         }
-                        cmp?.components?.value?.forEach {
+                        component.components.value?.forEach {
                             it.updateProcessLogicDomain(it.processLogicDomain.value.copy(shouldHide = expressionSatisfied))
                             if (expressionSatisfied) {
                                 it.clearValues()
@@ -77,9 +76,8 @@ class LogicCalculation(
                     LogicType.Required -> {
                         typeLogic = LogicType.Required
                         val expressionSatisfied = evaluateLogics(component, it)
-                        val cmp = allComponents.findComponentById(component.id)
                         idCmp = component.id ?: ""
-                        cmp?.updateProcessLogicDomain(cmp.processLogicDomain.value.copy(required = expressionSatisfied))
+                        component.updateProcessLogicDomain(component.processLogicDomain.value.copy(required = expressionSatisfied))
                         hasLogic = expressionSatisfied
                         val logicModel = ExtractLogicsModel(hasLogic, typeLogic, idCmp)
                         if (hasLogic)
@@ -89,16 +87,14 @@ class LogicCalculation(
                     LogicType.Disable -> {
                         typeLogic = LogicType.Disable
                         val expressionSatisfied = evaluateLogics(component, it)
-                        val cmp = allComponents.findComponentById(component.id)
-                        cmp?.updateProcessLogicDomain(cmp.processLogicDomain.value.copy(disabled = expressionSatisfied))
+                        component.updateProcessLogicDomain(component.processLogicDomain.value.copy(disabled = expressionSatisfied))
                         hasLogic = expressionSatisfied
                     }
 
                     LogicType.ReadOnly -> {
                         typeLogic = LogicType.ReadOnly
                         val expressionSatisfied = evaluateLogics(component, it)
-                        val cmp = allComponents.findComponentById(component.id)
-                        cmp?.updateProcessLogicDomain(cmp.processLogicDomain.value.copy(readOnly = expressionSatisfied))
+                        component.updateProcessLogicDomain(component.processLogicDomain.value.copy(readOnly = expressionSatisfied))
 
                         hasLogic = expressionSatisfied
                     }
@@ -107,15 +103,14 @@ class LogicCalculation(
                     LogicType.Calculate -> {
                         typeLogic = LogicType.Calculate
                         val result = checkCalculation(allComponents, it)
-                        val cmp = allComponents.findComponentById(component.id)
                         result?.let { res ->
                             val updatedValueDomain = updateValueDomain(
-                                cmp?.values?.get(0) ?: ValueDomain(),
+                                component.values?.get(0) ?: ValueDomain(),
                                 result
                             )
-                            cmp?.values = listOf(updatedValueDomain)
-                            cmp?.updateProcessLogicDomain(
-                                cmp.processLogicDomain.value.copy(
+                            component.values = listOf(updatedValueDomain)
+                            component.updateProcessLogicDomain(
+                                component.processLogicDomain.value.copy(
                                     calculatedValue = result
                                 )
                             )
@@ -123,12 +118,12 @@ class LogicCalculation(
 
                         } ?: run {
                             val updatedValueDomain = updateValueDomain(
-                                cmp?.values?.get(0) ?: ValueDomain(),
+                                component.values?.get(0) ?: ValueDomain(),
                                 ""
                             )
-                            cmp?.values = listOf(updatedValueDomain)
-                            cmp?.updateProcessLogicDomain(
-                                cmp.processLogicDomain.value.copy(
+                            component.values = listOf(updatedValueDomain)
+                            component.updateProcessLogicDomain(
+                                component.processLogicDomain.value.copy(
                                     calculatedValue = ""
                                 )
                             )
@@ -140,7 +135,6 @@ class LogicCalculation(
                         typeLogic = LogicType.Validate
                         val expressionSatisfied =
                             evaluateValidateLogics(allComponents, component, it)
-                        val cmp = allComponents.findComponentById(component.id)
                         idCmp = component.id ?: ""
 
 
@@ -150,17 +144,17 @@ class LogicCalculation(
                             message = expressionSatisfied.toString()
                         )
 
-                        cmp?.let {
+                        component.let {
                             expressionSatisfied?.let {
-                                cmp.updateProcessLogicDomain(
-                                    cmp.processLogicDomain.value.copy(
+                                component.updateProcessLogicDomain(
+                                    component.processLogicDomain.value.copy(
                                         validate = expressionSatisfied.result,
                                         errorMessage = expressionSatisfied.message
                                     )
                                 )
                             } ?: run {
-                                cmp.updateProcessLogicDomain(
-                                    cmp.processLogicDomain.value.copy(
+                                component.updateProcessLogicDomain(
+                                    component.processLogicDomain.value.copy(
                                         validate = false,
                                         errorMessage = null
                                     )
@@ -184,26 +178,25 @@ class LogicCalculation(
                             tag = "listOfBinding",
                             message = listOfBinding.toString()
                         )
-                        val cmp = allComponents.findComponentById(component.id)
 
                         if (listOfBinding.isNotEmpty()) {
                             val updatedValueDomain = updateValueDomain(
-                                cmp?.values?.get(0) ?: ValueDomain(),
+                                component.values?.get(0) ?: ValueDomain(),
                                 listOfBinding[0]
                             )
-                            cmp?.values = listOf(updatedValueDomain)
-                            cmp?.processLogicDomain?.value?.copy(calculatedValue = listOfBinding[0])
-                                ?.let { it1 -> cmp.updateProcessLogicDomain(it1) }
+                            component.values = listOf(updatedValueDomain)
+                            component.processLogicDomain.value.copy(calculatedValue = listOfBinding[0])
+                                .let { it1 -> component.updateProcessLogicDomain(it1) }
 
                             hasLogic = true
                         } else {
                             val updatedValueDomain = updateValueDomain(
-                                cmp?.values?.get(0) ?: ValueDomain(),
+                                component.values?.get(0) ?: ValueDomain(),
                                 ""
                             )
-                            cmp?.values = listOf(updatedValueDomain)
-                            cmp?.processLogicDomain?.value?.copy(calculatedValue = "")
-                                ?.let { it1 -> cmp.updateProcessLogicDomain(it1) }
+                            component.values = listOf(updatedValueDomain)
+                            component.processLogicDomain.value?.copy(calculatedValue = "")
+                                ?.let { it1 -> component.updateProcessLogicDomain(it1) }
                         }
 
 
