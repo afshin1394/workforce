@@ -63,8 +63,6 @@ class StoreStepFormUseCase(
 
         }
 
-
-
         params.second.createRepeatableSectionStructure(params.first,removablesWithParent,dict,dictImages)
         params.second.findImageComponents(params.first).getKeysAndValues(dictImages)
         params.second.findComponentsByType(FormViewerTypes.FileUpload).getKeysAndValues(dictImages)
@@ -76,10 +74,8 @@ class StoreStepFormUseCase(
             dictImages.toJson()
         )
 
-
         Napier.log(LogLevel.ASSERT, "keyValue ", message = dict.toJson())
         Location.stop()
-
     }
 
     private suspend fun  List<ComponentDomain>.createRepeatableSectionStructure(ticketNumber : String, removablesWithParent: ArrayList<ComponentDomain>, dict: MutableMap<String, Any>, dictImages: MutableMap<String,Any>){

@@ -26,6 +26,7 @@ import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
+import presentation.components.TicketInfoTopBar
 import presentation.model.SingleButtonActionModel
 import presentation.screens.main.components.formViewer.SimpleEditable
 
@@ -85,16 +86,12 @@ class TicketInfoScreen(
             hasDrawer = false,
             bottomSheetHasHeader = false,
             topBar = {
-                MenuItemsTopBar(stringResource(MR.strings.ticket_info)) {
+                TicketInfoTopBar(ticket_number) {
                     navigator.pop()
                 }
             },
             bottomSheetTitle = "",
-
-            bottomBarBottomSheetContent = {
-
-
-            },
+            bottomBarBottomSheetContent = {},
             bottomSheetContent = {
                 bottomSingleActionComponent(
                     SingleButtonActionModel(
@@ -123,15 +120,13 @@ class TicketInfoScreen(
                     contentPadding = PaddingValues(bottom = 100.dp)
                 ) {
                     items(viewModel.initFormsState) { item ->
-
                         SimpleEditable(item.key, item.value)
                     }
                 }
 
             },
-            onCloseBottomSheet = {
-
-            }, onBackPressed = {
+            onCloseBottomSheet = {},
+            onBackPressed = {
                 navigator.pop()
             }, shouldBlurOnBottomSheetExpansion = false
         )

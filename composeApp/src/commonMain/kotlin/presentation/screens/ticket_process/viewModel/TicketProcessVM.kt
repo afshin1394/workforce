@@ -30,6 +30,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import presentation.model.ExtractLogicsModel
 import presentation.screens.main.events.TicketProcessEvent
+import presentation.screens.main.viewmodel.TicketListStatus
 import presentation.screens.ticket_process.events.StepEvent
 import utils.AsyncStatus
 import utils.BaseViewModel
@@ -38,6 +39,11 @@ import utils.LogicCalculation
 import utils.PROCEED
 import utils.ViewStates
 import utils.validateComponents
+
+sealed class SaveDataStatus {
+    data object Success : SaveDataStatus()
+    data object UnRecognized : SaveDataStatus()
+}
 
 class TicketProcessVM(
     private val updateStepFormUseCase: UpdateStepFormUseCase,
@@ -105,6 +111,10 @@ class TicketProcessVM(
 
     val logicCalculation: LogicCalculation = LogicCalculation(viewModelScope, tempComponentList)
     var extractLogicsModel = mutableListOf<ExtractLogicsModel>()
+
+    private val _saveDataStatus =
+        MutableStateFlow<SaveDataStatus>(SaveDataStatus.UnRecognized)
+    val saveDataStatus = _saveDataStatus.asStateFlow()
 
     fun getMokStepsForm(proceed: String) {
         events.value = TicketProcessEvent.InProgress
@@ -306,18 +316,42 @@ class TicketProcessVM(
         }
     }
 
+    fun storeStepBeforeTicketInfo() {
+        viewModelScope.launch {
+            storeStepFormUseCase(
+                Tuple5(
+                    _ticketNumber.value,
+                    tempComponentList.toList(),
+                    photoDomainList.toList(),
+                    _currentLevel.value,
+                    _ticketId.value
+                )
+            ).collect {
+                when (it.status) {
+                    AsyncStatus.SUCCESS -> {
+                        updateState(ViewStates.Success())
+                        _saveDataStatus.update { SaveDataStatus.Success }
+                    }
+
+                    AsyncStatus.LOADING -> {
+                        updateState(ViewStates.Loading)
+                    }
+
+                    else -> {}
+                }
+            }
+        }
+    }
 
     fun updateTicketNumber(ticketNumber: String) {
         _ticketNumber.update { ticketNumber }
     }
-
 
     fun updateTempComponentList(newList: List<ComponentDomain>) {
         tempComponentList.clear()
         tempComponentList.addAll(newList)
 
     }
-
 
     private suspend fun checkLogicsForAll(components: List<ComponentDomain>) {
         // Create a copy of the components list to iterate over
@@ -333,7 +367,8 @@ class TicketProcessVM(
             }
         }
     }
-    private suspend fun checkAutoFillLogicForAll(components: List<ComponentDomain>){
+
+    private suspend fun checkAutoFillLogicForAll(components: List<ComponentDomain>) {
         val componentsCopy = components.toMutableList()
 
         for (cmp in componentsCopy) {
@@ -352,8 +387,8 @@ class TicketProcessVM(
         viewModelScope.launch(Dispatchers.IO) {
             extractLogicsModel.clear()
             try {
-              async {    checkLogicsForAll(tempComponentList) }.await()
-              async {    checkAutoFillLogicForAll(tempComponentList) }.await()
+                async { checkLogicsForAll(tempComponentList) }.await()
+                async { checkAutoFillLogicForAll(tempComponentList) }.await()
 
                 viewModelScope.launch(Dispatchers.Main) {
                     arrayListOf<ComponentDomain>().apply {
@@ -384,7 +419,6 @@ class TicketProcessVM(
 
         }
     }
-
 
 
     suspend fun addComponentDomainRepeatableToList(
@@ -427,7 +461,7 @@ class TicketProcessVM(
     }
 
 
-    /////////////////////////////photo//////////////////////////////////////////////////////////
+/////////////////////////////photo//////////////////////////////////////////////////////////
 
 
     private val photoDomain = MutableStateFlow<PhotoDomain>(
@@ -784,7 +818,10 @@ class TicketProcessVM(
         }
     }
 
-    fun findComponentPairById(components: List<ComponentDomain>, targetId: String): Pair<Int, Int>? {
+    fun findComponentPairById(
+        components: List<ComponentDomain>,
+        targetId: String
+    ): Pair<Int, Int>? {
         components.forEachIndexed { parentIndex, parentComponent ->
             // Check if the parent component itself matches the target ID
             if (parentComponent.id == targetId) {
@@ -822,8 +859,6 @@ class TicketProcessVM(
     fun updateReloadState(reload: Boolean) {
         _reloadState.update { reload }
     }
-
-
 
 
 //

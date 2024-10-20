@@ -53,6 +53,7 @@ import presentation.screens.main.components.PhotoPreviewComponent
 import presentation.screens.main.compose.BaseScreen
 import presentation.screens.main.events.TicketProcessEvent
 import presentation.screens.ticket_process.events.StepEvent
+import presentation.screens.ticket_process.viewModel.SaveDataStatus
 import presentation.theme.body_large
 import presentation.theme.surfaceBrandDefault
 import presentation.theme.surfaceDefault
@@ -65,8 +66,7 @@ import utils.initialize
 import utils.validateComponents
 
 class TicketProcessScreen(
-    private val ticketId: String,
-    private val ticketNumber: String
+    private val ticketId: String, private val ticketNumber: String
 ) : Screen {
     @OptIn(ExperimentalMaterialApi::class)
     @Composable
@@ -92,6 +92,7 @@ class TicketProcessScreen(
         val mainScreen = rememberScreen(Menu.MyTickets)
         val updateTaskCompleteState = viewModel.updateTasksComplete.collectAsState()
         val scrollingState = viewModel.scrollingPosition.collectAsState()
+        val saveDataStatus by viewModel.saveDataStatus.collectAsState()
 
         LaunchedEffect(Unit) {
             viewModel.updateTicketId(ticketId)
@@ -118,36 +119,35 @@ class TicketProcessScreen(
                 }
             }
         }
-        val bottomSheetTitle: String =
-            when (events) {
+        val bottomSheetTitle: String = when (events) {
 
-                TicketProcessEvent.PhotoPreview -> {
-                    stringResource(MR.strings.photo_preview)
-                }
-
-                TicketProcessEvent.EditPhoto -> {
-                    stringResource(MR.strings.edit_photo)
-
-                }
-
-                TicketProcessEvent.DeletePhoto -> {
-                    stringResource(MR.strings.delete_photo)
-
-                }
-
-                TicketProcessEvent.Default -> {
-                    ""
-
-                }
-
-                TicketProcessEvent.InProgress -> {
-                    ""
-                }
-
-                TicketProcessEvent.TicketFlowCompleted -> {
-                    "SuccessFully!"
-                }
+            TicketProcessEvent.PhotoPreview -> {
+                stringResource(MR.strings.photo_preview)
             }
+
+            TicketProcessEvent.EditPhoto -> {
+                stringResource(MR.strings.edit_photo)
+
+            }
+
+            TicketProcessEvent.DeletePhoto -> {
+                stringResource(MR.strings.delete_photo)
+
+            }
+
+            TicketProcessEvent.Default -> {
+                ""
+
+            }
+
+            TicketProcessEvent.InProgress -> {
+                ""
+            }
+
+            TicketProcessEvent.TicketFlowCompleted -> {
+                "SuccessFully!"
+            }
+        }
 
 
         fun backClick() {
@@ -180,8 +180,7 @@ class TicketProcessScreen(
             }
         }
 
-        BaseScreen(
-            viewModel = viewModel,
+        BaseScreen(viewModel = viewModel,
             title = stringResource(MR.strings.ticket_process),
             scaffoldState = scaffoldState,
             hasDrawer = false,
@@ -190,17 +189,10 @@ class TicketProcessScreen(
             bottomSheetHasHeader = viewModel.events.value != TicketProcessEvent.Default,
             topBar = {
                 TicketProcessTopBar(stringResource(MR.strings.ticket_process), onInfoClick = {
-                    navigator.push(
-                        TicketInfoScreen(
-                            ticketId = viewModel.ticketId.value,
-                            ticket_number = viewModel.ticketNumber.value
-                        )
-                    )
+                    viewModel.storeStepBeforeTicketInfo()
                 }, onBackClick = {
                     Napier.log(
-                        LogLevel.ASSERT,
-                        tag = "backButtonEvent",
-                        message = isClickable.toString()
+                        LogLevel.ASSERT, tag = "backButtonEvent", message = isClickable.toString()
                     )
                     if (isClickable) {
                         isClickable = false
@@ -225,90 +217,83 @@ class TicketProcessScreen(
 
                     TicketProcessEvent.DeletePhoto -> {
 
-                        bottomSheetDoubleActionBottomBar(
-                            BottomSheetActionModel(
-                                stringResource(MR.strings.cancel),
-                                surfaceDefault,
-                                textPrimary,
-                                stringResource(MR.strings.delete),
-                                Color.Red,
-                                textInverse
-                            ), onFirstButtonClick = {
-                                viewModel.events.value = TicketProcessEvent.PhotoPreview
-                            }, onSecondButtonClick = {
-                                viewModel.updateImageUriForDeletePhoto(
-                                    positionSelectedPhotoForEdit,
-                                    componentKey,
-                                    componentId
-                                )
-                            })
+                        bottomSheetDoubleActionBottomBar(BottomSheetActionModel(
+                            stringResource(MR.strings.cancel),
+                            surfaceDefault,
+                            textPrimary,
+                            stringResource(MR.strings.delete),
+                            Color.Red,
+                            textInverse
+                        ), onFirstButtonClick = {
+                            viewModel.events.value = TicketProcessEvent.PhotoPreview
+                        }, onSecondButtonClick = {
+                            viewModel.updateImageUriForDeletePhoto(
+                                positionSelectedPhotoForEdit, componentKey, componentId
+                            )
+                        })
                         scope.launch {
                             scaffoldState.bottomSheetState.expand()
                         }
                     }
 
                     TicketProcessEvent.Default -> {
-                        bottomSingleActionComponent(
-                            SingleButtonActionModel(
-                                stringResource(MR.strings.resume),
-                                surfaceBrandDefault,
-                                textInverse
-                            ), onClick = {
-                                viewModel.handleLogics { extractLogicsModel ->
-                                    scope.launch(Dispatchers.Main) {
-                                        if (extractLogicsModel.size > 0) {
-                                            val itemsToRemove =
-                                                mutableListOf<ExtractLogicsModel>()  // Replace `YourItemType` with the actual type of items in `extractLogicsModel`
+                        bottomSingleActionComponent(SingleButtonActionModel(
+                            stringResource(MR.strings.resume), surfaceBrandDefault, textInverse
+                        ), onClick = {
+                            viewModel.handleLogics { extractLogicsModel ->
+                                scope.launch(Dispatchers.Main) {
+                                    if (extractLogicsModel.size > 0) {
+                                        val itemsToRemove =
+                                            mutableListOf<ExtractLogicsModel>()  // Replace `YourItemType` with the actual type of items in `extractLogicsModel`
 
-                                            for (it in extractLogicsModel) {
-                                                val component =
-                                                    viewModel.tempComponentList.findComponentById(it.componentId)
-                                                if (component?.isSelectableValue() == true) {
-                                                    if (component.values?.any { it.isSelected } == true) {
-                                                        itemsToRemove.add(it)
-                                                    }
-                                                } else {
-                                                    if (component?.values?.get(0)?.value?.isNotEmpty() == true) {
-                                                        itemsToRemove.add(it)
-                                                    }
+                                        for (it in extractLogicsModel) {
+                                            val component =
+                                                viewModel.tempComponentList.findComponentById(it.componentId)
+                                            if (component?.isSelectableValue() == true) {
+                                                if (component.values?.any { it.isSelected } == true) {
+                                                    itemsToRemove.add(it)
+                                                }
+                                            } else {
+                                                if (component?.values?.get(0)?.value?.isNotEmpty() == true) {
+                                                    itemsToRemove.add(it)
                                                 }
                                             }
-                                            extractLogicsModel.removeAll(itemsToRemove)
+                                        }
+                                        extractLogicsModel.removeAll(itemsToRemove)
+                                    }
+
+                                    if (extractLogicsModel.size > 0) {
+
+                                        if (extractLogicsModel.size > 0) {
+                                            val errors =
+                                                mutableMapOf<String, List<ResourceFormattedStringDesc>>()
+
+                                            extractLogicsModel.forEach {
+                                                errors[it.componentId] = arrayListOf()
+                                            }
+                                            viewModel.showFirstError(errors)
                                         }
 
-                                        if (extractLogicsModel.size > 0) {
+                                    } else {
+                                        val errors = validateComponents(
+                                            viewModel.tempComponentList, false
+                                        ) {
+                                            viewModel.updateTempComponentList(it)
+                                        }
+                                        if (errors.isNotEmpty()) {
+                                            viewModel.showFirstError(errors)
+                                        }
 
-                                            if (extractLogicsModel.size > 0) {
-                                                val errors =
-                                                    mutableMapOf<String, List<ResourceFormattedStringDesc>>()
-
-                                                extractLogicsModel.forEach {
-                                                    errors[it.componentId] = arrayListOf()
-                                                }
-                                                viewModel.showFirstError(errors)
-                                            }
-
-                                        } else {
-                                            val errors = validateComponents(
-                                                viewModel.tempComponentList,
-                                                false
-                                            ) {
-                                                viewModel.updateTempComponentList(it)
-                                            }
-                                            if (errors.isNotEmpty()) {
-                                                viewModel.showFirstError(errors)
-                                            }
-
-                                            if (errors.isEmpty()) {
-                                                async { viewModel.saveAndDeletePhotoByComponentKey() }.await()
-                                                if (state is ViewStates.Success) {
-                                                    viewModel.updateLevel(PROCEED.NEXT)
-                                                }
+                                        if (errors.isEmpty()) {
+                                            async { viewModel.saveAndDeletePhotoByComponentKey() }.await()
+                                            if (state is ViewStates.Success) {
+                                                viewModel.updateLevel(PROCEED.NEXT)
                                             }
                                         }
                                     }
                                 }
-                            })
+                            }
+                        })
 
                         scope.launch {
                             scaffoldState.bottomSheetState.expand()
@@ -322,15 +307,12 @@ class TicketProcessScreen(
                     }
 
                     TicketProcessEvent.TicketFlowCompleted -> {
-                        bottomSingleActionComponent(
-                            SingleButtonActionModel(
-                                stringResource(MR.strings.submit),
-                                surfaceBrandDefault,
-                                textInverse
-                            ), onClick = {
-                                viewModel.updateTicketFlowState(false)
-                                viewModel.updateTasks()
-                            })
+                        bottomSingleActionComponent(SingleButtonActionModel(
+                            stringResource(MR.strings.submit), surfaceBrandDefault, textInverse
+                        ), onClick = {
+                            viewModel.updateTicketFlowState(false)
+                            viewModel.updateTasks()
+                        })
 
                         scope.launch {
                             scaffoldState.bottomSheetState.expand()
@@ -343,23 +325,18 @@ class TicketProcessScreen(
                 when (events) {
                     TicketProcessEvent.PhotoPreview -> {
                         PhotoPreviewComponent(viewModel.findPhotosByComponentId(
-                            componentId,
-                            componentKey
-                        ),
-                            indexPhotoSelected,
-                            onEditPhotoClick = { position ->
-                                indexPhotoSelected = position
-                                viewModel.updatePositionSelected(position)
-                                viewModel.events.value = TicketProcessEvent.EditPhoto
-                            },
-                            onDeletePhoto = {
-                                viewModel.updatePositionSelected(it)
-                                viewModel.events.value = TicketProcessEvent.DeletePhoto
-                            },
-                            onSaveChangeAngle = {
-                                viewModel.photoDomainList = it.toMutableStateList()
-                                viewModel.events.value = TicketProcessEvent.Default
-                            })
+                            componentId, componentKey
+                        ), indexPhotoSelected, onEditPhotoClick = { position ->
+                            indexPhotoSelected = position
+                            viewModel.updatePositionSelected(position)
+                            viewModel.events.value = TicketProcessEvent.EditPhoto
+                        }, onDeletePhoto = {
+                            viewModel.updatePositionSelected(it)
+                            viewModel.events.value = TicketProcessEvent.DeletePhoto
+                        }, onSaveChangeAngle = {
+                            viewModel.photoDomainList = it.toMutableStateList()
+                            viewModel.events.value = TicketProcessEvent.Default
+                        })
 
                         scope.launch {
                             scaffoldState.bottomSheetState.expand()
@@ -367,22 +344,16 @@ class TicketProcessScreen(
                     }
 
                     TicketProcessEvent.EditPhoto -> {
-                        EditPhotoComponent(
-                            angle = 0.0F,
+                        EditPhotoComponent(angle = 0.0F,
                             id = componentId,
                             key = componentKey,
                             path = InternalStorage.getProcessRouteEdited(provideAppContext()),
                             photoDomain = viewModel.photoDomainList[viewModel.findPhotoIndexByIdAndPosition(
-                                componentKey,
-                                componentId,
-                                positionSelectedPhotoForEdit
+                                componentKey, componentId, positionSelectedPhotoForEdit
                             ) ?: 0],
                             onEditUri = { editUri, originUri ->
                                 viewModel.updateImageUriForEditPhoto(
-                                    editUri,
-                                    positionSelectedPhotoForEdit,
-                                    componentKey,
-                                    componentId
+                                    editUri, positionSelectedPhotoForEdit, componentKey, componentId
                                 )
                             })
                     }
@@ -423,6 +394,17 @@ class TicketProcessScreen(
                 }
             },
             content = {
+                when (saveDataStatus) {
+                    SaveDataStatus.Success -> {
+                        navigator.push(
+                            TicketInfoScreen(
+                                ticketId = viewModel.ticketId.value,
+                                ticket_number = viewModel.ticketNumber.value
+                            )
+                        )
+                    }
+                    SaveDataStatus.UnRecognized -> {}
+                }
                 LaunchedEffect(updateTaskCompleteState.value) {
                     if (updateTaskCompleteState.value) {
                         navigator.popAll()
@@ -474,9 +456,7 @@ class TicketProcessScreen(
 
                                 scope.launch {
                                     viewModel.addComponentDomainRepeatableToList(
-                                        component,
-                                        indexChild,
-                                        scrollCallback
+                                        component, indexChild, scrollCallback
                                     )
                                 }
 
@@ -485,9 +465,7 @@ class TicketProcessScreen(
                             onRemoveItem = { component, indexChild, scrollCallBack ->
 
                                 viewModel.removeComponentDomainRepeatableToList(
-                                    component,
-                                    indexChild,
-                                    scrollCallBack
+                                    component, indexChild, scrollCallBack
                                 )
 
                             },
@@ -496,7 +474,8 @@ class TicketProcessScreen(
                 }
 
 
-            }, onCloseBottomSheet = {
+            },
+            onCloseBottomSheet = {
                 when (viewModel.events.value) {
                     TicketProcessEvent.PhotoPreview -> {
                         viewModel.events.value = TicketProcessEvent.Default
@@ -518,12 +497,11 @@ class TicketProcessScreen(
                 }
                 isBottomSheetOpen = false
 
-            }, onBackPressed = {
+            },
+            onBackPressed = {
 
                 Napier.log(
-                    LogLevel.ASSERT,
-                    tag = "backButtonEvent",
-                    message = isClickable.toString()
+                    LogLevel.ASSERT, tag = "backButtonEvent", message = isClickable.toString()
                 )
                 if (isClickable) {
                     isClickable = false
@@ -533,7 +511,8 @@ class TicketProcessScreen(
                         isClickable = true
                     }
                 }
-            }, shouldBlurOnBottomSheetExpansion = false
+            },
+            shouldBlurOnBottomSheetExpansion = false
         )
     }
 

@@ -10,7 +10,9 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.irancell.nwg.wfm.presentation.theme.spacing075X
 import presentation.theme.surfaceDefault
@@ -18,6 +20,7 @@ import dev.icerock.moko.resources.compose.painterResource
 import irancell.nwg.wfm.MR
 import irancell.nwg.wfm.getSharedPref
 import presentation.theme.h4
+import presentation.theme.h5
 import utils.Language
 
 
@@ -44,6 +47,36 @@ fun MenuItemsTopBar(title: String = "About", onBackClick: () -> Unit = {}) {
             style = h4,
             modifier = Modifier.padding(vertical = 15.dp).weight(.8f),
             textAlign = TextAlign.Center
+        )
+        Text("", modifier = Modifier.weight(.1f))
+    }
+}
+
+@Composable
+fun TicketInfoTopBar(title: String = "About", onBackClick: () -> Unit = {}) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Center,
+        modifier = Modifier.background(
+            surfaceDefault
+        ).padding(
+            horizontal =
+            spacing075X
+        )
+    ) {
+        Image(painter = if (getSharedPref().getString(Language) == "en") painterResource(MR.images.arrow_left) else
+            painterResource(MR.images.arrow_right),
+            contentDescription = "",
+            modifier = Modifier.weight(.1f).clickable {
+                onBackClick()
+            })
+        Text(
+            text = title,
+            style = h5,
+            modifier = Modifier.padding(vertical = 15.dp).weight(.8f).scale(0.9f),
+            textAlign = TextAlign.Center,
+            maxLines = 1,
+            overflow = TextOverflow.Visible
         )
         Text("", modifier = Modifier.weight(.1f))
     }
