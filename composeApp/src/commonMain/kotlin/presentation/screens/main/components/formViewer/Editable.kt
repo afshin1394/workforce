@@ -56,7 +56,7 @@ fun Editable(
     Napier.log(LogLevel.ASSERT, tag = "Editable Editable", message =  placeholder)
     Napier.log(LogLevel.ASSERT, tag = "Editable calculatedValue", message =   processLogicDomain.calculatedValue.toString())
     Napier.log(LogLevel.ASSERT, tag = "Editable value", message =   value)
-    val valueChange  =    mutableStateOf(processLogicDomain.calculatedValue?:value)
+    val valueChange = mutableStateOf(processLogicDomain.calculatedValue ?: value)
 
 
 
@@ -76,7 +76,10 @@ fun Editable(
 
     Napier.log(LogLevel.ASSERT, tag = "processLogicDomain", message = placeholder)
     Napier.log(LogLevel.ASSERT, tag = "processLogicDomain", message = processLogicDomain.toString())
-
+    if (hideLogic) {
+        valueChange.value = ""
+        processLogicDomain.calculatedValue = ""
+    }
     if (!hideLogic) {
         Column(Modifier.padding(16.dp)) {
 

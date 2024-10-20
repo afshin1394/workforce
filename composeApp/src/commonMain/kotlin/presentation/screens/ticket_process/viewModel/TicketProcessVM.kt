@@ -324,7 +324,7 @@ class TicketProcessVM(
         val componentsCopy = components.toMutableList()
 
         for (cmp in componentsCopy) {
-            extractLogicsModel.addAll(logicCalculation.extractLogics(componentsCopy, cmp))
+            extractLogicsModel.addAll(logicCalculation.extractLogics(cmp))
             cmp.components.value?.let { cmps ->
                 if (cmps.isNotEmpty()) {
                     checkLogicsForAll(cmps)
@@ -333,7 +333,18 @@ class TicketProcessVM(
             }
         }
     }
+    private suspend fun checkAutoFillLogicForAll(components: List<ComponentDomain>){
+        val componentsCopy = components.toMutableList()
 
+        for (cmp in componentsCopy) {
+            logicCalculation.executeTicketAutoFillLogic(cmp)
+            cmp.components.value?.let { cmps ->
+                if (cmps.isNotEmpty()) {
+                    checkAutoFillLogicForAll(cmps)
+                }
+            }
+        }
+    }
 
     fun handleLogics(onResult: (MutableList<ExtractLogicsModel>) -> Unit) {
 
@@ -341,7 +352,9 @@ class TicketProcessVM(
         viewModelScope.launch(Dispatchers.IO) {
             extractLogicsModel.clear()
             try {
-                checkLogicsForAll(tempComponentList)
+              async {    checkLogicsForAll(tempComponentList) }.await()
+              async {    checkAutoFillLogicForAll(tempComponentList) }.await()
+
                 viewModelScope.launch(Dispatchers.Main) {
                     arrayListOf<ComponentDomain>().apply {
                         this.addAll(tempComponentList)
@@ -371,6 +384,8 @@ class TicketProcessVM(
 
         }
     }
+
+
 
     suspend fun addComponentDomainRepeatableToList(
         compD: ComponentDomain,
