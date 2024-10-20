@@ -844,7 +844,7 @@ class MainScreen(
                                     if (isClickable) {
                                         BackgroundServiceApp.updateServiceState(ServiceState.Suspend)
                                         isClickable = false
-                                        viewModel.checkIfTicketIsEdited()
+                                       viewModel.checkIfTicketIsEdited()
                                         viewModel.selectedTask.value = it
                                         viewModel.resetSuspendTask()
                                         scope.launch {

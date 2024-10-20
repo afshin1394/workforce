@@ -17,6 +17,7 @@ import domain.usecase.usecase.photo.DeletePhotoByComponentKeyAndIdUseCase
 import domain.usecase.usecase.ticket.GetTicketDetailsUseCase
 import io.github.aakira.napier.LogLevel
 import io.github.aakira.napier.Napier
+import irancell.nwg.wfm.DatePickerFormat.format
 import irancell.nwg.wfm.MR
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -1104,7 +1105,7 @@ class LogicCalculation(
                                                 ?: 0.0) < (value?.toDouble() ?: 0.0),
                                             StringDesc.ResourceFormatted(
                                                 MR.strings.GreaterThan,
-                                                (value).toString()
+                                                (getLocalDateTimeFromLong(value?.toLong()?:0L).format("yyyy-MM-dd HH:mm:ss")).toString()
                                             )
                                         )
                                     )
@@ -1443,7 +1444,7 @@ class LogicCalculation(
                                             ?: 0.0) <= (value?.toDouble() ?: 0.0),
                                         StringDesc.ResourceFormatted(
                                             MR.strings.LessThanOrEqualTo,
-                                            (value).toString()
+                                            (getLocalDateTimeFromLong(value?.toLong()?:0L).format("yyyy-MM-dd HH:mm:ss")).toString()
                                         )
                                     )
                                 )
