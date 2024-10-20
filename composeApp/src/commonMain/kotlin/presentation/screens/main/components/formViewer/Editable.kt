@@ -56,7 +56,7 @@ fun Editable(
     Napier.log(LogLevel.ASSERT, tag = "Editable Editable", message =  placeholder)
     Napier.log(LogLevel.ASSERT, tag = "Editable calculatedValue", message =   processLogicDomain.calculatedValue.toString())
     Napier.log(LogLevel.ASSERT, tag = "Editable value", message =   value)
-    var valueChange  =   mutableStateOf(value)
+    var valueChange  = mutableStateOf(value)
     LaunchedEffect(processLogicDomain) {
         processLogicDomain.calculatedValue?.let {
             if (it.isNotEmpty() && it != valueChange.value) {
