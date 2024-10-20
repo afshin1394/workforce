@@ -3,6 +3,7 @@ package data.network.response.task
 import data.network.response.task.logic.Logic
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import utils.AnySerializer
 
 @Serializable
 data class Component(
@@ -39,7 +40,7 @@ data class Component(
     @SerialName("disabled")
     val disabled: Boolean? = null,
     @SerialName("defaultValue")
-    val defaultValue: String? = null,
+    @Serializable(with = AnySerializer::class) val defaultValue: Any? = null,
     @SerialName("logics")
     val logics: List<Logic>? = null
 )

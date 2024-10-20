@@ -39,28 +39,8 @@ class UpdateTaskUseCase(
                 )
             }
         }
-        Napier.log(LogLevel.ASSERT, tag = "UpdateTaskUseCase", message = initialTasks.toString())
 
-        iInitialFormRepository.deleteAll()
-        Napier.log(LogLevel.ASSERT, tag = "UpdateTaskUseCase", message = "deleteAll")
-
-        iInitialFormRepository.resetEntitySequence()
-        Napier.log(LogLevel.ASSERT, tag = "UpdateTaskUseCase", message = "resetEntitySequence")
-
-        iInitialFormRepository.insertAll(initialTasks)
-
-        Napier.log(LogLevel.ASSERT, tag = "UpdateTaskUseCase", message = "insertAll")
-
-        iTaskRepository.deleteAll()
-        Napier.log(LogLevel.ASSERT, tag = "UpdateTaskUseCase", message = "deleteAll")
-
-        iTaskRepository.resetEntitySequence()
-        Napier.log(LogLevel.ASSERT, tag = "UpdateTaskUseCase", message = "resetEntitySequence")
-
-        iTaskRepository.insertAll(tasks.details.toTaskEntityList())
-        Napier.log(LogLevel.ASSERT, tag = "UpdateTaskUseCase", message = "insertAll")
-
-        val domainList = iTaskRepository.getAll().toTaskDomainList()
+        val domainList = tasks.details.toTaskEntityList().toTaskDomainList()
 
         Napier.log(LogLevel.ASSERT, tag = "UpdateTaskUseCase", message = "domainList")
 
@@ -106,6 +86,7 @@ class UpdateTaskUseCase(
                 editedTickets,
                 stepEntities.sortedBy { it.activityId })
         )
+
         iSendStepsRepository.deleteAll(editedTickets)
         iSendStepsRepository.resetEntitySequence()
         iSendStepsRepository.insertAll(
@@ -122,6 +103,27 @@ class UpdateTaskUseCase(
                 stepPointerEntities
             )
         )
+
+        Napier.log(LogLevel.ASSERT, tag = "UpdateTaskUseCase", message = initialTasks.toString())
+
+        iInitialFormRepository.deleteAll()
+        Napier.log(LogLevel.ASSERT, tag = "UpdateTaskUseCase", message = "deleteAll")
+
+        iInitialFormRepository.resetEntitySequence()
+        Napier.log(LogLevel.ASSERT, tag = "UpdateTaskUseCase", message = "resetEntitySequence")
+
+        iInitialFormRepository.insertAll(initialTasks)
+
+        Napier.log(LogLevel.ASSERT, tag = "UpdateTaskUseCase", message = "insertAll")
+
+        iTaskRepository.deleteAll()
+        Napier.log(LogLevel.ASSERT, tag = "UpdateTaskUseCase", message = "deleteAll")
+
+        iTaskRepository.resetEntitySequence()
+        Napier.log(LogLevel.ASSERT, tag = "UpdateTaskUseCase", message = "resetEntitySequence")
+
+        iTaskRepository.insertAll(tasks.details.toTaskEntityList())
+        Napier.log(LogLevel.ASSERT, tag = "UpdateTaskUseCase", message = "insertAll")
 
         return tasks.details.toTaskEntityList()
     }

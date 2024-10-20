@@ -249,7 +249,6 @@ class UpdateStepFormUseCase(
                             this.filter { it.key == componentDomain.key },
                             dict
                         )
-
                     }
                 } else {
                     if (componentDomain.shouldBeArray()) {
