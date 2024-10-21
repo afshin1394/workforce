@@ -37,7 +37,7 @@ object LOCATION_RECORDS {
 
 object BASE_USECASE {
     const val MAX_RETRY_COUNT = 3
-    const val INITIAL_RETRY_DELAY = 500L
+    const val INITIAL_RETRY_DELAY = 200L
 }
 
 object AlarmAction {

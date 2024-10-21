@@ -349,9 +349,11 @@ class MainScreen(
                                     textInverse
                                 ), onFirstButtonClick = {},
                                 onSecondButtonClick = {
-                                    viewModel.logoutCallApi()
-                                    navigator.popAll()
-                                    navigator.push(loginScreen)
+                                    viewModel.logoutCallApi{
+                                        navigator.pop()
+                                        navigator.push(loginScreen)
+                                    }
+
                                 })
                             scope.launch {
                                 scaffoldState.bottomSheetState.expand()

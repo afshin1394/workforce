@@ -97,6 +97,7 @@ open class BaseViewModel : ViewModel(), KoinComponent {
     val availabilityStatus = _availabilityStatus.asStateFlow()
 
     init {
+        BackgroundServiceApp.updateServiceState(ServiceState.Normal)
         traceNetwork()
         traceLocation()
         collectServiceState()
@@ -110,16 +111,16 @@ open class BaseViewModel : ViewModel(), KoinComponent {
     private fun collectServiceState() {
         viewModelScope.launch {
             BackgroundServiceApp.serviceState.collect {
+                Napier.log(LogLevel.ASSERT, tag = "autoLogoutUseCase", message = it.toString())
+
                 when (it) {
+
                     is ServiceState.Faulty -> {
                         autoLogoutUseCase(Unit).collect{
                            val result = it
                             when{
                                 result.status == AsyncStatus.SUCCESS->{
-                                    BackgroundServiceApp.stopBackgroundService()
-                                    Napier.log(LogLevel.ASSERT, tag = "autoLogoutUseCase", message = "result.status")
                                     _serviceState.update { ServiceState.Faulty(MR.strings.unauthorized) }
-                                    Napier.log(LogLevel.ASSERT, tag = "autoLogoutUseCase", message = "unauthorized")
                                 }
                             }
                         }

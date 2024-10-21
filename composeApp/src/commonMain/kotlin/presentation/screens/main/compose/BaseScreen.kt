@@ -389,10 +389,10 @@ fun <T : BaseViewModel> BaseScreen(
                                             stringResource((serviceState as ServiceState.Faulty).message)
                                         scope.launch {
                                             scaffoldState.snackbarHostState.showSnackbar(message = message)
-                                            delay(200)
-                                                navigator.popAll()
-                                                navigator.push(loginScreen)
-                                                BackgroundServiceApp.updateServiceState(ServiceState.Normal)
+                                            navigator.popAll()
+                                            navigator.push(loginScreen)
+                                            BackgroundServiceApp.stopBackgroundService()
+                                            viewModel.updateServiceState(ServiceState.Normal)
 
                                         }
                                     }
@@ -493,7 +493,7 @@ fun <T : BaseViewModel> BaseScreen(
                             )
                         }
                     }
-                }) {
+                })   {
 
                 Column(
                     modifier = if ((scaffoldState.bottomSheetState.isExpanded || gpsScaffoldState.bottomSheetState.isExpanded) && shouldBlurOnBottomSheetExpansion) Modifier.fillMaxSize()
@@ -645,12 +645,15 @@ fun <T : BaseViewModel> BaseScreen(
                                 if (key != loginScreen.key && key != verifyScreen.key && key != splashScreen.key) {
                                     val message =
                                         stringResource((serviceState as ServiceState.Faulty).message)
+
                                     scope.launch {
+
                                         scaffoldState.snackbarHostState.showSnackbar(message = message)
-                                        delay(200)
                                         navigator.popAll()
                                         navigator.push(loginScreen)
-                                        BackgroundServiceApp.updateServiceState(ServiceState.Normal)
+                                        BackgroundServiceApp.stopBackgroundService()
+                                        viewModel.updateServiceState(ServiceState.Normal)
+
                                     }
 
                                 }

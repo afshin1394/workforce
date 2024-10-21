@@ -953,7 +953,7 @@ class MainScreenVM(
         }
     }
 
-    fun logoutCallApi() {
+    fun logoutCallApi(onSuccess : ()-> Unit) {
         viewModelScope.launch {
             logoutUseCase(Unit).collect {
                 when (it.status) {
@@ -963,6 +963,7 @@ class MainScreenVM(
 
                     AsyncStatus.SUCCESS -> {
                         println("apiiLogout   ${"success"}")
+                        onSuccess()
                     }
 
                     else -> {}
