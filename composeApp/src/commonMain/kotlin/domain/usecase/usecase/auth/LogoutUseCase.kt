@@ -23,33 +23,36 @@ class LogoutUseCase(
         Napier.log(LogLevel.ASSERT, "Logout", message = "")
         val available = getSharedPref().getBool(Availability, false)
         if (available) {
-            val pair = iAvailabilityRepository.changeAvailability(
-                ChangeAvailabilityRequest(
-                    false,
-                    getSharedPref().getString(AvailabilityObjectId)?.toInt()
+            try {
+                iAvailabilityRepository.changeAvailability(
+                    ChangeAvailabilityRequest(
+                        false,
+                        getSharedPref().getString(AvailabilityObjectId)?.toInt()
+                    )
                 )
-            )
+                iAuthRepository.logout()
+            }catch (exception : Exception){
 
-            if (pair.first == HttpStatusCode.OK) {
-                BackgroundServiceApp.stopBackgroundService()
-                val pairLogout = iAuthRepository.logout()
-                if (pairLogout in HttpStatusCode.OK..HttpStatusCode.MultiStatus || pairLogout == HttpStatusCode.Forbidden) {
-                    getSharedPref().deleteAll()
-                    iAuthRepository.deleteAllTableDB()
-                    Napier.log(LogLevel.ASSERT, "Logout", message = "Availability")
-                    InternalStorage.clearCache(provideAppContext())
-                    Napier.log(LogLevel.ASSERT, "Logout", message = "App data folders deleted")
-                }
             }
+            BackgroundServiceApp.stopBackgroundService()
+            getSharedPref().deleteAll()
+            iAuthRepository.deleteAllTableDB()
+            Napier.log(LogLevel.ASSERT, "Logout", message = "Availability")
+            InternalStorage.clearCache(provideAppContext())
+            Napier.log(LogLevel.ASSERT, "Logout", message = "App data folders deleted")
+
+
         } else {
-            val pairLogout = iAuthRepository.logout()
-            if (pairLogout in HttpStatusCode.OK..HttpStatusCode.MultiStatus || pairLogout == HttpStatusCode.Forbidden) {
-                getSharedPref().deleteAll()
-                iAuthRepository.deleteAllTableDB()
-                InternalStorage.clearCache(provideAppContext())
-                Napier.log(LogLevel.ASSERT, "Logout", message = "App data folders deleted")
-                Napier.log(LogLevel.ASSERT, "Logout", message = "pairLogout")
+            try {
+                iAuthRepository.logout()
+            }catch (exception : Exception){
+
             }
+            getSharedPref().deleteAll()
+            iAuthRepository.deleteAllTableDB()
+            InternalStorage.clearCache(provideAppContext())
+            Napier.log(LogLevel.ASSERT, "Logout", message = "App data folders deleted")
+            Napier.log(LogLevel.ASSERT, "Logout", message = "pairLogout")
         }
     }
 }

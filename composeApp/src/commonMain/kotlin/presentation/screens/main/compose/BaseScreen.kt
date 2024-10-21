@@ -390,11 +390,10 @@ fun <T : BaseViewModel> BaseScreen(
                                         scope.launch {
                                             scaffoldState.snackbarHostState.showSnackbar(message = message)
                                             delay(200)
-                                            if (navigator.items[navigator.items.lastIndex].key != loginScreen.key) {
                                                 navigator.popAll()
                                                 navigator.push(loginScreen)
                                                 BackgroundServiceApp.updateServiceState(ServiceState.Normal)
-                                            }
+
                                         }
                                     }
                                 }

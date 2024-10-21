@@ -82,7 +82,7 @@ internal actual class BackgroundServiceApp : Service(), KoinComponent {
         const val Notification_ID = 123
         const val CHANNEL_ID = "GPS TRACKER"
         actual fun stopBackgroundService() {
-
+            updateServiceState(ServiceState.Normal)
             /*if (getSharedPref().getBool(isRunningGPS, false))*/
             (provideAppContext() as Context).stopService(gpsTrackingIntent)
 

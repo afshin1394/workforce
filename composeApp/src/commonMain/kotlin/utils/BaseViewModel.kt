@@ -112,14 +112,13 @@ open class BaseViewModel : ViewModel(), KoinComponent {
             BackgroundServiceApp.serviceState.collect {
                 when (it) {
                     is ServiceState.Faulty -> {
-                        autoLogoutUseCase(Unit).collect{it ->
+                        autoLogoutUseCase(Unit).collect{
                            val result = it
                             when{
                                 result.status == AsyncStatus.SUCCESS->{
                                     BackgroundServiceApp.stopBackgroundService()
                                     Napier.log(LogLevel.ASSERT, tag = "autoLogoutUseCase", message = "result.status")
                                     _serviceState.update { ServiceState.Faulty(MR.strings.unauthorized) }
-
                                     Napier.log(LogLevel.ASSERT, tag = "autoLogoutUseCase", message = "unauthorized")
                                 }
                             }
