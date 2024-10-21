@@ -64,8 +64,8 @@ fun TicketInfoTopBar(title: String = "About", onBackClick: () -> Unit = {}) {
             spacing075X
         )
     ) {
-        Image(painter = if (getSharedPref().getString(Language) == "en") painterResource(MR.images.arrow_left) else
-            painterResource(MR.images.arrow_right),
+        Image(painter = if (getSharedPref().getString(Language) == "fa") painterResource(MR.images.arrow_right) else
+            painterResource(MR.images.arrow_left),
             contentDescription = "",
             modifier = Modifier.weight(.1f).clickable {
                 onBackClick()
@@ -98,8 +98,8 @@ fun TicketProcessTopBar(
             spacing075X
         )
     ) {
-        Image(painter = if (getSharedPref().getString(Language) == "en") painterResource(MR.images.arrow_left) else
-            painterResource(MR.images.arrow_right),
+        Image(painter = if (getSharedPref().getString(Language) == "fa") painterResource(MR.images.arrow_right) else
+            painterResource(MR.images.arrow_left),
             contentDescription = "",
             modifier = Modifier.weight(.1f).clickable {
                 onBackClick()
