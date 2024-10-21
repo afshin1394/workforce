@@ -15,8 +15,11 @@ import domain.repository.ITaskRepository
 import domain.usecase.BaseUseCase
 import io.github.aakira.napier.LogLevel
 import io.github.aakira.napier.Napier
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import toSendStepEntity
 import toStepDetailsEntity
+import kotlinx.coroutines.awaitAll
 
 class UpdateTaskUseCase(
     private val iTaskRepository: ITaskRepository,
@@ -28,6 +31,7 @@ class UpdateTaskUseCase(
     override suspend fun run(params: Unit): List<TaskEntity> {
         val tasks = iTaskRepository.fetchWorks()
         Napier.log(LogLevel.ASSERT, tag = "UpdateTaskUseCase", message = tasks.toString())
+
         val initialTasks = arrayListOf<InitialFormEntity>()
         tasks.details.forEach {
             it.initial_form?.let { _ ->
@@ -40,45 +44,62 @@ class UpdateTaskUseCase(
             }
         }
 
+        iInitialFormRepository.deleteAll()
+        iInitialFormRepository.resetEntitySequence()
+        iInitialFormRepository.insertAll(initialTasks)
+        Napier.log(LogLevel.ASSERT, tag = "UpdateTaskUseCase", message = "Initial forms inserted")
+
         val domainList = tasks.details.toTaskEntityList().toTaskDomainList()
-
-        Napier.log(LogLevel.ASSERT, tag = "UpdateTaskUseCase", message = "domainList")
-
-        Napier.log(LogLevel.ASSERT, tag = "domainList", message = domainList.toString())
-
-
-        val editedTickets = try {
-            iSendStepsRepository.getEditedTickets()
-        } catch (_: Exception) {
-            arrayListOf()
-        }
 
         val stepEntities = arrayListOf<StepsEntity>()
         val stepPointerEntities = arrayListOf<StepPointerEntity>()
-        domainList.forEach { task ->
-            task.basic_info.ticket_number?.let { ticketNumber ->
-                try {
-                    val stepList = iStepsRepository.fetch(task.basic_info.ticket_number)
-                    stepEntities.addAll(stepList.toStepDetailsEntity(ticketNumber))
-                    stepList.stepDetails[0].acitivities[0].id?.let {
-                        stepPointerEntities.add(
-                            StepPointerEntity(
-                                ticketNumber = ticketNumber,
-                                activeActivity = it,
-                                edited = false
-                            )
-                        )
+
+        coroutineScope {
+            val deferredStepFetches = domainList.map { task ->
+                async {
+                    task.basic_info.ticket_number?.let { ticketNumber ->
+                        try {
+                            val stepList = iStepsRepository.fetch(ticketNumber)
+                            stepEntities.addAll(stepList.toStepDetailsEntity(ticketNumber))
+                            stepList.stepDetails.firstOrNull()?.acitivities?.firstOrNull()?.id?.let {
+                                stepPointerEntities.add(
+                                    StepPointerEntity(
+                                        ticketNumber = ticketNumber,
+                                        activeActivity = it,
+                                        edited = false
+                                    )
+                                )
+                            }
+                        } catch (e: Exception) {
+                            Napier.log(LogLevel.ASSERT, tag = "exception", message = e.toString())
+                        }
                     }
-                } catch (e: Exception) {
-                    Napier.log(LogLevel.ASSERT, tag = "exceotuon", message = e.toString())
                 }
-            }
+            }.toList()
+
+            deferredStepFetches.awaitAll()
         }
-//        val availableTasks = iTaskRepository.getAll().toTaskDomainList()
-//        val editedAvailableTickets = availableTasks
-//            .filter { it.basic_info.ticket_number != null && it.basic_info.ticket_number in editedTickets }
-//            .map { it.basic_info.ticket_number!! }
-//            .toHashSet().toList()
+
+        updateDatabaseWithStepsData(
+            editedTickets = iSendStepsRepository.getEditedTickets(),
+            stepEntities,
+            stepPointerEntities
+        )
+
+        iTaskRepository.deleteAll()
+        iTaskRepository.resetEntitySequence()
+        iTaskRepository.insertAll(tasks.details.toTaskEntityList())
+
+        Napier.log(LogLevel.ASSERT, tag = "UpdateTaskUseCase", message = "Tasks inserted")
+
+        return tasks.details.toTaskEntityList()
+    }
+
+    private suspend fun updateDatabaseWithStepsData(
+        editedTickets: List<String>,
+        stepEntities: List<StepsEntity>,
+        stepPointerEntities: List<StepPointerEntity>
+    ) {
         iStepsRepository.deleteAll(editedTickets)
         iStepsRepository.resetEntitySequence()
         iStepsRepository.insertAll(
@@ -95,6 +116,7 @@ class UpdateTaskUseCase(
                 stepEntities.sortedBy { it.activityId }.toSendStepEntity()
             )
         )
+
         iStepPointerRepository.deleteAll(editedTickets)
         iStepPointerRepository.resetEntitySequence()
         iStepPointerRepository.insertAll(
@@ -103,30 +125,8 @@ class UpdateTaskUseCase(
                 stepPointerEntities
             )
         )
-
-        Napier.log(LogLevel.ASSERT, tag = "UpdateTaskUseCase", message = initialTasks.toString())
-
-        iInitialFormRepository.deleteAll()
-        Napier.log(LogLevel.ASSERT, tag = "UpdateTaskUseCase", message = "deleteAll")
-
-        iInitialFormRepository.resetEntitySequence()
-        Napier.log(LogLevel.ASSERT, tag = "UpdateTaskUseCase", message = "resetEntitySequence")
-
-        iInitialFormRepository.insertAll(initialTasks)
-
-        Napier.log(LogLevel.ASSERT, tag = "UpdateTaskUseCase", message = "insertAll")
-
-        iTaskRepository.deleteAll()
-        Napier.log(LogLevel.ASSERT, tag = "UpdateTaskUseCase", message = "deleteAll")
-
-        iTaskRepository.resetEntitySequence()
-        Napier.log(LogLevel.ASSERT, tag = "UpdateTaskUseCase", message = "resetEntitySequence")
-
-        iTaskRepository.insertAll(tasks.details.toTaskEntityList())
-        Napier.log(LogLevel.ASSERT, tag = "UpdateTaskUseCase", message = "insertAll")
-
-        return tasks.details.toTaskEntityList()
     }
+
 
     private fun getInsertingPointerValues(
         editedTicketNumbers: List<String>,
@@ -136,7 +136,8 @@ class UpdateTaskUseCase(
     private fun getInsertingValues(
         editedTicketNumbers: List<String>,
         stepEntities: List<StepsEntity>
-    ): List<StepsEntity> = stepEntities.filter { it.ticketNumber !in editedTicketNumbers
+    ): List<StepsEntity> = stepEntities.filter {
+        it.ticketNumber !in editedTicketNumbers
 
     }
 
