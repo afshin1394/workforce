@@ -6,9 +6,7 @@ import androidx.room.PrimaryKey
 
 @Entity
 data class TaskEntity(
-
-    @PrimaryKey(autoGenerate = true) val pk: Long = 0,
-    val ticket_id: String,
+    @PrimaryKey(autoGenerate = true) val ticket_id: Int,
     val ticket_number: String,
     val ticket_state: String,
     val level: String,

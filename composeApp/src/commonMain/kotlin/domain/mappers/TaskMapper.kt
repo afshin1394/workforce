@@ -10,7 +10,7 @@ import utils.TaskState
 
 fun Detail.toTaskEntity(): TaskEntity {
     return TaskEntity(
-        ticket_id = this.basic_info.ticket_id.toString(),
+        ticket_id = this.basic_info.ticket_id.toInt(),
         ticket_number = this.basic_info.ticket_number ?: "",
         ticket_state = this.basic_info.ticket_state ?: "",
         city = this.basic_info.city ?: "",
@@ -66,7 +66,6 @@ fun TaskEntity.toTaskDomain(): TaskDomain {
             province = this.province,
             city = this.city,
             instanceStateId = checkForInstanceStateId(this.ticket_state),
-            pk = this.pk,
         )
     )
 

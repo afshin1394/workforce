@@ -20,6 +20,8 @@ import kotlinx.coroutines.coroutineScope
 import toSendStepEntity
 import toStepDetailsEntity
 import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 
 class UpdateTaskUseCase(
     private val iTaskRepository: ITaskRepository,
@@ -28,6 +30,9 @@ class UpdateTaskUseCase(
     private val iStepPointerRepository: IStepPointerRepository,
     private val iSendStepsRepository: ISendStepsRepository
 ) : BaseUseCase<List<TaskEntity>, Unit>() {
+
+    private val mutex = Mutex()
+
     override suspend fun run(params: Unit): List<TaskEntity> {
         val tasks = iTaskRepository.fetchWorks()
         Napier.log(LogLevel.ASSERT, tag = "UpdateTaskUseCase", message = tasks.toString())
@@ -50,7 +55,6 @@ class UpdateTaskUseCase(
         Napier.log(LogLevel.ASSERT, tag = "UpdateTaskUseCase", message = "Initial forms inserted")
 
         val domainList = tasks.details.toTaskEntityList().toTaskDomainList()
-
         val stepEntities = arrayListOf<StepsEntity>()
         val stepPointerEntities = arrayListOf<StepPointerEntity>()
 
@@ -60,22 +64,24 @@ class UpdateTaskUseCase(
                     task.basic_info.ticket_number?.let { ticketNumber ->
                         try {
                             val stepList = iStepsRepository.fetch(ticketNumber)
-                            stepEntities.addAll(stepList.toStepDetailsEntity(ticketNumber))
-                            stepList.stepDetails.firstOrNull()?.acitivities?.firstOrNull()?.id?.let {
-                                stepPointerEntities.add(
-                                    StepPointerEntity(
-                                        ticketNumber = ticketNumber,
-                                        activeActivity = it,
-                                        edited = false
+                            mutex.withLock {
+                                stepEntities.addAll(stepList.toStepDetailsEntity(ticketNumber))
+                                stepList.stepDetails.firstOrNull()?.acitivities?.firstOrNull()?.id?.let {
+                                    stepPointerEntities.add(
+                                        StepPointerEntity(
+                                            ticketNumber = ticketNumber,
+                                            activeActivity = it,
+                                            edited = false
+                                        )
                                     )
-                                )
+                                }
                             }
                         } catch (e: Exception) {
                             Napier.log(LogLevel.ASSERT, tag = "exception", message = e.toString())
                         }
                     }
                 }
-            }.toList()
+            }
 
             deferredStepFetches.awaitAll()
         }
@@ -88,11 +94,12 @@ class UpdateTaskUseCase(
 
         iTaskRepository.deleteAll()
         iTaskRepository.resetEntitySequence()
-        iTaskRepository.insertAll(tasks.details.toTaskEntityList())
 
-        Napier.log(LogLevel.ASSERT, tag = "UpdateTaskUseCase", message = "Tasks inserted")
+        val uniqueTasks = tasks.details.toTaskEntityList().distinctBy { it.ticket_number }
+        iTaskRepository.insertAll(uniqueTasks)
+        Napier.log(LogLevel.ASSERT, tag = "UpdateTaskUseCase", message = "Unique tasks inserted")
 
-        return tasks.details.toTaskEntityList()
+        return uniqueTasks
     }
 
     private suspend fun updateDatabaseWithStepsData(
@@ -127,7 +134,6 @@ class UpdateTaskUseCase(
         )
     }
 
-
     private fun getInsertingPointerValues(
         editedTicketNumbers: List<String>,
         stepPointerEntities: List<StepPointerEntity>
@@ -138,7 +144,6 @@ class UpdateTaskUseCase(
         stepEntities: List<StepsEntity>
     ): List<StepsEntity> = stepEntities.filter {
         it.ticketNumber !in editedTicketNumbers
-
     }
 
     private fun getSendInsertingValues(
@@ -146,3 +151,4 @@ class UpdateTaskUseCase(
         sendStepEntities: List<SendStepsEntity>
     ): List<SendStepsEntity> = sendStepEntities.filter { it.ticketNumber !in editedTicketNumbers }
 }
+
