@@ -37,6 +37,18 @@ class UpdateTaskUseCase(
         val tasks = iTaskRepository.fetchWorks()
         Napier.log(LogLevel.ASSERT, tag = "UpdateTaskUseCase", message = tasks.toString())
 
+        val editedTickets = iSendStepsRepository.getEditedTickets()
+
+        iTaskRepository.deleteAll()
+        iTaskRepository.resetEntitySequence()
+        iStepPointerRepository.deleteAll(editedTickets)
+        iInitialFormRepository.deleteAll()
+        iInitialFormRepository.resetEntitySequence()
+        iSendStepsRepository.deleteAll(editedTickets)
+        iSendStepsRepository.resetEntitySequence()
+        iStepsRepository.deleteAll(editedTickets)
+        iStepsRepository.resetEntitySequence()
+
         val initialTasks = arrayListOf<InitialFormEntity>()
         tasks.details.forEach {
             it.initial_form?.let { _ ->
@@ -49,8 +61,7 @@ class UpdateTaskUseCase(
             }
         }
 
-        iInitialFormRepository.deleteAll()
-        iInitialFormRepository.resetEntitySequence()
+
         iInitialFormRepository.insertAll(initialTasks)
         Napier.log(LogLevel.ASSERT, tag = "UpdateTaskUseCase", message = "Initial forms inserted")
 
@@ -92,9 +103,6 @@ class UpdateTaskUseCase(
             stepPointerEntities
         )
 
-        iTaskRepository.deleteAll()
-        iTaskRepository.resetEntitySequence()
-
         val uniqueTasks = tasks.details.toTaskEntityList().distinctBy { it.ticket_number }
         iTaskRepository.insertAll(uniqueTasks)
         Napier.log(LogLevel.ASSERT, tag = "UpdateTaskUseCase", message = "Unique tasks inserted")
@@ -107,16 +115,13 @@ class UpdateTaskUseCase(
         stepEntities: List<StepsEntity>,
         stepPointerEntities: List<StepPointerEntity>
     ) {
-        iStepsRepository.deleteAll(editedTickets)
-        iStepsRepository.resetEntitySequence()
+
         iStepsRepository.insertAll(
             getInsertingValues(
                 editedTickets,
                 stepEntities.sortedBy { it.activityId })
         )
 
-        iSendStepsRepository.deleteAll(editedTickets)
-        iSendStepsRepository.resetEntitySequence()
         iSendStepsRepository.insertAll(
             getSendInsertingValues(
                 editedTickets,
@@ -124,7 +129,6 @@ class UpdateTaskUseCase(
             )
         )
 
-        iStepPointerRepository.deleteAll(editedTickets)
         iStepPointerRepository.resetEntitySequence()
         iStepPointerRepository.insertAll(
             getInsertingPointerValues(

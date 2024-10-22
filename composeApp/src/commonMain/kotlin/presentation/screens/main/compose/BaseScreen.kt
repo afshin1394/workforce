@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -19,8 +18,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
@@ -51,9 +48,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.sp
 import cafe.adriel.voyager.core.registry.rememberScreen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
@@ -100,7 +94,6 @@ fun <T : BaseViewModel> BaseScreen(
     isShwCloseBtnBottomSheet: Boolean = true,
     shouldBlurOnBottomSheetExpansion: Boolean = true,
     typeBottomSheet: String = BottomSheetTypes.Default
-
 ) {
     val navigator = LocalNavigator.currentOrThrow
     val loginScreen = rememberScreen(presentation.nav.Screen.Auth.Login)
@@ -274,7 +267,6 @@ fun <T : BaseViewModel> BaseScreen(
                         else
                             Modifier.fillMaxSize().blur(7.dp).clickable(enabled = false) { }
                     ) {
-
                         Box(
                             modifier = Modifier.fillMaxWidth().fillMaxHeight()
                                 .background(backgroundBackground3)
@@ -289,14 +281,9 @@ fun <T : BaseViewModel> BaseScreen(
 
 
                             when (orientationState) {
-                                OrientationState.Default -> {
-
-
-                                }
+                                OrientationState.Default -> {}
 
                                 OrientationState.Landscape -> {
-
-
                                     if (previousOrientation == OrientationState.Portrait) {
 
                                         isCloseMenuForOrientation.value = true
@@ -324,8 +311,6 @@ fun <T : BaseViewModel> BaseScreen(
                                     previousOrientation = OrientationState.Portrait
                                 }
                             }
-
-
 
                             when (gpsState) {
                                 GpsState.Default -> {
@@ -441,8 +426,6 @@ fun <T : BaseViewModel> BaseScreen(
                         }
 
                         gpsState is GpsState.Disabled -> {
-
-
                             bottomSheetDoubleActionWithMessage(
                                 BottomSheetActionModel(
                                     stringResource(MR.strings.cancel),
@@ -493,7 +476,7 @@ fun <T : BaseViewModel> BaseScreen(
                             )
                         }
                     }
-                })   {
+                }) {
 
                 Column(
                     modifier = if ((scaffoldState.bottomSheetState.isExpanded || gpsScaffoldState.bottomSheetState.isExpanded) && shouldBlurOnBottomSheetExpansion) Modifier.fillMaxSize()
