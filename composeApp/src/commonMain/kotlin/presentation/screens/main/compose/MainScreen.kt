@@ -349,7 +349,7 @@ class MainScreen(
                                     textInverse
                                 ), onFirstButtonClick = {},
                                 onSecondButtonClick = {
-                                    viewModel.logoutCallApi{
+                                    viewModel.logoutCallApi {
                                         navigator.pop()
                                         navigator.push(loginScreen)
                                     }
@@ -844,9 +844,8 @@ class MainScreen(
                                 tasks = ArrayList(viewModel.tasks.toList()),
                                 onAccept = {
                                     if (isClickable) {
-                                        BackgroundServiceApp.updateServiceState(ServiceState.Suspend)
                                         isClickable = false
-                                       viewModel.checkIfTicketIsEdited()
+                                        viewModel.checkIfTicketIsEdited()
                                         viewModel.selectedTask.value = it
                                         viewModel.resetSuspendTask()
                                         scope.launch {
@@ -868,6 +867,7 @@ class MainScreen(
 
                             }
                         } else {
+                            BackgroundServiceApp.updateServiceState(ServiceState.Suspend)
                             viewModel.updateState(MainEvent.ShowAcceptTicketDialog)
                         }
                     }
@@ -880,14 +880,12 @@ class MainScreen(
                         }
 
                         MainEvent.EditPhoto -> {
-
                             DrawController.reset()
                             viewModel.updateState(MainEvent.PhotoPreview)
                         }
 
                         MainEvent.DeletePhoto -> {
                             viewModel.updateState(MainEvent.PhotoPreview)
-
                         }
 
                         MainEvent.SuspendTicket -> {
@@ -917,7 +915,6 @@ class MainScreen(
                                 drawerState.close()
                             viewModel.updateState(MainEvent.Exit)
                         }
-
 
                     } else {
                         when (viewModel.events.value) {

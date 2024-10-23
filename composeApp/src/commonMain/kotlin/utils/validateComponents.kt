@@ -16,7 +16,6 @@ fun validateComponents(
 ): Map<String, List<StringDesc>> {
     val errors = mutableMapOf<String, List<ResourceFormattedStringDesc>>()
     Napier.log(LogLevel.ASSERT, tag = "validateComponent", message = components.toList().toString())
-    println("haniiiiiiiivalidateComponents  ${firstCheck}")
     fun updateComponentsRecursively(component: ComponentDomain): ComponentDomain {
         return when (component.type) {
             FormViewerTypes.TextField -> {

@@ -89,8 +89,6 @@ fun PhotoPreviewComponent(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
 
-
-        println("Photoselected${selectedItemImage}")
         LaunchedEffect(Unit) {
             delay(300)
             firstTimeInitPager = false
@@ -118,7 +116,6 @@ fun PhotoPreviewComponent(
                 onItemSelectedPosition = {
                     firstTimeInitPager = false
                     selectedItemImage = it
-                    println("onItemSelectedPosition${it}")
                 },
                 onItemSelect = {
                     imageSelected.value = it.origin_uri

@@ -25,16 +25,13 @@ suspend fun startDownloadFileApk(url: String): Boolean {
 
             return apkFilePath?.let { path ->
                 InstallApk(path)
-                println("Installing: ok")
                 true
             } ?: run {
-                println("Installing: nok")
                 false
             }
         } else {
 
             getSharedPref().put(FileApk, "")
-            println("Error during download: ${downloadResult.exceptionOrNull()?.message}")
             return false
         }
     } else {
@@ -42,10 +39,8 @@ suspend fun startDownloadFileApk(url: String): Boolean {
         val apkFilePath = getSharedPref().getString(FileApk)
         return apkFilePath?.let { path ->
             InstallApk(path)
-            println("Installing: ok")
             true
         } ?: run {
-            println("Installing: nok")
             false
         }
     }

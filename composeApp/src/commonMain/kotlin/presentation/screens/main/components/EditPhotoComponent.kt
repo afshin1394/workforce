@@ -105,13 +105,8 @@ fun EditPhotoComponent(
    val bitmapNewState= UriToImageBitmap(ParseUri(if (photoDomain.edited_uri=="") photoDomain.origin_uri else photoDomain.edited_uri), angle)
     bitmapNewState as ImageBitmap
 
-    println("checkForRecompose${photoDomain.edited_uri}")
     val widthImage =  bitmapNewState.width/ getDpi()
     val heightImage =  bitmapNewState.height / getDpi()
-
-    Napier.log(LogLevel.ASSERT,tag = "andazee", message = widthImage.toString())
-    Napier.log(LogLevel.ASSERT,tag = "andazee", message = heightImage.toString())
-
 
     LaunchedEffect(Unit){
         InternalStorage.createWorkItemImages(

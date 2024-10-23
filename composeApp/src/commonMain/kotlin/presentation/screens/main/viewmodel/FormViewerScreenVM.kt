@@ -28,7 +28,6 @@ class FormViewerScreenVM(
     val uriList = mutableListOf<String>()
 
     init {
-
         uriList.add("content://irancell.nwg.wfm.provider/wfmImages/Suspend/Original/--workorder_19-20240805-00008/fbb5143e-531d-4151-9384-7fc768865c36%40Suspend*4096*.jpg")
         uriList.add("content://irancell.nwg.wfm.provider/wfmImages/Suspend/Original/--workorder_19-20240805-00008/c62a2c98-0aa9-4ef6-ab7e-788b599fe39a%40Suspend*4096*.jpg")
         uriList.add("content://irancell.nwg.wfm.provider/wfmImages/Suspend/Original/--workorder_19-20240805-00008/e2a0e4f0-489c-42ca-b9f3-3e48ee05f48e%40Suspend*4096*.jpg")
@@ -51,12 +50,7 @@ class FormViewerScreenVM(
         uriList.add("content://irancell.nwg.wfm.provider/wfmImages/Process/Original/0/8e2c5021-f125-47a2-8346-57de0220e4b4%40image_ixz2q*4096*.jpg")
         uriList.add("content://irancell.nwg.wfm.provider/wfmImages/Process/Original/0/33e49d09-6c4b-44ff-b955-02d350fd1274%40image_ixz2q*4096*.jpg")
         uriList.add("content://irancell.nwg.wfm.provider/wfmImages/Process/Original/0/3e3c7866-e7d7-4a95-8622-835128826f17%40image_ixz2q*4096*.jpg")
-
-
     }
-
-
-
 
     private val photoDomain = MutableStateFlow<PhotoDomain>(
         PhotoDomain(
@@ -86,9 +80,6 @@ class FormViewerScreenVM(
                         Napier.log(LogLevel.ASSERT, "getAllPhotoUseCase", message = "LOADING: ")
                         updateState(ViewStates.Loading)
                     }
-                    AsyncStatus.EMPTY->{
-
-                    }
 
                     AsyncStatus.SUCCESS -> {
                         photoDomainList.clear()
@@ -109,34 +100,24 @@ class FormViewerScreenVM(
                             }
                         }
 
-
-
-
-                       photoDomainList.forEach { photoDomain ->
+                        photoDomainList.forEach { photoDomain ->
                             uriList.add(photoDomain.origin_uri)
                             uriList.add(photoDomain.edited_uri)
                         }
-
-
-                        uriList.forEach {
-                            println("URI: $it")
-                        }
                     }
+
+                    else -> {}
                 }
             }
         }
     }
 
-/*    fun createJsonWithTicketNumber(ticketNumber: String): ExtraInfo {
-        return ExtraInfo(ticket_num = ticketNumber)
-    }*/
+    /*    fun createJsonWithTicketNumber(ticketNumber: String): ExtraInfo {
+            return ExtraInfo(ticket_num = ticketNumber)
+        }*/
 
 
-
-
-
-
-     fun callApiUpload(uploadRequest: UploadRequest) {
+    fun callApiUpload(uploadRequest: UploadRequest) {
         viewModelScope.launch(Dispatchers.Main) {
 
 
@@ -144,25 +125,19 @@ class FormViewerScreenVM(
                 when (it.status) {
                     AsyncStatus.ERROR -> {
                         handleError(it.resultStatus)
-                        println("apiUpload  ${"Error"}")
                     }
 
                     AsyncStatus.LOADING -> {
                         updateState(ViewStates.Loading)
-                        println("apiUpload  ${"Loading"}")
                     }
-                    AsyncStatus.EMPTY->{
 
-
-                    }
+                    AsyncStatus.EMPTY -> {}
 
                     AsyncStatus.SUCCESS -> {
                         updateState(ViewStates.Success())
-                        println("apiUpload  ${it.data?.toString()}")
-                        val formattedList = formatUploadDomainList(it.data!!)
-                        formattedList.forEach { println("apiUploadResponse  ${it}") }
                     }
 
+                    else -> {}
                 }
             }
         }

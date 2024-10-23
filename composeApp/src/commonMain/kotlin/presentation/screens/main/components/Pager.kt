@@ -81,7 +81,6 @@ fun <T : Any> Pager(
     state.itemSpacing = with(LocalDensity.current) { itemSpacing.toPx() }
     state.orientation = orientation
     state.listener = { index ->
-        println("PhotoselectedPagger${initialIndex}")
         if (!firstTimeInit){
 
             onItemSelect(items[state.currentIndex])
@@ -107,8 +106,6 @@ fun <T : Any> Pager(
         IconButton(
             onClick = {
                 state.scope?.launch {
-
-                    println("currentPage${state.currentIndex}")
                     state.snapTo((state.currentIndex+1).coerceIn(0, items.lastIndex))
                 }
             },
@@ -177,20 +174,13 @@ fun <T : Any> Pager(
         LaunchedEffect(key1 = items, key2 = initialIndex,key3 = angle, ) {
            state.snapTo(initialIndex)
             onItemSelectedPosition(initialIndex)
-            println("PhotoselectedPagger2${initialIndex}")
             onItemSelect(items[initialIndex])
-            println("testsnap${initialIndex}")
-
-
         }
 
         IconButton(
             onClick = {
                 state.scope?.launch {
-
-                    println("currentPage${state.currentIndex}")
                     state.snapTo((state.currentIndex- 1).coerceIn(0, items.lastIndex))
-
                 }
             },
             modifier = Modifier

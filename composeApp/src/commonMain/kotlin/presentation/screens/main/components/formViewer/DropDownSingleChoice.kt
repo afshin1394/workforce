@@ -107,7 +107,6 @@ fun DropDownSingleChoice(
     }
 
 
-    println("recomposeeee ${"SingleChoice"}")
     if(!hideLogic) {
         Column(Modifier.padding(16.dp)) {
             val styledString = buildAnnotatedString {

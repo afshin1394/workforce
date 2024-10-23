@@ -269,14 +269,9 @@ fun List<android.telephony.CellInfo>.toJson(): JsonObject {
         }
     }
     val jsonString = json.encodeToString(cellInfoModule.serializer(), cellInfos)
-    println("jsonSTRING :  $jsonString")
-
     val jsonArray = Json.decodeFromString<JsonArray>(jsonString)
     val jsonObject = JsonObject(mapOf("info" to jsonArray))
-
     val wrappedJsonString = Json.encodeToString(JsonObject.serializer(), jsonObject)
-
-    println("wrappedJsonString :  $wrappedJsonString")
 
     return json.parseToJsonElement(wrappedJsonString).jsonObject
 

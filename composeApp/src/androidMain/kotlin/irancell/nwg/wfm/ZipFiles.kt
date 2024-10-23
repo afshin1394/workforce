@@ -21,8 +21,6 @@ actual fun ZipFiles(fileDataList: List<String>, zipFilePath: String): FileData? 
                     fis.copyTo(zipOut)
                     zipOut.closeEntry()
                 }
-            } else {
-                println("File not found: ${fileData}")
             }
         }
 

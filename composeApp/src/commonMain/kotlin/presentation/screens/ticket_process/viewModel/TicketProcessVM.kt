@@ -742,7 +742,6 @@ class TicketProcessVM(
                 when (it.status) {
                     AsyncStatus.ERROR -> {
                         handleError(it.resultStatus)
-                        println("TaskCallApi${"ERROR"}")
                     }
 
                     AsyncStatus.LOADING -> {
@@ -756,7 +755,6 @@ class TicketProcessVM(
                     AsyncStatus.SUCCESS -> {
                         _updateTasksComplete.update { true }
                         updateState(ViewStates.Success())
-                        println("TaskCallApi${"SUCCESS"}")
                     }
                 }
             }

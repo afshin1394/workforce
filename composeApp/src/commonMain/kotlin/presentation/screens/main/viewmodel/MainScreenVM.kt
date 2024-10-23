@@ -183,7 +183,6 @@ class MainScreenVM(
 
     private fun startWorkerManager() {
         BackgroundWorker.start(900000L) {
-            println("Work executed!      ${" is okeyyyyyyyyy"}")
             sendLocationForServer()
         }
     }
@@ -219,7 +218,6 @@ class MainScreenVM(
             }
         }
 
-        println("AvailabilityObjectId  ${getSharedPref().getString(AvailabilityObjectId)}")
         return generalLocationList.map { location ->
             LiveLocationDomain(
                 latitude = location.latitude.toDouble(),
@@ -237,12 +235,7 @@ class MainScreenVM(
         viewModelScope.launch {
             sendLocationToServerUseCase(Unit).collect {
                 when (it.status) {
-                    AsyncStatus.ERROR -> {
-                        println("Work executed!      ${" is ERROR"}")
-                    }
-
                     AsyncStatus.SUCCESS -> {
-                        println("Work executed!      ${" is SUCCESS"}")
                         updateSendLocationInDB()
                     }
 
@@ -256,12 +249,7 @@ class MainScreenVM(
         viewModelScope.launch {
             updateUnSendLocationUseCase(Unit).collect {
                 when (it.status) {
-                    AsyncStatus.ERROR -> {
-                        println("Work executed!      ${" is ERROR delete"}")
-                    }
-
                     AsyncStatus.SUCCESS -> {
-                        println("Work executed!      ${" is SUCCESS delete"}")
                         deleteSendLocationInDB()
                     }
 
@@ -338,7 +326,6 @@ class MainScreenVM(
 
                     AsyncStatus.SUCCESS -> {
                         updateState(ViewStates.Success())
-                        println("testtttttttavaliblity ${it.data}")
                         it.data?.let { available ->
                             updateAvailabilityState(if (available) AvailabilityStatus.Available else AvailabilityStatus.Unavailable)
                             _availability.update { available }
@@ -473,9 +460,6 @@ class MainScreenVM(
             }
         }
 
-        println("Active filters: $filterMaps")
-        println("Original tasks: $tasks")
-
         var tasksList: List<TaskDomain> = tasks.toList()
 
         for (key in filterMaps) {
@@ -483,33 +467,28 @@ class MainScreenVM(
                 FilterType.REGION -> {
                     val filteredByRegion =
                         tasksList.filter { it.basic_info.region == key.filter.title }
-                    println("Filtering by region (${key.filter.title}): $filteredByRegion")
                     filteredByRegion
                 }
 
                 FilterType.STATE -> {
                     val filteredByState =
                         tasksList.filter { it.basic_info.ticket_state == key.filter.title }
-                    println("Filtering by state (${key.filter.title}): $filteredByState")
                     filteredByState
                 }
 
                 FilterType.SEVERITY_LEVEL -> {
                     val filteredBySeverity =
                         tasksList.filter { it.basic_info.level == key.filter.title }
-                    println("Filtering by severity (${key.filter.title}): $filteredBySeverity")
                     filteredBySeverity
                 }
 
                 else -> tasksList
             }
-            println("TasksList after applying ${key.type}: $tasksList")
         }
 
         tasks.clear()
         tasks.addAll(tasksList)
 
-        println("Final filtered tasks: $tasks")
     }
 
     fun removeAllFilters() {
@@ -958,11 +937,9 @@ class MainScreenVM(
             logoutUseCase(Unit).collect {
                 when (it.status) {
                     AsyncStatus.ERROR -> {
-                        println("apiiLogout   ${"ERROR"}")
                     }
 
                     AsyncStatus.SUCCESS -> {
-                        println("apiiLogout   ${"success"}")
                         onSuccess()
                     }
 
@@ -976,13 +953,11 @@ class MainScreenVM(
         updateTaskUseCase(Unit).collect {
             when (it.status) {
                 AsyncStatus.ERROR -> {
-                    println("TaskCallApi${"ERROR"}")
                 }
 
                 AsyncStatus.SUCCESS -> {
                     getTasks()
                     updateTicketListState(TicketListStatus.Filled)
-                    println("PullToRefreshCallApi${"SUCCESS"}")
                 }
 
                 AsyncStatus.EMPTY -> {

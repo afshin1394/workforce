@@ -273,7 +273,6 @@ fun <T : BaseViewModel> BaseScreen(
                         ) {
                             content(scaffoldState.snackbarHostState)
                             BackButtonHandler.backPress(onBackPressed = {
-                                println("checkkkkvalueeee")
                                 if (vpnDetectionStates !is VpnDetectionStates.ShowBottomSheet) {
                                     onBackPressed()
                                 }
@@ -493,7 +492,6 @@ fun <T : BaseViewModel> BaseScreen(
                         content(scaffoldState.snackbarHostState)
 
                         BackButtonHandler.backPress(onBackPressed = {
-                            println("checkkkkvalueeee")
                             if (vpnDetectionStates !is VpnDetectionStates.ShowBottomSheet) {
                                 onBackPressed()
                             }

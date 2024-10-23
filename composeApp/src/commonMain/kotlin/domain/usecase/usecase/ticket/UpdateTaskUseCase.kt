@@ -49,18 +49,16 @@ class UpdateTaskUseCase(
             }
         }
 
-        iInitialFormRepository.deleteAll()
-        iInitialFormRepository.resetEntitySequence()
-        iInitialFormRepository.insertAll(initialTasks)
-        Napier.log(LogLevel.ASSERT, tag = "UpdateTaskUseCase", message = "Initial forms inserted")
-
         val domainList = tasks.details.toTaskEntityList().toTaskDomainList()
         val stepEntities = arrayListOf<StepsEntity>()
         val stepPointerEntities = arrayListOf<StepPointerEntity>()
 
+        Napier.log(LogLevel.ASSERT, tag = "stepsYO", message = "1")
+
         coroutineScope {
             val deferredStepFetches = domainList.map { task ->
                 async {
+                    Napier.log(LogLevel.ASSERT, tag = "stepsYO", message = "2")
                     task.basic_info.ticket_number?.let { ticketNumber ->
                         try {
                             val stepList = iStepsRepository.fetch(ticketNumber)
@@ -82,9 +80,25 @@ class UpdateTaskUseCase(
                     }
                 }
             }
-
             deferredStepFetches.awaitAll()
         }
+
+        Napier.log(LogLevel.ASSERT, tag = "stepsYO", message = "3")
+
+
+        iTaskRepository.deleteAll()
+        iTaskRepository.resetEntitySequence()
+
+        val uniqueTasks = tasks.details.toTaskEntityList().distinctBy { it.ticket_number }
+        iTaskRepository.insertAll(uniqueTasks)
+
+        Napier.log(LogLevel.ASSERT, tag = "stepsYO", message = "4")
+
+        iInitialFormRepository.deleteAll()
+        iInitialFormRepository.resetEntitySequence()
+        iInitialFormRepository.insertAll(initialTasks)
+
+        Napier.log(LogLevel.ASSERT, tag = "stepsYO", message = "5")
 
         updateDatabaseWithStepsData(
             editedTickets = iSendStepsRepository.getEditedTickets(),
@@ -92,12 +106,8 @@ class UpdateTaskUseCase(
             stepPointerEntities
         )
 
-        iTaskRepository.deleteAll()
-        iTaskRepository.resetEntitySequence()
+        Napier.log(LogLevel.ASSERT, tag = "stepsYO", message = "6")
 
-        val uniqueTasks = tasks.details.toTaskEntityList().distinctBy { it.ticket_number }
-        iTaskRepository.insertAll(uniqueTasks)
-        Napier.log(LogLevel.ASSERT, tag = "UpdateTaskUseCase", message = "Unique tasks inserted")
 
         return uniqueTasks
     }

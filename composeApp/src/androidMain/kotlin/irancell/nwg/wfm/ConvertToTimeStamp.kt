@@ -15,7 +15,6 @@ actual fun ConvertStringToTimeStamp(dateString:String): Long {
     val localDate = LocalDate.parse(dateString, formatter)
     val nextDay = localDate.plusDays(1)
     val formattedDate = nextDay.format(formatter)
-    println("Next day: $formattedDate")
 
     val date = SimpleDateFormat("yyyy-MM-dd").parse(formattedDate)
     val timeInMillis = date?.time ?: 0

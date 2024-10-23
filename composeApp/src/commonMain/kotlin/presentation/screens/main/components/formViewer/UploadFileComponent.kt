@@ -90,9 +90,6 @@ fun UploadFileComponent(
     val fileExtensions = listOf("pdf", "docx", "png", "jpg")
     val fileIcons = listOf(MR.images.pdf, MR.images.docx, MR.images.icon_png, MR.images.icon_jpg)
 
-    println("recomposeeee ${"UploadFile"}")
-
-
     fun getFileIcon(fileName: String): ImageResource {
         val fileExtension = fileName.substringAfterLast(".")
         val index = fileExtensions.indexOf(fileExtension.toLowerCase())

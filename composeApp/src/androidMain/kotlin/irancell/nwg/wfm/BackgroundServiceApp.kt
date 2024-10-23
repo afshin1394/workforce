@@ -41,6 +41,7 @@ import utils.AsyncStatus
 import utils.ServiceState
 import utils.getCurrentDate
 import java.util.concurrent.TimeUnit
+import kotlin.math.log
 
 internal actual class BackgroundServiceApp : Service(), KoinComponent {
 
@@ -71,6 +72,7 @@ internal actual class BackgroundServiceApp : Service(), KoinComponent {
             MutableStateFlow(TicketListStatus.UnRecognized)
 
         actual fun updateServiceState(serviceState: ServiceState) {
+            Log.d("HeyServiceGimmeTheLog",serviceState.toString())
             _serviceState.update { serviceState }
         }
 
@@ -183,7 +185,6 @@ internal actual class BackgroundServiceApp : Service(), KoinComponent {
                     updateServiceState(newState)
                 }
                 val data = telephonyData.getTelephonyData()
-                println("service action${intent?.action}")
                 when (intent?.action) {
                     AlarmAction.SEND_LOCATION.title -> {
                         startSendLocationAlarm()
@@ -236,15 +237,6 @@ internal actual class BackgroundServiceApp : Service(), KoinComponent {
             )
         ).collect {
             when (it.status) {
-                AsyncStatus.ERROR -> {
-                    val errorMessage = it.message!!
-                    println("checkGpsPerAction storeLocationDataUseCase Error")
-                }
-
-                AsyncStatus.SUCCESS -> {
-                    println("checkGpsPerAction sustoreLocationDataUseCaseccess")
-                }
-
                 else -> {}
             }
         }
@@ -290,11 +282,9 @@ internal actual class BackgroundServiceApp : Service(), KoinComponent {
                     AsyncStatus.ERROR -> {
                         if (it.resultStatus is ResultStatus.CLIENT_EXCEPTION.UNATHORIZED || it.resultStatus is ResultStatus.CLIENT_EXCEPTION.FORBIDDEN)
                             _serviceState.update { ServiceState.Faulty(MR.strings.unauthorized) }
-                        println("TaskCallApi${"ERROR"}")
                     }
 
                     AsyncStatus.SUCCESS -> {
-                        println("TaskCallApi${"SUCCESS"}")
                         Log.i("getAllTask", "onStartCommand: CallApi" + it.data)
                         _ticketListState.update { TicketListStatus.Filled }
                     }

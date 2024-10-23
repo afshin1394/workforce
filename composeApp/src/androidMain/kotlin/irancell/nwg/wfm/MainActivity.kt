@@ -79,7 +79,6 @@ class MainActivity : FragmentActivity(), SensorEventListener {
         when (newConfig.orientation) {
             Configuration.ORIENTATION_LANDSCAPE -> {
                 isPortrait = false
-                println("Switched to landscape mode")
                 canOpenDrawer = false  // در لحظه تغییر، باز شدن دراور را غیر فعال کنید
 
                 getSharedPref().put(ORIENTATION, canOpenDrawer)
@@ -87,7 +86,6 @@ class MainActivity : FragmentActivity(), SensorEventListener {
             }
             Configuration.ORIENTATION_PORTRAIT -> {
                 isPortrait = true
-                println("Switched to portrait mode")
                 canOpenDrawer = false  // در لحظه تغییر، باز شدن دراور را غیر فعال کنید
 
                 getSharedPref().put(ORIENTATION, canOpenDrawer)
@@ -135,11 +133,9 @@ class MainActivity : FragmentActivity(), SensorEventListener {
             // وقتی در حالت عمودی هستیم و در حال چرخش به افقی هستیم
             if (isPortrait && (pitch > -10 && pitch < 10)) {
                 // تغییر از portrait به landscape
-                println("تغییر از portrait به landscape")
                 isPortrait = false // به‌روزرسانی وضعیت
             } else if (!isPortrait && (pitch < -80 || pitch > 80)) {
                 // تغییر از landscape به portrait
-                println("تغییر از landscape به portrait")
                 isPortrait = true // به‌روزرسانی وضعیت
             }
         }

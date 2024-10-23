@@ -51,7 +51,6 @@ fun Radio(
 ) {
 
     var select by remember { mutableStateOf(selectItem) }
-    println("recomposeeee  radio ${processLogicDomain}")
     val disableLogic = processLogicDomain.disabled || disable
     val readOnlyLogic = processLogicDomain.readOnly || readOnly
     val validateLogic = processLogicDomain.validate
