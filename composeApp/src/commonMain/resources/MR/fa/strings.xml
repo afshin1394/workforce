@@ -136,11 +136,15 @@
     <string name="Equal">عدد نباید برابر باشد با %s</string>
     <string name="NotEqual">%s عدد باید برابر باشد با</string>
     <string name="GreaterThan">%s عدد نباید بزرگتر باشد از</string>
+    <string name="NotGreaterThan">عدد باید بزرگتر باشد از %s</string>
     <string name="GreaterOrEqualTo">عدد باید بزرگتر یا مساوی باشد با %s</string>
     <string name="NotGreaterOrEqualTo">%s عدد باید بزرگتر یا مساوی باشد با</string>
-    <string name="NotGreaterThan">عدد باید بزرگتر باشد از %s</string>
     <string name="LessThan">%s عدد باید کوچکتر باشد از</string>
+    <string name="NotLessThan">عدد نباید کوچکتر باشد از %s</string>
     <string name="LessThanOrEqualTo">عدد باید کوچکتر یا مساوی باشد با %s</string>
+    <string name="NotLessThanOrEqualTo">عدد باید کوچکتر یا مساوی باشد با %s</string>
+
+
 
 
     <string name="i_ticket">تسک های من</string>
