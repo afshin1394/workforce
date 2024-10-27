@@ -8,6 +8,7 @@ import dev.icerock.moko.resources.desc.ResourceFormatted
 import dev.icerock.moko.resources.desc.ResourceFormattedStringDesc
 import dev.icerock.moko.resources.desc.StringDesc
 import domain.models.form_struct.ComponentDomain
+import domain.models.form_struct.ValueDate
 import domain.models.form_struct.ValueDomain
 import domain.models.form_struct.logic.ConditionDomain
 import domain.models.ticket.PhaseDomain
@@ -60,8 +61,7 @@ class LogicCalculation(
                                 shouldHide = expressionSatisfied
                             )
                         )
-                        component.processLogicDomain.value.shouldHide = expressionSatisfied
-                        component._processLogicDomain.shouldHide = expressionSatisfied
+
                         if (expressionSatisfied) {
                             component.clearValues()
                         }
@@ -518,16 +518,14 @@ class LogicCalculation(
                             if (it.isNotEmpty()) {
                                 if (component.isSelectableValue()) {
                                     component.values?.forEach {
-                                        if (it.isSelected && !(it.value.equals(
+
+                                            expressionResults[i].add(it.isSelected && !(it.value.equals(
                                                 condition.value
-                                            ))
-                                        )
-                                            expressionResults[i].add(true)
+                                            )))
                                     }
                                 } else {
                                     component.values?.get(0)?.let {
-                                        if (!it.value.equals(condition.value))
-                                            expressionResults[i].add(true)
+                                            expressionResults[i].add(!it.value.equals(condition.value))
                                     }
                                 }
 
@@ -540,11 +538,10 @@ class LogicCalculation(
                             if (it.isNotEmpty()) {
                                 if (component.isSelectableValue()) {
                                     component.values?.forEach {
-                                        if (it.isSelected && it.value?.startsWith(
+
+                                            expressionResults[i].add(it.isSelected && it.value?.startsWith(
                                                 condition.value.toString()
-                                            ) == true
-                                        )
-                                            expressionResults[i].add(true)
+                                            ) == true)
                                     }
                                 } else {
                                     component.values?.let {
@@ -558,11 +555,7 @@ class LogicCalculation(
                                     }
 
 
-                                    expressionResults[i].add(
-                                        component.values?.get(0)?.value?.startsWith(
-                                            condition.value.toString()
-                                        ) == true
-                                    )
+
                                 }
 
                             }
@@ -702,31 +695,29 @@ class LogicCalculation(
                     OperatorType.ContainsAny -> {
 
                         condition.values?.let {
-                            if (component?.values?.filter { it.value?.isNotEmpty() == true && it.isSelected }
+
+                                expressionResults[i].add(component?.values?.filter { it.value?.isNotEmpty() == true && it.isSelected }
                                     ?.map { it.value }?.intersect(condition.values)
-                                    ?.isNotEmpty() == true
-                            ) {
-                                expressionResults[i].add(true)
-                            }
+                                    ?.isNotEmpty() == true)
+
                         }
 
                     }
 
                     OperatorType.NotContainsAny -> {
                         condition.values?.let {
-                            if (component?.values?.filter { it.value?.isNotEmpty() == true && it.isSelected }
+
+                                expressionResults[i].add(component?.values?.filter { it.value?.isNotEmpty() == true && it.isSelected }
                                     ?.map { it.value }?.intersect(condition.values)
-                                    ?.isEmpty() == true
-                            )
-                                expressionResults[i].add(true)
+                                    ?.isEmpty() == true)
                         }
                     }
 
                     OperatorType.ContainsAll -> {
                         condition.values?.let {
-                            if (component?.values?.filter { it.value?.isNotEmpty() == true && it.isSelected }
+
+                                expressionResults[i].add(component?.values?.filter { it.value?.isNotEmpty() == true && it.isSelected }
                                     ?.map { it.value }?.containsAll(condition.values) == true)
-                                expressionResults[i].add(true)
                         }
                     }
                 }
@@ -889,8 +880,8 @@ class LogicCalculation(
 
                                     expressionResults[i].add(
                                         ValidateLogicResult(
-                                            (cmpValue.toDouble()
-                                                ?: 0.0) == (value?.toDouble() ?: 0.0),
+                                            (cmpValue?: 0.0
+                                                ) == (value?.toDoubleOrNull() ?: 0.0),
                                             StringDesc.ResourceFormatted(
                                                 MR.strings.NotEqual,
                                                 (value).toString()
@@ -1005,7 +996,7 @@ class LogicCalculation(
 
                                     expressionResults[i].add(
                                         ValidateLogicResult(
-                                            (cmpValue.toDouble()
+                                            (cmpValue?: 0.0
                                                 ) != (value?.toDouble() ?: 0.0),
                                             StringDesc.ResourceFormatted(
                                                 MR.strings.Equal,
@@ -1110,18 +1101,18 @@ class LogicCalculation(
                                     else -> {}
                                 }
                             } ?: run {
-                                val cmpValue =
+                                val cmpValue : Double? =
                                     if (componentDomain.type == FormViewerTypes.Datetime) {
                                         componentDomain.values?.get(0)?.value?.parseLocalDateTime()
-                                            ?.localDateTimeToMilliseconds()
+                                            ?.localDateTimeToMilliseconds()?.toDouble()
                                     } else {
                                         componentDomain.values?.get(0)?.value?.toDoubleOrNull()
                                     }
                                 if (componentDomain.type == FormViewerTypes.Datetime) {
                                     expressionResults[i].add(
                                         ValidateLogicResult(
-                                            (cmpValue?.toDouble()
-                                                ?: 0.0) < (value?.toDouble() ?: 0.0),
+                                            (cmpValue
+                                                ?: 0.0) < (value?.toDoubleOrNull() ?: 0.0),
                                             StringDesc.ResourceFormatted(
                                                 MR.strings.NotGreaterThan,
                                                 (getLocalDateTimeFromLong(
@@ -1238,7 +1229,7 @@ class LogicCalculation(
 
                                     expressionResults[i].add(
                                         ValidateLogicResult(
-                                            !((cmpValue
+                                            !((cmpValue?:0.0
                                                 ) >= (value?.toDoubleOrNull() ?: 0.0)),
                                             StringDesc.ResourceFormatted(
                                                 MR.strings.NotGreaterOrEqualTo,
@@ -1351,8 +1342,8 @@ class LogicCalculation(
                                     }
                                 expressionResults[i].add(
                                     ValidateLogicResult(
-                                        ((cmpValue?.toDouble()
-                                            ?: 0.0) < (value?.toDouble() ?: 0.0)),
+                                        ((cmpValue
+                                            ?: 0.0) < (value?.toDoubleOrNull() ?: 0.0)),
                                         StringDesc.ResourceFormatted(
                                             MR.strings.NotLessThan,
                                             (value).toString()
@@ -1464,8 +1455,8 @@ class LogicCalculation(
                                 cmpValue?.let {
                                     expressionResults[i].add(
                                         ValidateLogicResult(
-                                            !((cmpValue.toDouble()
-                                                ?: 0.0) <= (value?.toDouble() ?: 0.0)),
+                                            !((cmpValue
+                                                ?: 0.0) <= (value?.toDoubleOrNull() ?: 0.0)),
                                             StringDesc.ResourceFormatted(
                                                 MR.strings.NotLessThanOrEqualTo,
                                                 (getLocalDateTimeFromLong(
@@ -1520,11 +1511,12 @@ class LogicCalculation(
 
     private fun ComponentDomain?.clearValues() {
         if (this?.isSelectableValue() == true) {
-            this.values?.forEach {
+           this.updateValues(this.values?.map {
                 it.isSelected = false
-            }
+                it
+            })
         } else
-            this?.updateValues(null)
+            this?.updateValues(listOf())
 
     }
 }
