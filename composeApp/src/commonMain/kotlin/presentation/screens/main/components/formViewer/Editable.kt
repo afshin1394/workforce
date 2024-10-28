@@ -62,14 +62,7 @@ fun Editable(
     Napier.log(LogLevel.ASSERT, tag = "Editable value", message = value)
     val valueChange = remember {   mutableStateOf(processLogicDomain.calculatedValue?:value) }
 
-//    LaunchedEffect(processLogicDomain.calculatedValue) {
-//        processLogicDomain.calculatedValue?.let {
-//
-//            if (it.isNotEmpty() && it != valueChange.value) {
-//                valueChange.value = it
-//            }
-//        }
-//    }
+
 
 
     val disableLogic = processLogicDomain.disabled || disable
