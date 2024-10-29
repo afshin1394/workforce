@@ -157,14 +157,18 @@ class TicketProcessVM(
                                 )
                                 tempComponentList.clear()
                                 tempComponentList.addAll(it.toList())
-
-                                handleLogics {
+                                async {
                                     validateComponents(tempComponentList, true) {
                                         updateTempComponentList(it)
                                         updateState(ViewStates.Success())
-
+//
                                     }
+                                }.await()
+
+                                handleLogics {
                                 }
+
+
                             }
 
                             Napier.log(
@@ -381,43 +385,27 @@ class TicketProcessVM(
         }
     }
 
-    fun handleLogics(onResult: (MutableList<ExtractLogicsModel>) -> Unit) {
+    suspend fun handleLogics(onResult: (MutableList<ExtractLogicsModel>) -> Unit) {
 
 
-        viewModelScope.launch(Dispatchers.IO) {
+        withContext(Dispatchers.IO) {
             extractLogicsModel.clear()
-            try {
-                async { checkLogicsForAll(tempComponentList) }.await()
-                async { checkAutoFillLogicForAll(tempComponentList) }.await()
+            checkLogicsForAll(tempComponentList)
+            checkAutoFillLogicForAll(tempComponentList)
 
-                viewModelScope.launch(Dispatchers.Main) {
-                    arrayListOf<ComponentDomain>().apply {
-                        this.addAll(tempComponentList)
-                        tempComponentList.clear()
-                        tempComponentList.addAll(this)
-                    }
-
-
-                    onResult(extractLogicsModel)
-
+            viewModelScope.launch(Dispatchers.Main) {
+                arrayListOf<ComponentDomain>().apply {
+                    this.addAll(tempComponentList)
+                    tempComponentList.clear()
+                    tempComponentList.addAll(this)
                 }
 
 
-            } catch (_: Exception) {
-                async { checkLogicsForAll(tempComponentList) }.await()
-                viewModelScope.launch(Dispatchers.Main) {
+                onResult(extractLogicsModel)
 
-                    arrayListOf<ComponentDomain>().apply {
-                        this.addAll(tempComponentList)
-                        tempComponentList.clear()
-                        tempComponentList.addAll(this)
-                    }
-
-                    onResult(extractLogicsModel)
-                }
             }
 
-        }
+        }.join()
     }
 
 

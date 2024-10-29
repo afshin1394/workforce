@@ -37,6 +37,7 @@ import domain.models.PhotoDomain
 import domain.models.form_struct.ComponentDomain
 import domain.models.form_struct.ProcessLogicDomain
 import domain.models.form_struct.ValueDomain
+import io.github.aakira.napier.LogLevel
 import io.github.aakira.napier.Napier
 import irancell.nwg.wfm.MR
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -101,7 +102,7 @@ fun groupComponent(
     }
 
 
-
+   Napier.log(LogLevel.ASSERT, tag = "hideLogictoString", message = hideLogic.toString())
     if(!hideLogic) {
         Column(
             modifier = Modifier

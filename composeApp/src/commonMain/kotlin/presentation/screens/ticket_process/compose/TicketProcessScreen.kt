@@ -42,6 +42,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.koin.compose.koinInject
 import presentation.components.TicketProcessTopBar
 import presentation.model.BottomSheetActionModel
@@ -240,60 +241,42 @@ class TicketProcessScreen(
                         bottomSingleActionComponent(SingleButtonActionModel(
                             stringResource(MR.strings.resume), surfaceBrandDefault, textInverse
                         ), onClick = {
-                            viewModel.handleLogics { extractLogicsModel ->
-                                scope.launch(Dispatchers.Main) {
-                                    if (extractLogicsModel.size > 0) {
-                                        val itemsToRemove =
-                                            mutableListOf<ExtractLogicsModel>()  // Replace `YourItemType` with the actual type of items in `extractLogicsModel`
-
-                                        for (it in extractLogicsModel) {
-                                            val component =
-                                                viewModel.tempComponentList.findComponentById(it.componentId)
-                                            if (component?.isSelectableValue() == true) {
-                                                if (component.values?.any { it.isSelected } == true) {
-                                                    itemsToRemove.add(it)
-                                                }
-                                            } else {
-                                                if (component?.values?.get(0)?.value?.isNotEmpty() == true) {
-                                                    itemsToRemove.add(it)
-                                                }
-                                            }
-                                        }
-                                        extractLogicsModel.removeAll(itemsToRemove)
-                                    }
-
-                                    if (extractLogicsModel.size > 0) {
-
-                                        if (extractLogicsModel.size > 0) {
-                                            val errors =
-                                                mutableMapOf<String, List<ResourceFormattedStringDesc>>()
-
-                                            extractLogicsModel.forEach {
-                                                errors[it.componentId] = arrayListOf()
-                                            }
-                                            viewModel.showFirstError(errors)
-                                        }
-
-                                    } else {
-                                        val errors = validateComponents(
-                                            viewModel.tempComponentList, false
-                                        ) {
-                                            viewModel.updateTempComponentList(it)
-                                        }
-                                        if (errors.isNotEmpty()) {
-                                            viewModel.showFirstError(errors)
-                                        }
-
-                                        if (errors.isEmpty()) {
-                                            async { viewModel.saveAndDeletePhotoByComponentKey() }.await()
-                                            if (state is ViewStates.Success) {
-                                                viewModel.updateLevel(PROCEED.NEXT)
-                                            }
-                                        }
-                                    }
+                            scope.launch {
+                                val errors = async {
+                                validateComponents(
+                                    viewModel.tempComponentList, false
+                                ) {
+                                    viewModel.updateTempComponentList(it)
+                                }}.await()
+                                if (errors.isNotEmpty()) {
+                                    viewModel.showFirstError(errors)
+                                }else{
+//                                    viewModel.handleLogics { extractLogicsModel ->
+//                                        scope.launch {
+//                                            if (extractLogicsModel.size > 0) {
+//
+//                                                if (extractLogicsModel.size > 0) {
+//                                                    val errors =
+//                                                        mutableMapOf<String, List<ResourceFormattedStringDesc>>()
+//
+//                                                    extractLogicsModel.forEach {
+//                                                        errors[it.componentId] = arrayListOf()
+//                                                    }
+//                                                    viewModel.showFirstError(errors)
+//                                                }
+//
+//                                            } else {
+//                                                if (errors.isEmpty()) {
+                                                    async { viewModel.saveAndDeletePhotoByComponentKey() }.await()
+                                                    if (state is ViewStates.Success) {
+                                                        viewModel.updateLevel(PROCEED.NEXT)
+                                                    }
+//                                                }
+//                                            }
+//                                        }
+//                                    }
                                 }
-                            }
-                        })
+                        }})
 
                         scope.launch {
                             scaffoldState.bottomSheetState.expand()
@@ -437,9 +420,12 @@ class TicketProcessScreen(
 
 
                             onChanges = { component, listValueDomain ->
-                                viewModel.handleLogics {
-                                    viewModel.extractLogicsModel.clear()
-                                }
+                               scope.launch {
+                                   async {
+                                   viewModel.handleLogics {
+                                   }}.await()
+                                   viewModel.extractLogicsModel.clear()
+                               }
                                 Napier.log(
                                     LogLevel.ASSERT,
                                     tag = "componentsListss",

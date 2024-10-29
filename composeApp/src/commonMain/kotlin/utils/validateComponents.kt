@@ -9,7 +9,7 @@ import io.github.aakira.napier.Napier
 import kotlin.math.tan
 
 
-fun validateComponents(
+suspend fun validateComponents(
     components: List<ComponentDomain>,
     firstCheck:Boolean,
     clearTempComponentListCallback: (List<ComponentDomain>) -> Unit
@@ -60,6 +60,7 @@ fun validateComponents(
 
                             errors[component.id.toString()] = listMessageError
                         }
+//                        component.updateProcessLogicDomain(component.processLogicDomain.value.copy(required = true, errorMessage = validationErrors, hasInitialMessage = firstCheck))
                         component.copy(
                             validate = component.validate?.copy(
                                 messageError = validationErrors,

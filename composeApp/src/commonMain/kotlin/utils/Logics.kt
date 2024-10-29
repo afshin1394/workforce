@@ -80,7 +80,7 @@ class LogicCalculation(
 
                     LogicType.Required -> {
                         typeLogic = LogicType.Required
-                        val expressionSatisfied = evaluateLogics(component, it)
+                        val expressionSatisfied = evaluateLogics(component, it) && !component.hasValue()
                         idCmp = component.id ?: ""
                         component.updateProcessLogicDomain(
                             component.processLogicDomain.value.copy(
@@ -122,7 +122,7 @@ class LogicCalculation(
                         val result = checkCalculation(allComponents, it)
                         result?.let { res ->
                             val updatedValueDomain = updateValueDomain(
-                                component.values?.get(0) ?: ValueDomain(),
+                                component.values?.getOrNull(0) ?: ValueDomain(),
                                 result
                             )
                             component.values = listOf(updatedValueDomain)
@@ -135,7 +135,7 @@ class LogicCalculation(
 
                         } ?: run {
                             val updatedValueDomain = updateValueDomain(
-                                component.values?.get(0) ?: ValueDomain(),
+                                component.values?.getOrNull(0) ?: ValueDomain(),
                                 ""
                             )
                             component.values = listOf(updatedValueDomain)
@@ -198,7 +198,7 @@ class LogicCalculation(
 
                         if (listOfBinding.isNotEmpty()) {
                             val updatedValueDomain = updateValueDomain(
-                                component.values?.get(0) ?: ValueDomain(),
+                                component.values?.getOrNull(0) ?: ValueDomain(),
                                 listOfBinding[0]
                             )
                             component.values = listOf(updatedValueDomain)
@@ -208,7 +208,7 @@ class LogicCalculation(
                             hasLogic = true
                         } else {
                             val updatedValueDomain = updateValueDomain(
-                                component.values?.get(0) ?: ValueDomain(),
+                                component.values?.getOrNull(0) ?: ValueDomain(),
                                 ""
                             )
                             component.values = listOf(updatedValueDomain)
@@ -324,7 +324,7 @@ class LogicCalculation(
         this.bind_logic?.field_options?.let {
             it.forEach { fieldOption ->
                 val cmp = allComponents.findComponentByKey(fieldOption.field_key)
-                cmp?.values?.get(0)?.value?.let { value ->
+                cmp?.values?.getOrNull(0)?.value?.let { value ->
                     if (value.isNotEmpty())
                         list.add(value)
                 }
@@ -463,7 +463,7 @@ class LogicCalculation(
                 when (condition.secondOperator?.title) {
                     OperatorType.IsFill -> {
                         component?.values?.let {
-                            expressionResults[i].add(it[0].value?.isNotEmpty() == true)
+                            expressionResults[i].add(it.getOrNull(0)?.value?.isNotEmpty() == true)
                         }
                     }
 
@@ -472,7 +472,7 @@ class LogicCalculation(
                             expressionResults[i].add(true)
                         } else {
                             component.values?.let {
-                                expressionResults[i].add(it[0].value?.isEmpty() == true)
+                                expressionResults[i].add(it.getOrNull(0)?.value?.isEmpty() == true)
                             }
                         }
                     }
@@ -484,7 +484,7 @@ class LogicCalculation(
                                     expressionResults[i].add(true)
                             }
                         } else {
-                            component?.values?.get(0)?.let {
+                            component?.values?.getOrNull(0)?.let {
                                 if (it.value.equals(condition.value))
                                     expressionResults[i].add(true)
                             }
@@ -504,7 +504,7 @@ class LogicCalculation(
                                             expressionResults[i].add(true)
                                     }
                                 } else {
-                                    component.values?.get(0)?.let {
+                                    component.values?.getOrNull(0)?.let {
                                         if (!it.value.equals(condition.value))
                                             expressionResults[i].add(true)
                                     }
@@ -524,7 +524,7 @@ class LogicCalculation(
                                             )))
                                     }
                                 } else {
-                                    component.values?.get(0)?.let {
+                                    component.values?.getOrNull(0)?.let {
                                             expressionResults[i].add(!it.value.equals(condition.value))
                                     }
                                 }
@@ -546,18 +546,14 @@ class LogicCalculation(
                                 } else {
                                     component.values?.let {
                                         if (it.isNotEmpty()) {
-                                            if (it.get(0).value?.startsWith(
+                                            if (it.getOrNull(0)?.value?.startsWith(
                                                     condition.value.toString()
                                                 ) == true
                                             )
                                                 expressionResults[i].add(true)
                                         }
                                     }
-
-
-
                                 }
-
                             }
                         }
                     }
@@ -579,7 +575,7 @@ class LogicCalculation(
                                                 }
                                         }
                                 } else {
-                                    component.values?.get(0)?.let { valueDomain ->
+                                    component.values?.getOrNull(0)?.let { valueDomain ->
                                         valueDomain.value?.toFloatOrNull()?.let { componentValue ->
                                             condition.value?.toFloatOrNull()
                                                 ?.let { conditionValue ->
@@ -612,7 +608,7 @@ class LogicCalculation(
                                                 }
                                         }
                                 } else {
-                                    component.values?.get(0)?.let { valueDomain ->
+                                    component.values?.getOrNull(0)?.let { valueDomain ->
                                         valueDomain.value?.toFloatOrNull()?.let { componentValue ->
                                             condition.value?.toFloatOrNull()
                                                 ?.let { conditionValue ->
@@ -644,7 +640,7 @@ class LogicCalculation(
                                                 }
                                         }
                                 } else {
-                                    component.values?.get(0)?.let { valueDomain ->
+                                    component.values?.getOrNull(0)?.let { valueDomain ->
                                         valueDomain.value?.toFloatOrNull()?.let { componentValue ->
                                             condition.value?.toFloatOrNull()
                                                 ?.let { conditionValue ->
@@ -676,7 +672,7 @@ class LogicCalculation(
                                                 }
                                         }
                                 } else {
-                                    component.values?.get(0)?.let { valueDomain ->
+                                    component.values?.getOrNull(0)?.let { valueDomain ->
                                         valueDomain.value?.toFloatOrNull()?.let { componentValue ->
                                             condition.value?.toFloatOrNull()
                                                 ?.let { conditionValue ->
@@ -772,18 +768,18 @@ class LogicCalculation(
                 val value = if (condition.firstFieldKey == "now") {
                     getCurrentDateLocalDateTime().localDateTimeToMilliseconds().toString()
                 } else {
-                    cmp?.values?.get(0)?.value
+                    cmp?.values?.getOrNull(0)?.value
                 }
                 condition.firstOperator?.let {
                     when (condition.firstOperator.title) {
                         OperatorType.Equals -> {
                             condition.secondOperator?.let {
-                                when (condition.secondOperator.title) {
+                                when (condition.secondOperator?.title) {
                                     OperatorType.Add -> {
                                         value?.toFloatOrNull()?.let { fieldValue ->
                                             condition.value?.toFloatOrNull()
                                                 ?.let { conditionValue ->
-                                                    componentDomain.values?.get(0)?.value?.toFloatOrNull()
+                                                    componentDomain.values?.getOrNull(0)?.value?.toFloatOrNull()
                                                         ?.let { currentValue ->
                                                             expressionResults[i].add(
                                                                 ValidateLogicResult(
@@ -805,7 +801,7 @@ class LogicCalculation(
                                         value?.toFloatOrNull()?.let { fieldValue ->
                                             condition.value?.toFloatOrNull()
                                                 ?.let { conditionValue ->
-                                                    componentDomain.values?.get(0)?.value?.toFloatOrNull()
+                                                    componentDomain.values?.getOrNull(0)?.value?.toFloatOrNull()
                                                         ?.let { currentValue ->
                                                             expressionResults[i].add(
                                                                 ValidateLogicResult(
@@ -826,7 +822,7 @@ class LogicCalculation(
                                         value?.toFloatOrNull()?.let { fieldValue ->
                                             condition.value?.toFloatOrNull()
                                                 ?.let { conditionValue ->
-                                                    componentDomain.values?.get(0)?.value?.toFloatOrNull()
+                                                    componentDomain.values?.getOrNull(0)?.value?.toFloatOrNull()
                                                         ?.let { currentValue ->
                                                             expressionResults[i].add(
                                                                 ValidateLogicResult(
@@ -847,7 +843,7 @@ class LogicCalculation(
                                         value?.toFloatOrNull()?.let { fieldValue ->
                                             condition.value?.toFloatOrNull()
                                                 ?.let { conditionValue ->
-                                                    componentDomain.values?.get(0)?.value?.toFloatOrNull()
+                                                    componentDomain.values?.getOrNull(0)?.value?.toFloatOrNull()
                                                         ?.let { currentValue ->
                                                             if (conditionValue != 0.0f)
                                                                 expressionResults[i].add(
@@ -871,10 +867,10 @@ class LogicCalculation(
                             } ?: run {
                                 val cmpValue : Double? =
                                     if (componentDomain.type == FormViewerTypes.Datetime) {
-                                        componentDomain.values?.get(0)?.value?.parseLocalDateTime()
+                                        componentDomain.values?.getOrNull(0)?.value?.parseLocalDateTime()
                                             ?.localDateTimeToMilliseconds()?.toDouble()
                                     } else {
-                                        componentDomain.values?.get(0)?.value?.toDoubleOrNull()
+                                        componentDomain.values?.getOrNull(0)?.value?.toDoubleOrNull()
                                     }
                                 cmpValue?.let {
 
@@ -895,12 +891,12 @@ class LogicCalculation(
 
                         OperatorType.NotEquals -> {
                             condition.secondOperator?.let {
-                                when (condition.secondOperator.title) {
+                                when (condition.secondOperator?.title) {
                                     OperatorType.Add -> {
                                         value?.toFloatOrNull()?.let { fieldValue ->
                                             condition.value?.toFloatOrNull()
                                                 ?.let { conditionValue ->
-                                                    componentDomain.values?.get(0)?.value?.toFloatOrNull()
+                                                    componentDomain.values?.getOrNull(0)?.value?.toFloatOrNull()
                                                         ?.let { currentValue ->
                                                             expressionResults[i].add(
                                                                 ValidateLogicResult(
@@ -922,7 +918,7 @@ class LogicCalculation(
                                         value?.toFloatOrNull()?.let { fieldValue ->
                                             condition.value?.toFloatOrNull()
                                                 ?.let { conditionValue ->
-                                                    componentDomain.values?.get(0)?.value?.toFloatOrNull()
+                                                    componentDomain.values?.getOrNull(0)?.value?.toFloatOrNull()
                                                         ?.let { currentValue ->
                                                             expressionResults[i].add(
                                                                 ValidateLogicResult(
@@ -943,7 +939,7 @@ class LogicCalculation(
                                         value?.toFloatOrNull()?.let { fieldValue ->
                                             condition.value?.toFloatOrNull()
                                                 ?.let { conditionValue ->
-                                                    componentDomain.values?.get(0)?.value?.toFloatOrNull()
+                                                    componentDomain.values?.getOrNull(0)?.value?.toFloatOrNull()
                                                         ?.let { currentValue ->
                                                             expressionResults[i].add(
                                                                 ValidateLogicResult(
@@ -964,7 +960,7 @@ class LogicCalculation(
                                         value?.toFloatOrNull()?.let { fieldValue ->
                                             condition.value?.toFloatOrNull()
                                                 ?.let { conditionValue ->
-                                                    componentDomain.values?.get(0)?.value?.toFloatOrNull()
+                                                    componentDomain.values?.getOrNull(0)?.value?.toFloatOrNull()
                                                         ?.let { currentValue ->
                                                             if (conditionValue != 0.0f)
                                                                 expressionResults[i].add(
@@ -987,10 +983,10 @@ class LogicCalculation(
                             } ?: run {
                                 val cmpValue : Double? =
                                     if (componentDomain.type == FormViewerTypes.Datetime) {
-                                        componentDomain.values?.get(0)?.value?.parseLocalDateTime()
+                                        componentDomain.values?.getOrNull(0)?.value?.parseLocalDateTime()
                                             ?.localDateTimeToMilliseconds()?.toDouble()
                                     } else {
-                                        componentDomain.values?.get(0)?.value?.toDoubleOrNull()
+                                        componentDomain.values?.getOrNull(0)?.value?.toDoubleOrNull()
                                     }
                                 cmpValue?.let {
 
@@ -1011,12 +1007,12 @@ class LogicCalculation(
 
                         OperatorType.GreaterThan -> {
                             condition.secondOperator?.let {
-                                when (condition.secondOperator.title) {
+                                when (condition.secondOperator?.title) {
                                     OperatorType.Add -> {
                                         value?.toFloatOrNull()?.let { fieldValue ->
                                             condition.value?.toFloatOrNull()
                                                 ?.let { conditionValue ->
-                                                    componentDomain.values?.get(0)?.value?.toFloatOrNull()
+                                                    componentDomain.values?.getOrNull(0)?.value?.toFloatOrNull()
                                                         ?.let { currentValue ->
                                                             expressionResults[i].add(
                                                                 ValidateLogicResult(
@@ -1038,7 +1034,7 @@ class LogicCalculation(
                                         value?.toFloatOrNull()?.let { fieldValue ->
                                             condition.value?.toFloatOrNull()
                                                 ?.let { conditionValue ->
-                                                    componentDomain.values?.get(0)?.value?.toFloatOrNull()
+                                                    componentDomain.values?.getOrNull(0)?.value?.toFloatOrNull()
                                                         ?.let { currentValue ->
                                                             expressionResults[i].add(
                                                                 ValidateLogicResult(
@@ -1059,7 +1055,7 @@ class LogicCalculation(
                                         value?.toFloatOrNull()?.let { fieldValue ->
                                             condition.value?.toFloatOrNull()
                                                 ?.let { conditionValue ->
-                                                    componentDomain.values?.get(0)?.value?.toFloatOrNull()
+                                                    componentDomain.values?.getOrNull(0)?.value?.toFloatOrNull()
                                                         ?.let { currentValue ->
                                                             expressionResults[i].add(
                                                                 ValidateLogicResult(
@@ -1080,7 +1076,7 @@ class LogicCalculation(
                                         value?.toFloatOrNull()?.let { fieldValue ->
                                             condition.value?.toFloatOrNull()
                                                 ?.let { conditionValue ->
-                                                    componentDomain.values?.get(0)?.value?.toFloatOrNull()
+                                                    componentDomain.values?.getOrNull(0)?.value?.toFloatOrNull()
                                                         ?.let { currentValue ->
                                                             if (conditionValue != 0.0f)
                                                                 expressionResults[i].add(
@@ -1103,10 +1099,10 @@ class LogicCalculation(
                             } ?: run {
                                 val cmpValue : Double? =
                                     if (componentDomain.type == FormViewerTypes.Datetime) {
-                                        componentDomain.values?.get(0)?.value?.parseLocalDateTime()
+                                        componentDomain.values?.getOrNull(0)?.value?.parseLocalDateTime()
                                             ?.localDateTimeToMilliseconds()?.toDouble()
                                     } else {
-                                        componentDomain.values?.get(0)?.value?.toDoubleOrNull()
+                                        componentDomain.values?.getOrNull(0)?.value?.toDoubleOrNull()
                                     }
                                 if (componentDomain.type == FormViewerTypes.Datetime) {
                                     expressionResults[i].add(
@@ -1128,12 +1124,12 @@ class LogicCalculation(
                         OperatorType.GreaterThanOrEqualsTo -> {
 
                             condition.secondOperator?.let {
-                                when (condition.secondOperator.title) {
+                                when (condition.secondOperator?.title) {
                                     OperatorType.Add -> {
                                         value?.toFloatOrNull()?.let { fieldValue ->
                                             condition.value?.toFloatOrNull()
                                                 ?.let { conditionValue ->
-                                                    componentDomain.values?.get(0)?.value?.toFloatOrNull()
+                                                    componentDomain.values?.getOrNull(0)?.value?.toFloatOrNull()
                                                         ?.let { currentValue ->
                                                             expressionResults[i].add(
                                                                 ValidateLogicResult(
@@ -1155,7 +1151,7 @@ class LogicCalculation(
                                         value?.toFloatOrNull()?.let { fieldValue ->
                                             condition.value?.toFloatOrNull()
                                                 ?.let { conditionValue ->
-                                                    componentDomain.values?.get(0)?.value?.toFloatOrNull()
+                                                    componentDomain.values?.getOrNull(0)?.value?.toFloatOrNull()
                                                         ?.let { currentValue ->
                                                             expressionResults[i].add(
                                                                 ValidateLogicResult(
@@ -1176,7 +1172,7 @@ class LogicCalculation(
                                         value?.toFloatOrNull()?.let { fieldValue ->
                                             condition.value?.toFloatOrNull()
                                                 ?.let { conditionValue ->
-                                                    componentDomain.values?.get(0)?.value?.toFloatOrNull()
+                                                    componentDomain.values?.getOrNull(0)?.value?.toFloatOrNull()
                                                         ?.let { currentValue ->
                                                             expressionResults[i].add(
                                                                 ValidateLogicResult(
@@ -1197,7 +1193,7 @@ class LogicCalculation(
                                         value?.toFloatOrNull()?.let { fieldValue ->
                                             condition.value?.toFloatOrNull()
                                                 ?.let { conditionValue ->
-                                                    componentDomain.values?.get(0)?.value?.toFloatOrNull()
+                                                    componentDomain.values?.getOrNull(0)?.value?.toFloatOrNull()
                                                         ?.let { currentValue ->
                                                             if (conditionValue != 0.0f)
                                                                 expressionResults[i].add(
@@ -1220,10 +1216,10 @@ class LogicCalculation(
                             } ?: run {
                                 val cmpValue : Double? =
                                     if (componentDomain.type == FormViewerTypes.Datetime) {
-                                        componentDomain.values?.get(0)?.value?.parseLocalDateTime()
+                                        componentDomain.values?.getOrNull(0)?.value?.parseLocalDateTime()
                                             ?.localDateTimeToMilliseconds()?.toDouble()
                                     } else {
-                                        componentDomain.values?.get(0)?.value?.toDoubleOrNull()
+                                        componentDomain.values?.getOrNull(0)?.value?.toDoubleOrNull()
                                     }
                                 cmpValue?.let {
 
@@ -1244,12 +1240,12 @@ class LogicCalculation(
 
                         OperatorType.LessThan -> {
                             condition.secondOperator?.let {
-                                when (condition.secondOperator.title) {
+                                when (condition.secondOperator?.title) {
                                     OperatorType.Add -> {
                                         value?.toFloatOrNull()?.let { fieldValue ->
                                             condition.value?.toFloatOrNull()
                                                 ?.let { conditionValue ->
-                                                    componentDomain.values?.get(0)?.value?.toFloatOrNull()
+                                                    componentDomain.values?.getOrNull(0)?.value?.toFloatOrNull()
                                                         ?.let { currentValue ->
                                                             expressionResults[i].add(
                                                                 ValidateLogicResult(
@@ -1271,7 +1267,7 @@ class LogicCalculation(
                                         value?.toFloatOrNull()?.let { fieldValue ->
                                             condition.value?.toFloatOrNull()
                                                 ?.let { conditionValue ->
-                                                    componentDomain.values?.get(0)?.value?.toFloatOrNull()
+                                                    componentDomain.values?.getOrNull(0)?.value?.toFloatOrNull()
                                                         ?.let { currentValue ->
                                                             expressionResults[i].add(
                                                                 ValidateLogicResult(
@@ -1292,7 +1288,7 @@ class LogicCalculation(
                                         value?.toFloatOrNull()?.let { fieldValue ->
                                             condition.value?.toFloatOrNull()
                                                 ?.let { conditionValue ->
-                                                    componentDomain.values?.get(0)?.value?.toFloatOrNull()
+                                                    componentDomain.values?.getOrNull(0)?.value?.toFloatOrNull()
                                                         ?.let { currentValue ->
                                                             expressionResults[i].add(
                                                                 ValidateLogicResult(
@@ -1310,9 +1306,9 @@ class LogicCalculation(
 
                                     OperatorType.Divide -> {
                                         value?.toFloatOrNull()?.let { fieldValue ->
-                                            condition.values?.get(0)?.toFloatOrNull()
+                                            condition.values?.getOrNull(0)?.toFloatOrNull()
                                                 ?.let { conditionValue ->
-                                                    componentDomain.values?.get(0)?.value?.toFloatOrNull()
+                                                    componentDomain.values?.getOrNull(0)?.value?.toFloatOrNull()
                                                         ?.let { currentValue ->
                                                             if (conditionValue != 0.0f)
                                                                 expressionResults[i].add(
@@ -1335,10 +1331,10 @@ class LogicCalculation(
                             } ?: run {
                                 val cmpValue : Double? =
                                     if (componentDomain.type == FormViewerTypes.Datetime) {
-                                        componentDomain.values?.get(0)?.value?.parseLocalDateTime()
+                                        componentDomain.values?.getOrNull(0)?.value?.parseLocalDateTime()
                                             ?.localDateTimeToMilliseconds()?.toDouble()
                                     } else {
-                                        componentDomain.values?.get(0)?.value?.toDoubleOrNull()
+                                        componentDomain.values?.getOrNull(0)?.value?.toDoubleOrNull()
                                     }
                                 expressionResults[i].add(
                                     ValidateLogicResult(
@@ -1355,12 +1351,12 @@ class LogicCalculation(
 
                         OperatorType.LessThanOrEqualsTo -> {
                             condition.secondOperator?.let {
-                                when (condition.secondOperator.title) {
+                                when (condition.secondOperator?.title) {
                                     OperatorType.Add -> {
                                         value?.toFloatOrNull()?.let { fieldValue ->
                                             condition.value?.toFloatOrNull()
                                                 ?.let { conditionValue ->
-                                                    componentDomain.values?.get(0)?.value?.toFloatOrNull()
+                                                    componentDomain.values?.getOrNull(0)?.value?.toFloatOrNull()
                                                         ?.let { currentValue ->
                                                             expressionResults[i].add(
                                                                 ValidateLogicResult(
@@ -1382,7 +1378,7 @@ class LogicCalculation(
                                         value?.toFloatOrNull()?.let { fieldValue ->
                                             condition.value?.toFloatOrNull()
                                                 ?.let { conditionValue ->
-                                                    componentDomain.values?.get(0)?.value?.toFloatOrNull()
+                                                    componentDomain.values?.getOrNull(0)?.value?.toFloatOrNull()
                                                         ?.let { currentValue ->
                                                             expressionResults[i].add(
                                                                 ValidateLogicResult(
@@ -1403,7 +1399,7 @@ class LogicCalculation(
                                         value?.toFloatOrNull()?.let { fieldValue ->
                                             condition.value?.toFloatOrNull()
                                                 ?.let { conditionValue ->
-                                                    componentDomain.values?.get(0)?.value?.toFloatOrNull()
+                                                    componentDomain.values?.getOrNull(0)?.value?.toFloatOrNull()
                                                         ?.let { currentValue ->
                                                             expressionResults[i].add(
                                                                 ValidateLogicResult(
@@ -1424,7 +1420,7 @@ class LogicCalculation(
                                         value?.toFloatOrNull()?.let { fieldValue ->
                                             condition.value?.toFloatOrNull()
                                                 ?.let { conditionValue ->
-                                                    componentDomain.values?.get(0)?.value?.toFloatOrNull()
+                                                    componentDomain.values?.getOrNull(0)?.value?.toFloatOrNull()
                                                         ?.let { currentValue ->
                                                             if (conditionValue != 0.0f)
                                                                 expressionResults[i].add(
@@ -1447,10 +1443,10 @@ class LogicCalculation(
                             } ?: run {
                                 val cmpValue : Double? =
                                     if (componentDomain.type == FormViewerTypes.Datetime) {
-                                        componentDomain.values?.get(0)?.value?.parseLocalDateTime()
+                                        componentDomain.values?.getOrNull(0)?.value?.parseLocalDateTime()
                                             ?.localDateTimeToMilliseconds()?.toDouble()
                                     } else {
-                                        componentDomain.values?.get(0)?.value?.toDoubleOrNull()
+                                        componentDomain.values?.getOrNull(0)?.value?.toDoubleOrNull()
                                     }
                                 cmpValue?.let {
                                     expressionResults[i].add(
@@ -1490,14 +1486,13 @@ class LogicCalculation(
 
     fun ArrayList<ArrayList<ValidateLogicResult>>.aggregateValidateLogicResult(): ValidateLogicResult? {
         return   this[0].firstOrNull{it.result}
-
     }
 
     private fun ComponentDomain.hasValue(): Boolean {
         return if (this.isSelectableValue()) {
             this.values?.any { it.isSelected } ?: false
         } else {
-            this.values?.get(0)?.value?.isNotEmpty() == true
+            this.values?.getOrNull(0)?.value?.isNotEmpty() == true
         }
     }
 
@@ -1517,7 +1512,6 @@ class LogicCalculation(
             })
         } else
             this?.updateValues(listOf())
-
     }
 }
 
