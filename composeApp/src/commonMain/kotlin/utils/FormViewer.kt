@@ -507,11 +507,16 @@ fun initialize(
                                 tempErrors?.let {
                                     components[indexChildSaveable.value].updateProcessLogicDomain(
                                         components[indexChildSaveable.value].processLogicDomain.value.copy(
-                                            required = true, errorMessage = tempErrors, hasInitialMessage = false
+                                            required = item.validate?.required == true, errorMessage = tempErrors, hasInitialMessage = false
                                         )
                                     )
 
                                 } ?: run {
+                                    components[indexChildSaveable.value].updateProcessLogicDomain(
+                                        components[indexChildSaveable.value].processLogicDomain.value.copy(
+                                            required = item.validate?.required == true, errorMessage = null, hasInitialMessage = true
+                                        )
+                                    )
                                     components[indexChildSaveable.value].values = oldList.toMutableList()
                                     uploadDomainList.value = oldList.toMutableList()
                                     onChanges(
@@ -539,16 +544,34 @@ fun initialize(
                                 newList.remove(fileToRemove)
                                 uploadDomainList.value = newList
                                 item.values = newList
-                                Napier.log(
-                                    LogLevel.ASSERT,
-                                    tag = "UploadFileComponent onClickUpload",
-                                    message = item.toString()
+                                val tempErrors = validateFileUpload(
+                                    item,
+                                    item.validate ?: ValidateDomain(),
+                                    newList,
+                                    false
                                 )
 
-                                onChanges(
-                                    item,
-                                    item.values
-                                )
+                                tempErrors?.let {
+                                    components[indexChildSaveable.value].updateProcessLogicDomain(
+                                        components[indexChildSaveable.value].processLogicDomain.value.copy(
+                                            required = item.validate?.required == true, errorMessage = tempErrors, hasInitialMessage = false
+                                        )
+                                    )
+
+                                } ?: run {
+                                    components[indexChildSaveable.value].updateProcessLogicDomain(
+                                        components[indexChildSaveable.value].processLogicDomain.value.copy(
+                                            required = item.validate?.required == true, errorMessage = null, hasInitialMessage = true
+                                        )
+                                    )
+                                    components[indexChildSaveable.value].values = newList.toMutableList()
+                                    uploadDomainList.value = newList.toMutableList()
+                                    onChanges(
+                                        item,
+                                        item.values
+                                    )
+                                }
+
                             }
 
                         )

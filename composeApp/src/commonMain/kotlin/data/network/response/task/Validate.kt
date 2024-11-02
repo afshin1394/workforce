@@ -46,11 +46,11 @@ data class Validate (
     val validationType:String?=null,
 ) : INetworkObject {
     override fun hasNullProperty(): Boolean {
-      return  (id == null || key == null || hide == null || layout == null || subtype == null || required == null)
+      return  (id == null || key == null || hide == null || layout == null || subtype == null || required == null || maxLength == null || minLength == null || pattern == null || maxTotalSize == null || maxFileNumber == null || max==null || min == null || blacklistAttachment == null || whitelistAttachment == null || domainType==null || domainList == null || validationType == null)
     }
 
     override fun areAllMembersNull(): Boolean {
-       return (id == null && key == null && hide == null && layout == null && subtype == null && required == null)
+       return (id == null && key == null && hide == null && layout == null && subtype == null && required == null && maxLength == null && minLength == null && pattern == null && maxTotalSize == null && maxFileNumber == null && max==null && min == null && blacklistAttachment == null && whitelistAttachment == null && domainType==null && domainList == null && validationType == null)
     }
 
     override fun toString(): String {

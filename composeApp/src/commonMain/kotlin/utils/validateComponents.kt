@@ -12,6 +12,7 @@ import kotlin.math.tan
 suspend fun validateComponents(
     components: List<ComponentDomain>,
     firstCheck: Boolean,
+    initialCheckingFileUpload : Boolean = true
 ): Map<String, List<StringDesc>> {
     val errors = mutableMapOf<String, List<ResourceFormattedStringDesc>>()
     Napier.log(LogLevel.ASSERT, tag = "validateComponent", message = components.toList().toString())
@@ -23,15 +24,15 @@ suspend fun validateComponents(
                     component.validate?.let { validate ->
 
                         val validationErrors = validateShortText(component, validate)
-//                        val listMessageError: ArrayList<ResourceFormattedStringDesc> = arrayListOf()
-//                        if (validationErrors != null) {
-//                            listMessageError.add(validationErrors)
-//                            errors[component.id.toString()] = listMessageError
-//                        }
+                        val listMessageError: ArrayList<ResourceFormattedStringDesc> = arrayListOf()
+                        if (validationErrors != null) {
+                            listMessageError.add(validationErrors)
+                            errors[component.id.toString()] = listMessageError
+                        }
                         validationErrors?.let {
                             component.updateProcessLogicDomain(
                                 component.processLogicDomain.value.copy(
-                                    required = validationErrors != null,
+                                    required = true,
                                     errorMessage = validationErrors,
                                     hasInitialMessage = firstCheck
                                 )
@@ -49,12 +50,12 @@ suspend fun validateComponents(
 
                         val validationErrors =
                             validateTextarea(component, validate, true)
-//                        val listMessageError: ArrayList<ResourceFormattedStringDesc> = arrayListOf()
-//                        if (validationErrors != null) {
-//                            listMessageError.add(validationErrors)
-//
-//                            errors[component.id.toString()] = listMessageError
-//                        }
+                        val listMessageError: ArrayList<ResourceFormattedStringDesc> = arrayListOf()
+                        if (validationErrors != null) {
+                            listMessageError.add(validationErrors)
+
+                            errors[component.id.toString()] = listMessageError
+                        }
                         validationErrors?.let {
 
                             component.updateProcessLogicDomain(
@@ -80,12 +81,12 @@ suspend fun validateComponents(
 
                         val validationErrors =
                             validateNumber(component, validate, true)
-//                        val listMessageError: ArrayList<ResourceFormattedStringDesc> = arrayListOf()
-//                        if (validationErrors != null) {
-//                            listMessageError.add(validationErrors)
-//
-//                            errors[component.id.toString()] = listMessageError
-//                        }
+                        val listMessageError: ArrayList<ResourceFormattedStringDesc> = arrayListOf()
+                        if (validationErrors != null) {
+                            listMessageError.add(validationErrors)
+
+                            errors[component.id.toString()] = listMessageError
+                        }
                         validationErrors?.let {
 
                             component.updateProcessLogicDomain(
@@ -106,12 +107,12 @@ suspend fun validateComponents(
                     component.validate?.let { validate ->
                         val validationErrors =
                             validateLatLong(component, validate)
-//                        val listMessageError: ArrayList<ResourceFormattedStringDesc> = arrayListOf()
-//                        if (validationErrors != null) {
-//                            listMessageError.add(validationErrors)
-//
-//                            errors[component.id.toString()] = listMessageError
-//                        }
+                        val listMessageError: ArrayList<ResourceFormattedStringDesc> = arrayListOf()
+                        if (validationErrors != null) {
+                            listMessageError.add(validationErrors)
+
+                            errors[component.id.toString()] = listMessageError
+                        }
                         validationErrors?.let {
 
                             component.updateProcessLogicDomain(
@@ -136,12 +137,12 @@ suspend fun validateComponents(
                         val validationErrors =
                             validatePhone(component, validate, true)
 
-//                        val listMessageError: ArrayList<ResourceFormattedStringDesc> = arrayListOf()
-//                        if (validationErrors != null) {
-//                            listMessageError.add(validationErrors)
-//                            errors[component.id.toString()] = listMessageError
-//
-//                        }
+                        val listMessageError: ArrayList<ResourceFormattedStringDesc> = arrayListOf()
+                        if (validationErrors != null) {
+                            listMessageError.add(validationErrors)
+                            errors[component.id.toString()] = listMessageError
+
+                        }
                         validationErrors?.let {
 
                             component.updateProcessLogicDomain(
@@ -164,12 +165,12 @@ suspend fun validateComponents(
                         val validationErrors =
                             validateEmail(component, validate, true)
 
-//                        val listMessageError: ArrayList<ResourceFormattedStringDesc> = arrayListOf()
-//                        if (validationErrors != null) {
-//                            listMessageError.add(validationErrors)
-//                            errors[component.id.toString()] = listMessageError
-//
-//                        }
+                        val listMessageError: ArrayList<ResourceFormattedStringDesc> = arrayListOf()
+                        if (validationErrors != null) {
+                            listMessageError.add(validationErrors)
+                            errors[component.id.toString()] = listMessageError
+
+                        }
                         validationErrors?.let {
 
                             component.updateProcessLogicDomain(
@@ -193,12 +194,12 @@ suspend fun validateComponents(
 
                         val validationErrors =
                             validateSelected(component, validate)
-//                        val listMessageError: ArrayList<ResourceFormattedStringDesc> = arrayListOf()
-//                        if (validationErrors != null) {
-//                            listMessageError.add(validationErrors)
-//                            errors[component.id.toString()] = listMessageError
-//
-//                        }
+                        val listMessageError: ArrayList<ResourceFormattedStringDesc> = arrayListOf()
+                        if (validationErrors != null) {
+                            listMessageError.add(validationErrors)
+                            errors[component.id.toString()] = listMessageError
+
+                        }
                         validationErrors?.let {
 
                             component.updateProcessLogicDomain(
@@ -223,13 +224,13 @@ suspend fun validateComponents(
                             component,
                             validate,
                             null,
-                            firstCheck
+                            initialCheckingFileUpload
                         )
-//                        val listMessageError: ArrayList<ResourceFormattedStringDesc> = arrayListOf()
-//                        if (validationErrors != null) {
-//                            listMessageError.add(validationErrors)
-//                            errors[component.id.toString()] = listMessageError
-//                        }
+                        val listMessageError: ArrayList<ResourceFormattedStringDesc> = arrayListOf()
+                        if (validationErrors != null) {
+                            listMessageError.add(validationErrors)
+                            errors[component.id.toString()] = listMessageError
+                        }
                         validationErrors?.let {
                             component.updateProcessLogicDomain(
                                 component.processLogicDomain.value.copy(

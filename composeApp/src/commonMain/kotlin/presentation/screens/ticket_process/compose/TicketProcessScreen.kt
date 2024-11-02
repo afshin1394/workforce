@@ -268,7 +268,8 @@ class TicketProcessScreen(
                                               if (errors.isEmpty()) {
                                                 async { viewModel.saveAndDeletePhotoByComponentKey() }.await()
                                                 if (state is ViewStates.Success) {
-                                                    viewModel.updateLevel(PROCEED.NEXT)
+                                                    scaffoldState.snackbarHostState.showSnackbar("successss")
+//                                                    viewModel.updateLevel(PROCEED.NEXT)
                                                 }
                                               }
                                           }
@@ -422,7 +423,7 @@ class TicketProcessScreen(
                                 Napier.log(LogLevel.ASSERT, tag = "tempComponentLost", message = viewModel.tempComponentList.toList().toString())
                                 scope.launch(Dispatchers.Main) {
                                         async {
-                                            validateComponents(viewModel.tempComponentList, false)
+                                            validateComponents(viewModel.tempComponentList, false,initialCheckingFileUpload = false)
                                         }.await()
 
                                     viewModel.handleLogics {
