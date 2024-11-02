@@ -21,6 +21,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -43,6 +44,7 @@ import irancell.nwg.wfm.FilePicker
 import irancell.nwg.wfm.MR
 import irancell.nwg.wfm.provideAppContext
 import presentation.theme.body_small
+import presentation.theme.strokeDefaultLight
 import presentation.theme.surfaceBrandDefault
 import presentation.theme.surfaceBrandDisabled
 import presentation.theme.textInverseDisabled
@@ -57,10 +59,7 @@ fun UploadFileComponent(
     index : Int,
     item : ComponentDomain,
     label : String,
-    showErrorMessageValidation:Boolean,
-    errorMessage: ResourceFormattedStringDesc,
-    modifier: Modifier,
-    uploadList: List<ValueDomain>,
+    uploadList: List<ValueDomain>?,
     onClickUpload : (index : Int) -> Unit,
     onChooseFileFromDevice: (MutableList<ValueDomain>) -> Unit,
     onRemoveFile: (ValueDomain) -> Unit
@@ -71,9 +70,10 @@ fun UploadFileComponent(
     val readOnlyLogic = processLogicDomain.readOnly || readOnly
     val requiredLogic = processLogicDomain.required
     val validateLogic = processLogicDomain.validate
-    val errorMessageValidateLogic =processLogicDomain.errorMessage
+    val errorMessageLogic = processLogicDomain.errorMessage
+    val hasInitialMessageLogic = processLogicDomain.hasInitialMessage
 
-    val backgroundColor = if (errorMessage.localized() != ""  && !showErrorMessageValidation|| validateLogic) {
+    val backgroundColor =  if (validateLogic || (requiredLogic && !hasInitialMessageLogic)) {
         Color.Red
     } else if (readOnlyLogic || disableLogic) {
         surfaceBrandDisabled
@@ -128,7 +128,7 @@ fun UploadFileComponent(
         ) {
             append(label)
         }
-        if (requiredLogic ||errorMessage.localized() != "") {
+        if (requiredLogic || validateLogic) {
             withStyle(style = SpanStyle(color = Color.Red, fontSize = 18.sp)) {
                 append(" *")
             }
@@ -166,7 +166,7 @@ fun UploadFileComponent(
 
                 })
 
-            if (uploadList.isNotEmpty()) {
+            if (uploadList?.isNotEmpty() == true) {
                 LazyColumn(modifier = Modifier.heightIn(0.dp, 500.dp)) {
                     itemsIndexed(items = uploadList) { index: Int, item: ValueDomain ->
 
@@ -217,22 +217,11 @@ fun UploadFileComponent(
 
 
 
-            errorMessage.localized().let {
 
-                if (!showErrorMessageValidation){
+            if (validateLogic || (requiredLogic && !hasInitialMessageLogic)) {
+                errorMessageLogic?.let {
                     Text(
-                        text = it,
-                        color = Color.Red,
-                        modifier = Modifier.padding(end = 14.dp, start = 14.dp)
-                    )
-
-                }
-
-            }
-            if (validateLogic) {
-                errorMessageValidateLogic?.let {
-                    Text(
-                        text = errorMessageValidateLogic.localized(),
+                        text = errorMessageLogic.localized(),
                         color = Color.Red,
                         style = TextStyle(fontSize = 12.sp),
                         modifier = Modifier.padding(top = 4.dp)

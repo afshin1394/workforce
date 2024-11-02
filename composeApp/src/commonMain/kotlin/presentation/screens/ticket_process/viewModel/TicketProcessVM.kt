@@ -158,15 +158,12 @@ class TicketProcessVM(
                                 tempComponentList.clear()
                                 tempComponentList.addAll(it.toList())
                                 async {
-                                    validateComponents(tempComponentList, true) {
-                                        updateTempComponentList(it)
-                                        updateState(ViewStates.Success())
-//
-                                    }
+                                    validateComponents(tempComponentList, true)
                                 }.await()
 
                                 handleLogics {
                                 }
+                                updateState(ViewStates.Success())
 
 
                             }

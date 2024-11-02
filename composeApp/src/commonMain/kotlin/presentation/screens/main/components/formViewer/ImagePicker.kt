@@ -40,17 +40,13 @@ import presentation.theme.textSecondary
 
 @Composable
 fun ImagePicker(
-    disable : Boolean,
-    readOnly : Boolean,
+    disable: Boolean,
+    readOnly: Boolean,
     processLogicDomain: ProcessLogicDomain,
-    itemIndex : Int,
-    item : ComponentDomain,
-    componentId: String,
-    showErrorMessageValidation:Boolean,
-    errorMessage: ResourceFormattedStringDesc,
+    item: ComponentDomain,
     photoDomainList: List<PhotoDomain>,
-    onTakePhoto: (obj : Any?,resultTakePhoto: String) -> Unit,
-    onCameraClick : (item : ComponentDomain) -> Unit,
+    onTakePhoto: (obj: Any?, resultTakePhoto: String) -> Unit,
+    onCameraClick: (item: ComponentDomain) -> Unit,
     onImageClick: (index: Int) -> Unit
 ) {
 
@@ -59,9 +55,9 @@ fun ImagePicker(
     val readOnlyLogic = processLogicDomain.readOnly || readOnly
     val requiredLogic = processLogicDomain.required
     val validateLogic = processLogicDomain.validate
-    val errorMessageValidateLogic = processLogicDomain.errorMessage
-
-    val backgroundColor = if (errorMessage.localized() != "" &&!showErrorMessageValidation || validateLogic) {
+    val errorMessageLogic = processLogicDomain.errorMessage
+    val hasInitialMessageLogic = processLogicDomain.hasInitialMessage
+    val backgroundColor = if (validateLogic || (requiredLogic && !hasInitialMessageLogic)) {
         Color.Red
     } else if (readOnlyLogic || disableLogic) {
         surfaceBrandDisabled
@@ -71,8 +67,8 @@ fun ImagePicker(
 
     var openCamera by remember { mutableStateOf(false) }
 
-    Camera.onResult {uri,obj->
-        onTakePhoto(obj,uri.toString())
+    Camera.onResult { uri, obj ->
+        onTakePhoto(obj, uri.toString())
     }
 
     if (openCamera) {
@@ -87,7 +83,7 @@ fun ImagePicker(
                 item,
                 InternalStorage.getProcessRouteOriginal(
                     provideAppContext()
-                ) , it
+                ), it
             )
 
             openCamera = false
@@ -95,7 +91,7 @@ fun ImagePicker(
         }
     }
 
-    if(!hideLogic) {
+    if (!hideLogic) {
         Column(
             modifier = Modifier
 
@@ -110,9 +106,9 @@ fun ImagePicker(
                         fontSize = 14.sp
                     )
                 ) {
-                    append(item.label?:"")
+                    append(item.label ?: "")
                 }
-                if (requiredLogic  ||errorMessage.localized() != "") {
+                if (requiredLogic || validateLogic) {
                     withStyle(style = SpanStyle(color = Color.Red, fontSize = 18.sp)) {
                         append(" *")
                     }
@@ -126,10 +122,14 @@ fun ImagePicker(
             )
 
             Spacer(modifier = Modifier.height(12.dp))
-            ImageRowComponent(backgroundColor,photoDomainList, onCameraClick = {
-                Napier.log(LogLevel.ASSERT,tag = "componentDomainForImage",message =item.toString())
+            ImageRowComponent(backgroundColor, photoDomainList, onCameraClick = {
+                Napier.log(
+                    LogLevel.ASSERT,
+                    tag = "componentDomainForImage",
+                    message = item.toString()
+                )
 
-                if(!(disableLogic || readOnlyLogic)) {
+                if (!(disableLogic || readOnlyLogic)) {
                     openCamera = true
                     onCameraClick(item)
                 }
@@ -138,23 +138,10 @@ fun ImagePicker(
                 onImageClick(it)
             }
             Spacer(modifier = Modifier.height(6.dp))
-            errorMessage.localized().let {
-
-                if (!showErrorMessageValidation){
+            if (validateLogic || (requiredLogic && !hasInitialMessageLogic)) {
+                errorMessageLogic?.localized()?.let {
                     Text(
                         text = it,
-                        color = Color.Red,
-                        modifier = Modifier
-                    )
-
-                }
-
-            }
-
-            if (validateLogic) {
-                errorMessageValidateLogic?.let {
-                    Text(
-                        text = errorMessageValidateLogic.localized(),
                         color = Color.Red,
                         style = TextStyle(fontSize = 12.sp),
                         modifier = Modifier.padding(top = 4.dp)

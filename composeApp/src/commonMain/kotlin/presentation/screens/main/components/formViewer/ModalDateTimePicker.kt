@@ -91,25 +91,24 @@ import utils.getLocalDateTimeFromLong
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ModalDateTimePicker(
-    readOnly : Boolean,
-    disable : Boolean,
-    showErrorMessageValidation:Boolean,
+    readOnly: Boolean,
+    disable: Boolean,
     processLogicDomain: ProcessLogicDomain,
     title: String,
     titleDatePiker: String,
-    errorMessage: ResourceFormattedStringDesc,
     onDateSelected: (selectDateItem: String) -> Unit,
 
 
     ) {
-    val disableLogic = processLogicDomain.disabled||disable
+    val disableLogic = processLogicDomain.disabled || disable
     val hideLogic = processLogicDomain.shouldHide
     val readOnlyLogic = processLogicDomain.readOnly || readOnly
     val requiredLogic = processLogicDomain.required
     val validateLogic = processLogicDomain.validate
-    val errorMessageValidateLogic = processLogicDomain.errorMessage
+    val errorMessageLogic = processLogicDomain.errorMessage
+    val hasInitialMessageLogic = processLogicDomain.hasInitialMessage
 
-    val backgroundColor = if (errorMessage.localized() != "" || validateLogic) {
+    val backgroundColor = if (validateLogic || (requiredLogic && !hasInitialMessageLogic)) {
         Color.Red
     } else if (readOnlyLogic || disableLogic) {
         surfaceBrandDisabled
@@ -125,7 +124,7 @@ fun ModalDateTimePicker(
 
     LaunchedEffect(processLogicDomain.calculatedValue) {
         processLogicDomain.calculatedValue?.let {
-            if (it.isNotEmpty() ) {
+            if (it.isNotEmpty()) {
                 title = it
             }
         }
@@ -161,7 +160,7 @@ fun ModalDateTimePicker(
                 ) {
                     append(titleDatePiker)
                 }
-                if (requiredLogic||errorMessage.localized() != "") {
+                if (requiredLogic || validateLogic) {
                     withStyle(style = SpanStyle(color = Color.Red, fontSize = 18.sp)) {
                         append(" *")
                     }
@@ -220,19 +219,10 @@ fun ModalDateTimePicker(
                     )
 
                 })
-            if (errorMessage.localized() != ""  && !showErrorMessageValidation) {
-                Text(
-                    text = errorMessage.localized(),
-                    color = Color.Red,
-                    style = TextStyle(fontSize = 12.sp),
-                    modifier = Modifier.padding(top = 4.dp)
-                )
-            }
-
-            if (validateLogic) {
-                errorMessageValidateLogic?.let {
+            if (validateLogic || (requiredLogic && !hasInitialMessageLogic)) {
+                errorMessageLogic?.localized()?.let {
                     Text(
-                        text = errorMessageValidateLogic.localized(),
+                        text = it,
                         color = Color.Red,
                         style = TextStyle(fontSize = 12.sp),
                         modifier = Modifier.padding(top = 4.dp)

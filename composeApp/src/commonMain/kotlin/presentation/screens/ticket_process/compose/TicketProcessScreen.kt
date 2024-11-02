@@ -38,6 +38,7 @@ import irancell.nwg.wfm.InternalStorage
 import irancell.nwg.wfm.MR
 import irancell.nwg.wfm.provideAppContext
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -245,36 +246,34 @@ class TicketProcessScreen(
                                 val errors = async {
                                 validateComponents(
                                     viewModel.tempComponentList, false
-                                ) {
-                                    viewModel.updateTempComponentList(it)
-                                }}.await()
+                                )}.await()
                                 if (errors.isNotEmpty()) {
                                     viewModel.showFirstError(errors)
                                 }else{
-//                                    viewModel.handleLogics { extractLogicsModel ->
-//                                        scope.launch {
-//                                            if (extractLogicsModel.size > 0) {
-//
-//                                                if (extractLogicsModel.size > 0) {
-//                                                    val errors =
-//                                                        mutableMapOf<String, List<ResourceFormattedStringDesc>>()
-//
-//                                                    extractLogicsModel.forEach {
-//                                                        errors[it.componentId] = arrayListOf()
-//                                                    }
-//                                                    viewModel.showFirstError(errors)
-//                                                }
-//
-//                                            } else {
-//                                                if (errors.isEmpty()) {
-                                                    async { viewModel.saveAndDeletePhotoByComponentKey() }.await()
-                                                    if (state is ViewStates.Success) {
-                                                        viewModel.updateLevel(PROCEED.NEXT)
-                                                    }
-//                                                }
-//                                            }
-//                                        }
-//                                    }
+                                    viewModel.handleLogics { extractLogicsModel ->
+                                      scope.launch {
+                                          if (extractLogicsModel.size > 0) {
+
+                                              if (extractLogicsModel.size > 0) {
+                                                  val errors =
+                                                      mutableMapOf<String, List<ResourceFormattedStringDesc>>()
+
+                                                  extractLogicsModel.forEach {
+                                                      errors[it.componentId] = arrayListOf()
+                                                  }
+                                                  viewModel.showFirstError(errors)
+                                              }
+
+                                          } else {
+                                              if (errors.isEmpty()) {
+                                                async { viewModel.saveAndDeletePhotoByComponentKey() }.await()
+                                                if (state is ViewStates.Success) {
+                                                    viewModel.updateLevel(PROCEED.NEXT)
+                                                }
+                                              }
+                                          }
+                                      }
+                                  }
                                 }
                         }})
 
@@ -420,21 +419,19 @@ class TicketProcessScreen(
 
 
                             onChanges = { component, listValueDomain ->
-                               scope.launch {
-                                   async {
-                                   viewModel.handleLogics {
-                                   }}.await()
-                                   viewModel.extractLogicsModel.clear()
-                               }
-                                Napier.log(
-                                    LogLevel.ASSERT,
-                                    tag = "componentsListss",
-                                    message = viewModel.tempComponentList.toList().toString()
-                                )
+                                Napier.log(LogLevel.ASSERT, tag = "tempComponentLost", message = viewModel.tempComponentList.toList().toString())
+                                scope.launch(Dispatchers.IO) {
+                                        async {
+                                            validateComponents(viewModel.tempComponentList, false)
+                                        }.await()
 
-                                listValueDomain?.let { listValues ->
-                                    if (component.type == FormViewerTypes.ImageView) {
-                                        viewModel.updateUriPhotoComponent(component, listValues)
+                                    viewModel.handleLogics {
+                                    }
+
+                                    listValueDomain?.let { listValues ->
+                                        if (component.type == FormViewerTypes.ImageView) {
+                                            viewModel.updateUriPhotoComponent(component, listValues)
+                                        }
                                     }
                                 }
                             },

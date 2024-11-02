@@ -79,11 +79,9 @@ import utils.getLocalDateTimeFromLong
 fun ModalDatePicker(
     readOnly : Boolean,
     disable : Boolean,
-    showErrorMessageValidation:Boolean,
     processLogicDomain: ProcessLogicDomain,
     title: String,
     titleDatePiker: String,
-    errorMessage: ResourceFormattedStringDesc,
     onDateSelected: (selectItem: String) -> Unit
 ) {
 
@@ -92,10 +90,17 @@ fun ModalDatePicker(
     val readOnlyLogic = processLogicDomain.readOnly || readOnly
     val requiredLogic = processLogicDomain.required
     val validateLogic = processLogicDomain.validate
-    val errorMessageValidateLogic = processLogicDomain.errorMessage
+    val errorMessageLogic = processLogicDomain.errorMessage
+    val hasInitialMessageLogic = processLogicDomain.hasInitialMessage
 
-
-
+    val backgroundColor =
+        if (validateLogic || (requiredLogic && !hasInitialMessageLogic)) {
+            Color.Red
+        } else if (readOnlyLogic || disableLogic) {
+            surfaceBrandDisabled
+        } else {
+            strokeDefaultLight
+        }
 
     val scope = rememberCoroutineScope()
     var isBottomSheetVisible by rememberSaveable { mutableStateOf(false) }
@@ -127,7 +132,7 @@ fun ModalDatePicker(
                 ) {
                     append(titleDatePiker)
                 }
-                if (requiredLogic||errorMessage.localized() != "") {
+                if (requiredLogic||validateLogic) {
                     withStyle(style = SpanStyle(color = Color.Red, fontSize = 18.sp)) {
                         append(" *")
                     }
@@ -146,7 +151,7 @@ fun ModalDatePicker(
                     .fillMaxWidth()
                     .border(
                         width = 1.dp,
-                        color = if (errorMessage.localized() != "") Color.Red else strokeDefaultLight,
+                        color = backgroundColor,
                         shape = RoundedCornerShape(15.dp)
                     ).clickable {
                         scope.launch {
@@ -188,19 +193,10 @@ fun ModalDatePicker(
                 })
 
 
-            if (errorMessage.localized() != "" && !showErrorMessageValidation) {
-                Text(
-                    text = errorMessage.localized(),
-                    color = Color.Red,
-                    style = TextStyle(fontSize = 12.sp),
-                    modifier = Modifier.padding(top = 4.dp)
-                )
-            }
-
-            if (validateLogic) {
-                errorMessageValidateLogic?.let {
+            if (validateLogic || (requiredLogic && !hasInitialMessageLogic)) {
+                errorMessageLogic?.localized()?.let {
                     Text(
-                        text = errorMessageValidateLogic.localized(),
+                        text = it,
                         color = Color.Red,
                         style = TextStyle(fontSize = 12.sp),
                         modifier = Modifier.padding(top = 4.dp)

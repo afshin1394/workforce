@@ -11,9 +11,9 @@ actual class File actual constructor(private val path: String) {
 
     }
 
-    actual fun sizeInMB(): Int {
+    actual fun sizeInMB(): Double {
         //return (file.length() / (1024 * 1024)).toInt()
-        return file.length().toInt()
+        return file.length().toDouble()/(1000 * 1000)
     }
 
     actual fun extension(): String {

@@ -39,40 +39,37 @@ import presentation.theme.textSecondary
 
 @Composable
 fun CheckList(
-    readOnly : Boolean,
-    disable : Boolean,
-    showErrorMessageValidation:Boolean,
+    readOnly: Boolean,
+    disable: Boolean,
     processLogicDomain: ProcessLogicDomain,
     title: String,
-    errorMessage: ResourceFormattedStringDesc,
     selectItem: String,
     itemList: List<ValueDomain>,
     onSelect: (ValueDomain) -> Unit
 ) {
-    val disableLogic = processLogicDomain.disabled ||disable
+    val disableLogic = processLogicDomain.disabled || disable
     val hideLogic = processLogicDomain.shouldHide
-    val readOnlyLogic = processLogicDomain.readOnly|| readOnly
+    val readOnlyLogic = processLogicDomain.readOnly || readOnly
     val requiredLogic = processLogicDomain.required
     val validateLogic = processLogicDomain.validate
-    val errorMessageValidateLogic = processLogicDomain.errorMessage
+    val errorMessageLogic = processLogicDomain.errorMessage
+    val hasInitialMessageLogic = processLogicDomain.hasInitialMessage
 
-
-    val backgroundColor = if (errorMessage.localized() != "" || validateLogic){
+    val backgroundColor = if (validateLogic || (requiredLogic && !hasInitialMessageLogic)) {
         Color.Red
-    }else if(readOnlyLogic || disableLogic){
+    } else if (readOnlyLogic || disableLogic) {
         surfaceBrandDisabled
-    }else{
+    } else {
         strokeDefaultLight
     }
 
-    val currentErrorMessage by rememberUpdatedState(errorMessage)
     val selectedListState = remember { itemList.map { it.isSelected }.toMutableStateList() }
 
     LaunchedEffect(selectItem) {
         selectedListState.clear()
         selectedListState.addAll(itemList.map { it.isSelected }.toMutableStateList())
     }
-    if(!hideLogic) {
+    if (!hideLogic) {
         Column(Modifier.padding(16.dp)) {
             val styledString = buildAnnotatedString {
                 withStyle(
@@ -83,7 +80,7 @@ fun CheckList(
                 ) {
                     append(title)
                 }
-                if (requiredLogic ||errorMessage.localized() != "") {
+                if (requiredLogic || validateLogic) {
                     withStyle(style = SpanStyle(color = Color.Red, fontSize = 18.sp)) {
                         append(" *")
                     }
@@ -105,38 +102,32 @@ fun CheckList(
                         modifier = Modifier.fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Checkbox( enabled = (!disableLogic || !readOnlyLogic), checked = selectedItem, colors = CheckboxDefaults.colors(
-                            checkedColor = if(readOnlyLogic || disableLogic) surfaceBrandDisabled else surfaceBrandDefault,
-                            uncheckedColor = if(readOnlyLogic || disableLogic) surfaceBrandDisabled else surfaceBrandDefault,
-                        ), onCheckedChange = { checked_ ->
-                            if(!(disableLogic || readOnlyLogic)) {
-                                selectedListState[index] = checked_
-                                item.isSelected = checked_
-                                onSelect(item)
-                            }
-                        })
+                        Checkbox(enabled = (!disableLogic || !readOnlyLogic),
+                            checked = selectedItem,
+                            colors = CheckboxDefaults.colors(
+                                checkedColor = if (readOnlyLogic || disableLogic) surfaceBrandDisabled else surfaceBrandDefault,
+                                uncheckedColor = if (readOnlyLogic || disableLogic) surfaceBrandDisabled else surfaceBrandDefault,
+                            ),
+                            onCheckedChange = { checked_ ->
+                                if (!(disableLogic || readOnlyLogic)) {
+                                    selectedListState[index] = checked_
+                                    item.isSelected = checked_
+                                    onSelect(item)
+                                }
+                            })
                         Text(
-                            text = item.label?:"",
-                            style = TextStyle(color = if(readOnlyLogic || disableLogic) textPlaceHolder else textSecondary)
+                            text = item.label ?: "",
+                            style = TextStyle(color = if (readOnlyLogic || disableLogic) textPlaceHolder else textSecondary)
                         )
                     }
                 }
             }
 
 
-            if (currentErrorMessage.localized().isNotEmpty() && !showErrorMessageValidation) {
-                Text(
-                    text = currentErrorMessage.localized(),
-                    color = Color.Red,
-                    style = TextStyle(fontSize = 12.sp),
-                    modifier = Modifier.padding(top = 4.dp)
-                )
-            }
-
-            if (validateLogic) {
-                errorMessageValidateLogic?.let {
+            if (validateLogic || (requiredLogic && !hasInitialMessageLogic)) {
+                errorMessageLogic?.localized()?.let {
                     Text(
-                        text = errorMessageValidateLogic.localized(),
+                        text = it,
                         color = Color.Red,
                         style = TextStyle(fontSize = 12.sp),
                         modifier = Modifier.padding(top = 4.dp)

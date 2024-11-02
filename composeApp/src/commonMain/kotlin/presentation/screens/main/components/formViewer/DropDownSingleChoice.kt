@@ -61,53 +61,54 @@ import presentation.theme.strokeDefaultLight
 import presentation.theme.surfaceBrandDark
 import presentation.theme.surfaceBrandDefault
 import presentation.theme.surfaceBrandDisabled
+import presentation.theme.surfaceDefaultLight
 import presentation.theme.textInverseDisabled
 import presentation.theme.textSecondary
 
 @Composable
 fun DropDownSingleChoice(
-    readOnly:Boolean,
-    disable:Boolean,
-    showErrorMessageValidation:Boolean,
+    readOnly: Boolean,
+    disable: Boolean,
     processLogicDomain: ProcessLogicDomain,
     titleDropDown: String,
-    errorMessage: ResourceFormattedStringDesc,
     itemList: List<ValueDomain>,
     selectItem: String,
     searchText: String,
     onItemSelected: (selectItem: String) -> Unit,
     onSearchButtonClicked: (query: String) -> Unit
 ) {
-    val disableLogic = processLogicDomain.disabled ||disable
+    val disableLogic = processLogicDomain.disabled || disable
     val hideLogic = processLogicDomain.shouldHide
     val readOnlyLogic = processLogicDomain.readOnly || readOnly
     val requiredLogic = processLogicDomain.required
     val validateLogic = processLogicDomain.validate
-    val errorMessageValidateLogic = processLogicDomain.errorMessage
-    val backgroundColor = if (errorMessage.localized() != "" || validateLogic){
+    val errorMessageLogic = processLogicDomain.errorMessage
+    val hasInitialMessageLogic = processLogicDomain.hasInitialMessage
+
+    val backgroundColor = if (validateLogic || (requiredLogic && !hasInitialMessageLogic)) {
         Color.Red
-    }else if(readOnlyLogic || disableLogic){
+    } else if (readOnlyLogic || disableLogic) {
         surfaceBrandDisabled
-    }else{
-        surfaceBrandDark
+    } else {
+        surfaceDefaultLight
     }
 
     var expanded by remember { mutableStateOf(false) }
 
-    var selectedText  by remember { mutableStateOf(selectItem) }
+    var selectedText by remember { mutableStateOf(selectItem) }
     var searchedText by remember { mutableStateOf(searchText) }
     var textFieldSize by remember { mutableStateOf(Size.Zero) }
     val icon = if (expanded) Icons.Filled.KeyboardArrowUp
     else Icons.Filled.KeyboardArrowDown
 
-    LaunchedEffect(hideLogic){
-        if(hideLogic){
-           selectedText = ""
+    LaunchedEffect(hideLogic) {
+        if (hideLogic) {
+            selectedText = ""
         }
     }
 
 
-    if(!hideLogic) {
+    if (!hideLogic) {
         Column(Modifier.padding(16.dp)) {
             val styledString = buildAnnotatedString {
                 withStyle(
@@ -118,7 +119,7 @@ fun DropDownSingleChoice(
                 ) {
                     append(titleDropDown)
                 }
-                if (requiredLogic ||errorMessage.localized() != "") {
+                if (requiredLogic || validateLogic) {
                     withStyle(style = SpanStyle(color = Color.Red, fontSize = 18.sp)) {
                         append(" *")
                     }
@@ -134,13 +135,13 @@ fun DropDownSingleChoice(
 
 
             TextField(value = selectedText,
-                textStyle = TextStyle(color = if(disableLogic || readOnlyLogic) textInverseDisabled else textSecondary ),
+                textStyle = TextStyle(color = if (disableLogic || readOnlyLogic) textInverseDisabled else textSecondary),
                 onValueChange = { selectedText = it },
                 modifier = Modifier
                     .fillMaxWidth()
                     .border(
                         width = 1.dp,
-                        color = if (errorMessage.localized() != "") Color.Red else strokeDefaultLight,
+                        color = backgroundColor,
                         shape = RoundedCornerShape(15.dp)
                     )
                     .onGloballyPositioned { coordinates ->
@@ -153,7 +154,7 @@ fun DropDownSingleChoice(
                     disabledIndicatorColor = Color.Transparent,
                     unfocusedIndicatorColor = Color.Transparent,
                     focusedContainerColor = Color.White,
-                    unfocusedContainerColor =  Color.White,
+                    unfocusedContainerColor = Color.White,
                     disabledContainerColor = Color.White
                 ),
 
@@ -173,7 +174,7 @@ fun DropDownSingleChoice(
                             icon,
                             "contentDescription",
                             Modifier.padding(end = 8.dp).clickable {
-                                if(!(disableLogic || readOnlyLogic)) {
+                                if (!(disableLogic || readOnlyLogic)) {
                                     expanded = !expanded
                                     searchedText = ""
                                 }
@@ -184,18 +185,10 @@ fun DropDownSingleChoice(
                     }
                 })
 
-            if (errorMessage.localized() != "" && !showErrorMessageValidation) {
-                Text(
-                    text = errorMessage.localized(),
-                    color = Color.Red,
-                    style = TextStyle(fontSize = 12.sp),
-                    modifier = Modifier.padding(top = 4.dp)
-                )
-            }
-            if (validateLogic) {
-                errorMessageValidateLogic?.let {
+            if (validateLogic || (requiredLogic && !hasInitialMessageLogic)) {
+                errorMessageLogic?.localized()?.let {
                     Text(
-                        text = errorMessageValidateLogic.localized(),
+                        text = it,
                         color = Color.Red,
                         style = TextStyle(fontSize = 12.sp),
                         modifier = Modifier.padding(top = 4.dp)

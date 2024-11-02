@@ -43,4 +43,8 @@ data class Component(
     @Serializable(with = AnySerializer::class) val defaultValue: Any? = null,
     @SerialName("logics")
     val logics: List<Logic>? = null
-)
+){
+    override fun toString(): String {
+        return "Component(id=$id, key=$key, hide=$hide, type='$type', label=$label, layout=$layout, subType=$subType, isMulti=$isMulti, validate=$validate, values=$values, conditional=$conditional, components=$components, readOnly=$readOnly, repeatable=$repeatable, removable=$removable, disabled=$disabled, defaultValue=$defaultValue, logics=$logics)"
+    }
+}

@@ -43,14 +43,12 @@ fun Editable(
     type: TypeEditable,
     processLogicDomain: ProcessLogicDomain,
     value: String,
-    showErrorMessageValidation: Boolean,
     placeholder: String,
     imeAction: ImeAction,
     keyboardType: KeyboardType,
     readOnly: Boolean,
     disable: Boolean,
     maxLines: Int,
-    errorMessage: ResourceFormattedStringDesc,
     onValueChange: (value: String) -> Unit
 ) {
     Napier.log(LogLevel.ASSERT, tag = "Editable Editable", message = placeholder)
@@ -70,9 +68,10 @@ fun Editable(
     val readOnlyLogic = processLogicDomain.readOnly || readOnly
     val requiredLogic = processLogicDomain.required
     val validateLogic = processLogicDomain.validate
-    val errorMessageValidateLogic = processLogicDomain.errorMessage
+    val errorMessageLogic = processLogicDomain.errorMessage
+    val hasInitialMessageLogic = processLogicDomain.hasInitialMessage
     val textFieldBackground =
-        if (errorMessage.localized() != "" && !showErrorMessageValidation || validateLogic) {
+        if (validateLogic || (requiredLogic && !hasInitialMessageLogic)) {
             Color.Red
         } else if (readOnlyLogic || disableLogic) {
             surfaceBrandDisabled
@@ -98,7 +97,7 @@ fun Editable(
                 ) {
                     append(placeholder)
                 }
-                if (requiredLogic || errorMessage.localized() != "") {
+                if (requiredLogic || validateLogic) {
                     withStyle(style = SpanStyle(color = Color.Red, fontSize = 18.sp)) {
                         append(" *")
                     }
@@ -148,19 +147,12 @@ fun Editable(
 
 
                 )
-            if (errorMessage.localized() != "" && !showErrorMessageValidation) {
-                Text(
-                    text = errorMessage.localized(),
-                    color = Color.Red,
-                    style = TextStyle(fontSize = 12.sp),
-                    modifier = Modifier.padding(top = 4.dp)
-                )
-            }
 
-            if (validateLogic) {
-                errorMessageValidateLogic?.let {
+
+            if (validateLogic || (requiredLogic && !hasInitialMessageLogic)) {
+                errorMessageLogic?.let {
                     Text(
-                        text = errorMessageValidateLogic.localized(),
+                        text = errorMessageLogic.localized(),
                         color = Color.Red,
                         style = TextStyle(fontSize = 12.sp),
                         modifier = Modifier.padding(top = 4.dp)

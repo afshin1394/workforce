@@ -17,4 +17,8 @@ data class FormStruct(
     val conditional : Conditional?= null,
     @SerialName("schemaVersion")
     val schemaVersion : Int?= null,
-)
+){
+    override fun toString(): String {
+        return "FormStruct(id=$id, hide=$hide, type=$type, components=$components, conditional=$conditional, schemaVersion=$schemaVersion)"
+    }
+}

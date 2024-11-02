@@ -69,6 +69,7 @@ import presentation.theme.subtleDefault
 import presentation.theme.surfaceBrandDark
 import presentation.theme.surfaceBrandDefault
 import presentation.theme.surfaceBrandDisabled
+import presentation.theme.surfaceDefaultLight
 import presentation.theme.textInverseDisabled
 import presentation.theme.textSecondary
 
@@ -77,10 +78,8 @@ import presentation.theme.textSecondary
 fun DropDownMultiChoice(
     readOnly: Boolean,
     disable: Boolean,
-    showErrorMessageValidation:Boolean,
     processLogicDomain: ProcessLogicDomain,
     titleDropDown: String,
-    errorMessage: ResourceFormattedStringDesc,
     searchText: String,
     selectItem: String,
     itemList: List<ValueDomain>,
@@ -88,18 +87,19 @@ fun DropDownMultiChoice(
     onSearchButtonClicked: (query: String) -> Unit
 ) {
 
-    val disableLogic = processLogicDomain.disabled ||disable
+    val disableLogic = processLogicDomain.disabled || disable
     val hideLogic = processLogicDomain.shouldHide
     val readOnlyLogic = processLogicDomain.readOnly || readOnly
     val requiredLogic = processLogicDomain.required
     val validateLogic = processLogicDomain.validate
-    val errorMessageValidateLogic = processLogicDomain.errorMessage
-    val backgroundColor = if (errorMessage.localized() != "" || validateLogic) {
+    val errorMessageLogic = processLogicDomain.errorMessage
+    val hasInitialMessageLogic = processLogicDomain.hasInitialMessage
+    val backgroundColor = if (validateLogic || (requiredLogic && !hasInitialMessageLogic)) {
         Color.Red
     } else if (readOnlyLogic || disableLogic) {
         surfaceBrandDisabled
     } else {
-        surfaceBrandDark
+        surfaceDefaultLight
     }
 
     var expanded by remember { mutableStateOf(false) }
@@ -108,9 +108,10 @@ fun DropDownMultiChoice(
     var searchedText by remember { mutableStateOf(searchText) }
     val icon = if (expanded) Icons.Filled.KeyboardArrowUp else Icons.Filled.KeyboardArrowDown
 
-    val selectedItems = remember {   mutableStateListOf<ValueDomain>().apply { addAll(itemList.filter { it.isSelected }) } }
-    LaunchedEffect(hideLogic){
-        if(hideLogic){
+    val selectedItems =
+        remember { mutableStateListOf<ValueDomain>().apply { addAll(itemList.filter { it.isSelected }) } }
+    LaunchedEffect(hideLogic) {
+        if (hideLogic) {
 
             selectedItems.clear()
 
@@ -129,7 +130,7 @@ fun DropDownMultiChoice(
                 ) {
                     append(titleDropDown)
                 }
-                if (requiredLogic ||errorMessage.localized() != "") {
+                if (requiredLogic || validateLogic) {
                     withStyle(style = SpanStyle(color = Color.Red, fontSize = 18.sp)) {
                         append(" *")
                     }
@@ -149,7 +150,7 @@ fun DropDownMultiChoice(
                     .fillMaxWidth(1f)
                     .border(
                         width = 1.dp,
-                        color = if (errorMessage.localized() != "") Color.Red else strokeDefaultLight,
+                        color = backgroundColor,
                         shape = RoundedCornerShape(15.dp)
                     )
                     .background(color = White, shape = RoundedCornerShape(15.dp))
@@ -180,9 +181,9 @@ fun DropDownMultiChoice(
                                     Row(
                                         modifier = Modifier
                                             .toggleable(
-                                            value = false,
-                                            onValueChange = {}
-                                        )
+                                                value = false,
+                                                onValueChange = {}
+                                            )
                                     ) {
                                         Text(
                                             text = selectedItem.label!!,
@@ -201,26 +202,26 @@ fun DropDownMultiChoice(
                     }
                 } else {
 
-                        Text(
-                            text = "",
-                            style = TextStyle(
-                                color = if (disableLogic || readOnlyLogic) textInverseDisabled else textSecondary,
-                                fontSize = 14.sp
-                            ),
-                            modifier = Modifier.clickable {
-                                if (!(disableLogic || readOnlyLogic)) {
-                                    expanded = !expanded
-                                    searchedText = ""
-                                }
+                    Text(
+                        text = "",
+                        style = TextStyle(
+                            color = if (disableLogic || readOnlyLogic) textInverseDisabled else textSecondary,
+                            fontSize = 14.sp
+                        ),
+                        modifier = Modifier.clickable {
+                            if (!(disableLogic || readOnlyLogic)) {
+                                expanded = !expanded
+                                searchedText = ""
                             }
-                                .weight(1f)
-                                .fillMaxWidth()
-                                .fillMaxHeight()
-                                .background(color = Color.Transparent)
-                                .padding(19.dp),
-                            color = if (disableLogic || readOnlyLogic) textInverseDisabled else textSecondary
-                        )
-                    }
+                        }
+                            .weight(1f)
+                            .fillMaxWidth()
+                            .fillMaxHeight()
+                            .background(color = Color.Transparent)
+                            .padding(19.dp),
+                        color = if (disableLogic || readOnlyLogic) textInverseDisabled else textSecondary
+                    )
+                }
 
 
                 Spacer(modifier = Modifier.padding(2.dp))
@@ -257,20 +258,10 @@ fun DropDownMultiChoice(
 
 
             }
-
-            if (errorMessage.localized() != "" && !showErrorMessageValidation) {
-                Text(
-                    text = errorMessage.localized(),
-                    color = Color.Red,
-                    style = TextStyle(fontSize = 12.sp),
-                    modifier = Modifier.padding(top = 4.dp)
-                )
-            }
-
-            if (validateLogic) {
-                errorMessageValidateLogic?.let {
+            if (validateLogic || (requiredLogic && !hasInitialMessageLogic)) {
+                errorMessageLogic?.localized()?.let {
                     Text(
-                        text = errorMessageValidateLogic.localized(),
+                        text = it,
                         color = Color.Red,
                         style = TextStyle(fontSize = 12.sp),
                         modifier = Modifier.padding(top = 4.dp)

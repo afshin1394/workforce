@@ -7,7 +7,7 @@ import kotlinx.serialization.Transient
 @Serializable
 data class ProcessLogicDomain(var shouldHide : Boolean = false,var required : Boolean= false,var disabled : Boolean= false,var readOnly : Boolean= false,var calculatedValue : String? = null,var validate : Boolean = false,
                               @Transient
-                              var errorMessage : ResourceFormattedStringDesc? = null/*,var hasInitialMessage : Boolean = false*/)
+                              var errorMessage : ResourceFormattedStringDesc? = null,var hasInitialMessage : Boolean = false)
 {
     override fun toString(): String {
         return "ProcessLogicDomain(shouldHide=$shouldHide, required=$required, disabled=$disabled, readOnly=$readOnly, calculatedValue=$calculatedValue, validate=$validate, errorMessage=$errorMessage)"

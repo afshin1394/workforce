@@ -129,12 +129,24 @@ fun Validate.toValidateDomain(): ValidateDomain? {
         null
     } else {
         ValidateDomain(
-            this.id,
-            this.key,
-            this.id,
-            this.layout,
-            this.subtype,
-            this.required
+           id =  this.id,
+           key = this.key,
+           layout =  this.layout,
+           subtype =  this.subtype,
+           required =  this.required,
+           maxLength =  this.maxLength,
+           minLength =  this.minLength,
+           pattern =  this.pattern,
+           maxTotalSize =  this.maxTotalSize,
+           maxFileNumber =  this.maxFileNumber,
+           max = this.max,
+           min =  this.min,
+           blacklistAttachment =  this.blacklistAttachment,
+           attachedValidationType =  this.attachedValidationType,
+           whitelistAttachment =  this.whitelistAttachment,
+           domainType =  this.domainType,
+           domainList =  this.domainList,
+           validationType =  this.validationType,
         )
     }
 
@@ -284,7 +296,24 @@ fun LayoutDomain.toLayout(): Layout {
 }
 
 fun ValidateDomain.toValidate(): Validate {
-    return Validate(this.id, this.key, this.id, this.layout, this.subtype, this.required)
+    return Validate(id =  this.id,
+        key = this.key,
+        layout =  this.layout,
+        subtype =  this.subtype,
+        required =  this.required,
+        maxLength =  this.maxLength,
+        minLength =  this.minLength,
+        pattern =  this.pattern,
+        maxTotalSize =  this.maxTotalSize,
+        maxFileNumber =  this.maxFileNumber,
+        max = this.max,
+        min =  this.min,
+        blacklistAttachment =  this.blacklistAttachment,
+        attachedValidationType =  this.attachedValidationType,
+        whitelistAttachment =  this.whitelistAttachment,
+        domainType =  this.domainType,
+        domainList =  this.domainList,
+        validationType =  this.validationType)
 
 }
 

@@ -41,10 +41,8 @@ import presentation.theme.textSecondary
 fun Radio(
     readOnly: Boolean,
     disable: Boolean,
-    showErrorMessageValidation: Boolean,
     processLogicDomain: ProcessLogicDomain,
     title: String,
-    errorMessage: ResourceFormattedStringDesc,
     itemList: List<ValueDomain>,
     selectItem: String,
     onItemSelected: (selectItem: String) -> Unit
@@ -55,8 +53,9 @@ fun Radio(
     val readOnlyLogic = processLogicDomain.readOnly || readOnly
     val validateLogic = processLogicDomain.validate
     val requiredLogic = processLogicDomain.required
+    val hasInitialMessageLogic = processLogicDomain.hasInitialMessage
+    val errorMessageLogic = processLogicDomain.errorMessage
 
-    val errorMessageValidateLogic = processLogicDomain.errorMessage // var select =selectItem
     if (!processLogicDomain.shouldHide) {
 
 
@@ -71,7 +70,7 @@ fun Radio(
                 ) {
                     append(title)
                 }
-                if (requiredLogic || errorMessage.localized() != "") {
+                if (requiredLogic || validateLogic) {
                     withStyle(style = SpanStyle(color = Color.Red, fontSize = 18.sp)) {
                         append(" *")
                     }
@@ -101,24 +100,17 @@ fun Radio(
                     )
                 }
             }
-            if (errorMessage.localized() != "" && !showErrorMessageValidation) {
-                Text(
-                    text = errorMessage.localized(),
-                    color = Color.Red,
-                    style = TextStyle(fontSize = 12.sp),
-                    modifier = Modifier.padding(top = 4.dp)
-                )
-            }
-            if (validateLogic) {
-                errorMessageValidateLogic?.let {
+            if (validateLogic || (requiredLogic && !hasInitialMessageLogic)) {
+                errorMessageLogic?.localized()?.let {
                     Text(
-                        text = errorMessageValidateLogic.localized(),
+                        text = it,
                         color = Color.Red,
                         style = TextStyle(fontSize = 12.sp),
                         modifier = Modifier.padding(top = 4.dp)
                     )
                 }
             }
+
 
         }
     }

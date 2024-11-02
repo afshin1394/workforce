@@ -34,27 +34,29 @@ fun validateFileUpload(
             )
         }
     } else {
-        val totalSize = selectList!!.sumOf { File(it.value ?: "").sizeInMB() }
-        if (totalSize > maxTotalSize) {
+        val totalSize = selectList?.sumOf { File(it.value ?: "").sizeInMB() }
+        totalSize?.let {
+            if (it > maxTotalSize.toDouble()) {
 
-            return StringDesc.ResourceFormatted(
-                MR.strings.file_total_size,maxTotalSize
-            )
+                return StringDesc.ResourceFormatted(
+                    MR.strings.file_total_size, maxTotalSize
+                )
+            }
+        }
+        selectList?.let {
+            if (selectList.size > maxFileNumber) {
+
+                return StringDesc.ResourceFormatted(
+                    MR.strings.file_total_count, maxFileNumber
+                )
+            }
         }
 
-        if (values.size >= maxFileNumber) {
-
-            return StringDesc.ResourceFormatted(
-                MR.strings.file_total_count,maxFileNumber
-            )
-        }
-
-        selectList.forEach { valueDomain ->
+        selectList?.forEach { valueDomain ->
             val fileExtension = File(valueDomain.value ?: "").extension().lowercase()
             when (validationType) {
                 "Blacklist" -> {
                     if (blacklistAttachment.contains(fileExtension)) {
-
                         return StringDesc.ResourceFormatted(
                             MR.strings.file_type_black,validateDomain.blacklistAttachment?: ""
                         )
