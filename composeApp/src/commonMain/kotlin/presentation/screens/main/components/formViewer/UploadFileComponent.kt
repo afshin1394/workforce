@@ -64,14 +64,14 @@ fun UploadFileComponent(
     onChooseFileFromDevice: (MutableList<ValueDomain>) -> Unit,
     onRemoveFile: (ValueDomain) -> Unit
 ) {
-    val processLogicDomainState by remember { mutableStateOf(processLogicDomain) }
-    val hideLogic = processLogicDomainState.shouldHide
-    val disableLogic = processLogicDomainState.disabled || disable
-    val readOnlyLogic = processLogicDomainState.readOnly || readOnly
-    val requiredLogic = processLogicDomainState.required
-    val validateLogic = processLogicDomainState.validate
-    val errorMessageLogic = processLogicDomainState.errorMessage
-    val hasInitialMessageLogic = processLogicDomainState.hasInitialMessage
+
+    val hideLogic = processLogicDomain.shouldHide
+    val disableLogic = processLogicDomain.disabled || disable
+    val readOnlyLogic = processLogicDomain.readOnly || readOnly
+    val requiredLogic = processLogicDomain.required
+    val validateLogic = processLogicDomain.validate
+    val errorMessageLogic = processLogicDomain.errorMessage
+    val hasInitialMessageLogic = processLogicDomain.hasInitialMessage
 
     val backgroundColor =  if (validateLogic || (requiredLogic && !hasInitialMessageLogic)) {
         Color.Red

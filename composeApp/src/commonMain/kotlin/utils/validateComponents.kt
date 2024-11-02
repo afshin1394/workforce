@@ -28,13 +28,15 @@ suspend fun validateComponents(
 //                            listMessageError.add(validationErrors)
 //                            errors[component.id.toString()] = listMessageError
 //                        }
-                        component.updateProcessLogicDomain(
-                            component.processLogicDomain.value.copy(
-                                required = validationErrors!=null,
-                                errorMessage = validationErrors,
-                                hasInitialMessage = firstCheck
+                        validationErrors?.let {
+                            component.updateProcessLogicDomain(
+                                component.processLogicDomain.value.copy(
+                                    required = validationErrors != null,
+                                    errorMessage = validationErrors,
+                                    hasInitialMessage = firstCheck
+                                )
                             )
-                        )
+                        }
                     }
                 }
             }
@@ -53,14 +55,16 @@ suspend fun validateComponents(
 //
 //                            errors[component.id.toString()] = listMessageError
 //                        }
-                        component.updateProcessLogicDomain(
-                            component.processLogicDomain.value.copy(
-                                required = validationErrors!=null,
-                                errorMessage = validationErrors,
-                                hasInitialMessage = firstCheck
-                            )
-                        )
+                        validationErrors?.let {
 
+                            component.updateProcessLogicDomain(
+                                component.processLogicDomain.value.copy(
+                                    required = validationErrors != null,
+                                    errorMessage = validationErrors,
+                                    hasInitialMessage = firstCheck
+                                )
+                            )
+                        }
                     }
 
                 }
@@ -82,15 +86,16 @@ suspend fun validateComponents(
 //
 //                            errors[component.id.toString()] = listMessageError
 //                        }
+                        validationErrors?.let {
 
-                        component.updateProcessLogicDomain(
-                            component.processLogicDomain.value.copy(
-                                required = validationErrors!=null,
-                                errorMessage = validationErrors,
-                                hasInitialMessage = firstCheck
+                            component.updateProcessLogicDomain(
+                                component.processLogicDomain.value.copy(
+                                    required = validationErrors != null,
+                                    errorMessage = validationErrors,
+                                    hasInitialMessage = firstCheck
+                                )
                             )
-                        )
-
+                        }
                     }
                 }
             }
@@ -107,14 +112,16 @@ suspend fun validateComponents(
 //
 //                            errors[component.id.toString()] = listMessageError
 //                        }
-                        component.updateProcessLogicDomain(
-                            component.processLogicDomain.value.copy(
-                                required = validationErrors!=null,
-                                errorMessage = validationErrors,
-                                hasInitialMessage = firstCheck
-                            )
-                        )
+                        validationErrors?.let {
 
+                            component.updateProcessLogicDomain(
+                                component.processLogicDomain.value.copy(
+                                    required = validationErrors != null,
+                                    errorMessage = validationErrors,
+                                    hasInitialMessage = firstCheck
+                                )
+                            )
+                        }
                     }
 
                 }
@@ -135,15 +142,16 @@ suspend fun validateComponents(
 //                            errors[component.id.toString()] = listMessageError
 //
 //                        }
+                        validationErrors?.let {
 
-                        component.updateProcessLogicDomain(
-                            component.processLogicDomain.value.copy(
-                                required = validationErrors!=null,
-                                errorMessage = validationErrors,
-                                hasInitialMessage = firstCheck
+                            component.updateProcessLogicDomain(
+                                component.processLogicDomain.value.copy(
+                                    required = validationErrors != null,
+                                    errorMessage = validationErrors,
+                                    hasInitialMessage = firstCheck
+                                )
                             )
-                        )
-
+                        }
                     }
                 }
             }
@@ -162,14 +170,16 @@ suspend fun validateComponents(
 //                            errors[component.id.toString()] = listMessageError
 //
 //                        }
-                        component.updateProcessLogicDomain(
-                            component.processLogicDomain.value.copy(
-                                required = validationErrors!=null,
-                                errorMessage = validationErrors,
-                                hasInitialMessage = firstCheck
-                            )
-                        )
+                        validationErrors?.let {
 
+                            component.updateProcessLogicDomain(
+                                component.processLogicDomain.value.copy(
+                                    required = validationErrors != null,
+                                    errorMessage = validationErrors,
+                                    hasInitialMessage = firstCheck
+                                )
+                            )
+                        }
                     }
                 }
             }
@@ -189,13 +199,16 @@ suspend fun validateComponents(
 //                            errors[component.id.toString()] = listMessageError
 //
 //                        }
-                        component.updateProcessLogicDomain(
-                            component.processLogicDomain.value.copy(
-                                required = validationErrors!=null,
-                                errorMessage = validationErrors,
-                                hasInitialMessage = firstCheck
+                        validationErrors?.let {
+
+                            component.updateProcessLogicDomain(
+                                component.processLogicDomain.value.copy(
+                                    required = validationErrors != null,
+                                    errorMessage = validationErrors,
+                                    hasInitialMessage = firstCheck
+                                )
                             )
-                        )
+                        }
 
                     }
                 }
@@ -217,13 +230,15 @@ suspend fun validateComponents(
 //                            listMessageError.add(validationErrors)
 //                            errors[component.id.toString()] = listMessageError
 //                        }
-                        component.updateProcessLogicDomain(
-                            component.processLogicDomain.value.copy(
-                                required = validationErrors!=null,
-                                errorMessage = validationErrors,
-                                hasInitialMessage = firstCheck
+                        validationErrors?.let {
+                            component.updateProcessLogicDomain(
+                                component.processLogicDomain.value.copy(
+                                    required = true,
+                                    errorMessage = validationErrors,
+                                    hasInitialMessage = firstCheck
+                                )
                             )
-                        )
+                        }
                     }
                 }
             }
@@ -246,7 +261,7 @@ suspend fun validateComponents(
                         }
                         component.updateProcessLogicDomain(
                             component.processLogicDomain.value.copy(
-                                required = validationErrors!=null,
+                                required = validationErrors != null,
                                 errorMessage = validationErrors,
                                 hasInitialMessage = firstCheck
                             )
@@ -257,14 +272,14 @@ suspend fun validateComponents(
             }
 
             FormViewerTypes.Group -> {
-                 component.components.value?.map { subComponent ->
+                component.components.value?.map { subComponent ->
                     updateComponentsRecursively(subComponent)
-                 }
+                }
             }
         }
     }
 
-     components.map { component ->
+    components.map { component ->
         updateComponentsRecursively(component)
     }
 

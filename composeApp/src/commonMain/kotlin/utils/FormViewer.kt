@@ -510,17 +510,13 @@ fun initialize(
                                             required = true, errorMessage = tempErrors, hasInitialMessage = false
                                         )
                                     )
-                                    onChanges(
-                                        item,
-                                        selectedComponentObject.values
-                                    )
+
                                 } ?: run {
                                     components[indexChildSaveable.value].values = oldList.toMutableList()
                                     uploadDomainList.value = oldList.toMutableList()
                                     onChanges(
                                         item,
-                                        selectedComponentObject.values
-                                    )
+                                        uploadDomainList.value                                    )
                                 }
                             },
                             onClickUpload = { indexClick ->

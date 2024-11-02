@@ -420,7 +420,7 @@ class TicketProcessScreen(
 
                             onChanges = { component, listValueDomain ->
                                 Napier.log(LogLevel.ASSERT, tag = "tempComponentLost", message = viewModel.tempComponentList.toList().toString())
-                                scope.launch(Dispatchers.IO) {
+                                scope.launch(Dispatchers.Main) {
                                         async {
                                             validateComponents(viewModel.tempComponentList, false)
                                         }.await()
