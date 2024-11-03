@@ -65,6 +65,7 @@ import utils.FormViewerTypes
 import utils.PROCEED
 import utils.ViewStates
 import utils.initialize
+import utils.validateComponent
 import utils.validateComponents
 
 class TicketProcessScreen(
@@ -182,7 +183,8 @@ class TicketProcessScreen(
             }
         }
 
-        BaseScreen(viewModel = viewModel,
+        BaseScreen(
+            viewModel = viewModel,
             title = stringResource(MR.strings.ticket_process),
             scaffoldState = scaffoldState,
             hasDrawer = false,
@@ -244,39 +246,40 @@ class TicketProcessScreen(
                         ), onClick = {
                             scope.launch {
                                 val errors = async {
-                                validateComponents(
-                                    viewModel.tempComponentList, false
-                                )}.await()
+                                    validateComponents(
+                                        viewModel.tempComponentList, false
+                                    )
+                                }.await()
                                 if (errors.isNotEmpty()) {
                                     viewModel.showFirstError(errors)
-                                }else{
+                                } else {
                                     viewModel.handleLogics { extractLogicsModel ->
-                                      scope.launch {
-                                          if (extractLogicsModel.size > 0) {
+                                        scope.launch {
+                                            if (extractLogicsModel.size > 0) {
 
-                                              if (extractLogicsModel.size > 0) {
-                                                  val errors =
-                                                      mutableMapOf<String, List<ResourceFormattedStringDesc>>()
+                                                if (extractLogicsModel.size > 0) {
+                                                    val errors =
+                                                        mutableMapOf<String, List<ResourceFormattedStringDesc>>()
 
-                                                  extractLogicsModel.forEach {
-                                                      errors[it.componentId] = arrayListOf()
-                                                  }
-                                                  viewModel.showFirstError(errors)
-                                              }
-
-                                          } else {
-                                              if (errors.isEmpty()) {
-                                                async { viewModel.saveAndDeletePhotoByComponentKey() }.await()
-                                                if (state is ViewStates.Success) {
-                                                    scaffoldState.snackbarHostState.showSnackbar("successss")
-//                                                    viewModel.updateLevel(PROCEED.NEXT)
+                                                    extractLogicsModel.forEach {
+                                                        errors[it.componentId] = arrayListOf()
+                                                    }
+                                                    viewModel.showFirstError(errors)
                                                 }
-                                              }
-                                          }
-                                      }
-                                  }
+
+                                            } else {
+                                                if (errors.isEmpty()) {
+                                                    async { viewModel.saveAndDeletePhotoByComponentKey() }.await()
+                                                    if (state is ViewStates.Success) {
+                                                        viewModel.updateLevel(PROCEED.NEXT)
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
                                 }
-                        }})
+                            }
+                        })
 
                         scope.launch {
                             scaffoldState.bottomSheetState.expand()
@@ -386,6 +389,7 @@ class TicketProcessScreen(
                             )
                         )
                     }
+
                     SaveDataStatus.UnRecognized -> {}
                 }
                 LaunchedEffect(updateTaskCompleteState.value) {
@@ -417,17 +421,24 @@ class TicketProcessScreen(
                                 indexPhotoSelected = index
                                 viewModel.events.value = TicketProcessEvent.PhotoPreview
                             },
-
-
                             onChanges = { component, listValueDomain ->
-                                Napier.log(LogLevel.ASSERT, tag = "tempComponentLost", message = viewModel.tempComponentList.toList().toString())
-                                scope.launch(Dispatchers.Main) {
-                                        async {
-                                            validateComponents(viewModel.tempComponentList, false,initialCheckingFileUpload = false)
-                                        }.await()
+                                Napier.log(
+                                    LogLevel.ASSERT,
+                                    tag = "tempComponentLost",
+                                    message = viewModel.tempComponentList.toList().toString()
+                                )
+                                scope.launch(Dispatchers.Default) {
+                                    async {
+                                        viewModel.handleLogics {
+                                        }
+                                    }.await()
+                                    validateComponent(
+                                        component,
+                                        false,
+                                        initialCheckingFileUpload = false
+                                    )
 
-                                    viewModel.handleLogics {
-                                    }
+
 
                                     listValueDomain?.let { listValues ->
                                         if (component.type == FormViewerTypes.ImageView) {

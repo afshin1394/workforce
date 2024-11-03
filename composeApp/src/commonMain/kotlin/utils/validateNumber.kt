@@ -7,7 +7,7 @@ import domain.models.form_struct.ComponentDomain
 import domain.models.form_struct.ValidateDomain
 import irancell.nwg.wfm.MR
 
-fun validateNumber(component: ComponentDomain, validateDomain: ValidateDomain,initialChecking: Boolean?): ResourceFormattedStringDesc?  {
+fun validateNumber(component: ComponentDomain, validateDomain: ValidateDomain): ResourceFormattedStringDesc?  {
     val required = validateDomain.required ?: false
     val max = validateDomain.max ?: Int.MAX_VALUE
     val min = validateDomain.min ?: Int.MIN_VALUE

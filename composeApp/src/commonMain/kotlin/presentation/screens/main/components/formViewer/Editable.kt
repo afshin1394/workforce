@@ -31,6 +31,14 @@ import dev.icerock.moko.resources.desc.ResourceFormattedStringDesc
 import domain.models.form_struct.ProcessLogicDomain
 import io.github.aakira.napier.LogLevel
 import io.github.aakira.napier.Napier
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.launch
 import presentation.theme.strokeDefaultLight
 import presentation.theme.surfaceBrandDefault
 import presentation.theme.surfaceBrandDisabled
@@ -61,7 +69,7 @@ fun Editable(
     val valueChange = remember {   mutableStateOf(processLogicDomain.calculatedValue?:value) }
 
 
-
+    val scope = rememberCoroutineScope()
 
     val disableLogic = processLogicDomain.disabled || disable
     val hideLogic = processLogicDomain.shouldHide
@@ -124,6 +132,8 @@ fun Editable(
                     if (!disableLogic && !readOnlyLogic && it != valueChange.value) {
                         valueChange.value = it
                         onValueChange(valueChange.value)
+
+
                     }
                 },
                 modifier = Modifier

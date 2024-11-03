@@ -11,7 +11,6 @@ import irancell.nwg.wfm.MR
 fun validateEmail(
     component: ComponentDomain,
     validateDomain: ValidateDomain,
-    initialChecking: Boolean?
 ): ResourceFormattedStringDesc? {
     val required = validateDomain.required ?: false
     val domainList =

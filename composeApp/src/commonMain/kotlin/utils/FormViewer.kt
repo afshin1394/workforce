@@ -104,8 +104,8 @@ fun initialize(
         contentPadding = PaddingValues(bottom = 100.dp)
     ) {
         itemsIndexed(components, key = { _, item -> item.id!! }) { index, item ->
-            val nestedComponentsState by  item.components
-            val processLogicDomainState by  item.processLogicDomain
+            val nestedComponentsState by remember {  item.components }
+            val processLogicDomainState by remember { item.processLogicDomain }
 
             val updatedParentIndex = currentParentIndex + index
 
@@ -189,6 +189,7 @@ fun initialize(
                                     newValue
                                 )
                                 item.values = listOf(updatedValueDomain)
+
                                 onChanges(
                                     item,
                                     listOf(updatedValueDomain)
@@ -829,161 +830,3 @@ fun updateValueDomain(
         value = newValue,
     )
 }
-
-
-fun updateNumberValidationError(
-    item: ComponentDomain,
-    errorMessageState: MutableState<ResourceFormattedStringDesc>
-) {
-    val validationErrors = validateNumber(item, item.validate ?: ValidateDomain(), null)
-    val messageError: ResourceFormattedStringDesc = validationErrors
-        ?: ResourceFormattedStringDesc(
-            MR.strings.empty_error_message,
-            emptyList()
-        )
-    errorMessageState.value = messageError
-    val updatedValidate = item.validate?.copy(messageError = messageError, firstCheck = false)
-    item.validate = updatedValidate
-}
-
-fun updateTextareaValidationError(
-    item: ComponentDomain,
-    errorMessageState: MutableState<ResourceFormattedStringDesc>
-) {
-    Napier.log(LogLevel.ASSERT, tag = "validateShortText", message = item.label.toString())
-    Napier.log(LogLevel.ASSERT, tag = "validateShortText", message = item.values?.get(0).toString())
-    val validationErrors = validateTextarea(item, item.validate ?: ValidateDomain(), null)
-    val messageError: ResourceFormattedStringDesc = validationErrors
-        ?: ResourceFormattedStringDesc(
-            MR.strings.empty_error_message,
-            emptyList()
-        )
-    errorMessageState.value = messageError
-    val updatedValidate = item.validate?.copy(messageError = messageError, firstCheck = false)
-    item.validate = updatedValidate
-}
-
-fun updateShortTextValidationError(
-    item: ComponentDomain,
-    errorMessageState: MutableState<ResourceFormattedStringDesc>
-) {
-    Napier.log(LogLevel.ASSERT, tag = "validateShortText", message = item.label.toString())
-    Napier.log(LogLevel.ASSERT, tag = "validateShortText", message = item.values?.get(0).toString())
-
-    val validationErrors =
-        validateShortText(item, item.validate ?: ValidateDomain())
-    val messageError: ResourceFormattedStringDesc = validationErrors
-        ?: ResourceFormattedStringDesc(
-            MR.strings.empty_error_message,
-            emptyList()
-        )
-    errorMessageState.value = messageError
-    val updatedValidate = item.validate?.copy(messageError = messageError, firstCheck = false)
-    item.validate = updatedValidate
-}
-
-fun updateLatLongValidationError(
-    item: ComponentDomain,
-    errorMessageState: MutableState<ResourceFormattedStringDesc>
-) {
-    val validationErrors =
-        validateLatLong(item, item.validate ?: ValidateDomain())
-    val messageError: ResourceFormattedStringDesc = validationErrors
-        ?: ResourceFormattedStringDesc(
-            MR.strings.empty_error_message,
-            emptyList()
-        )
-    errorMessageState.value = messageError
-    val updatedValidate = item.validate?.copy(messageError = messageError, firstCheck = false)
-    item.validate = updatedValidate
-}
-
-fun updatePhoneValidationError(
-    item: ComponentDomain,
-    errorMessageState: MutableState<ResourceFormattedStringDesc>
-) {
-    val validationErrors =
-        validatePhone(item, item.validate ?: ValidateDomain(), null)
-    val messageError: ResourceFormattedStringDesc = validationErrors
-        ?: ResourceFormattedStringDesc(
-            MR.strings.empty_error_message,
-            emptyList()
-        )
-    errorMessageState.value = messageError
-    val updatedValidate = item.validate?.copy(messageError = messageError, firstCheck = false)
-    item.validate = updatedValidate
-}
-
-fun updateEmailValidationError(
-    item: ComponentDomain,
-    errorMessageState: MutableState<ResourceFormattedStringDesc>
-) {
-    val validationErrors = validateEmail(item, item.validate ?: ValidateDomain(), null)
-    val messageError: ResourceFormattedStringDesc = validationErrors
-        ?: ResourceFormattedStringDesc(
-            MR.strings.empty_error_message,
-            emptyList()
-        )
-    errorMessageState.value = messageError
-    val updatedValidate = item.validate?.copy(
-        messageError = messageError,
-        firstCheck = false
-    )
-    item.validate = updatedValidate
-}
-
-fun updateDateTimeValidationError(
-    item: ComponentDomain,
-    errorMessageState: MutableState<ResourceFormattedStringDesc>
-) {
-
-    val validationErrors = validateRequired(item, item.validate ?: ValidateDomain())
-    val messageError: ResourceFormattedStringDesc = validationErrors
-        ?: ResourceFormattedStringDesc(
-            MR.strings.empty_error_message,
-            emptyList()
-        )
-    errorMessageState.value = messageError
-    val updatedValidate = item.validate?.copy(
-        messageError = messageError,
-        firstCheck = false
-    )
-    item.validate = updatedValidate
-
-}
-
-
-
-fun updateImageViewValidationError(
-    item: ComponentDomain,
-    errorMessageState: MutableState<ResourceFormattedStringDesc>
-) {
-    val validationErrors = validateRequired(item, item.validate ?: ValidateDomain())
-    val messageError: ResourceFormattedStringDesc = validationErrors
-        ?: ResourceFormattedStringDesc(
-            MR.strings.empty_error_message,
-            emptyList()
-        )
-    errorMessageState.value = messageError
-    val updatedValidate = item.validate?.copy(messageError = messageError, firstCheck = false)
-
-    item.validate = updatedValidate
-}
-
-fun updateSelectedComponentValidationError(
-    item: ComponentDomain,
-    errorMessageState: MutableState<ResourceFormattedStringDesc>
-) {
-
-
-    val validationErrors = validateSelected(item, item.validate ?: ValidateDomain())
-    val messageError: ResourceFormattedStringDesc = validationErrors
-        ?: ResourceFormattedStringDesc(
-            MR.strings.empty_error_message,
-            emptyList()
-        )
-    errorMessageState.value = messageError
-    val updatedValidate = item.validate?.copy(messageError = messageError, firstCheck = false)
-    item.validate = updatedValidate
-}
-

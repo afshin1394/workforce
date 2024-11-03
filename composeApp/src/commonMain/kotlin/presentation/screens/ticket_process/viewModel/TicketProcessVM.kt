@@ -4,6 +4,7 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import arrow.core.Tuple5
 import arrow.core.Tuple6
+import arrow.core.raise.catch
 import dev.icerock.moko.resources.desc.StringDesc
 import domain.models.PhotoDomain
 import domain.models.form_struct.ComponentDomain
@@ -28,6 +29,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.yield
 import presentation.model.ExtractLogicsModel
 import presentation.screens.main.events.TicketProcessEvent
 import presentation.screens.main.viewmodel.TicketListStatus
@@ -150,35 +152,22 @@ class TicketProcessVM(
                         it.data?.let { data ->
 
                             data.activityDomain.form.form_structure.components?.let {
-                                Napier.log(
-                                    LogLevel.ASSERT,
-                                    "form_structure.components",
-                                    message = it.toString()
-                                )
+
                                 tempComponentList.clear()
                                 tempComponentList.addAll(it.toList())
                                 async {
-                                    validateComponents(tempComponentList, true)
-                                }.await()
 
-                                handleLogics {
-                                }
+                                    handleLogics {
+                                    }
+                                }.await()
+                                validateComponents(tempComponentList, true)
+
+
+
                                 updateState(ViewStates.Success())
 
 
                             }
-
-                            Napier.log(
-                                LogLevel.ASSERT,
-                                "data.stepCounter",
-                                message = data.stepCounter.toString()
-                            )
-                            Napier.log(
-                                LogLevel.ASSERT,
-                                "data.stepCounter",
-                                message = data.stepTitle
-                            )
-
                             _currentLevel.update { data.stepCounter }
                             _currentLevelName.update { data.stepTitle }
                             _stepDetails.update { data.stepDetails }
@@ -355,54 +344,50 @@ class TicketProcessVM(
     }
 
     private suspend fun checkLogicsForAll(components: List<ComponentDomain>) {
-        // Create a copy of the components list to iterate over
-        val componentsCopy = components.toMutableList()
-
-        for (cmp in componentsCopy) {
+        for (cmp in components) {
+            // Extract logics for the current component and add to the model
             extractLogicsModel.addAll(logicCalculation.extractLogics(cmp))
-            cmp.components.value?.let { cmps ->
-                if (cmps.isNotEmpty()) {
-                    checkLogicsForAll(cmps)
 
+            // Check nested components if available
+            cmp.components.value?.let { nestedComponents ->
+                if (nestedComponents.isNotEmpty()) {
+                    // Pause to allow other coroutines to execute if the workload is high
+                    yield()
+                    checkLogicsForAll(nestedComponents)  // Recursive call on nested components
                 }
             }
         }
     }
 
     private suspend fun checkAutoFillLogicForAll(components: List<ComponentDomain>) {
-        val componentsCopy = components.toMutableList()
-
-        for (cmp in componentsCopy) {
+        for (cmp in components) {
+            // Execute the autofill logic for the current component
             logicCalculation.executeTicketAutoFillLogic(cmp)
-            cmp.components.value?.let { cmps ->
-                if (cmps.isNotEmpty()) {
-                    checkAutoFillLogicForAll(cmps)
+
+            // Check nested components if available
+            cmp.components.value?.let { nestedComponents ->
+                if (nestedComponents.isNotEmpty()) {
+                    yield()  // Allow other coroutines to execute if workload is high
+                    checkAutoFillLogicForAll(nestedComponents)  // Recursive call on nested components
                 }
             }
         }
     }
 
     suspend fun handleLogics(onResult: (MutableList<ExtractLogicsModel>) -> Unit) {
+        withContext(Dispatchers.Default) {
+            val componentsCopy = tempComponentList.toList()
 
-
-        withContext(Dispatchers.IO) {
             extractLogicsModel.clear()
-            checkLogicsForAll(tempComponentList)
-            checkAutoFillLogicForAll(tempComponentList)
 
-            viewModelScope.launch(Dispatchers.Main) {
-                arrayListOf<ComponentDomain>().apply {
-                    this.addAll(tempComponentList)
-                    tempComponentList.clear()
-                    tempComponentList.addAll(this)
-                }
+            // Perform logic checks in the background
+            checkLogicsForAll(componentsCopy)
+            checkAutoFillLogicForAll(componentsCopy)
+        }
 
-
-                onResult(extractLogicsModel)
-
-            }
-
-        }.join()
+        withContext(Dispatchers.Main) {
+            onResult(extractLogicsModel)
+        }
     }
 
 
