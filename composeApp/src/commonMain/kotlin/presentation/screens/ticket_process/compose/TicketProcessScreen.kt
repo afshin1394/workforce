@@ -65,6 +65,7 @@ import utils.FormViewerTypes
 import utils.PROCEED
 import utils.ViewStates
 import utils.initialize
+import utils.validateComponent
 import utils.validateComponents
 
 class TicketProcessScreen(
@@ -245,7 +246,7 @@ class TicketProcessScreen(
                             scope.launch {
                                 val errors = async {
                                 validateComponents(
-                                    viewModel.tempComponentList, false
+                                    viewModel.tempComponentList, false,null,null
                                 )}.await()
                                 if (errors.isNotEmpty()) {
                                     viewModel.showFirstError(errors)
@@ -423,7 +424,7 @@ class TicketProcessScreen(
                                 Napier.log(LogLevel.ASSERT, tag = "tempComponentLost", message = viewModel.tempComponentList.toList().toString())
                                 scope.launch(Dispatchers.Main) {
                                         async {
-                                            validateComponents(viewModel.tempComponentList, false,initialCheckingFileUpload = false)
+                                            validateComponent(component, false,listValueDomain,initialCheckingFileUpload = false)
                                         }.await()
 
                                     viewModel.handleLogics {
@@ -442,6 +443,10 @@ class TicketProcessScreen(
                                     viewModel.addComponentDomainRepeatableToList(
                                         component, indexChild, scrollCallback
                                     )
+                                    async {
+                                        validateComponent(component, false,null,initialCheckingFileUpload = false)
+                                    }.await()
+
                                 }
 
 

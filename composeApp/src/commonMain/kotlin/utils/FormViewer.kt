@@ -104,8 +104,9 @@ fun initialize(
         contentPadding = PaddingValues(bottom = 100.dp)
     ) {
         itemsIndexed(components, key = { _, item -> item.id!! }) { index, item ->
-            val nestedComponentsState by  item.components
-            val processLogicDomainState by  item.processLogicDomain
+            val nestedComponentsState by item.components
+            val processLogicDomainState by item.processLogicDomain
+            val valuesState by item.valuesState
 
             val updatedParentIndex = currentParentIndex + index
 
@@ -168,7 +169,7 @@ fun initialize(
 
                     FormViewerTypes.Number -> {
                         var valueState =
-                             mutableStateOf(item.values?.get(0)?.value ?: "")
+                            mutableStateOf(item.values?.get(0)?.value ?: "")
 
 
                         Editable(
@@ -201,7 +202,7 @@ fun initialize(
 
                     FormViewerTypes.TextAREA -> {
                         var valueState =
-                               mutableStateOf(item.values?.get(0)?.value ?: "")
+                            mutableStateOf(item.values?.get(0)?.value ?: "")
 
                         Editable(
                             processLogicDomain = processLogicDomainState,
@@ -221,16 +222,7 @@ fun initialize(
                                     newValue
                                 )
                                 item.values = listOf(updatedValueDomain)
-                                Napier.log(
-                                    LogLevel.ASSERT,
-                                    tag = "validateShortText",
-                                    message = item.label.toString()
-                                )
-                                Napier.log(
-                                    LogLevel.ASSERT,
-                                    tag = "validateShortText",
-                                    message = item.values?.get(0).toString()
-                                )
+
                                 onChanges(
                                     item,
                                     listOf(updatedValueDomain)
@@ -241,7 +233,7 @@ fun initialize(
 
                     FormViewerTypes.TextField -> {
                         var valueState =
-                              mutableStateOf(item.values?.get(0)?.value ?: "")
+                            mutableStateOf(item.values?.get(0)?.value ?: "")
 
                         Editable(
                             processLogicDomain = processLogicDomainState,
@@ -254,11 +246,7 @@ fun initialize(
                             disable = item.disabled,
                             maxLines = 1,
                             onValueChange = { newValue ->
-                                Napier.log(
-                                    LogLevel.ASSERT,
-                                    tag = "onValueChange",
-                                    message = newValue
-                                )
+
                                 valueState.value = newValue
                                 val updatedValueDomain = updateValueDomain(
                                     item.values?.get(0) ?: ValueDomain(), newValue
@@ -277,7 +265,7 @@ fun initialize(
 
 
                         var valueState =
-                              mutableStateOf(item.values?.get(0)?.value ?: "")
+                            mutableStateOf(item.values?.get(0)?.value ?: "")
 
 
                         Editable(
@@ -298,8 +286,6 @@ fun initialize(
                                 )
                                 item.values = listOf(updatedValueDomain)
 
-
-
                                 onChanges(
                                     item,
                                     listOf(updatedValueDomain)
@@ -315,7 +301,7 @@ fun initialize(
 
 
                         var valueState =
-                          mutableStateOf(item.values?.get(0)?.value ?: "")
+                            mutableStateOf(item.values?.get(0)?.value ?: "")
 
                         Editable(
                             processLogicDomain = processLogicDomainState,
@@ -348,7 +334,7 @@ fun initialize(
 
 
                         var valueState =
-                           mutableStateOf(item.values?.get(0)?.value ?: "")
+                            mutableStateOf(item.values?.get(0)?.value ?: "")
 
                         Editable(
                             processLogicDomain = processLogicDomainState,
@@ -387,7 +373,6 @@ fun initialize(
                     FormViewerTypes.Datetime -> {
 
 
-
                         val selectedDateState = remember {
                             mutableStateOf(
                                 item.values?.getOrNull(0)?.value ?: " "
@@ -405,8 +390,6 @@ fun initialize(
                                 listOf(ValueDomain(FormViewerTypes.Datetime, dateSelected))
                             item.values = newValues
                             selectedDateState.value = dateSelected
-
-//                            updateDateTimeValidationError(item, errorMessageState)
 
                             onChanges(item, newValues)
                         }
@@ -431,9 +414,6 @@ fun initialize(
                             val newValues = listOf(ValueDomain(FormViewerTypes.Date, dateSelected))
                             item.values = newValues
                             selectedDateState.value = dateSelected
-
-//                            updateDateTimeValidationError(item, errorMessageState)
-
                             onChanges(item, newValues)
 
 
@@ -457,11 +437,10 @@ fun initialize(
                             processLogicDomainState,
                             selectedDateState.value,
                             item.label.toString(),
-                            ) { timeSelected ->
+                        ) { timeSelected ->
                             val newValues = listOf(ValueDomain(FormViewerTypes.Time, timeSelected))
                             item.values = newValues
                             selectedDateState.value = timeSelected
-
 
                             onChanges(item, newValues)
 
@@ -472,17 +451,9 @@ fun initialize(
 
 
                     FormViewerTypes.FileUpload -> {
-                        var selectedComponentObject = components[index]
-                        // Ensure there is an upload list for this item key
-                        if (!uploadDomainLists.containsKey(item.key)) {
-                            uploadDomainLists[item.key!!] = mutableStateOf(
-                                components[index].values ?: item.values ?: emptyList()
-                            )
-                        }
 
-
-                        val uploadDomainList = uploadDomainLists[item.key!!]!!
-
+                        val currentId= item.id ?: ""
+                        var filteredValuesState = valuesState?.filter { it.value?.contains(currentId) == true }
 
 
                         UploadFileComponent(
@@ -491,86 +462,32 @@ fun initialize(
                             processLogicDomainState,
                             index = index,
                             item = item,
-                            label = item.key ?: "",
-                            uploadList = uploadDomainList.value.toMutableList(),
+                            label = item.id ?: "",
+                            uploadList =  filteredValuesState,
                             onChooseFileFromDevice = { list ->
-                                val oldList = uploadDomainList.value.toMutableSet()
-                                oldList.addAll(list)
 
-                                val tempErrors = validateFileUpload(
+                                onChanges(
                                     item,
-                                    item.validate ?: ValidateDomain(),
-                                    oldList.toMutableList(),
-                                    false
+                                    list,
                                 )
 
-                                tempErrors?.let {
-                                    components[indexChildSaveable.value].updateProcessLogicDomain(
-                                        components[indexChildSaveable.value].processLogicDomain.value.copy(
-                                            required = item.validate?.required == true, errorMessage = tempErrors, hasInitialMessage = false
-                                        )
-                                    )
 
-                                } ?: run {
-                                    components[indexChildSaveable.value].updateProcessLogicDomain(
-                                        components[indexChildSaveable.value].processLogicDomain.value.copy(
-                                            required = item.validate?.required == true, errorMessage = null, hasInitialMessage = true
-                                        )
-                                    )
-                                    components[indexChildSaveable.value].values = oldList.toMutableList()
-                                    uploadDomainList.value = oldList.toMutableList()
-                                    onChanges(
-                                        item,
-                                        uploadDomainList.value                                    )
-                                }
                             },
                             onClickUpload = { indexClick ->
                                 indexChildSaveable.value = indexClick
-                                Napier.log(
-                                    LogLevel.ASSERT,
-                                    tag = "UploadFileComponent",
-                                    message = index.toString()
-                                )
-                                Napier.log(
-                                    LogLevel.ASSERT,
-                                    tag = "UploadFileComponent onClickUpload",
-                                    message = components[indexChildSaveable.value].toString()
-                                )
 
                             },
                             onRemoveFile = { fileToRemove ->
 
-                                val newList = uploadDomainList.value.toMutableList()
-                                newList.remove(fileToRemove)
-                                uploadDomainList.value = newList
+                                val newList = filteredValuesState?.toMutableList()
+                                newList?.remove(fileToRemove)
+                                filteredValuesState = newList!!
                                 item.values = newList
-                                val tempErrors = validateFileUpload(
-                                    item,
-                                    item.validate ?: ValidateDomain(),
-                                    newList,
-                                    false
-                                )
-
-                                tempErrors?.let {
-                                    components[indexChildSaveable.value].updateProcessLogicDomain(
-                                        components[indexChildSaveable.value].processLogicDomain.value.copy(
-                                            required = item.validate?.required == true, errorMessage = tempErrors, hasInitialMessage = false
-                                        )
-                                    )
-
-                                } ?: run {
-                                    components[indexChildSaveable.value].updateProcessLogicDomain(
-                                        components[indexChildSaveable.value].processLogicDomain.value.copy(
-                                            required = item.validate?.required == true, errorMessage = null, hasInitialMessage = true
-                                        )
-                                    )
-                                    components[indexChildSaveable.value].values = newList.toMutableList()
-                                    uploadDomainList.value = newList.toMutableList()
                                     onChanges(
                                         item,
                                         item.values
                                     )
-                                }
+
 
                             }
 
@@ -580,7 +497,6 @@ fun initialize(
 
 
                     FormViewerTypes.ImageView -> {
-
 
 
                         ImagePicker(
@@ -705,13 +621,7 @@ fun initialize(
                     }
 
                     FormViewerTypes.Select -> {
-                        val initialMessageError: ResourceFormattedStringDesc =
-                            item.validate?.messageError ?: ResourceFormattedStringDesc(
-                                MR.strings.empty_error_message,
-                                emptyList()
-                            )
 
-                        val errorMessageState = remember { mutableStateOf(initialMessageError) }
                         val componentLabel = item.label
                         val valuesState = remember {
                             mutableStateListOf(
@@ -831,159 +741,5 @@ fun updateValueDomain(
 }
 
 
-fun updateNumberValidationError(
-    item: ComponentDomain,
-    errorMessageState: MutableState<ResourceFormattedStringDesc>
-) {
-    val validationErrors = validateNumber(item, item.validate ?: ValidateDomain(), null)
-    val messageError: ResourceFormattedStringDesc = validationErrors
-        ?: ResourceFormattedStringDesc(
-            MR.strings.empty_error_message,
-            emptyList()
-        )
-    errorMessageState.value = messageError
-    val updatedValidate = item.validate?.copy(messageError = messageError, firstCheck = false)
-    item.validate = updatedValidate
-}
 
-fun updateTextareaValidationError(
-    item: ComponentDomain,
-    errorMessageState: MutableState<ResourceFormattedStringDesc>
-) {
-    Napier.log(LogLevel.ASSERT, tag = "validateShortText", message = item.label.toString())
-    Napier.log(LogLevel.ASSERT, tag = "validateShortText", message = item.values?.get(0).toString())
-    val validationErrors = validateTextarea(item, item.validate ?: ValidateDomain(), null)
-    val messageError: ResourceFormattedStringDesc = validationErrors
-        ?: ResourceFormattedStringDesc(
-            MR.strings.empty_error_message,
-            emptyList()
-        )
-    errorMessageState.value = messageError
-    val updatedValidate = item.validate?.copy(messageError = messageError, firstCheck = false)
-    item.validate = updatedValidate
-}
-
-fun updateShortTextValidationError(
-    item: ComponentDomain,
-    errorMessageState: MutableState<ResourceFormattedStringDesc>
-) {
-    Napier.log(LogLevel.ASSERT, tag = "validateShortText", message = item.label.toString())
-    Napier.log(LogLevel.ASSERT, tag = "validateShortText", message = item.values?.get(0).toString())
-
-    val validationErrors =
-        validateShortText(item, item.validate ?: ValidateDomain())
-    val messageError: ResourceFormattedStringDesc = validationErrors
-        ?: ResourceFormattedStringDesc(
-            MR.strings.empty_error_message,
-            emptyList()
-        )
-    errorMessageState.value = messageError
-    val updatedValidate = item.validate?.copy(messageError = messageError, firstCheck = false)
-    item.validate = updatedValidate
-}
-
-fun updateLatLongValidationError(
-    item: ComponentDomain,
-    errorMessageState: MutableState<ResourceFormattedStringDesc>
-) {
-    val validationErrors =
-        validateLatLong(item, item.validate ?: ValidateDomain())
-    val messageError: ResourceFormattedStringDesc = validationErrors
-        ?: ResourceFormattedStringDesc(
-            MR.strings.empty_error_message,
-            emptyList()
-        )
-    errorMessageState.value = messageError
-    val updatedValidate = item.validate?.copy(messageError = messageError, firstCheck = false)
-    item.validate = updatedValidate
-}
-
-fun updatePhoneValidationError(
-    item: ComponentDomain,
-    errorMessageState: MutableState<ResourceFormattedStringDesc>
-) {
-    val validationErrors =
-        validatePhone(item, item.validate ?: ValidateDomain(), null)
-    val messageError: ResourceFormattedStringDesc = validationErrors
-        ?: ResourceFormattedStringDesc(
-            MR.strings.empty_error_message,
-            emptyList()
-        )
-    errorMessageState.value = messageError
-    val updatedValidate = item.validate?.copy(messageError = messageError, firstCheck = false)
-    item.validate = updatedValidate
-}
-
-fun updateEmailValidationError(
-    item: ComponentDomain,
-    errorMessageState: MutableState<ResourceFormattedStringDesc>
-) {
-    val validationErrors = validateEmail(item, item.validate ?: ValidateDomain(), null)
-    val messageError: ResourceFormattedStringDesc = validationErrors
-        ?: ResourceFormattedStringDesc(
-            MR.strings.empty_error_message,
-            emptyList()
-        )
-    errorMessageState.value = messageError
-    val updatedValidate = item.validate?.copy(
-        messageError = messageError,
-        firstCheck = false
-    )
-    item.validate = updatedValidate
-}
-
-fun updateDateTimeValidationError(
-    item: ComponentDomain,
-    errorMessageState: MutableState<ResourceFormattedStringDesc>
-) {
-
-    val validationErrors = validateRequired(item, item.validate ?: ValidateDomain())
-    val messageError: ResourceFormattedStringDesc = validationErrors
-        ?: ResourceFormattedStringDesc(
-            MR.strings.empty_error_message,
-            emptyList()
-        )
-    errorMessageState.value = messageError
-    val updatedValidate = item.validate?.copy(
-        messageError = messageError,
-        firstCheck = false
-    )
-    item.validate = updatedValidate
-
-}
-
-
-
-fun updateImageViewValidationError(
-    item: ComponentDomain,
-    errorMessageState: MutableState<ResourceFormattedStringDesc>
-) {
-    val validationErrors = validateRequired(item, item.validate ?: ValidateDomain())
-    val messageError: ResourceFormattedStringDesc = validationErrors
-        ?: ResourceFormattedStringDesc(
-            MR.strings.empty_error_message,
-            emptyList()
-        )
-    errorMessageState.value = messageError
-    val updatedValidate = item.validate?.copy(messageError = messageError, firstCheck = false)
-
-    item.validate = updatedValidate
-}
-
-fun updateSelectedComponentValidationError(
-    item: ComponentDomain,
-    errorMessageState: MutableState<ResourceFormattedStringDesc>
-) {
-
-
-    val validationErrors = validateSelected(item, item.validate ?: ValidateDomain())
-    val messageError: ResourceFormattedStringDesc = validationErrors
-        ?: ResourceFormattedStringDesc(
-            MR.strings.empty_error_message,
-            emptyList()
-        )
-    errorMessageState.value = messageError
-    val updatedValidate = item.validate?.copy(messageError = messageError, firstCheck = false)
-    item.validate = updatedValidate
-}
 

@@ -158,7 +158,7 @@ class TicketProcessVM(
                                 tempComponentList.clear()
                                 tempComponentList.addAll(it.toList())
                                 async {
-                                    validateComponents(tempComponentList, true)
+                                    validateComponents(tempComponentList, true,null,null)
                                 }.await()
 
                                 handleLogics {

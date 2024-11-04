@@ -6,6 +6,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.Saver
 import cafe.adriel.voyager.core.lifecycle.JavaSerializable
 import data.network.response.task.logic.LogicDomain
+import io.github.aakira.napier.LogLevel
+import io.github.aakira.napier.Napier
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 import kotlinx.serialization.json.Json
@@ -59,6 +61,8 @@ data class ComponentDomain(
 
     fun updateValues(newValues: List<ValueDomain>?): ComponentDomain {
         valuesState.value = newValues // Update the MutableState
+        values=newValues
+        Napier.log(LogLevel.ASSERT, tag = "updatedList 2", message = "${newValues}")
         return this.copy(values = newValues) // Return a new instance for serialization
     }
 

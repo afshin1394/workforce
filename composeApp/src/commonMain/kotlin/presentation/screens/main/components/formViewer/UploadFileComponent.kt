@@ -95,7 +95,7 @@ fun UploadFileComponent(
         val index = fileExtensions.indexOf(fileExtension.toLowerCase())
         return if (index != -1) fileIcons[index] else MR.images.about
     }
-    item.key?.let {
+    item.id?.let {
         FilePicker.onResult(it) { files ->
             files.forEach { pair ->
                 val fileName = pair.first
