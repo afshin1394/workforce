@@ -10,29 +10,11 @@ import io.github.aakira.napier.Napier
 import kotlin.math.tan
 
 
-fun validateComponents(
+suspend fun validateComponents(
     components: List<ComponentDomain>,
     firstCheck: Boolean,
-    listValueDomain: List<ValueDomain>?,
-
-    initialCheckingFileUpload : Boolean = true,
-
-    ): Map<String, List<StringDesc>> {
-    val errors = mutableMapOf<String, List<ResourceFormattedStringDesc>>()
-    components.map { component ->
-        validateComponent(component,firstCheck, listValueDomain, initialCheckingFileUpload)
-    }
-
-    return errors
-}
-
-fun validateComponent(
-    component: ComponentDomain,
-    firstCheck: Boolean,
-    listValueDomain: List<ValueDomain>?,
-    initialCheckingFileUpload : Boolean = true,
-
-    ): Map<String, List<StringDesc>> {
+    initialCheckingFileUpload: Boolean = true
+): Map<String, List<StringDesc>> {
     val errors = mutableMapOf<String, List<ResourceFormattedStringDesc>>()
     Napier.log(LogLevel.ASSERT, tag = "validateComponent", message = components.toList().toString())
     fun updateComponentsRecursively(component: ComponentDomain) {
@@ -383,6 +365,7 @@ fun validateComponent(
 suspend fun validateComponent(
     component: ComponentDomain,
     firstCheck: Boolean,
+    listValueDomain:List<ValueDomain>?,
     initialCheckingFileUpload: Boolean = true
 ): Map<String, List<StringDesc>> {
     val errors = mutableMapOf<String, List<ResourceFormattedStringDesc>>()
@@ -642,56 +625,58 @@ suspend fun validateComponent(
             }
 
 
-        FormViewerTypes.FileUpload -> {
+            FormViewerTypes.FileUpload -> {
 
-            if (!(component.disabled || component.processLogicDomain.value.disabled || component.processLogicDomain.value.shouldHide)) {
-                component.validate?.let { validate ->
+                if (!(component.disabled || component.processLogicDomain.value.disabled || component.processLogicDomain.value.shouldHide)) {
+                    component.validate?.let { validate ->
 
 
-                    val updatedList = component.values?.toMutableSet() ?: mutableSetOf()
-                    listValueDomain?.let { updatedList.addAll(it) }
+                        val updatedList = component.values?.toMutableSet() ?: mutableSetOf()
+                        listValueDomain?.let { updatedList.addAll(it) }
 
-                    val validationErrors = validateFileUpload(
-                        component,
-                        validate,
-                        updatedList.toMutableList(),
-                        initialCheckingFileUpload
-                    )
-
-                    validationErrors?.let {
-                        val listMessageError: ArrayList<ResourceFormattedStringDesc> = arrayListOf()
-                        listMessageError.add(it)
-                        errors[component.id.toString()] = listMessageError
-
-                        component.updateProcessLogicDomain(
-                            component.processLogicDomain.value.copy(
-                                required = true,
-                                errorMessage = it,
-                                hasInitialMessage = firstCheck
-                            )
-                        )
-                    } ?: run {
-
-                        component.updateProcessLogicDomain(
-                            component.processLogicDomain.value.copy(
-                                required = updatedList.size==0,
-                                errorMessage = null,
-                                hasInitialMessage = if (updatedList.size==0) true else firstCheck
-                            )
+                        val validationErrors = validateFileUpload(
+                            component,
+                            validate,
+                            updatedList.toMutableList(),
+                            initialCheckingFileUpload
                         )
 
-                        component.updateValues(updatedList.toList())
+                        validationErrors?.let {
+                            val listMessageError: ArrayList<ResourceFormattedStringDesc> = arrayListOf()
+                            listMessageError.add(it)
+                            errors[component.id.toString()] = listMessageError
 
+                            component.updateProcessLogicDomain(
+                                component.processLogicDomain.value.copy(
+                                    required = true,
+                                    errorMessage = it,
+                                    hasInitialMessage = firstCheck
+                                )
+                            )
+                        } ?: run {
+
+                            component.updateProcessLogicDomain(
+                                component.processLogicDomain.value.copy(
+                                    required = updatedList.size==0,
+                                    errorMessage = null,
+                                    hasInitialMessage = if (updatedList.size==0) true else firstCheck
+                                )
+                            )
+
+                            component.updateValues(updatedList.toList())
+
+                        }
                     }
                 }
             }
-        }
-        FormViewerTypes.Datetime,
-        FormViewerTypes.Date,
-        FormViewerTypes.Time,
-        FormViewerTypes.ImageView -> {
-            if (!(component.disabled || component.processLogicDomain.value.disabled || component.processLogicDomain.value.shouldHide)) {
-                component.validate?.let { validate ->
+
+
+            FormViewerTypes.Datetime,
+            FormViewerTypes.Date,
+            FormViewerTypes.Time,
+            FormViewerTypes.ImageView -> {
+                if (!(component.disabled || component.processLogicDomain.value.disabled || component.processLogicDomain.value.shouldHide)) {
+                    component.validate?.let { validate ->
 
                         val validationErrors =
                             validateRequired(component, validate)
