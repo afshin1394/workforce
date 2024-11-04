@@ -425,11 +425,12 @@ class TicketProcessScreen(
                                 Napier.log(LogLevel.ASSERT, tag = "tempComponentLost", message = viewModel.tempComponentList.toList().toString())
                                 scope.launch(Dispatchers.Default) {
                                         async {
-                                            validateComponent(component, false,listValueDomain,initialCheckingFileUpload = false)
+                                            viewModel.handleLogics {
+                                            }
                                         }.await()
 
-                                    viewModel.handleLogics {
-                                    }
+                                      validateComponent(component, false,listValueDomain,initialCheckingFileUpload = false)
+
 
 
 

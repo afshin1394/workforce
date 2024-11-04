@@ -316,6 +316,7 @@ class TicketProcessVM(
             ).collect {
                 when (it.status) {
                     AsyncStatus.SUCCESS -> {
+                        async { saveAndDeletePhotoByComponentKey() }.await()
                         updateState(ViewStates.Success())
                         _saveDataStatus.update { SaveDataStatus.Success }
                     }
@@ -342,18 +343,19 @@ class TicketProcessVM(
 
     private suspend fun checkLogicsForAll(components: List<ComponentDomain>) {
         for (cmp in components) {
-            // Extract logics for the current component and add to the model
-            extractLogicsModel.addAll(logicCalculation.extractLogics(cmp))
-
-            // Check nested components if available
-            cmp.components.value?.let { nestedComponents ->
-                if (nestedComponents.isNotEmpty()) {
-                    // Pause to allow other coroutines to execute if the workload is high
-                    yield()
-                    checkLogicsForAll(nestedComponents)  // Recursive call on nested components
-                }
+            // Safely extract logics and add them to the model
+            logicCalculation.extractLogics(cmp).let { logics ->
+//                extractLogicsModel.addAll(logics)
+//            }
+//
+//                // Check nested components if available and non-empty
+//                cmp.components.value?.takeIf { it.isNotEmpty() }?.let { nestedComponents ->
+//                    yield()  // Yield control if the workload is high
+//                    checkLogicsForAll(nestedComponents)  // Recursive call on nested components
+//                }
             }
         }
+
     }
 
     private suspend fun checkAutoFillLogicForAll(components: List<ComponentDomain>) {
@@ -361,15 +363,14 @@ class TicketProcessVM(
             // Execute the autofill logic for the current component
             logicCalculation.executeTicketAutoFillLogic(cmp)
 
-            // Check nested components if available
-            cmp.components.value?.let { nestedComponents ->
-                if (nestedComponents.isNotEmpty()) {
-                    yield()  // Allow other coroutines to execute if workload is high
-                    checkAutoFillLogicForAll(nestedComponents)  // Recursive call on nested components
-                }
+            // Check nested components if available and non-empty
+            cmp.components.value?.takeIf { it.isNotEmpty() }?.let { nestedComponents ->
+                yield()  // Yield control to other coroutines if the workload is high
+                checkAutoFillLogicForAll(nestedComponents)  // Recursive call on nested components
             }
         }
     }
+
 
     suspend fun handleLogics(onResult: (MutableList<ExtractLogicsModel>) -> Unit) {
         withContext(Dispatchers.Default) {
@@ -771,6 +772,7 @@ class TicketProcessVM(
 //    }
 
     suspend fun showFirstError(errors: Map<String, List<StringDesc>>) {
+        if(errors.isNotEmpty())
         errors.keys.toList()[0].let {
             val pair = findComponentPairById(tempComponentList, it)
             pair?.let {

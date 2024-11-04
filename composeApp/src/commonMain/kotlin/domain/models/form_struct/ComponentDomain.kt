@@ -61,8 +61,6 @@ data class ComponentDomain(
 
     fun updateValues(newValues: List<ValueDomain>?): ComponentDomain {
         valuesState.value = newValues // Update the MutableState
-        values=newValues
-        Napier.log(LogLevel.ASSERT, tag = "updatedList 2", message = "${newValues}")
         return this.copy(values = newValues) // Return a new instance for serialization
     }
 
