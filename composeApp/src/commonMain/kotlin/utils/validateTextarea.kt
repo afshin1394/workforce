@@ -9,8 +9,7 @@ import io.github.aakira.napier.LogLevel
 import io.github.aakira.napier.Napier
 import irancell.nwg.wfm.MR
 
-fun validateTextarea(component: ComponentDomain, validateDomain: ValidateDomain,initialChecking: Boolean?): ResourceFormattedStringDesc? {
-    val errors = mutableListOf<String>()
+fun validateTextarea(component: ComponentDomain, validateDomain: ValidateDomain): ResourceFormattedStringDesc? {
     val required = validateDomain.required ?: false
     val maxLength = validateDomain.maxLength ?: Int.MAX_VALUE
     val minLength =validateDomain.minLength ?: 0

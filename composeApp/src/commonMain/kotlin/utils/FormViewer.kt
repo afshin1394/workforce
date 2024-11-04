@@ -104,9 +104,9 @@ fun initialize(
         contentPadding = PaddingValues(bottom = 100.dp)
     ) {
         itemsIndexed(components, key = { _, item -> item.id!! }) { index, item ->
-            val nestedComponentsState by item.components
-            val processLogicDomainState by item.processLogicDomain
             val valuesState by item.valuesState
+            val nestedComponentsState by remember {  item.components }
+            val processLogicDomainState by remember { item.processLogicDomain }
 
             val updatedParentIndex = currentParentIndex + index
 
@@ -190,6 +190,7 @@ fun initialize(
                                     newValue
                                 )
                                 item.values = listOf(updatedValueDomain)
+
                                 onChanges(
                                     item,
                                     listOf(updatedValueDomain)

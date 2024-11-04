@@ -7,7 +7,7 @@ import domain.models.form_struct.ComponentDomain
 import domain.models.form_struct.ValidateDomain
 import irancell.nwg.wfm.MR
 
-fun validatePhone(component: ComponentDomain, validateDomain: ValidateDomain ,initialChecking: Boolean?): ResourceFormattedStringDesc? {
+fun validatePhone(component: ComponentDomain, validateDomain: ValidateDomain ): ResourceFormattedStringDesc? {
     val required = validateDomain.required ?: false
 
 
