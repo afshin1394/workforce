@@ -7,6 +7,8 @@ import domain.models.form_struct.ValidateDomain
 import domain.models.form_struct.ValueDomain
 import io.github.aakira.napier.LogLevel
 import io.github.aakira.napier.Napier
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import kotlin.math.tan
 
 
@@ -354,10 +356,10 @@ suspend fun validateComponents(
             }
         }
     }
+        components.map { component ->
+            updateComponentsRecursively(component)
+        }
 
-    components.map { component ->
-        updateComponentsRecursively(component)
-    }
 
     return errors
 }

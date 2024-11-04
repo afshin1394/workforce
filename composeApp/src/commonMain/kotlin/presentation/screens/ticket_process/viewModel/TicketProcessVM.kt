@@ -155,12 +155,13 @@ class TicketProcessVM(
 
                                 tempComponentList.clear()
                                 tempComponentList.addAll(it.toList())
-                                async {
-                                    validateComponents(tempComponentList, true,true)
-                                }.await()
 
+                                async {
+                                    validateComponents(tempComponentList, true, true)
+                                }.await()
                                 handleLogics {
                                 }
+
                                 updateState(ViewStates.Success())
 
 
@@ -345,18 +346,17 @@ class TicketProcessVM(
         for (cmp in components) {
             // Safely extract logics and add them to the model
             logicCalculation.extractLogics(cmp).let { logics ->
-//                extractLogicsModel.addAll(logics)
-//            }
-//
-//                // Check nested components if available and non-empty
-//                cmp.components.value?.takeIf { it.isNotEmpty() }?.let { nestedComponents ->
-//                    yield()  // Yield control if the workload is high
-//                    checkLogicsForAll(nestedComponents)  // Recursive call on nested components
-//                }
+                extractLogicsModel.addAll(logics)
+            }
+
+            // Check nested components if available and non-empty
+            cmp.components.value?.takeIf { it.isNotEmpty() }?.let { nestedComponents ->
+                yield()  // Yield control if the workload is high
+                checkLogicsForAll(nestedComponents)  // Recursive call on nested components
             }
         }
-
     }
+
 
     private suspend fun checkAutoFillLogicForAll(components: List<ComponentDomain>) {
         for (cmp in components) {
@@ -379,12 +379,15 @@ class TicketProcessVM(
             extractLogicsModel.clear()
 
             // Perform logic checks in the background
+
             checkLogicsForAll(componentsCopy)
             checkAutoFillLogicForAll(componentsCopy)
-        }
 
-        withContext(Dispatchers.Main) {
-            onResult(extractLogicsModel)
+
+            withContext(Dispatchers.Main)
+            {
+                onResult(extractLogicsModel)
+            }
         }
     }
 
@@ -772,17 +775,17 @@ class TicketProcessVM(
 //    }
 
     suspend fun showFirstError(errors: Map<String, List<StringDesc>>) {
-        if(errors.isNotEmpty())
-        errors.keys.toList()[0].let {
-            val pair = findComponentPairById(tempComponentList, it)
-            pair?.let {
-                withContext(Dispatchers.Main) {
-                    _scrollingPosition.update { pair }
-                    delay(1000)
-                    _scrollingPosition.update { Pair(-1, -1) }
+        if (errors.isNotEmpty())
+            errors.keys.toList()[0].let {
+                val pair = findComponentPairById(tempComponentList, it)
+                pair?.let {
+                    withContext(Dispatchers.Main) {
+                        _scrollingPosition.update { pair }
+                        delay(1000)
+                        _scrollingPosition.update { Pair(-1, -1) }
+                    }
                 }
             }
-        }
     }
 
     fun findComponentPairById(

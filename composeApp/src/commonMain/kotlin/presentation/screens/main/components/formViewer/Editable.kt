@@ -66,10 +66,9 @@ fun Editable(
         message = processLogicDomain.calculatedValue.toString()
     )
     Napier.log(LogLevel.ASSERT, tag = "Editable value", message = value)
-    val valueChange = remember {   mutableStateOf(processLogicDomain.calculatedValue?:value) }
+    val valueChange =   mutableStateOf(processLogicDomain.calculatedValue?:value)
 
 
-    val scope = rememberCoroutineScope()
 
     val disableLogic = processLogicDomain.disabled || disable
     val hideLogic = processLogicDomain.shouldHide

@@ -189,7 +189,7 @@ fun initialize(
                                     item.values?.get(0) ?: ValueDomain(),
                                     newValue
                                 )
-                                item.values = listOf(updatedValueDomain)
+                                item.updateValues(listOf(updatedValueDomain))
 
                                 onChanges(
                                     item,
@@ -222,7 +222,7 @@ fun initialize(
                                     item.values?.get(0) ?: ValueDomain(),
                                     newValue
                                 )
-                                item.values = listOf(updatedValueDomain)
+                                item.updateValues(listOf(updatedValueDomain))
 
                                 onChanges(
                                     item,
@@ -252,7 +252,7 @@ fun initialize(
                                 val updatedValueDomain = updateValueDomain(
                                     item.values?.get(0) ?: ValueDomain(), newValue
                                 )
-                                item.values = listOf(updatedValueDomain)
+                                item.updateValues(listOf(updatedValueDomain))
                                 onChanges(
                                     item,
                                     listOf(updatedValueDomain)
@@ -285,7 +285,7 @@ fun initialize(
                                 val updatedValueDomain = updateValueDomain(
                                     item.values?.get(0) ?: ValueDomain(), newValue
                                 )
-                                item.values = listOf(updatedValueDomain)
+                                item.updateValues(listOf(updatedValueDomain))
 
                                 onChanges(
                                     item,
@@ -320,7 +320,7 @@ fun initialize(
                                 val updatedValueDomain = updateValueDomain(
                                     item.values?.get(0) ?: ValueDomain(), newValue
                                 )
-                                item.values = listOf(updatedValueDomain)
+                                item.updateValues(listOf(updatedValueDomain))
                                 onChanges(
                                     item,
                                     listOf(updatedValueDomain)
@@ -355,12 +355,8 @@ fun initialize(
                                     item.values?.get(0) ?: ValueDomain(),
                                     newValue
                                 )
-                                item.values = listOf(updatedValueDomain)
-                                item.updateProcessLogicDomain(
-                                    item._processLogicDomain.copy(
-                                        calculatedValue = newValue
-                                    )
-                                )
+                                item.updateValues(listOf(updatedValueDomain))
+
                                 onChanges(
                                     item,
                                     listOf(updatedValueDomain)

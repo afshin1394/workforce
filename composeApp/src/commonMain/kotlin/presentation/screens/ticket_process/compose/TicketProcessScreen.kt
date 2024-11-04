@@ -252,7 +252,7 @@ class TicketProcessScreen(
                                 }.await()
                                 if (errors.isNotEmpty()) {
                                     viewModel.showFirstError(errors)
-                                }else{
+                                } else {
                                     viewModel.handleLogics { extractLogicsModel ->
                                         scope.launch {
                                             if (extractLogicsModel.size > 0) {
@@ -422,14 +422,24 @@ class TicketProcessScreen(
                                 viewModel.events.value = TicketProcessEvent.PhotoPreview
                             },
                             onChanges = { component, listValueDomain ->
-                                Napier.log(LogLevel.ASSERT, tag = "tempComponentLost", message = viewModel.tempComponentList.toList().toString())
+                                Napier.log(
+                                    LogLevel.ASSERT,
+                                    tag = "tempComponentLost",
+                                    message = viewModel.tempComponentList.toList().toString()
+                                )
                                 scope.launch(Dispatchers.Default) {
-                                        async {
-                                            viewModel.handleLogics {
-                                            }
-                                        }.await()
+                                    async {
+                                        viewModel.handleLogics {
+                                        }
+                                    }.await()
+                                    validateComponent(
+                                        component,
+                                        false,
+                                        listValueDomain,
+                                        initialCheckingFileUpload = false
+                                    )
 
-                                      validateComponent(component, false,listValueDomain,initialCheckingFileUpload = false)
+
 
 
 
@@ -449,7 +459,12 @@ class TicketProcessScreen(
                                         component, indexChild, scrollCallback
                                     )
                                     async {
-                                        validateComponent(component, false,null,initialCheckingFileUpload = false)
+                                        validateComponent(
+                                            component,
+                                            false,
+                                            null,
+                                            initialCheckingFileUpload = false
+                                        )
                                     }.await()
 
                                 }

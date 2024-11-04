@@ -51,37 +51,27 @@ data class ComponentDomain(
     // Method to create a new instance with updated components
     fun updateComponents(newComponents: List<ComponentDomain>): ComponentDomain {
         components.value = newComponents // Update the MutableState
+        _components = newComponents
         return this.copy(_components = newComponents) // Return a new instance for serialization
     }
 
     fun updateProcessLogicDomain(newProcessLogicDomain: ProcessLogicDomain): ComponentDomain {
         this.processLogicDomain.value = newProcessLogicDomain // Update the MutableState
+        _processLogicDomain = newProcessLogicDomain
         return this.copy(_processLogicDomain = newProcessLogicDomain) // Return a new instance for serialization
     }
 
     fun updateValues(newValues: List<ValueDomain>?): ComponentDomain {
         valuesState.value = newValues // Update the MutableState
+        values = newValues
         return this.copy(values = newValues) // Return a new instance for serialization
     }
 
-
-
-
     override fun toString(): String {
-        return "ComponentDomain(id=$id, key=$key, hide=$hide, type=$type, label=$label, layout=$layout, subType=$subType, validate=$validate, values=$values, conditional=$conditional, components=$components, logics=$logics, repeatable=$repeatable, removable=$removable, isMulti=$isMulti, readOnly=$readOnly, processLogicDomain=$processLogicDomain)"
+        return "ComponentDomain(id=$id, key=$key, hide=$hide, type=$type, label=$label, layout=$layout, subType=$subType, validate=$validate, values=$values, conditional=$conditional, _components=$_components, logics=$logics, repeatable=$repeatable, removable=$removable, isMulti=$isMulti, readOnly=$readOnly, disabled=$disabled, defaultValue=$defaultValue, _processLogicDomain=$_processLogicDomain, components=$components, processLogicDomain=$processLogicDomain, valuesState=$valuesState)"
     }
 
-    companion object {
-        // Custom Saver for ComponentDomain
-        val componentDomainSaver = Saver<ComponentDomain, String>(
-            save = { componentDomain ->
-                Json.encodeToString(serializer(), componentDomain)
-            },
-            restore = { jsonString ->
-                Json.decodeFromString<ComponentDomain>(jsonString)
-            }
-        )
-    }
+
 }
 
 

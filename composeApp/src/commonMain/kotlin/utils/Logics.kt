@@ -1372,6 +1372,7 @@ class LogicCalculation(
 
                 }
 
+
             }
         }
         Napier.log(
@@ -1410,7 +1411,7 @@ class LogicCalculation(
                 it
             })
         } else
-            this?.updateValues(listOf())
+            this?.updateValues(null)
     }
 }
 
