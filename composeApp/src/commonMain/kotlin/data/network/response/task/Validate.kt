@@ -52,9 +52,4 @@ data class Validate (
     override fun areAllMembersNull(): Boolean {
        return (id == null && key == null && hide == null && layout == null && subtype == null && required == null && maxLength == null && minLength == null && pattern == null && maxTotalSize == null && maxFileNumber == null && max==null && min == null && blacklistAttachment == null && whitelistAttachment == null && domainType==null && domainList == null && validationType == null)
     }
-
-    override fun toString(): String {
-        return "Validate(id=$id, key=$key, hide=$hide, layout=$layout, subtype=$subtype, required=$required, maxLength=$maxLength, minLength=$minLength, pattern=$pattern, maxTotalSize=$maxTotalSize, maxFileNumber=$maxFileNumber, max=$max, min=$min, blacklistAttachment=$blacklistAttachment, attachedValidationType=$attachedValidationType, whitelistAttachment=$whitelistAttachment, domainType=$domainType, domainList=$domainList, validationType=$validationType)"
-    }
-
 }
