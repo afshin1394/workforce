@@ -174,6 +174,7 @@ class MainScreenVM(
                     }
 
                     else -> {
+                        getCurrentAvailability()
                         val serviceRunning = BackgroundServiceApp.isServiceRunning()
                         if (_availability.value) {
                             updateAvailabilityState(

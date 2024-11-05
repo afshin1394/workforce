@@ -13,6 +13,7 @@ import irancell.nwg.wfm.getSharedPref
 import irancell.nwg.wfm.provideAppContext
 import utils.Availability
 import utils.AvailabilityObjectId
+import utils.Language
 
 
 class LogoutUseCase(
@@ -35,7 +36,9 @@ class LogoutUseCase(
 
             }
             BackgroundServiceApp.stopBackgroundService()
+            val language= getSharedPref().getString(Language)
             getSharedPref().deleteAll()
+            getSharedPref().put(Language,language?:"en")
             iAuthRepository.deleteAllTableDB()
             Napier.log(LogLevel.ASSERT, "Logout", message = "Availability")
             InternalStorage.clearCache(provideAppContext())
@@ -48,7 +51,9 @@ class LogoutUseCase(
             }catch (exception : Exception){
 
             }
+            val language= getSharedPref().getString(Language)
             getSharedPref().deleteAll()
+            getSharedPref().put(Language,language?:"en")
             iAuthRepository.deleteAllTableDB()
             InternalStorage.clearCache(provideAppContext())
             Napier.log(LogLevel.ASSERT, "Logout", message = "App data folders deleted")

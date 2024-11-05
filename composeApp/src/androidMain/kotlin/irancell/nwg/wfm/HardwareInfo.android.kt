@@ -16,6 +16,8 @@ actual fun hardwareInfo(): Semaphore {
     val totalRam = memoryInfo.totalMem / (1024 * 1024)
 
     val semaphoreCount = when {
+        totalRam > 8192 && availableCores >= 8 -> 12
+        totalRam > 6144 && availableCores >= 8 -> 10
         totalRam > 4096 && availableCores >= 8 -> 8
         totalRam > 2048 && availableCores >= 4 -> 4
         else -> 2

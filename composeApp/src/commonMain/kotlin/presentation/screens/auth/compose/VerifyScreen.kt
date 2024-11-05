@@ -95,6 +95,9 @@ class VerifyScreen(private val phoneNumber: String = "") : Screen {
                     ""
                 }
 
+                else -> {
+                    ""
+                }
             }
 
 
@@ -154,6 +157,9 @@ class VerifyScreen(private val phoneNumber: String = "") : Screen {
                     CheckVersionEvent.InvalidToken -> {
 
                     }
+
+
+                    else -> {}
                 }
 
             },
@@ -256,6 +262,8 @@ class VerifyScreen(private val phoneNumber: String = "") : Screen {
 
 
                     }
+
+                    else -> {}
                 }
 
             },
@@ -264,7 +272,6 @@ class VerifyScreen(private val phoneNumber: String = "") : Screen {
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
-                        .verticalScroll(rememberScrollState())
                         .background(color = backgroundBackground3),
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.CenterHorizontally
@@ -273,14 +280,17 @@ class VerifyScreen(private val phoneNumber: String = "") : Screen {
                         painter = painterResource(MR.images.ic_i_ticket),
                         contentDescription = "ic_wfm",
                         modifier = Modifier
-                            .width(82.dp)
-                            .height(82.dp)
-
+                            .width(72.dp)
+                            .height(72.dp)
+                            .weight(2f)
                             .wrapContentSize()
+
                     )
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
+                            .verticalScroll(rememberScrollState())
+                            .weight(4f)
                             .padding(spacing2X)
                     ) {
 

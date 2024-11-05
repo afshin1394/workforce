@@ -118,9 +118,11 @@ fun SelectableSingleItemComponentStringResource(
         LazyColumn() {
             itemsIndexed(items = selectableItemsState) { index, item ->
 
-                val text = stringResource(item.text)
+                val text = item.languageType
 
-                OptionsItemComponentStringResource(item=item,isSelected = select== stringResource(item.text).lowercase().take(2), onItemSelected = {
+                OptionsItemComponentStringResource(item=item
+                    ,isSelected = select== item.languageType.lowercase().take(2),
+                    onItemSelected = {
                     select= text.lowercase().take(2)
                     if (getSharedPref().getString(Language)!=select){
                         onOptionSelected(index, item)

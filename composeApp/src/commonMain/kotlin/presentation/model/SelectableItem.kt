@@ -11,6 +11,6 @@ data class SelectableItem(val id : Int, val text : String, var isSelected : Bool
 }
 
 
-data class SelectableItemStringResource(val id : Int, val text : StringResource, var isSelected : Boolean){
+data class SelectableItemStringResource(val id : Int, val text : StringResource, var isSelected : Boolean,val languageType:String=""){
     var isSelectedState = mutableStateOf(isSelected)
 }

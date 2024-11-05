@@ -9,7 +9,9 @@ import presentation.screens.main.events.SettingEvent
 import dev.icerock.moko.mvvm.viewmodel.ViewModel
 import dev.icerock.moko.resources.compose.stringResource
 import irancell.nwg.wfm.MR
+import irancell.nwg.wfm.getSharedPref
 import utils.BaseViewModel
+import utils.Language
 
 class SettingScreenVM : BaseViewModel() {
 
@@ -17,8 +19,8 @@ class SettingScreenVM : BaseViewModel() {
 
 
     val mutableChangeLanguageOptions =  mutableStateListOf(
-        SelectableItemStringResource(1, MR.strings.english, false),
-        SelectableItemStringResource(2, MR.strings.farsi, false),
+        SelectableItemStringResource(1, MR.strings.english, if (getSharedPref().getString(Language) == "fa") false else true ,  "en"),
+        SelectableItemStringResource(2, MR.strings.farsi,  if (getSharedPref().getString(Language) == "en") false else true,"fa"),
     )
 
 

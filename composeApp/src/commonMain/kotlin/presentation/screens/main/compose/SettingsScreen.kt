@@ -86,6 +86,7 @@ class SettingsScreen(
                     SettingEvent.ChangeLanguage -> {
                         ChangeLanguageBottomSheetComponent(
                             list = viewModel.mutableChangeLanguageOptions,
+
                             onItemSelected = { index, selectableItem ->
 
                                 scope.launch(Dispatchers.Main) {

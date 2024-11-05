@@ -459,7 +459,7 @@ fun initialize(
                             processLogicDomainState,
                             index = index,
                             item = item,
-                            label = item.id ?: "",
+                            label = item.label ?: "",
                             uploadList =  filteredValuesState,
                             onChooseFileFromDevice = { list ->
 
