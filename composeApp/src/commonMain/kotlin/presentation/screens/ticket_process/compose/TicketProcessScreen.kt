@@ -429,7 +429,15 @@ class TicketProcessScreen(
                                 )
                                 scope.launch(Dispatchers.Default) {
                                     async {
-                                        viewModel.handleLogics {
+                                        viewModel.handleLogics { logicsList ->
+                                            val filteredList =
+                                                logicsList.filter { it.typeLogic == "Hide" }
+                                            if (filteredList.isNotEmpty()) {
+                                                filteredList.forEach { item ->
+                                                    viewModel.deletePhotoWhenCheckHideLogic(item.componentKey,item.componentId)
+                                                }
+                                            }
+
                                         }
                                     }.await()
                                     validateComponent(

@@ -7,6 +7,7 @@ import dev.icerock.moko.resources.compose.localized
 import dev.icerock.moko.resources.desc.ResourceFormatted
 import dev.icerock.moko.resources.desc.ResourceFormattedStringDesc
 import dev.icerock.moko.resources.desc.StringDesc
+import domain.models.DeletePhotoByComponentIdAndKeyModel
 import domain.models.form_struct.ComponentDomain
 import domain.models.form_struct.ValueDate
 import domain.models.form_struct.ValueDomain
@@ -37,8 +38,8 @@ class LogicCalculation(
 ) : KoinComponent {
     val getTicketDetailsUseCase: GetTicketDetailsUseCase by inject()
     lateinit var ticketId: String
-
     val validationErrorList = mutableListOf<ExtractLogicsModel>()
+
 
 
     suspend fun extractLogics(component: ComponentDomain): MutableList<ExtractLogicsModel> = coroutineScope {
@@ -51,18 +52,38 @@ class LogicCalculation(
 
             when (logic.logicType) {
                 LogicType.Hide -> {
+                    typeLogic = LogicType.Hide
                     val expressionSatisfied = evaluateLogics(component, logic)
 
                     component.updateProcessLogicDomain(
                         component.processLogicDomain.value.copy(shouldHide = expressionSatisfied)
                     )
-                    if (expressionSatisfied) component.clearValues()
+                    if (expressionSatisfied){
+
+                        if (component.type==FormViewerTypes.ImageView){
+                            hasLogic = true
+                            validationErrorList.add(ExtractLogicsModel(hasLogic, typeLogic, component.id?:"",component.key?:""))
+                        }
+
+                        component.clearValues()
+
+                    }
 
                     component.components.value?.forEach { nestedComponent ->
                         nestedComponent.updateProcessLogicDomain(
                             nestedComponent.processLogicDomain.value.copy(shouldHide = expressionSatisfied)
                         )
-                        if (expressionSatisfied) nestedComponent.clearValues()
+                        if (expressionSatisfied){
+                            if (nestedComponent.type==FormViewerTypes.ImageView){
+                                hasLogic = true
+                                validationErrorList.add(ExtractLogicsModel(hasLogic, typeLogic, nestedComponent.id?:"",nestedComponent.key?:""))
+                            }
+
+                            nestedComponent.clearValues()
+
+
+
+                        }
                     }
 
                     hasLogic = expressionSatisfied

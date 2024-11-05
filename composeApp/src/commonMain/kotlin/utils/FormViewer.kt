@@ -496,6 +496,7 @@ fun initialize(
                     FormViewerTypes.ImageView -> {
 
 
+                        println("Imageeeeeeeeeee    ${ findPhotosByComponentId(photoDomainList, item.id, item.key)}")
                         ImagePicker(
                             item.disabled,
                             item.readOnly,

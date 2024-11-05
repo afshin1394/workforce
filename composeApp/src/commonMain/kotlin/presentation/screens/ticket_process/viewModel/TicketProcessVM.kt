@@ -391,6 +391,12 @@ class TicketProcessVM(
         }
     }
 
+    fun deletePhotoWhenCheckHideLogic(componentKey:String,componentId:String){
+        val filteredListPhotoDomainList =
+            photoDomainList.filter { it.component_key ==componentKey && it.componentId == componentId }
+        photoDomainList.removeAll(filteredListPhotoDomainList)
+    }
+
 
     suspend fun addComponentDomainRepeatableToList(
         compD: ComponentDomain,
@@ -549,6 +555,7 @@ class TicketProcessVM(
         // Filtering the photo list based on component key and ID
         val filteredList =
             photoDomainList.filter { it.component_key == key && it.componentId == id }
+
         val currentComponent = tempComponent.value
 
         // Updating the list of component values based on whether there are photos or not
