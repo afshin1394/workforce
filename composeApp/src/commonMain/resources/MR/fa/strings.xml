@@ -182,6 +182,7 @@
     <string name="noLocationFound">موقعیت مکانی یافت نشد</string>
     <string name= "online">آنلاین</string>
     <string name= "offline">آفلاین</string>
-    <string name="of">از</string>
+    <string name="Of">از</string>
+    <string name="edit">ویرایش</string>
 
 </resources>

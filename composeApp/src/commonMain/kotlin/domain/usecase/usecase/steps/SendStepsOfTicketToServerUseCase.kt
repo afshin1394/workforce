@@ -5,7 +5,6 @@ import data.network.request.step.StepRequest
 import data.network.request.step.SubmitAllRequest
 import domain.mappers.toPhotoDomainList
 import domain.mappers.toUploadDomainList
-import domain.models.PhotoDomain
 import domain.models.UploadDomain
 import domain.models.form_struct.ComponentDomain
 import domain.repository.IPhotoRepository
@@ -18,6 +17,7 @@ import io.github.aakira.napier.LogLevel
 import io.github.aakira.napier.Napier
 import irancell.nwg.wfm.InternalStorage
 import irancell.nwg.wfm.provideAppContext
+import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.jsonObject
@@ -26,6 +26,7 @@ import utils.FormViewerTypes
 import utils.convertToZip
 import utils.formatUploadDomainList
 import utils.mutableToJson
+import utils.processInParallel
 
 class SendStepsOfTicketToServerUseCase(
     private val iSendStepsRepository: ISendStepsRepository,
@@ -45,34 +46,43 @@ class SendStepsOfTicketToServerUseCase(
 
         val sortedSendSteps = sendStepsEntity.sortedBy { it.activityId }
         val submitAllRequest = SubmitAllRequest(ticket_num = params, steps = arrayListOf())
-        val listOfString = arrayListOf<String>()
-        sendStepsEntity.forEachIndexed { index, sendStepsEntity ->
-            try {
-                val map = jsonToMap(sendStepsEntity.key_value_image_structure)
-                listOfString.addAll(mapToList(map))
-            } catch (e: Exception) {
-                Napier.log(
-                    LogLevel.ERROR,
-                    tag = "jsonExceptionPlusTurbo",
-                    message = e.toString()
-                )
-                Napier.log(
-                    LogLevel.INFO,
-                    tag = "jsonExceptionPlusTurbo",
-                    message = sendStepsEntity.key_value_image_structure
-                )
+        val uploadDomains = mutableListOf<UploadDomain>()
+
+        processInParallel(
+            items = sendStepsEntity,
+            processBlock = { step, mutex ->
+                val map = try {
+                    jsonToMap(step.key_value_image_structure)
+                } catch (e: Exception) {
+                    Napier.log(
+                        LogLevel.ERROR,
+                        tag = "jsonExceptionPlusTurbo",
+                        message = e.message.orEmpty()
+                    )
+                    Napier.log(
+                        LogLevel.INFO,
+                        tag = "jsonExceptionPlusTurbo",
+                        message = step.key_value_image_structure
+                    )
+                    null
+                }
+                mutex.withLock {
+                    map?.let { validMap ->
+                        val uploadDomainsForMap = validMap.let(::mapToList).flatMap { group ->
+                            val zipData = convertToZip(listOf(group), "testt", params)
+                            iUploadRepository.fetchUpload(zipData).toUploadDomainList()
+                        }
+                        uploadDomains.addAll(uploadDomainsForMap)
+                    }
+                }
             }
-        }
-        val uploadDomains = arrayListOf<UploadDomain>()
-        listOfString.forEach { group ->
-            val zipData = convertToZip(list = arrayListOf(group), "testt", params)
-            uploadDomains.addAll(iUploadRepository.fetchUpload(zipData).toUploadDomainList())
-        }
-        uploadDomains.distinct()
+        )
+
+        val distinctUploadDomains = uploadDomains.distinct()
         Napier.log(
             LogLevel.ASSERT,
             tag = "uploadDomains",
-            message = "uploadDomains size" + uploadDomains.size
+            message = "uploadDomains size: ${distinctUploadDomains.size}"
         )
 
 

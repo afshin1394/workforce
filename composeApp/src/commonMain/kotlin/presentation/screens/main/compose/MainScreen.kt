@@ -841,7 +841,7 @@ class MainScreen(
                                         }
                                     }
                                 },
-                                tasks = ArrayList(viewModel.tasks.toList()),
+                                tasks = viewModel.tasks,
                                 onAccept = {
                                     if (isClickable) {
                                         isClickable = false

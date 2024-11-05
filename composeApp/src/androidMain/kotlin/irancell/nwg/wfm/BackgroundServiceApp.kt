@@ -178,7 +178,7 @@ internal actual class BackgroundServiceApp : Service(), KoinComponent {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         try {
-            scope.launch(Dispatchers.Main) {
+            scope.launch(Dispatchers.IO) {
                 if (_serviceState.value != ServiceState.Suspend && _serviceState.value !is ServiceState.Faulty) {
                     val newState =
                         if (isServiceRunning()) ServiceState.Normal else ServiceState.NotRunning

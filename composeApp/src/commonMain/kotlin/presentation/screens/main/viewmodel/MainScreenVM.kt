@@ -51,6 +51,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
+import presentation.model.Task
 import utils.AsyncResult
 import utils.AsyncStatus
 import utils.AvailabilityObjectId
@@ -93,7 +94,8 @@ class MainScreenVM(
     val availability = _availability.asStateFlow()
     private val _openCamera = MutableStateFlow(false)
     val openCamera = _openCamera.asStateFlow()
-    val tasks = mutableStateListOf<TaskDomain>()
+    private val _tasks = mutableStateListOf<TaskDomain>()
+    val tasks: List<TaskDomain> = _tasks
     private val _profileName = MutableStateFlow("")
     val profileName = _profileName.asStateFlow()
     private val _reload = MutableStateFlow(false)
@@ -126,6 +128,12 @@ class MainScreenVM(
         getTasks()
         updateTicketNumber("")
         collectTicketListState()
+    }
+    fun addTasks(tasks :List<TaskDomain>){
+        _tasks.addAll(tasks)
+    }
+    fun clearTasks(){
+        _tasks.clear()
     }
 
     fun updateTicketListState(ticketListStatus: TicketListStatus) {
@@ -486,8 +494,8 @@ class MainScreenVM(
             }
         }
 
-        tasks.clear()
-        tasks.addAll(tasksList)
+        clearTasks()
+        addTasks(tasksList)
 
     }
 
@@ -500,8 +508,8 @@ class MainScreenVM(
                 }
             }
         }
-        tasks.clear()
-        tasks.addAll(tasks)
+        clearTasks()
+        addTasks(tasks)
     }
 
     fun openCamera() {
@@ -548,13 +556,13 @@ class MainScreenVM(
                     }
 
                     AsyncStatus.SUCCESS -> {
-                        tasks.clear()
+                        clearTasks()
                         updateState(ViewStates.Success())
                         Napier.log(
                             LogLevel.ASSERT, "getAllWorksUseCase", message = "SUCCESS: " + it.data
                         )
                         it.data?.let { it1 ->
-                            tasks.addAll(it1)
+                            addTasks(it1)
                             _reload.update { true }
                             getActiveFilterItems()
                         }

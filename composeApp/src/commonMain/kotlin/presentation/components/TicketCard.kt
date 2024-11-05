@@ -7,6 +7,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
@@ -28,6 +29,7 @@ import presentation.theme.textBrand
 import presentation.theme.textError
 import presentation.theme.textInverse
 import presentation.theme.textPrimary
+import utils.TaskState
 
 @Composable
 fun ticketCard(
@@ -35,13 +37,18 @@ fun ticketCard(
     task: TaskDomain,
     onActionClick: () -> Unit = {},
     onMoreOptionsClick: () -> Unit = {}
-) =
+) {
     Card(
         colors = CardDefaults.cardColors(surfaceDefault),
         modifier = modifier
     ) {
         Column(
-            modifier = modifier.padding(top =  spacing05X, start = spacing15X, end = spacing15X, bottom = spacing15X),
+            modifier = modifier.padding(
+                top = spacing05X,
+                start = spacing15X,
+                end = spacing15X,
+                bottom = spacing15X
+            ),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.Start,
         ) {
@@ -201,4 +208,6 @@ fun ticketCard(
             }
         }
     }
+}
+
 

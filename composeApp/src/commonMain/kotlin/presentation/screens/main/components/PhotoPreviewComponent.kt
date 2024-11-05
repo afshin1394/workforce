@@ -146,7 +146,7 @@ fun PhotoPreviewComponent(
 
 
         Spacer(modifier = Modifier.weight(1f))
-        val of = stringResource(MR.strings.of)
+        val of = stringResource(MR.strings.Of)
         Text(
             text = "${selectedItemImage + 1} $of ${photoDomainList.size}",
             textAlign = TextAlign.Center,

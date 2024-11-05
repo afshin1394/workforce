@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.material.pullrefresh.PullRefreshIndicator
 import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import com.irancell.nwg.wfm.presentation.components.CustomSearchBar
 import com.irancell.nwg.wfm.presentation.components.FilterRow
 import presentation.components.ticketCard
@@ -35,13 +36,12 @@ import utils.TaskState
 @OptIn(ExperimentalMaterialApi::class, ExperimentalFoundationApi::class)
 @Composable
 fun TicketListScreen(
-    tasks: ArrayList<TaskDomain>,
+    tasks: List<TaskDomain>,
     searchText: String = "",
     onEvent: (mainEvents: MainEvent, selectedTask: TaskDomain?) -> Unit = { _: MainEvent, _: TaskDomain? -> },
     onAccept: (item: TaskDomain) -> Unit,
     viewModel: MainScreenVM
 ) {
-
     val refreshScope = rememberCoroutineScope()
     var refreshing by remember { mutableStateOf(false) }
 

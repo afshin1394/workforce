@@ -12,76 +12,64 @@ import domain.repository.ISendStepsRepository
 import domain.repository.IStepPointerRepository
 import domain.repository.IStepsRepository
 import domain.repository.ITaskRepository
+import domain.repository.ITicketRepository
 import domain.usecase.BaseUseCase
 import io.github.aakira.napier.LogLevel
 import io.github.aakira.napier.Napier
-import kotlinx.coroutines.async
-import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
 import toSendStepEntity
 import toStepDetailsEntity
-import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withContext
+import utils.processInParallel
 
 class UpdateTaskUseCase(
     private val iTaskRepository: ITaskRepository,
     private val iInitialFormRepository: IInitialFormRepository,
     private val iStepsRepository: IStepsRepository,
     private val iStepPointerRepository: IStepPointerRepository,
-    private val iSendStepsRepository: ISendStepsRepository
+    private val iSendStepsRepository: ISendStepsRepository,
 ) : BaseUseCase<List<TaskEntity>, Unit>() {
-
-    private val mutex = Mutex()
 
     override suspend fun run(params: Unit): List<TaskEntity> {
         val tasks = iTaskRepository.fetchWorks()
-        Napier.log(LogLevel.ASSERT, tag = "UpdateTaskUseCase", message = tasks.toString())
 
-        val initialTasks = arrayListOf<InitialFormEntity>()
-        tasks.details.forEach {
-            it.initial_form?.let { _ ->
-                initialTasks.add(
+        val initialTasks = tasks.details
+            .mapNotNull { task ->
+                task.initial_form?.let {
                     InitialFormEntity(
-                        ticket_number = it.basic_info.ticket_number ?: "",
-                        initFormList = it.initial_form
+                        ticket_number = task.basic_info.ticket_number ?: "",
+                        initFormList = it
                     )
-                )
-            }
-        }
-
-        val domainList = tasks.details.toTaskEntityList().toTaskDomainList()
-        val stepEntities = arrayListOf<StepsEntity>()
-        val stepPointerEntities = arrayListOf<StepPointerEntity>()
-
-        Napier.log(LogLevel.ASSERT, tag = "stepsYO", message = "1")
-
-        coroutineScope {
-            val deferredStepFetches = domainList.map { task ->
-                async {
-                    Napier.log(LogLevel.ASSERT, tag = "stepsYO", message = "2")
-                    task.basic_info.ticket_number?.let { ticketNumber ->
-                        try {
-                            val stepList = iStepsRepository.fetch(ticketNumber)
-                            mutex.withLock {
-                                stepEntities.addAll(stepList.toStepDetailsEntity(ticketNumber))
-                                stepList.stepDetails.firstOrNull()?.acitivities?.firstOrNull()?.id?.let {
-                                    stepPointerEntities.add(
-                                        StepPointerEntity(
-                                            ticketNumber = ticketNumber,
-                                            activeActivity = it,
-                                            edited = false
-                                        )
-                                    )
-                                }
-                            }
-                        } catch (e: Exception) {
-                            Napier.log(LogLevel.ASSERT, tag = "exception", message = e.toString())
-                        }
-                    }
                 }
             }
-            deferredStepFetches.awaitAll()
-        }
+
+        val domainList = tasks.details.toTaskEntityList().toTaskDomainList()
+        val stepEntities = mutableListOf<StepsEntity>()
+        val stepPointerEntities = mutableListOf<StepPointerEntity>()
+
+        processInParallel(
+            items = domainList,
+            processBlock = { task, mutex ->
+                task.basic_info.ticket_number?.let { ticketNumber ->
+                    val stepList = iStepsRepository.fetch(ticketNumber)
+                    val localStepEntities = stepList.toStepDetailsEntity(ticketNumber)
+                    val activeActivityId = stepList.stepDetails.firstOrNull()
+                        ?.acitivities?.firstOrNull()?.id
+                        stepEntities.addAll(localStepEntities)
+                        activeActivityId?.let {
+                            stepPointerEntities.add(
+                                StepPointerEntity(
+                                    ticketNumber = ticketNumber,
+                                    activeActivity = it,
+                                    edited = false
+                                )
+                            )
+                        }
+                }
+            }
+        )
 
         Napier.log(LogLevel.ASSERT, tag = "stepsYO", message = "3")
 
@@ -117,31 +105,34 @@ class UpdateTaskUseCase(
         stepEntities: List<StepsEntity>,
         stepPointerEntities: List<StepPointerEntity>
     ) {
-        iStepsRepository.deleteAll(editedTickets)
-        iStepsRepository.resetEntitySequence()
-        iStepsRepository.insertAll(
-            getInsertingValues(
-                editedTickets,
-                stepEntities.sortedBy { it.activityId })
-        )
+        withContext(Dispatchers.IO) {
+            iStepsRepository.apply {
+                deleteAll(editedTickets)
+                resetEntitySequence()
+                insertAll(
+                    getInsertingValues(editedTickets, stepEntities.sortedBy { it.activityId })
+                )
+            }
 
-        iSendStepsRepository.deleteAll(editedTickets)
-        iSendStepsRepository.resetEntitySequence()
-        iSendStepsRepository.insertAll(
-            getSendInsertingValues(
-                editedTickets,
-                stepEntities.sortedBy { it.activityId }.toSendStepEntity()
-            )
-        )
+            iSendStepsRepository.apply {
+                deleteAll(editedTickets)
+                resetEntitySequence()
+                insertAll(
+                    getSendInsertingValues(
+                        editedTickets,
+                        stepEntities.sortedBy { it.activityId }.toSendStepEntity()
+                    )
+                )
+            }
 
-        iStepPointerRepository.deleteAll(editedTickets)
-        iStepPointerRepository.resetEntitySequence()
-        iStepPointerRepository.insertAll(
-            getInsertingPointerValues(
-                editedTickets,
-                stepPointerEntities
-            )
-        )
+            iStepPointerRepository.apply {
+                deleteAll(editedTickets)
+                resetEntitySequence()
+                insertAll(
+                    getInsertingPointerValues(editedTickets, stepPointerEntities)
+                )
+            }
+        }
     }
 
     private fun getInsertingPointerValues(
@@ -152,9 +143,7 @@ class UpdateTaskUseCase(
     private fun getInsertingValues(
         editedTicketNumbers: List<String>,
         stepEntities: List<StepsEntity>
-    ): List<StepsEntity> = stepEntities.filter {
-        it.ticketNumber !in editedTicketNumbers
-    }
+    ): List<StepsEntity> = stepEntities.filter { it.ticketNumber !in editedTicketNumbers }
 
     private fun getSendInsertingValues(
         editedTicketNumbers: List<String>,

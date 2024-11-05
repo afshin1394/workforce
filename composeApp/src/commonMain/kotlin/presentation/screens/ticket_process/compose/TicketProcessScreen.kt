@@ -272,6 +272,7 @@ class TicketProcessScreen(
                                                     async { viewModel.saveAndDeletePhotoByComponentKey() }.await()
                                                     if (state is ViewStates.Success) {
                                                         viewModel.updateLevel(PROCEED.NEXT)
+
                                                     }
                                                 }
                                             }
@@ -280,10 +281,10 @@ class TicketProcessScreen(
                                 }
                             }
                         })
-
                         scope.launch {
                             scaffoldState.bottomSheetState.expand()
                         }
+
                     }
 
                     TicketProcessEvent.InProgress -> {
