@@ -6,10 +6,12 @@ import arrow.core.Tuple5
 import arrow.core.Tuple6
 import arrow.core.raise.catch
 import dev.icerock.moko.resources.desc.StringDesc
+import domain.models.DeletePhotoByComponentIdAndKeyModel
 import domain.models.PhotoDomain
 import domain.models.form_struct.ComponentDomain
 import domain.models.form_struct.ValueDomain
 import domain.usecase.usecase.photo.DeleteByComponentKeyUseCase
+import domain.usecase.usecase.photo.DeletePhotoByComponentKeyAndIdUseCase
 import domain.usecase.usecase.steps.UpdateStepFormUseCase
 import domain.usecase.usecase.steps.StepDetail
 import domain.usecase.usecase.steps.StoreStepFormUseCase
@@ -55,6 +57,7 @@ class TicketProcessVM(
     private val insertPhotoUseCase: InsertPhotoUseCase,
     private val sendStepsOfTicketToServerUseCase: SendStepsOfTicketToServerUseCase,
     private val updateTaskUseCase: UpdateTaskUseCase,
+    private val deletePhotoByComponentKeyAndIdUseCase: DeletePhotoByComponentKeyAndIdUseCase
 ) : BaseViewModel() {
     private val _scrollingPosition = MutableStateFlow(Pair(-1, -1))
     val scrollingPosition = _scrollingPosition.asStateFlow()
@@ -392,9 +395,36 @@ class TicketProcessVM(
     }
 
     fun deletePhotoWhenCheckHideLogic(componentKey:String,componentId:String){
+
+        //on ram
         val filteredListPhotoDomainList =
             photoDomainList.filter { it.component_key ==componentKey && it.componentId == componentId }
         photoDomainList.removeAll(filteredListPhotoDomainList)
+
+        //on database
+
+        viewModelScope.launch {
+            deletePhotoByComponentKeyAndIdUseCase(DeletePhotoByComponentIdAndKeyModel(componentId,componentKey)).collect {
+                when (it.status) {
+                    AsyncStatus.ERROR -> {
+                    }
+                    AsyncStatus.LOADING -> {
+                    }
+
+                    AsyncStatus.EMPTY -> {
+                    }
+                    AsyncStatus.SUCCESS -> {
+
+                    }
+                }
+            }
+
+        }
+
+
+
+
+
     }
 
 
