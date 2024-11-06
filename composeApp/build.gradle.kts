@@ -4,7 +4,6 @@ import org.jetbrains.kotlin.gradle.plugin.extraProperties
 
 plugins {
 
-
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsCompose)
@@ -172,8 +171,8 @@ android {
         applicationId = "irancell.nwg.wfm"
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
-        versionCode = 21
-        versionName = "0.2.1"
+        versionCode = 22
+        versionName = "0.2.2"
     }
     packaging {
         resources {
