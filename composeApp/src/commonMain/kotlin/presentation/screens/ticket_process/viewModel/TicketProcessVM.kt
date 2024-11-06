@@ -40,6 +40,7 @@ import utils.FormViewerTypes
 import utils.LogicCalculation
 import utils.PROCEED
 import utils.ViewStates
+import utils.processInParallel
 import utils.validateComponents
 
 sealed class SaveDataStatus {
@@ -343,32 +344,27 @@ class TicketProcessVM(
     }
 
     private suspend fun checkLogicsForAll(components: List<ComponentDomain>) {
-        for (cmp in components) {
-            // Safely extract logics and add them to the model
-            logicCalculation.extractLogics(cmp).let { logics ->
-                extractLogicsModel.addAll(logics)
+        processInParallel(components, processBlock = {componentDomain, mutex ->
+            logicCalculation.extractLogics(componentDomain).let { logics ->
+                    extractLogicsModel.addAll(logics)
             }
-
-            // Check nested components if available and non-empty
-            cmp.components.value?.takeIf { it.isNotEmpty() }?.let { nestedComponents ->
+            componentDomain.components.value?.takeIf { it.isNotEmpty() }?.let { nestedComponents ->
                 yield()  // Yield control if the workload is high
                 checkLogicsForAll(nestedComponents)  // Recursive call on nested components
             }
-        }
+        })
+
     }
 
 
     private suspend fun checkAutoFillLogicForAll(components: List<ComponentDomain>) {
-        for (cmp in components) {
-            // Execute the autofill logic for the current component
-            logicCalculation.executeTicketAutoFillLogic(cmp)
-
-            // Check nested components if available and non-empty
-            cmp.components.value?.takeIf { it.isNotEmpty() }?.let { nestedComponents ->
+        processInParallel(items = components, processBlock = {componentDomain, mutex ->
+            logicCalculation.executeTicketAutoFillLogic(componentDomain)
+            componentDomain.components.value?.takeIf { it.isNotEmpty() }?.let { nestedComponents ->
                 yield()  // Yield control to other coroutines if the workload is high
                 checkAutoFillLogicForAll(nestedComponents)  // Recursive call on nested components
             }
-        }
+        })
     }
 
 
