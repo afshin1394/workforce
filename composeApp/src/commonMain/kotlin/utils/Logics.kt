@@ -41,115 +41,140 @@ class LogicCalculation(
     val validationErrorList = mutableListOf<ExtractLogicsModel>()
 
 
-    suspend fun extractLogics(component: ComponentDomain): MutableList<ExtractLogicsModel> = coroutineScope {
-        validationErrorList.clear()
+    suspend fun extractLogics(component: ComponentDomain): MutableList<ExtractLogicsModel> =
+        coroutineScope {
+            validationErrorList.clear()
 
-        component.logics?.forEach { logic ->
-            var hasLogic = false
-            val typeLogic: String
-            val idCmp = component.id ?: ""
+            component.logics?.forEach { logic ->
+                var hasLogic = false
+                val typeLogic: String
+                val idCmp = component.id ?: ""
 
-            when (logic.logicType) {
-                LogicType.Hide -> {
-                    val expressionSatisfied = evaluateLogics(component, logic)
+                when (logic.logicType) {
+                    LogicType.Hide -> {
+                        val expressionSatisfied = evaluateLogics(component, logic)
 
-                    component.updateProcessLogicDomain(
-                        component.processLogicDomain.value.copy(shouldHide = expressionSatisfied)
-                    )
-                    if (expressionSatisfied) component.clearValues()
-
-                    component.components.value?.forEach { nestedComponent ->
-                        nestedComponent.updateProcessLogicDomain(
-                            nestedComponent.processLogicDomain.value.copy(shouldHide = expressionSatisfied)
-                        )
-                        if (expressionSatisfied) nestedComponent.clearValues()
-                    }
-
-                    hasLogic = expressionSatisfied
-                }
-
-                LogicType.Required -> {
-                    typeLogic = LogicType.Required
-                    val expressionSatisfied = evaluateLogics(component, logic) && !component.hasValue()
-                    component.updateProcessLogicDomain(
-                        component.processLogicDomain.value.copy(required = expressionSatisfied)
-                    )
-
-                    if (expressionSatisfied) {
-                        hasLogic = true
-                        validationErrorList.add(ExtractLogicsModel(hasLogic, typeLogic, idCmp))
-                    }
-                }
-
-                LogicType.Disable -> {
-                    val expressionSatisfied = evaluateLogics(component, logic)
-                    component.updateProcessLogicDomain(
-                        component.processLogicDomain.value.copy(disabled = expressionSatisfied)
-                    )
-                    hasLogic = expressionSatisfied
-                }
-
-                LogicType.ReadOnly -> {
-                    val expressionSatisfied = evaluateLogics(component, logic)
-                    component.updateProcessLogicDomain(
-                        component.processLogicDomain.value.copy(readOnly = expressionSatisfied)
-                    )
-                    hasLogic = expressionSatisfied
-                }
-
-                LogicType.Calculate -> {
-                    val result = checkCalculation(allComponents, logic)
-
-                    val updatedValue = result ?: ""
-                    component.values = listOf(updateValueDomain(component.values?.getOrNull(0) ?: ValueDomain(), updatedValue))
-                    component.updateProcessLogicDomain(
-                        component.processLogicDomain.value.copy(calculatedValue = updatedValue)
-                    )
-
-                    hasLogic = updatedValue.isNotEmpty()
-                }
-
-                LogicType.Validate -> {
-                    typeLogic = LogicType.Validate
-                    val expressionSatisfied = evaluateValidateLogics(allComponents, component, logic)
-
-                    expressionSatisfied?.let {
                         component.updateProcessLogicDomain(
-                            component.processLogicDomain.value.copy(
-                                validate = it.result,
-                                errorMessage = it.message
+                            component.processLogicDomain.value.copy(shouldHide = expressionSatisfied)
+                        )
+                        if (expressionSatisfied) component.clearValues()
+
+                        component.components.value?.forEach { nestedComponent ->
+                            nestedComponent.updateProcessLogicDomain(
+                                nestedComponent.processLogicDomain.value.copy(shouldHide = expressionSatisfied)
+                            )
+                            if (expressionSatisfied) nestedComponent.clearValues()
+                        }
+
+                        hasLogic = expressionSatisfied
+                    }
+
+                    LogicType.Required -> {
+                        typeLogic = LogicType.Required
+                        val expressionSatisfied =
+                            evaluateLogics(component, logic) && !component.hasValue()
+                        component.updateProcessLogicDomain(
+                            component.processLogicDomain.value.copy(required = expressionSatisfied)
+                        )
+
+                        if (expressionSatisfied) {
+                            hasLogic = true
+                            validationErrorList.add(ExtractLogicsModel(hasLogic, typeLogic, idCmp))
+                        }
+                    }
+
+                    LogicType.Disable -> {
+                        val expressionSatisfied = evaluateLogics(component, logic)
+                        component.updateProcessLogicDomain(
+                            component.processLogicDomain.value.copy(disabled = expressionSatisfied)
+                        )
+                        hasLogic = expressionSatisfied
+                    }
+
+                    LogicType.ReadOnly -> {
+                        val expressionSatisfied = evaluateLogics(component, logic)
+                        component.updateProcessLogicDomain(
+                            component.processLogicDomain.value.copy(readOnly = expressionSatisfied)
+                        )
+                        hasLogic = expressionSatisfied
+                    }
+
+                    LogicType.Calculate -> {
+                        val result = checkCalculation(allComponents, logic)
+
+                        val updatedValue = result ?: ""
+                        component.values = listOf(
+                            updateValueDomain(
+                                component.values?.getOrNull(0) ?: ValueDomain(), updatedValue
                             )
                         )
-                        hasLogic = it.result
-                    } ?: component.updateProcessLogicDomain(
-                        component.processLogicDomain.value.copy(validate = false, errorMessage = null)
-                    )
+                        component.updateProcessLogicDomain(
+                            component.processLogicDomain.value.copy(calculatedValue = updatedValue)
+                        )
 
-                    if (hasLogic) validationErrorList.add(ExtractLogicsModel(hasLogic, typeLogic, idCmp))
-                }
+                        hasLogic = updatedValue.isNotEmpty()
+                    }
 
-                LogicType.Bind -> {
-                    val listOfBinding = logic.getListOfBindingComponents()
+                    LogicType.Validate -> {
+                        typeLogic = LogicType.Validate
+                        val expressionSatisfied =
+                            evaluateValidateLogics(allComponents, component, logic)
 
-                    val updatedValue = listOfBinding.getOrNull(0) ?: ""
-                    component.values = listOf(updateValueDomain(component.values?.getOrNull(0) ?: ValueDomain(), updatedValue))
-                    component.updateProcessLogicDomain(
-                        component.processLogicDomain.value.copy(calculatedValue = updatedValue)
-                    )
+                        expressionSatisfied?.let {
+                            component.updateProcessLogicDomain(
+                                component.processLogicDomain.value.copy(
+                                    validate = it.result,
+                                    errorMessage = it.message
+                                )
+                            )
+                            hasLogic = it.result
+                        } ?: component.updateProcessLogicDomain(
+                            component.processLogicDomain.value.copy(
+                                validate = false,
+                                errorMessage = null
+                            )
+                        )
 
-                    hasLogic = updatedValue.isNotEmpty()
+                        if (hasLogic) validationErrorList.add(
+                            ExtractLogicsModel(
+                                hasLogic,
+                                typeLogic,
+                                idCmp
+                            )
+                        )
+                    }
+
+                    LogicType.Bind -> {
+                        val listOfBinding = logic.getListOfBindingComponents()
+
+                        val updatedValue = listOfBinding.getOrNull(0) ?: ""
+                        component.values = listOf(
+                            updateValueDomain(
+                                component.values?.getOrNull(0) ?: ValueDomain(), updatedValue
+                            )
+                        )
+                        component.updateProcessLogicDomain(
+                            component.processLogicDomain.value.copy(calculatedValue = updatedValue)
+                        )
+
+                        hasLogic = updatedValue.isNotEmpty()
+                    }
                 }
             }
-        }
 
-        return@coroutineScope validationErrorList
-    }
+            return@coroutineScope validationErrorList
+        }
 
     suspend fun executeTicketAutoFillLogic(component: ComponentDomain) {
         if (!component.processLogicDomain.value.shouldHide) {
             viewModelScope.launch {
                 component.logics?.forEach { logic ->
                     logic.ticketAutoFillLogicDomain?.options?.forEach { option ->
+                        component.updateProcessLogicDomain(
+                            component.processLogicDomain.value.copy(
+                                isAutoFillLoading = true
+                            )
+                        )
                         option.phaseName?.let { phaseName ->
                             option.property?.let { property ->
                                 withContext(Dispatchers.IO) {
@@ -184,21 +209,36 @@ class LogicCalculation(
                                                                 component.type == FormViewerTypes.Time ||
                                                                 component.type == FormViewerTypes.Date
                                                             ) {
-                                                                value = resultData.parsServerDateTime()
+                                                                value =
+                                                                    resultData.parsServerDateTime()
                                                             }
 
-                                                            val updatedValueDomain = updateValueDomain(
-                                                                component.values?.get(0) ?: ValueDomain(),
-                                                                value
-                                                            )
+                                                            val updatedValueDomain =
+                                                                updateValueDomain(
+                                                                    component.values?.get(0)
+                                                                        ?: ValueDomain(),
+                                                                    value
+                                                                )
 
                                                             // Update component values
-                                                            component.updateValues(listOf(updatedValueDomain))
+                                                            component.updateValues(
+                                                                listOf(
+                                                                    updatedValueDomain
+                                                                )
+                                                            )
 
                                                             // Update process logic domain
                                                             component.updateProcessLogicDomain(
                                                                 component.processLogicDomain.value.copy(
-                                                                    calculatedValue = value
+                                                                    calculatedValue = value,
+                                                                    isAutoFillLoading = false,
+
+                                                                    )
+                                                            )
+                                                        } else {
+                                                            component.updateProcessLogicDomain(
+                                                                component.processLogicDomain.value.copy(
+                                                                    isAutoFillLoading = false
                                                                 )
                                                             )
                                                         }
@@ -215,7 +255,6 @@ class LogicCalculation(
             }
         }
     }
-
 
 
     private fun LogicDomain.getListOfBindingComponents(): List<String> {
@@ -418,13 +457,15 @@ class LogicCalculation(
                                 if (component.isSelectableValue()) {
                                     component.values?.forEach {
 
-                                            expressionResults[i].add(it.isSelected && !(it.value.equals(
+                                        expressionResults[i].add(
+                                            it.isSelected && !(it.value.equals(
                                                 condition.value
-                                            )))
+                                            ))
+                                        )
                                     }
                                 } else {
                                     component.values?.getOrNull(0)?.let {
-                                            expressionResults[i].add(!it.value.equals(condition.value))
+                                        expressionResults[i].add(!it.value.equals(condition.value))
                                     }
                                 }
 
@@ -438,9 +479,11 @@ class LogicCalculation(
                                 if (component.isSelectableValue()) {
                                     component.values?.forEach {
 
-                                            expressionResults[i].add(it.isSelected && it.value?.startsWith(
+                                        expressionResults[i].add(
+                                            it.isSelected && it.value?.startsWith(
                                                 condition.value.toString()
-                                            ) == true)
+                                            ) == true
+                                        )
                                     }
                                 } else {
                                     component.values?.let {
@@ -591,9 +634,10 @@ class LogicCalculation(
 
                         condition.values?.let {
 
-                                expressionResults[i].add(component?.values?.filter { it.value?.isNotEmpty() == true && it.isSelected }
-                                    ?.map { it.value }?.intersect(condition.values)
-                                    ?.isNotEmpty() == true)
+                            expressionResults[i].add(component?.values?.filter { it.value?.isNotEmpty() == true && it.isSelected }
+                                ?.map { it.value }?.intersect(condition.values)
+                                ?.isNotEmpty() == true
+                            )
 
                         }
 
@@ -602,17 +646,18 @@ class LogicCalculation(
                     OperatorType.NotContainsAny -> {
                         condition.values?.let {
 
-                                expressionResults[i].add(component?.values?.filter { it.value?.isNotEmpty() == true && it.isSelected }
-                                    ?.map { it.value }?.intersect(condition.values)
-                                    ?.isEmpty() == true)
+                            expressionResults[i].add(component?.values?.filter { it.value?.isNotEmpty() == true && it.isSelected }
+                                ?.map { it.value }?.intersect(condition.values)
+                                ?.isEmpty() == true
+                            )
                         }
                     }
 
                     OperatorType.ContainsAll -> {
                         condition.values?.let {
 
-                                expressionResults[i].add(component?.values?.filter { it.value?.isNotEmpty() == true && it.isSelected }
-                                    ?.map { it.value }?.containsAll(condition.values) == true)
+                            expressionResults[i].add(component?.values?.filter { it.value?.isNotEmpty() == true && it.isSelected }
+                                ?.map { it.value }?.containsAll(condition.values) == true)
                         }
                     }
                 }
@@ -764,7 +809,7 @@ class LogicCalculation(
                                     else -> {}
                                 }
                             } ?: run {
-                                val cmpValue : Double? =
+                                val cmpValue: Double? =
                                     if (componentDomain.type == FormViewerTypes.Datetime) {
                                         componentDomain.values?.getOrNull(0)?.value?.parseLocalDateTime()
                                             ?.localDateTimeToMilliseconds()?.toDouble()
@@ -775,8 +820,8 @@ class LogicCalculation(
 
                                     expressionResults[i].add(
                                         ValidateLogicResult(
-                                            (cmpValue?: 0.0
-                                                ) == (value?.toDoubleOrNull() ?: 0.0),
+                                            (cmpValue ?: 0.0
+                                                    ) == (value?.toDoubleOrNull() ?: 0.0),
                                             StringDesc.ResourceFormatted(
                                                 MR.strings.NotEqual,
                                                 (value).toString()
@@ -880,7 +925,7 @@ class LogicCalculation(
                                     else -> {}
                                 }
                             } ?: run {
-                                val cmpValue : Double? =
+                                val cmpValue: Double? =
                                     if (componentDomain.type == FormViewerTypes.Datetime) {
                                         componentDomain.values?.getOrNull(0)?.value?.parseLocalDateTime()
                                             ?.localDateTimeToMilliseconds()?.toDouble()
@@ -891,8 +936,8 @@ class LogicCalculation(
 
                                     expressionResults[i].add(
                                         ValidateLogicResult(
-                                            (cmpValue?: 0.0
-                                                ) != (value?.toDouble() ?: 0.0),
+                                            (cmpValue ?: 0.0
+                                                    ) != (value?.toDouble() ?: 0.0),
                                             StringDesc.ResourceFormatted(
                                                 MR.strings.Equal,
                                                 (value).toString()
@@ -996,7 +1041,7 @@ class LogicCalculation(
                                     else -> {}
                                 }
                             } ?: run {
-                                val cmpValue : Double? =
+                                val cmpValue: Double? =
                                     if (componentDomain.type == FormViewerTypes.Datetime) {
                                         componentDomain.values?.getOrNull(0)?.value?.parseLocalDateTime()
                                             ?.localDateTimeToMilliseconds()?.toDouble()
@@ -1113,7 +1158,7 @@ class LogicCalculation(
                                     else -> {}
                                 }
                             } ?: run {
-                                val cmpValue : Double? =
+                                val cmpValue: Double? =
                                     if (componentDomain.type == FormViewerTypes.Datetime) {
                                         componentDomain.values?.getOrNull(0)?.value?.parseLocalDateTime()
                                             ?.localDateTimeToMilliseconds()?.toDouble()
@@ -1124,8 +1169,8 @@ class LogicCalculation(
 
                                     expressionResults[i].add(
                                         ValidateLogicResult(
-                                            !((cmpValue?:0.0
-                                                ) >= (value?.toDoubleOrNull() ?: 0.0)),
+                                            !((cmpValue ?: 0.0
+                                                    ) >= (value?.toDoubleOrNull() ?: 0.0)),
                                             StringDesc.ResourceFormatted(
                                                 MR.strings.NotGreaterOrEqualTo,
                                                 (value).toString()
@@ -1228,7 +1273,7 @@ class LogicCalculation(
                                     else -> {}
                                 }
                             } ?: run {
-                                val cmpValue : Double? =
+                                val cmpValue: Double? =
                                     if (componentDomain.type == FormViewerTypes.Datetime) {
                                         componentDomain.values?.getOrNull(0)?.value?.parseLocalDateTime()
                                             ?.localDateTimeToMilliseconds()?.toDouble()
@@ -1340,7 +1385,7 @@ class LogicCalculation(
                                     else -> {}
                                 }
                             } ?: run {
-                                val cmpValue : Double? =
+                                val cmpValue: Double? =
                                     if (componentDomain.type == FormViewerTypes.Datetime) {
                                         componentDomain.values?.getOrNull(0)?.value?.parseLocalDateTime()
                                             ?.localDateTimeToMilliseconds()?.toDouble()
@@ -1385,7 +1430,7 @@ class LogicCalculation(
 
 
     fun ArrayList<ArrayList<ValidateLogicResult>>.aggregateValidateLogicResult(): ValidateLogicResult? {
-        return   this[0].firstOrNull{it.result}
+        return this[0].firstOrNull { it.result }
     }
 
     private fun ComponentDomain.hasValue(): Boolean {
@@ -1406,7 +1451,7 @@ class LogicCalculation(
 
     private fun ComponentDomain?.clearValues() {
         if (this?.isSelectableValue() == true) {
-           this.updateValues(this.values?.map {
+            this.updateValues(this.values?.map {
                 it.isSelected = false
                 it
             })

@@ -1,21 +1,15 @@
 package utils
 
-
-import androidx.compose.foundation.gestures.animateScrollBy
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyListState
-
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
-
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.*
-import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.ImeAction
@@ -23,21 +17,14 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.benasher44.uuid.uuid4
 import dev.icerock.moko.resources.desc.ResourceFormattedStringDesc
-
 import domain.models.PhotoDomain
-
 import domain.models.form_struct.ComponentDomain
 import domain.models.form_struct.ProcessLogicDomain
-import domain.models.form_struct.ValidateDomain
-
 import domain.models.form_struct.ValueDomain
 import io.github.aakira.napier.LogLevel
 import io.github.aakira.napier.Napier
 import irancell.nwg.wfm.MR
-import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
-
 import presentation.screens.main.components.formViewer.CheckList
 import presentation.screens.main.components.formViewer.DropDownMultiChoice
 import presentation.screens.main.components.formViewer.DropDownSingleChoice
@@ -50,7 +37,6 @@ import presentation.screens.main.components.formViewer.Radio
 import presentation.screens.main.components.formViewer.TypeEditable
 import presentation.screens.main.components.formViewer.UploadFileComponent
 import presentation.screens.main.components.formViewer.groupComponent
-
 
 @Composable
 fun initialize(
@@ -69,19 +55,14 @@ fun initialize(
     currentParentIndex: List<Int> = listOf(),
 ) {
 
-
     Napier.log(LogLevel.ASSERT, tag = "indexFile", message = "indexFile${savedIndex}")
     val indexChildSaveable = rememberSaveable { mutableStateOf(savedIndex) }
     val indexParentSaveable = rememberSaveable { mutableStateOf<Int?>(null) }
     val itemState = remember { mutableStateOf(ComponentDomain()) }
     val uploadDomainLists =
         remember { mutableStateMapOf<String, MutableState<List<ValueDomain>>>() }
-
-
     val listState = rememberLazyListState()
     val scope = rememberCoroutineScope()
-
-
 
     LaunchedEffect(scrollingState) {
         Napier.log(
@@ -105,18 +86,14 @@ fun initialize(
     ) {
         itemsIndexed(components, key = { _, item -> item.id!! }) { index, item ->
             val valuesState by item.valuesState
-            val nestedComponentsState by remember {  item.components }
+            val nestedComponentsState by remember { item.components }
             val processLogicDomainState by remember { item.processLogicDomain }
-
             val updatedParentIndex = currentParentIndex + index
 
             Column(modifier = Modifier.padding(8.dp)) {
-
                 when (item.type) {
                     FormViewerTypes.Group -> {
                         indexParentSaveable.value = index
-
-
                         groupComponent(
                             disable = item.disabled,
                             readOnly = item.readOnly,
@@ -136,7 +113,6 @@ fun initialize(
                             item,
                             nestedComponentsState,
                             onAddClick = {
-
                                 val newComponents = nestedComponentsState?.let {
                                     copyComponentWithValues(
                                         item,
@@ -160,17 +136,12 @@ fun initialize(
                                         listState.animateScrollToItem(index - 1)
                                     }
                                 }
-
-
                             })
-
-
                     }
 
                     FormViewerTypes.Number -> {
-                        var valueState =
+                        val valueState =
                             mutableStateOf(item.values?.get(0)?.value ?: "")
-
 
                         Editable(
                             processLogicDomain = processLogicDomainState,
@@ -200,9 +171,8 @@ fun initialize(
                         )
                     }
 
-
                     FormViewerTypes.TextAREA -> {
-                        var valueState =
+                        val valueState =
                             mutableStateOf(item.values?.get(0)?.value ?: "")
 
                         Editable(
@@ -415,13 +385,9 @@ fun initialize(
 
 
                         }
-
                     }
 
-
                     FormViewerTypes.Time -> {
-
-
                         val selectedDateState = remember {
                             mutableStateOf(
                                 item.values?.getOrNull(0)?.value ?: " "
@@ -438,21 +404,15 @@ fun initialize(
                             val newValues = listOf(ValueDomain(FormViewerTypes.Time, timeSelected))
                             item.values = newValues
                             selectedDateState.value = timeSelected
-
                             onChanges(item, newValues)
-
-
                         }
-
                     }
-
 
                     FormViewerTypes.FileUpload -> {
 
-                        val currentId= item.id ?: ""
-                        var filteredValuesState = valuesState?.filter { it.value?.contains(currentId) == true }
-
-
+                        val currentId = item.id ?: ""
+                        var filteredValuesState =
+                            valuesState?.filter { it.value?.contains(currentId) == true }
                         UploadFileComponent(
                             item.readOnly,
                             item.disabled,
@@ -460,15 +420,12 @@ fun initialize(
                             index = index,
                             item = item,
                             label = item.label ?: "",
-                            uploadList =  filteredValuesState,
+                            uploadList = filteredValuesState,
                             onChooseFileFromDevice = { list ->
-
                                 onChanges(
                                     item,
                                     list,
                                 )
-
-
                             },
                             onClickUpload = { indexClick ->
                                 indexChildSaveable.value = indexClick
@@ -480,22 +437,15 @@ fun initialize(
                                 newList?.remove(fileToRemove)
                                 filteredValuesState = newList!!
                                 item.values = newList
-                                    onChanges(
-                                        item,
-                                        item.values
-                                    )
-
-
+                                onChanges(
+                                    item,
+                                    item.values
+                                )
                             }
-
                         )
-
                     }
 
-
                     FormViewerTypes.ImageView -> {
-
-
                         ImagePicker(
                             item.disabled,
                             item.readOnly,
@@ -514,11 +464,10 @@ fun initialize(
                                         listOf(
                                             ValueDomain(
                                                 "${obj?.type}:${obj?.id}",
-                                                "${resultTakePhoto}"
+                                                resultTakePhoto
                                             )
                                         )
                                     it.values = newValues
-
                                     onChanges(it, newValues)
                                 }
 
@@ -532,19 +481,14 @@ fun initialize(
                                     tag = "takePhoto onCameraClick",
                                     message = components[index].toString()
                                 )
-
                             })
                     }
 
-
                     FormViewerTypes.Radio -> {
-
                         val componentLabel = item.label
                         val valuesState = remember {
                             mutableStateListOf(*item.values?.toTypedArray() ?: arrayOf())
                         }
-
-
                         Radio(
                             item.readOnly,
                             item.disabled,
@@ -566,7 +510,6 @@ fun initialize(
                     }
 
                     FormViewerTypes.Checklist -> {
-
                         val valuesState = remember { mutableStateOf("") }
                         val componentLabel = item.label
                         item.values?.let { values ->
@@ -590,7 +533,6 @@ fun initialize(
                     }
 
                     FormViewerTypes.Multi -> {
-
                         val valuesState = remember { mutableStateOf("") }
                         val componentLabel = item.label
                         item.values?.let { values ->
@@ -643,8 +585,6 @@ fun initialize(
                                     }
                                 }
                                 item.values = valuesState
-
-
                                 onChanges(item, valuesState)
                             },
                             {}

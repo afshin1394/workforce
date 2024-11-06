@@ -1,6 +1,14 @@
 package presentation.screens.main.components.formViewer
 
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -15,7 +23,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -27,24 +41,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.irancell.nwg.wfm.presentation.theme.spacing05X
 import dev.icerock.moko.resources.compose.localized
-import dev.icerock.moko.resources.desc.ResourceFormattedStringDesc
 import domain.models.form_struct.ProcessLogicDomain
 import io.github.aakira.napier.LogLevel
 import io.github.aakira.napier.Napier
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.IO
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.debounce
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.launch
 import presentation.theme.strokeDefaultLight
 import presentation.theme.surfaceBrandDefault
 import presentation.theme.surfaceBrandDisabled
 import presentation.theme.textInverseDisabled
 import presentation.theme.textSecondary
-
 
 @Composable
 fun Editable(
@@ -59,16 +63,7 @@ fun Editable(
     maxLines: Int,
     onValueChange: (value: String) -> Unit
 ) {
-    Napier.log(LogLevel.ASSERT, tag = "Editable Editable", message = placeholder)
-    Napier.log(
-        LogLevel.ASSERT,
-        tag = "Editable calculatedValue",
-        message = processLogicDomain.calculatedValue.toString()
-    )
-    Napier.log(LogLevel.ASSERT, tag = "Editable value", message = value)
-    val valueChange =   mutableStateOf(processLogicDomain.calculatedValue?:value)
-
-
+    val valueChange = remember { mutableStateOf(processLogicDomain.calculatedValue ?: value) }
 
     val disableLogic = processLogicDomain.disabled || disable
     val hideLogic = processLogicDomain.shouldHide
@@ -77,6 +72,8 @@ fun Editable(
     val validateLogic = processLogicDomain.validate
     val errorMessageLogic = processLogicDomain.errorMessage
     val hasInitialMessageLogic = processLogicDomain.hasInitialMessage
+    val isAutoFilling = processLogicDomain.isAutoFillLoading
+
     val textFieldBackground =
         if (validateLogic || (requiredLogic && !hasInitialMessageLogic)) {
             Color.Red
@@ -86,15 +83,12 @@ fun Editable(
             strokeDefaultLight
         }
 
-    Napier.log(LogLevel.ASSERT, tag = "processLogicDomain", message = placeholder)
-    Napier.log(LogLevel.ASSERT, tag = "processLogicDomain", message = processLogicDomain.toString())
     if (hideLogic) {
         valueChange.value = ""
         processLogicDomain.calculatedValue = ""
     }
     if (!hideLogic) {
         Column(Modifier.padding(16.dp)) {
-
             val styledString = buildAnnotatedString {
                 withStyle(
                     style = SpanStyle(
@@ -111,61 +105,120 @@ fun Editable(
                 }
             }
 
-
-
             Text(
                 text = styledString,
                 modifier = Modifier.fillMaxWidth().wrapContentHeight(),
             )
             Spacer(modifier = Modifier.padding(top = spacing05X))
 
-            TextField(
-                keyboardOptions = KeyboardOptions(
-                    capitalization = KeyboardCapitalization.None,
-                    keyboardType = keyboardType,
-                    imeAction = imeAction
-                ),
-                maxLines = maxLines,
-                value = valueChange.value,
-                onValueChange = {
-                    if (!disableLogic && !readOnlyLogic && it != valueChange.value) {
-                        valueChange.value = it
-                        onValueChange(valueChange.value)
-
-
-                    }
-                },
+            Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .border(
-                        width = 1.dp,
-                        color = textFieldBackground,
-                        shape = RoundedCornerShape(15.dp)
+                    .wrapContentHeight()
+                    .padding(4.dp)
+            ) {
+                if (isAutoFilling) {
+                    val infiniteTransition = rememberInfiniteTransition()
+                    val progress by infiniteTransition.animateFloat(
+                        initialValue = 0f,
+                        targetValue = 1f,
+                        animationSpec = infiniteRepeatable(
+                            animation = tween(2000, easing = LinearEasing),
+                            repeatMode = RepeatMode.Restart
+                        )
+                    )
+                    Canvas(
+                        modifier = Modifier
+                            .matchParentSize()
+                            .padding(2.dp)
+                    ) {
+                        val strokeWidth = 2.dp.toPx()
+                        val pathEffect = PathEffect.dashPathEffect(
+                            floatArrayOf(15f, 15f),
+                            phase = progress * 300f
+                        )
+                        drawRoundRect(
+                            color = surfaceBrandDefault,
+                            topLeft = Offset(0f, 0f),
+                            size = Size(size.width, size.height),
+                            cornerRadius = CornerRadius(15.dp.toPx(), 15.dp.toPx()),
+                            style = Stroke(
+                                width = strokeWidth,
+                                pathEffect = pathEffect,
+                                cap = StrokeCap.Round
+                            )
+                        )
+                    }
+                } else {
+                    Canvas(
+                        modifier = Modifier
+                            .matchParentSize()
+                            .padding(2.dp)
+                    ) {
+                        val strokeWidth = 0.5.dp.toPx()
+                        drawRoundRect(
+                            color = textFieldBackground,
+                            topLeft = Offset(0f, 0f),
+                            size = Size(size.width, size.height),
+                            cornerRadius = CornerRadius(15.dp.toPx(), 15.dp.toPx()),
+                            style = Stroke(
+                                width = strokeWidth,
+                                cap = StrokeCap.Round
+                            )
+                        )
+                    }
+                }
+
+                TextField(
+                    keyboardOptions = KeyboardOptions(
+                        capitalization = KeyboardCapitalization.None,
+                        keyboardType = keyboardType,
+                        imeAction = imeAction
                     ),
-                readOnly = readOnly,
-                shape = RoundedCornerShape(15.dp),
-                textStyle = TextStyle(color = textSecondary),
-                colors = TextFieldDefaults.colors(
-                    focusedIndicatorColor = if (readOnlyLogic || disableLogic) surfaceBrandDisabled else Color.Transparent,
-                    disabledIndicatorColor = if (readOnlyLogic || disableLogic) surfaceBrandDisabled else Color.Transparent,
-                    unfocusedIndicatorColor = if (readOnlyLogic || disableLogic) surfaceBrandDisabled else Color.Transparent,
-                    focusedContainerColor = if (readOnlyLogic || disableLogic) surfaceBrandDisabled else Color.White,
-                    unfocusedContainerColor = if (readOnlyLogic || disableLogic) surfaceBrandDisabled else Color.White,
-                    disabledContainerColor = if (readOnlyLogic || disableLogic) surfaceBrandDisabled else Color.White
-                ),
-
-
+                    maxLines = maxLines,
+                    value = valueChange.value,
+                    onValueChange = {
+                        if (!disableLogic && !readOnlyLogic && it != valueChange.value) {
+                            valueChange.value = it
+                            onValueChange(valueChange.value)
+                        }
+                    },
+                    modifier = if (isAutoFilling) {
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(2.dp)
+                    } else {
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(2.dp)
+                            .border(
+                                width = 1.dp,
+                                color = textFieldBackground,
+                                shape = RoundedCornerShape(15.dp)
+                            )
+                    },
+                    readOnly = if (isAutoFilling) true else readOnlyLogic,
+                    shape = RoundedCornerShape(15.dp),
+                    textStyle = TextStyle(color = textSecondary),
+                    colors = TextFieldDefaults.colors(
+                        focusedIndicatorColor = if (readOnlyLogic || disableLogic) surfaceBrandDisabled else Color.Transparent,
+                        disabledIndicatorColor = if (readOnlyLogic || disableLogic) surfaceBrandDisabled else Color.Transparent,
+                        unfocusedIndicatorColor = if (readOnlyLogic || disableLogic) surfaceBrandDisabled else Color.Transparent,
+                        focusedContainerColor = if (readOnlyLogic || disableLogic) surfaceBrandDisabled else Color.White,
+                        unfocusedContainerColor = if (readOnlyLogic || disableLogic) surfaceBrandDisabled else Color.White,
+                        disabledContainerColor = if (readOnlyLogic || disableLogic) surfaceBrandDisabled else Color.White
+                    ),
                 )
 
-
-            if (validateLogic || (requiredLogic && !hasInitialMessageLogic)) {
-                errorMessageLogic?.let {
-                    Text(
-                        text = errorMessageLogic.localized(),
-                        color = Color.Red,
-                        style = TextStyle(fontSize = 12.sp),
-                        modifier = Modifier.padding(top = 4.dp)
-                    )
+                if (validateLogic || (requiredLogic && !hasInitialMessageLogic)) {
+                    errorMessageLogic?.let {
+                        Text(
+                            text = errorMessageLogic.localized(),
+                            color = Color.Red,
+                            style = TextStyle(fontSize = 12.sp),
+                            modifier = Modifier.padding(top = 4.dp)
+                        )
+                    }
                 }
             }
         }
@@ -187,27 +240,16 @@ fun SimpleEditable(
     value: String,
 ) {
     Napier.log(LogLevel.ASSERT, tag = "Editablevalue", message = value)
-    var valueChange by remember { mutableStateOf(value) }
-
-
-
-
+    val valueChange by remember { mutableStateOf(value) }
     Column(Modifier.padding(16.dp)) {
-
         val styledString = buildAnnotatedString {
             withStyle(
                 style = SpanStyle(
                     color = textSecondary,
                     fontSize = 14.sp
                 )
-            ) {
-                append(key)
-            }
-
+            ) { append(key) }
         }
-
-
-
         Text(
             text = styledString,
             modifier = Modifier.fillMaxWidth().wrapContentHeight(),
@@ -219,10 +261,7 @@ fun SimpleEditable(
                 capitalization = KeyboardCapitalization.None,
             ),
             value = valueChange,
-            onValueChange = {
-
-
-            },
+            onValueChange = {},
             modifier = Modifier
                 .fillMaxWidth()
                 .border(
@@ -242,10 +281,6 @@ fun SimpleEditable(
                 unfocusedContainerColor = Color.White,
                 disabledContainerColor = Color.White
             ),
-
-
-            )
-
-
+        )
     }
 }
