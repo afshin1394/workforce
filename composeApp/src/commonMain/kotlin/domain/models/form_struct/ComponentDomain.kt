@@ -36,12 +36,8 @@ data class ComponentDomain(
     val disabled: Boolean = false,
     @Serializable(with = AnySerializer::class)
     val defaultValue: Any? = null,
-
-
     //in app properties
     var _processLogicDomain: ProcessLogicDomain = ProcessLogicDomain().copy()
-
-
 ) {
     // Use MutableState for UI components
     var components: MutableState<List<ComponentDomain>?> = mutableStateOf(_components)
@@ -70,8 +66,6 @@ data class ComponentDomain(
     override fun toString(): String {
         return "ComponentDomain(id=$id, key=$key, hide=$hide, type=$type, label=$label, layout=$layout, subType=$subType, validate=$validate, values=$values, conditional=$conditional, _components=$_components, logics=$logics, repeatable=$repeatable, removable=$removable, isMulti=$isMulti, readOnly=$readOnly, disabled=$disabled, defaultValue=$defaultValue, _processLogicDomain=$_processLogicDomain, components=$components, processLogicDomain=$processLogicDomain, valuesState=$valuesState)"
     }
-
-
 }
 
 
