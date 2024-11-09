@@ -13,6 +13,9 @@ import kotlinx.serialization.Transient
 import kotlinx.serialization.json.Json
 import presentation.model.ExtractLogicsModel
 import utils.AnySerializer
+import utils.FormViewerTypes
+import utils.localDateTimeToMilliseconds
+import utils.parseLocalDateTime
 
 
 @Serializable
@@ -65,6 +68,18 @@ data class ComponentDomain(
 
     override fun toString(): String {
         return "ComponentDomain(id=$id, key=$key, hide=$hide, type=$type, label=$label, layout=$layout, subType=$subType, validate=$validate, values=$values, conditional=$conditional, _components=$_components, logics=$logics, repeatable=$repeatable, removable=$removable, isMulti=$isMulti, readOnly=$readOnly, disabled=$disabled, defaultValue=$defaultValue, _processLogicDomain=$_processLogicDomain, components=$components, processLogicDomain=$processLogicDomain, valuesState=$valuesState)"
+    }
+
+    fun getValueBaseOnType() : Double? {
+     return  when(this.type){
+           FormViewerTypes.Datetime ->{
+               this.values?.get(0)?.value?.parseLocalDateTime()?.localDateTimeToMilliseconds()?.toString()?.toDoubleOrNull()
+           }
+           else->{
+               this.values?.get(0)?.value?.toDoubleOrNull()
+           }
+       }
+
     }
 }
 

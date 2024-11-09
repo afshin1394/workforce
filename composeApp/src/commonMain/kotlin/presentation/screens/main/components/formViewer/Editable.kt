@@ -92,7 +92,7 @@ fun Editable(
 
     LaunchedEffect(Unit) {
         valueChangeFlow
-            .debounce(200  ) // Only emit if 500 ms has passed since the last change
+            .debounce(200) // Only emit if 500 ms has passed since the last change
             .distinctUntilChanged() // Only emit if the value has actually changed
             .flatMapLatest { latestValue ->
                 flow {

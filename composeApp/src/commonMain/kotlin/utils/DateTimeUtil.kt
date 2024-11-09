@@ -127,3 +127,12 @@ fun formatDateTime(dateTime: LocalDateTime): String {
     return "$year-$month-$day  $formattedHourString:$minute $amPm"
 }
 
+
+fun Long.convertMillisToTime(): String {
+    val days = this / (24 * 60 * 60 * 1000)
+    val hours = (this / (60 * 60 * 1000)) % 24
+    val minutes = (this / (60 * 1000)) % 60
+
+    return "$days days, $hours hours, $minutes minutes"
+}
+

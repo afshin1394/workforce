@@ -668,6 +668,10 @@ suspend fun validateComponent(
                             component.updateValues(updatedList.toList())
 
                         }
+                    }?: run {
+                        val updatedList = component.values?.toMutableSet() ?: mutableSetOf()
+                        listValueDomain?.let { updatedList.addAll(it) }
+                        component.updateValues(updatedList.toList())
                     }
                 }
             }

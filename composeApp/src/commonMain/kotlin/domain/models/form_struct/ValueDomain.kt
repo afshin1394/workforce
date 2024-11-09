@@ -9,6 +9,7 @@ data class ValueDomain(
     override fun toString(): String {
         return "ValueDomain(label=$label, value=$value, valueDate=$valueDate, isSelected=$isSelected)"
     }
+
 }
 @Serializable
 data class ValueDate(var date : String,var time : String) {

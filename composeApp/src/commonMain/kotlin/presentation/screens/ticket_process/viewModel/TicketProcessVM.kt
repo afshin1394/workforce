@@ -4,7 +4,6 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import arrow.core.Tuple5
 import arrow.core.Tuple6
-import arrow.core.raise.catch
 import dev.icerock.moko.resources.desc.StringDesc
 import domain.models.DeletePhotoByComponentIdAndKeyModel
 import domain.models.PhotoDomain
@@ -23,7 +22,6 @@ import io.github.aakira.napier.LogLevel
 import io.github.aakira.napier.Napier
 import irancell.nwg.wfm.Location
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.IO
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -34,11 +32,9 @@ import kotlinx.coroutines.withContext
 import kotlinx.coroutines.yield
 import presentation.model.ExtractLogicsModel
 import presentation.screens.main.events.TicketProcessEvent
-import presentation.screens.main.viewmodel.TicketListStatus
 import presentation.screens.ticket_process.events.StepEvent
 import utils.AsyncStatus
 import utils.BaseViewModel
-import utils.FormViewerTypes
 import utils.LogicCalculation
 import utils.PROCEED
 import utils.ViewStates
@@ -348,7 +344,9 @@ class TicketProcessVM(
 
     private suspend fun checkLogicsForAll(components: List<ComponentDomain>) {
         processInParallel(components, processBlock = { componentDomain, mutex ->
-            logicCalculation.extractLogics(componentDomain)
+            logicCalculation.extractLogics(componentDomain).let { logics ->
+                extractLogicsModel.addAll(logics)
+            }
             componentDomain.components.value?.takeIf { it.isNotEmpty() }?.let { nestedComponents ->
                 yield()  // Yield control if the workload is high
                 checkLogicsForAll(nestedComponents)  // Recursive call on nested components
@@ -360,7 +358,7 @@ class TicketProcessVM(
 
     private suspend fun checkAutoFillLogicForAll(components: List<ComponentDomain>) {
         processInParallel(items = components, processBlock = { componentDomain, mutex ->
-            logicCalculation.executeTicketAutoFillLogic(componentDomain)
+            logicCalculation.extractTicketAutoFillLogics(componentDomain)
             componentDomain.components.value?.takeIf { it.isNotEmpty() }?.let { nestedComponents ->
                 yield()  // Yield control to other coroutines if the workload is high
                 checkAutoFillLogicForAll(nestedComponents)  // Recursive call on nested components
@@ -388,13 +386,9 @@ class TicketProcessVM(
             extractLogicsModel.clear()
 
             // Perform logic checks in the background
-            async {
-                checkLogicsForAll(componentsCopy)
-            }.await()
-            async {
-                checkAutoFillLogicForAll(componentsCopy)
-            }.await()
-            async { checkRequiredAndValidateLogicForAll(componentsCopy) }.await()
+            checkLogicsForAll(componentsCopy)
+            checkAutoFillLogicForAll(componentsCopy)
+            checkRequiredAndValidateLogicForAll(componentsCopy)
 
 
             withContext(Dispatchers.Main)

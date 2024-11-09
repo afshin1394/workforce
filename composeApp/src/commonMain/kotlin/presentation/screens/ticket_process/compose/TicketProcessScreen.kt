@@ -438,7 +438,6 @@ class TicketProcessScreen(
                                                     viewModel.deletePhotoWhenCheckHideLogic(item.componentKey,item.componentId)
                                                 }
                                             }
-
                                         }
                                     }.await()
                                     validateComponent(

@@ -14,10 +14,14 @@ import domain.usecase.usecase.ticket.GetTicketDetailsUseCase
 import io.github.aakira.napier.LogLevel
 import io.github.aakira.napier.Napier
 import irancell.nwg.wfm.DatePickerFormat.format
+import irancell.nwg.wfm.DateTime
 import irancell.nwg.wfm.MR
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -34,13 +38,14 @@ class LogicCalculation(
     val validationErrorList = mutableListOf<ExtractLogicsModel>()
     suspend fun extractRequiredAndValidateLogics(component: ComponentDomain): MutableList<ExtractLogicsModel> =
         coroutineScope {
-            validationErrorList.clear()
             component.logics?.forEach { logic ->
                 var hasLogic = false
                 val typeLogic: String
                 val idCmp = component.id ?: ""
 
                 when (logic.logicType) {
+
+
                     LogicType.Required -> {
                         typeLogic = LogicType.Required
                         val expressionSatisfied =
@@ -54,6 +59,7 @@ class LogicCalculation(
                             validationErrorList.add(ExtractLogicsModel(hasLogic, typeLogic, idCmp))
                         }
                     }
+
                     LogicType.Validate -> {
                         typeLogic = LogicType.Validate
                         val expressionSatisfied =
@@ -82,6 +88,36 @@ class LogicCalculation(
                             )
                         )
                     }
+                    LogicType.Calculate -> {
+                        val result = checkCalculation(logic)
+
+                        val updatedValue = result ?: ""
+                        component.values = listOf(
+                            updateValueDomain(
+                                component.values?.getOrNull(0) ?: ValueDomain(), updatedValue
+                            )
+                        )
+                        component.updateProcessLogicDomain(
+                            component.processLogicDomain.value.copy(calculatedValue = updatedValue)
+                        )
+
+                        hasLogic = updatedValue.isNotEmpty()
+                    }
+                    LogicType.Bind -> {
+                        val listOfBinding = logic.getListOfBindingComponents()
+
+                        val updatedValue = listOfBinding.getOrNull(0) ?: ""
+                        component.values = listOf(
+                            updateValueDomain(
+                                component.values?.getOrNull(0) ?: ValueDomain(), updatedValue
+                            )
+                        )
+                        component.updateProcessLogicDomain(
+                            component.processLogicDomain.value.copy(calculatedValue = updatedValue)
+                        )
+
+                        hasLogic = updatedValue.isNotEmpty()
+                    }
 
                 }
             }
@@ -90,9 +126,8 @@ class LogicCalculation(
         }
 
 
-
-
-    suspend fun extractLogics(component: ComponentDomain) {
+    suspend fun extractLogics(component: ComponentDomain): MutableList<ExtractLogicsModel> =
+        coroutineScope {
             validationErrorList.clear()
 
             component.logics?.forEach { logic ->
@@ -144,12 +179,13 @@ class LogicCalculation(
                                 }
 
                                 nestedComponent.clearValues()
+
+
                             }
                         }
 
                         hasLogic = expressionSatisfied
                     }
-
 
                     LogicType.Disable -> {
                         val expressionSatisfied = evaluateLogics(component, logic)
@@ -167,21 +203,7 @@ class LogicCalculation(
                         hasLogic = expressionSatisfied
                     }
 
-                    LogicType.Calculate -> {
-                        val result = checkCalculation(allComponents, logic)
 
-                        val updatedValue = result ?: ""
-                        component.values = listOf(
-                            updateValueDomain(
-                                component.values?.getOrNull(0) ?: ValueDomain(), updatedValue
-                            )
-                        )
-                        component.updateProcessLogicDomain(
-                            component.processLogicDomain.value.copy(calculatedValue = updatedValue)
-                        )
-
-                        hasLogic = updatedValue.isNotEmpty()
-                    }
 
 
                     LogicType.Bind -> {
@@ -202,97 +224,107 @@ class LogicCalculation(
                 }
 
             }
+            return@coroutineScope validationErrorList
+
         }
 
-    suspend fun executeTicketAutoFillLogic(component: ComponentDomain) {
+    suspend fun extractTicketAutoFillLogics(component: ComponentDomain) {
         if (!component.processLogicDomain.value.shouldHide) {
             viewModelScope.launch {
-                component.logics?.forEach { logic ->
-                    logic.ticketAutoFillLogicDomain?.options?.forEach { option ->
-                        component.updateProcessLogicDomain(
-                            component.processLogicDomain.value.copy(
-                                isAutoFillLoading = true
-                            )
-                        )
-                        option.phaseName?.let { phaseName ->
-                            option.property?.let { property ->
-                                withContext(Dispatchers.IO) {
-                                    getTicketDetailsUseCase(
-                                        Pair(
-                                            ticketId,
-                                            TicketDetailRequestDomain(
-                                                listOf(PhaseDomain(phaseName, property))
+                coroutineScope {
+                    // Collect all API call jobs in a list to await their completion
+                    val apiCalls = mutableListOf<Deferred<Unit>>()
+
+                    component.logics?.forEach { logic ->
+                        logic.ticketAutoFillLogicDomain?.options?.forEach { option ->
+                            option.phaseName?.let { phaseName ->
+                                option.property?.let { property ->
+                                    val apiCall = async(Dispatchers.IO) {
+                                        // Set isAutoFillLoading to true
+                                        component.updateProcessLogicDomain(
+                                            component.processLogicDomain.value.copy(
+                                                isAutoFillLoading = true
                                             )
                                         )
-                                    ).collect { result ->
-                                        when (result.status) {
-                                            AsyncStatus.EMPTY -> {
-                                                // Handle empty case
-                                            }
 
-                                            AsyncStatus.ERROR -> {
-                                                // Handle error case
-                                            }
+                                        getTicketDetailsUseCase(
+                                            Pair(
+                                                ticketId,
+                                                TicketDetailRequestDomain(
+                                                    listOf(PhaseDomain(phaseName, property))
+                                                )
+                                            )
+                                        ).collect { result ->
+                                            when (result.status) {
+                                                AsyncStatus.EMPTY -> {
+                                                    // Handle empty case if needed
+                                                }
+                                                AsyncStatus.ERROR -> {
+                                                    // Handle error case if needed
+                                                }
+                                                AsyncStatus.LOADING -> {
+                                                    // Handle loading case if needed
+                                                }
+                                                AsyncStatus.SUCCESS -> {
+                                                    result.data?.keys?.forEach { key ->
+                                                        result.data[key]?.let { resultData ->
+                                                            var value = resultData
 
-                                            AsyncStatus.LOADING -> {
-                                                // Handle loading case
-                                            }
+                                                            if (resultData.isNotEmpty()) {
+                                                                if (component.type == FormViewerTypes.Datetime ||
+                                                                    component.type == FormViewerTypes.Time ||
+                                                                    component.type == FormViewerTypes.Date
+                                                                ) {
+                                                                    value = resultData.parsServerDateTime()
+                                                                }
 
-                                            AsyncStatus.SUCCESS -> {
-                                                result.data?.keys?.forEach { key ->
-                                                    result.data[key]?.let { resultData ->
-                                                        var value = resultData
-
-                                                        if (resultData.isNotEmpty()) {
-                                                            if (component.type == FormViewerTypes.Datetime ||
-                                                                component.type == FormViewerTypes.Time ||
-                                                                component.type == FormViewerTypes.Date
-                                                            ) {
-                                                                value =
-                                                                    resultData.parsServerDateTime()
-                                                            }
-
-                                                            val updatedValueDomain =
-                                                                updateValueDomain(
+                                                                val updatedValueDomain = updateValueDomain(
                                                                     component.values?.get(0)
                                                                         ?: ValueDomain(),
                                                                     value
                                                                 )
 
-                                                            // Update component values
-                                                            component.updateValues(
-                                                                listOf(
-                                                                    updatedValueDomain
-                                                                )
-                                                            )
-
-                                                            // Update process logic domain
-                                                            component.updateProcessLogicDomain(
-                                                                component.processLogicDomain.value.copy(
-                                                                    calculatedValue = value,
-                                                                    isAutoFillLoading = false,
-
+                                                                // Update component values
+                                                                component.updateValues(
+                                                                    listOf(
+                                                                        updatedValueDomain
                                                                     )
-                                                            )
-                                                        } else {
-                                                            component.updateProcessLogicDomain(
-                                                                component.processLogicDomain.value.copy(
-                                                                    isAutoFillLoading = false
                                                                 )
-                                                            )
+
+                                                                // Update process logic domain
+                                                                component.updateProcessLogicDomain(
+                                                                    component.processLogicDomain.value.copy(
+                                                                        calculatedValue = value,
+                                                                        isAutoFillLoading = false
+                                                                    )
+                                                                )
+                                                            } else {
+                                                                component.updateProcessLogicDomain(
+                                                                    component.processLogicDomain.value.copy(
+                                                                        isAutoFillLoading = false
+                                                                    )
+                                                                )
+                                                            }
                                                         }
                                                     }
                                                 }
                                             }
                                         }
                                     }
+                                    // Add each API call to the list
+                                    apiCalls.add(apiCall)
                                 }
                             }
                         }
                     }
+
+                    // Await completion of all API calls
+                    apiCalls.awaitAll()
                 }
             }
         }
+
+
     }
 
 
@@ -339,28 +371,28 @@ class LogicCalculation(
     }
 
 
-    private fun checkCalculation(components: List<ComponentDomain>, it: LogicDomain): String? {
+    private fun checkCalculation(it: LogicDomain): String? {
         it.experssions?.forEach { exp ->
             exp.conditions?.forEach { cond ->
 
                 when (cond.secondOperator?.title) {
                     OperatorType.Add -> {
-                        return invokeOperation(OperatorType.Add, cond, components)
+                        return invokeOperation(OperatorType.Add, cond)
 
                     }
 
                     OperatorType.Subtract -> {
-                        return invokeOperation(OperatorType.Subtract, cond, components)
+                        return invokeOperation(OperatorType.Subtract, cond)
 
                     }
 
                     OperatorType.Divide -> {
-                        return invokeOperation(OperatorType.Divide, cond, components)
+                        return invokeOperation(OperatorType.Divide, cond)
 
                     }
 
                     OperatorType.Multiply -> {
-                        return invokeOperation(OperatorType.Multiply, cond, components)
+                        return invokeOperation(OperatorType.Multiply, cond)
 
                     }
 
@@ -375,52 +407,40 @@ class LogicCalculation(
     fun invokeOperation(
         operator: String,
         cond: ConditionDomain,
-        components: List<ComponentDomain>
     ): String? {
-        val componet1 = allComponents.findComponentByKey(cond.firstFieldKey)
-        val componet2 = allComponents.findComponentByKey(cond.secondFieldKey)
-        componet1?.values?.let { values1 ->
-            if (values1.isNotEmpty()) {
-                values1[0].let { value1 ->
-                    componet2?.values?.let { values2 ->
-                        if (values2.isNotEmpty())
-                            values2[0].let { value2 ->
-                                value1.value?.toFloatOrNull()?.let { v1 ->
-                                    value2.value?.toFloatOrNull()?.let { v2 ->
-                                        when (operator) {
-                                            OperatorType.Add -> {
-                                                return (v1 + v2).toStringOrEmptyString()
-                                            }
+        val component1 = allComponents.findComponentByKey(cond.firstFieldKey)
+        val component2 = allComponents.findComponentByKey(cond.secondFieldKey)
+        val value1 = component1?.getValueBaseOnType()
+        val value2 = component2?.getValueBaseOnType()
 
-                                            OperatorType.Subtract -> {
-                                                return (v1 - v2).toStringOrEmptyString()
-                                            }
+        value1?.let { v1 ->
+            value2?.let { v2 ->
+                when (operator) {
+                    OperatorType.Add -> {
+                        return (v1 + v2).toStringOrEmptyString(component1.type == FormViewerTypes.Datetime && component2.type == FormViewerTypes.Datetime)
+                    }
 
-                                            OperatorType.Multiply -> {
-                                                return (v1 * v2).toStringOrEmptyString()
+                    OperatorType.Subtract -> {
+                        return (v1 - v2).toStringOrEmptyString(component1.type == FormViewerTypes.Datetime && component2.type == FormViewerTypes.Datetime)
+                    }
 
-                                            }
+                    OperatorType.Multiply -> {
+                        return (v1 * v2).toStringOrEmptyString(component1.type == FormViewerTypes.Datetime && component2.type == FormViewerTypes.Datetime)
+                    }
 
-                                            OperatorType.Divide -> {
-                                                if (v2 == 0.0f)
-                                                    return ""
-                                                else
-                                                    return (v1 / v2).toStringOrEmptyString()
+                    OperatorType.Divide -> {
+                        if (v2 == 0.0)
+                            return ""
+                        else
+                            return (v1 / v2).toStringOrEmptyString(component1.type == FormViewerTypes.Datetime && component2.type == FormViewerTypes.Datetime)
+                    }
 
-                                            }
-
-                                            else -> {
-                                                return null
-                                            }
-                                        }
-
-                                    }
-                                }
-                            }
+                    else -> {
+                        return null
                     }
                 }
-            }
 
+            }
         }
         return null
     }
@@ -1498,5 +1518,7 @@ class LogicCalculation(
             this?.updateValues(null)
     }
 }
+
+
 
 
