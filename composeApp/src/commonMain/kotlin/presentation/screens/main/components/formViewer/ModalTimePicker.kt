@@ -1,6 +1,12 @@
 package presentation.screens.main.components.formViewer
 
-
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -16,7 +22,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
-
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -39,7 +44,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
@@ -56,7 +67,6 @@ import com.mohamedrejeb.calf.ui.timepicker.AdaptiveTimePicker
 import com.mohamedrejeb.calf.ui.timepicker.rememberAdaptiveTimePickerState
 import dev.icerock.moko.resources.compose.localized
 import dev.icerock.moko.resources.compose.painterResource
-import dev.icerock.moko.resources.desc.ResourceFormattedStringDesc
 import domain.models.form_struct.ProcessLogicDomain
 import irancell.nwg.wfm.DatePickerFormat.format
 import irancell.nwg.wfm.MR
@@ -88,7 +98,6 @@ fun ModalTimePicker(
     var isBottomSheetVisible by rememberSaveable { mutableStateOf(false) }
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     var title by remember { mutableStateOf(title) }
-
     val disableLogic = processLogicDomain.disabled || disable
     val hideLogic = processLogicDomain.shouldHide
     val readOnlyLogic = processLogicDomain.readOnly || readOnly
@@ -96,6 +105,7 @@ fun ModalTimePicker(
     val validateLogic = processLogicDomain.validate
     val errorMessageLogic = processLogicDomain.errorMessage
     val hasInitialMessageLogic = processLogicDomain.hasInitialMessage
+    val isAutoFilling = processLogicDomain.isAutoFillLoading
 
     val backgroundColor = if (validateLogic || (requiredLogic && !hasInitialMessageLogic)) {
         Color.Red
@@ -106,9 +116,7 @@ fun ModalTimePicker(
     }
 
     if (!hideLogic) {
-
         Column(Modifier.padding(16.dp)) {
-
             val styledString = buildAnnotatedString {
                 withStyle(
                     style = SpanStyle(
@@ -129,57 +137,117 @@ fun ModalTimePicker(
                 modifier = Modifier.fillMaxWidth().wrapContentHeight(),
             )
             Spacer(modifier = Modifier.padding(top = spacing05X))
-            TextField(value = title,
-                onValueChange = { },
+            Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .border(
-                        width = 1.dp,
-                        color = backgroundColor,
-                        shape = RoundedCornerShape(15.dp)
+                    .wrapContentHeight()
+                    .padding(4.dp)
+            ) {
+                if (isAutoFilling) {
+                    val infiniteTransition = rememberInfiniteTransition()
+                    val progress by infiniteTransition.animateFloat(
+                        initialValue = 0f,
+                        targetValue = 1f,
+                        animationSpec = infiniteRepeatable(
+                            animation = tween(2000, easing = LinearEasing),
+                            repeatMode = RepeatMode.Restart
+                        )
                     )
-                    .background(color = Color.White, shape = RoundedCornerShape(15.dp))
-                    .clickable {
-                        scope.launch {
-                            if (!(disableLogic || readOnlyLogic)) {
-
-                                isBottomSheetVisible = !isBottomSheetVisible
-                                sheetState.expand()
-                            }
-                        }
-                    },
-                readOnly = true,
-                shape = RoundedCornerShape(15.dp),
-                textStyle = TextStyle(color = textSecondary),
-                colors = TextFieldDefaults.colors(
-                    focusedIndicatorColor = if (readOnlyLogic || disableLogic) surfaceBrandDisabled else Color.Transparent,
-                    disabledIndicatorColor = if (readOnlyLogic || disableLogic) surfaceBrandDisabled else Color.Transparent,
-                    unfocusedIndicatorColor = if (readOnlyLogic || disableLogic) surfaceBrandDisabled else Color.Transparent,
-                    focusedContainerColor = if (readOnlyLogic || disableLogic) surfaceBrandDisabled else Color.White,
-                    unfocusedContainerColor = if (readOnlyLogic || disableLogic) surfaceBrandDisabled else Color.White,
-                    disabledContainerColor = if (readOnlyLogic || disableLogic) surfaceBrandDisabled else Color.White
-                ),
-
-                trailingIcon = {
-
-                    Icon(
-                        painter = painterResource(MR.images.clock),
-                        "deleteAllSelected",
-                        Modifier.width(28.dp).height(28.dp).padding(end = 8.dp)
+                    Canvas(
+                        modifier = Modifier
+                            .matchParentSize()
+                            .padding(2.dp)
+                    ) {
+                        val strokeWidth = 2.dp.toPx()
+                        val pathEffect = PathEffect.dashPathEffect(
+                            floatArrayOf(15f, 15f),
+                            phase = progress * 300f
+                        )
+                        drawRoundRect(
+                            color = surfaceBrandDefault,
+                            topLeft = Offset(0f, 0f),
+                            size = Size(size.width, size.height),
+                            cornerRadius = CornerRadius(15.dp.toPx(), 15.dp.toPx()),
+                            style = Stroke(
+                                width = strokeWidth,
+                                pathEffect = pathEffect,
+                                cap = StrokeCap.Round
+                            )
+                        )
+                    }
+                } else {
+                    Canvas(
+                        modifier = Modifier
+                            .matchParentSize()
+                            .padding(2.dp)
+                    ) {
+                        val strokeWidth = 0.5.dp.toPx()
+                        drawRoundRect(
+                            color = backgroundColor,
+                            topLeft = Offset(0f, 0f),
+                            size = Size(size.width, size.height),
+                            cornerRadius = CornerRadius(15.dp.toPx(), 15.dp.toPx()),
+                            style = Stroke(
+                                width = strokeWidth,
+                                cap = StrokeCap.Round
+                            )
+                        )
+                    }
+                }
+                TextField(value = title,
+                    onValueChange = { },
+                    modifier = if (isAutoFilling) {
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(2.dp)
+                    } else {
+                        Modifier
+                            .fillMaxWidth()
+                            .border(
+                                width = 1.dp,
+                                color = backgroundColor,
+                                shape = RoundedCornerShape(15.dp)
+                            )
+                            .background(color = Color.White, shape = RoundedCornerShape(15.dp))
                             .clickable {
-
-
                                 scope.launch {
                                     if (!(disableLogic || readOnlyLogic)) {
                                         isBottomSheetVisible = !isBottomSheetVisible
                                         sheetState.expand()
                                     }
                                 }
-                            },
-                        tint = textSecondary
-                    )
+                            }
+                    },
+                    readOnly = true,
+                    shape = RoundedCornerShape(15.dp),
+                    textStyle = TextStyle(color = textSecondary),
+                    colors = TextFieldDefaults.colors(
+                        focusedIndicatorColor = if (readOnlyLogic || disableLogic) surfaceBrandDisabled else Color.Transparent,
+                        disabledIndicatorColor = if (readOnlyLogic || disableLogic) surfaceBrandDisabled else Color.Transparent,
+                        unfocusedIndicatorColor = if (readOnlyLogic || disableLogic) surfaceBrandDisabled else Color.Transparent,
+                        focusedContainerColor = if (readOnlyLogic || disableLogic) surfaceBrandDisabled else Color.White,
+                        unfocusedContainerColor = if (readOnlyLogic || disableLogic) surfaceBrandDisabled else Color.White,
+                        disabledContainerColor = if (readOnlyLogic || disableLogic) surfaceBrandDisabled else Color.White
+                    ),
 
-                })
+                    trailingIcon = {
+                        Icon(
+                            painter = painterResource(MR.images.clock),
+                            "deleteAllSelected",
+                            Modifier.width(28.dp).height(28.dp).padding(end = 8.dp)
+                                .clickable {
+                                    scope.launch {
+                                        if (!(disableLogic || readOnlyLogic)) {
+                                            isBottomSheetVisible = !isBottomSheetVisible
+                                            sheetState.expand()
+                                        }
+                                    }
+                                },
+                            tint = textSecondary
+                        )
+                    }
+                )
+            }
             if (validateLogic || (requiredLogic && !hasInitialMessageLogic)) {
                 errorMessageLogic?.localized()?.let {
                     Text(

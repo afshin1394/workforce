@@ -6,10 +6,12 @@ import arrow.core.Tuple5
 import arrow.core.Tuple6
 import arrow.core.raise.catch
 import dev.icerock.moko.resources.desc.StringDesc
+import domain.models.DeletePhotoByComponentIdAndKeyModel
 import domain.models.PhotoDomain
 import domain.models.form_struct.ComponentDomain
 import domain.models.form_struct.ValueDomain
 import domain.usecase.usecase.photo.DeleteByComponentKeyUseCase
+import domain.usecase.usecase.photo.DeletePhotoByComponentKeyAndIdUseCase
 import domain.usecase.usecase.steps.UpdateStepFormUseCase
 import domain.usecase.usecase.steps.StepDetail
 import domain.usecase.usecase.steps.StoreStepFormUseCase
@@ -56,6 +58,7 @@ class TicketProcessVM(
     private val insertPhotoUseCase: InsertPhotoUseCase,
     private val sendStepsOfTicketToServerUseCase: SendStepsOfTicketToServerUseCase,
     private val updateTaskUseCase: UpdateTaskUseCase,
+    private val deletePhotoByComponentKeyAndIdUseCase: DeletePhotoByComponentKeyAndIdUseCase
 ) : BaseViewModel() {
     private val _scrollingPosition = MutableStateFlow(Pair(-1, -1))
     val scrollingPosition = _scrollingPosition.asStateFlow()
@@ -344,10 +347,8 @@ class TicketProcessVM(
     }
 
     private suspend fun checkLogicsForAll(components: List<ComponentDomain>) {
-        processInParallel(components, processBlock = {componentDomain, mutex ->
-            logicCalculation.extractLogics(componentDomain).let { logics ->
-                    extractLogicsModel.addAll(logics)
-            }
+        processInParallel(components, processBlock = { componentDomain, mutex ->
+            logicCalculation.extractLogics(componentDomain)
             componentDomain.components.value?.takeIf { it.isNotEmpty() }?.let { nestedComponents ->
                 yield()  // Yield control if the workload is high
                 checkLogicsForAll(nestedComponents)  // Recursive call on nested components
@@ -358,11 +359,23 @@ class TicketProcessVM(
 
 
     private suspend fun checkAutoFillLogicForAll(components: List<ComponentDomain>) {
-        processInParallel(items = components, processBlock = {componentDomain, mutex ->
+        processInParallel(items = components, processBlock = { componentDomain, mutex ->
             logicCalculation.executeTicketAutoFillLogic(componentDomain)
             componentDomain.components.value?.takeIf { it.isNotEmpty() }?.let { nestedComponents ->
                 yield()  // Yield control to other coroutines if the workload is high
                 checkAutoFillLogicForAll(nestedComponents)  // Recursive call on nested components
+            }
+        })
+    }
+
+    private suspend fun checkRequiredAndValidateLogicForAll(components: List<ComponentDomain>) {
+        processInParallel(components, processBlock = { componentDomain, mutex ->
+            logicCalculation.extractRequiredAndValidateLogics(componentDomain).let { logics ->
+                extractLogicsModel.addAll(logics)
+            }
+            componentDomain.components.value?.takeIf { it.isNotEmpty() }?.let { nestedComponents ->
+                yield()  // Yield control if the workload is high
+                checkRequiredAndValidateLogicForAll(nestedComponents)  // Recursive call on nested components
             }
         })
     }
@@ -375,9 +388,13 @@ class TicketProcessVM(
             extractLogicsModel.clear()
 
             // Perform logic checks in the background
-
-            checkLogicsForAll(componentsCopy)
-            checkAutoFillLogicForAll(componentsCopy)
+            async {
+                checkLogicsForAll(componentsCopy)
+            }.await()
+            async {
+                checkAutoFillLogicForAll(componentsCopy)
+            }.await()
+            async { checkRequiredAndValidateLogicForAll(componentsCopy) }.await()
 
 
             withContext(Dispatchers.Main)
@@ -385,6 +402,43 @@ class TicketProcessVM(
                 onResult(extractLogicsModel)
             }
         }
+    }
+
+    fun deletePhotoWhenCheckHideLogic(componentKey: String, componentId: String) {
+
+        //on ram
+        val filteredListPhotoDomainList =
+            photoDomainList.filter { it.component_key == componentKey && it.componentId == componentId }
+        photoDomainList.removeAll(filteredListPhotoDomainList)
+
+        //on database
+
+        viewModelScope.launch {
+            deletePhotoByComponentKeyAndIdUseCase(
+                DeletePhotoByComponentIdAndKeyModel(
+                    componentId,
+                    componentKey
+                )
+            ).collect {
+                when (it.status) {
+                    AsyncStatus.ERROR -> {
+                    }
+
+                    AsyncStatus.LOADING -> {
+                    }
+
+                    AsyncStatus.EMPTY -> {
+                    }
+
+                    AsyncStatus.SUCCESS -> {
+
+                    }
+                }
+            }
+
+        }
+
+
     }
 
 
@@ -545,6 +599,7 @@ class TicketProcessVM(
         // Filtering the photo list based on component key and ID
         val filteredList =
             photoDomainList.filter { it.component_key == key && it.componentId == id }
+
         val currentComponent = tempComponent.value
 
         // Updating the list of component values based on whether there are photos or not
