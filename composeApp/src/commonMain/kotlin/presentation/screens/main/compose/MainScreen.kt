@@ -1,9 +1,7 @@
 package presentation.screens.main.compose
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -20,7 +18,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -46,10 +43,7 @@ import irancell.nwg.wfm.DrawController
 import irancell.nwg.wfm.ExitApp
 import irancell.nwg.wfm.InternalStorage
 import irancell.nwg.wfm.MR
-import irancell.nwg.wfm.getOrientation
-import irancell.nwg.wfm.getSharedPref
 import irancell.nwg.wfm.provideAppContext
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import presentation.components.CustomTopAppBar
@@ -73,7 +67,6 @@ import presentation.theme.surfaceDefault
 import presentation.theme.textInverse
 import presentation.theme.textInverseDisabled
 import presentation.theme.textPrimary
-import utils.ORIENTATION
 import utils.AvailabilityStatus
 import utils.NetworkStates
 import utils.ServiceState
@@ -830,29 +823,15 @@ class MainScreen(
                             TicketListScreen(
                                 searchText = "",
                                 onEvent = { mainEvent: MainEvent, task: TaskDomain? ->
-                                    if (isClickable) {
-                                        isClickable = false
-                                        viewModel.updateState(mainEvent)
-                                        viewModel.selectedTask.value = task
-                                        viewModel.resetSuspendTask()
-                                        scope.launch {
-                                            delay(500)
-                                            isClickable = true
-                                        }
-                                    }
+                                    viewModel.updateState(mainEvent)
+                                    viewModel.selectedTask.value = task
+                                    viewModel.resetSuspendTask()
                                 },
                                 tasks = viewModel.tasks,
                                 onAccept = {
-                                    if (isClickable) {
-                                        isClickable = false
-                                        viewModel.checkIfTicketIsEdited()
-                                        viewModel.selectedTask.value = it
-                                        viewModel.resetSuspendTask()
-                                        scope.launch {
-                                            delay(500)
-                                            isClickable = true
-                                        }
-                                    }
+                                    viewModel.checkIfTicketIsEdited()
+                                    viewModel.selectedTask.value = it
+                                    viewModel.resetSuspendTask()
                                 },
                                 viewModel = viewModel
                             )
