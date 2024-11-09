@@ -13,7 +13,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
@@ -23,8 +22,6 @@ import cafe.adriel.voyager.core.registry.rememberScreen
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import com.irancell.nwg.wfm.presentation.components.bottomSheetDoubleActionBottomBar
-import com.irancell.nwg.wfm.presentation.components.bottomSingleActionComponent
 import com.irancell.nwg.wfm.presentation.theme.spacing2X
 import presentation.screens.ticket_process.viewModel.TicketProcessVM
 import presentation.screens.ticket_process.components.processBar
@@ -38,16 +35,14 @@ import irancell.nwg.wfm.InternalStorage
 import irancell.nwg.wfm.MR
 import irancell.nwg.wfm.provideAppContext
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.IO
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import org.koin.compose.koinInject
 import presentation.components.TicketProcessTopBar
+import presentation.components.bottomSheetDoubleActionBottomBar
+import presentation.components.bottomSingleActionComponent
 import presentation.model.BottomSheetActionModel
-import presentation.model.ExtractLogicsModel
 import presentation.model.SingleButtonActionModel
 import presentation.nav.Screen.Main.Menu
 import presentation.screens.main.components.EditPhotoComponent

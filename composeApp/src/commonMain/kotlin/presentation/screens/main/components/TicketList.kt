@@ -16,8 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.material.pullrefresh.PullRefreshIndicator
 import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
-import androidx.compose.runtime.snapshots.SnapshotStateList
-import com.irancell.nwg.wfm.presentation.components.CustomSearchBar
+import presentation.components.CustomSearchBar
 import com.irancell.nwg.wfm.presentation.components.FilterRow
 import presentation.components.ticketCard
 import presentation.screens.main.events.MainEvent

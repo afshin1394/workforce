@@ -23,8 +23,8 @@ import cafe.adriel.voyager.core.registry.rememberScreen
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import com.irancell.nwg.wfm.presentation.components.bottomSheetDoubleActionBottomBarWithLoading
-import com.irancell.nwg.wfm.presentation.components.bottomSingleActionComponentWithLoading
+import presentation.components.bottomSheetDoubleActionBottomBarWithLoading
+import presentation.components.bottomSingleActionComponentWithLoading
 import com.irancell.nwg.wfm.presentation.theme.spacing2X
 import dev.icerock.moko.resources.compose.painterResource
 import dev.icerock.moko.resources.compose.stringResource

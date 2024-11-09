@@ -49,6 +49,7 @@ import org.koin.compose.koinInject
 import presentation.components.CustomTopAppBar
 import presentation.components.DrawerBody
 import presentation.components.DrawerHeader
+import presentation.components.bottomSheetDoubleActionBottomBar
 import presentation.model.BottomSheetActionModel
 import presentation.screens.main.components.AvailabilityStatus
 import presentation.screens.main.components.CancelTicketBottomBarComponent

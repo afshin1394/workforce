@@ -1,28 +1,23 @@
 package utils
 
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.*
 import kotlinx.coroutines.*
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 
 @Composable
 fun debounceClick(
     debounceTime: Long = 1000L,
     onClick: () -> Unit
 ): () -> Unit {
+    var isClickAllowed by remember { mutableStateOf(true) }
     val scope = rememberCoroutineScope()
-    val mutex = Mutex()
-    var job: Job? = null
 
     return {
-        scope.launch {
-            mutex.withLock {
-                job?.cancel()
-                job = launch {
-                    onClick()
-                    delay(debounceTime)
-                }
+        if (isClickAllowed) {
+            onClick()
+            isClickAllowed = false
+            scope.launch {
+                delay(debounceTime)
+                isClickAllowed = true
             }
         }
     }
