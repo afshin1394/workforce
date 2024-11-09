@@ -35,6 +35,8 @@ import org.koin.compose.koinInject
 import presentation.components.CustomButton
 import presentation.components.CustomButtonData
 import presentation.components.MenuItemsTopBar
+import presentation.components.bottomSheetDoubleActionBottomBarWithLoading
+import presentation.components.bottomSingleActionComponentWithLoading
 import presentation.model.BottomSheetActionModel
 import presentation.model.SingleButtonActionModel
 import presentation.screens.main.events.AboutEvent
@@ -55,30 +57,28 @@ class AboutScreen(
     @Composable
     override fun Content() {
         val navigator = LocalNavigator.currentOrThrow
-
         val scaffoldState: BottomSheetScaffoldState = rememberBottomSheetScaffoldState()
         val viewModel: AboutScreenVM = koinInject()
-
         val events by viewModel.eventsVersion
         var eventsAbout by viewModel.eventsAbout
         var showVersionDialog by remember { mutableStateOf(false) }
         var buttonState by remember { mutableStateOf(ButtonState.IDLE) }
         val scope = rememberCoroutineScope()
-
         val errorMessage = stringResource(MR.strings.download_failed)
+
         val bottomSheetTitle: String =
             when (eventsAbout) {
-                AboutEvent.ForceUpdate->{
+                AboutEvent.ForceUpdate -> {
                     viewModel.versionData.value?.title ?: ""
                 }
-                AboutEvent.NormUpdate->{
+
+                AboutEvent.NormUpdate -> {
                     viewModel.versionData.value?.title ?: ""
                 }
-                AboutEvent.Default->{
+
+                AboutEvent.Default -> {
                     ""
                 }
-
-
             }
 
         BaseScreen(
@@ -86,7 +86,7 @@ class AboutScreen(
             title = stringResource(MR.strings.about_application),
             scaffoldState = scaffoldState,
             bottomSheetTitle = bottomSheetTitle,
-            isShwCloseBtnBottomSheet = !(events == CheckVersionEvent.NormalUpdate ||events == CheckVersionEvent.ForceUpdate),
+            isShwCloseBtnBottomSheet = !(events == CheckVersionEvent.NormalUpdate || events == CheckVersionEvent.ForceUpdate),
             topBar = {
                 MenuItemsTopBar(stringResource(MR.strings.about_application)) {
                     navigator.pop()
@@ -101,7 +101,7 @@ class AboutScreen(
                                 .padding(start = spacing2X),
                             contentAlignment = Alignment.Center
                         ) {
-                            androidx.compose.material.Text(
+                            Text(
                                 text = viewModel.versionData.value?.description ?: "",
                                 style = body_large
                             )
@@ -111,9 +111,8 @@ class AboutScreen(
                         }
                     }
 
-
                     AboutEvent.NormUpdate -> {
-                        androidx.compose.material.Text(
+                        Text(
                             text = viewModel.versionData.value?.description ?: "",
                             textAlign = TextAlign.Center,
                             style = body_large,
@@ -122,7 +121,6 @@ class AboutScreen(
                         scope.launch {
                             scaffoldState.bottomSheetState.expand()
                         }
-
                     }
 
                     AboutEvent.Default -> {
@@ -133,15 +131,9 @@ class AboutScreen(
                 }
             },
 
-            bottomBarBottomSheetContent ={
+            bottomBarBottomSheetContent = {
                 when (eventsAbout) {
-
                     AboutEvent.ForceUpdate -> {
-
-
-
-
-
                         bottomSingleActionComponentWithLoading(
                             buttonState = buttonState,
                             SingleButtonActionModel(
@@ -159,22 +151,16 @@ class AboutScreen(
                                     } else {
                                         buttonState = ButtonState.IDLE
                                         scaffoldState.snackbarHostState.showSnackbar(message = errorMessage)
-
                                     }
                                 }
-
-
                             })
 
                         scope.launch {
                             scaffoldState.bottomSheetState.expand()
                         }
-
-
                     }
 
                     AboutEvent.NormUpdate -> {
-
                         bottomSheetDoubleActionBottomBarWithLoading(
                             buttonState = buttonState,
                             BottomSheetActionModel(
@@ -185,9 +171,7 @@ class AboutScreen(
                                 surfaceBrandDefault,
                                 textInverse
                             ), onFirstButtonClick = {
-
-                                eventsAbout=AboutEvent.Default
-
+                                eventsAbout = AboutEvent.Default
                             }, onSecondButtonClick = {
                                 buttonState = ButtonState.LOADING
                                 scope.launch {
@@ -205,132 +189,118 @@ class AboutScreen(
                         scope.launch {
                             scaffoldState.bottomSheetState.expand()
                         }
-
-
                     }
 
-
-                    AboutEvent.Default->{
+                    AboutEvent.Default -> {
                         scope.launch {
                             scaffoldState.bottomSheetState.collapse()
                         }
                     }
                 }
-            }, content = { Column(
-                modifier = if (eventsAbout==AboutEvent.NormUpdate ||eventsAbout==AboutEvent.ForceUpdate) Modifier.blur(7.dp) else Modifier
-                    .verticalScroll(rememberScrollState()),
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-
-
-
-
-                Spacer(modifier = Modifier.padding(30.dp))
-                Image(
-                    painter = painterResource(MR.images.ic_i_ticket),
-                    contentDescription = "wfm",
-                    modifier = Modifier
-                        .width(72.dp)
-                        .height(72.dp)
-                )
-                Spacer(modifier = Modifier.padding(spacing25X))
-
+            }, content = {
                 Column(
-                    modifier = Modifier.padding(horizontal = spacing3X),
+                    modifier = if (eventsAbout == AboutEvent.NormUpdate || eventsAbout == AboutEvent.ForceUpdate) Modifier.blur(
+                        7.dp
+                    ) else Modifier
+                        .verticalScroll(rememberScrollState()),
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-
-
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Center
-                    ) {
-                        Text(
-                            "${stringResource(MR.strings.current_version)}:",
-                            style = body_large,
-                            modifier = Modifier.weight(.8f),
-                        )
-                        ChipsView(
-                            chipsItem = ChipsItem(
-                                hasBorder = false,
-                                text = DeviceInfo.getAppVersionName(),
-                                chipsColor = subtleDefault,
-                                borderWidth = 0.dp,
-                                chipsRadius = radius2XLarge,
-                                textColor = textPrimary,
-                                textStyle = body_large
-                            ), modifier = Modifier.weight(.2f)
-                        )
-                    }
-                    Spacer(modifier = Modifier.padding(spacing15X))
-
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Center
-                    ) {
-                        Text(
-                            "${stringResource(MR.strings.latest_version)}:",
-                            style = body_large,
-                            modifier = Modifier.weight(.8f),
-
-                            )
-                        ChipsView(
-                            chipsItem = ChipsItem(
-                                hasBorder = false,
-                                text = viewModel.versionData.value?.version_name.toString(),
-                                chipsColor = subtleDefault,
-                                borderWidth = 0.dp,
-                                chipsRadius = radius2XLarge,
-                                textColor = textPrimary,
-                                textStyle = body_large
-                            ), modifier = Modifier.weight(.2f)
-                        )
-                    }
-
+                    Spacer(modifier = Modifier.padding(30.dp))
+                    Image(
+                        painter = painterResource(MR.images.ic_i_ticket),
+                        contentDescription = "wfm",
+                        modifier = Modifier
+                            .width(72.dp)
+                            .height(72.dp)
+                    )
                     Spacer(modifier = Modifier.padding(spacing25X))
 
+                    Column(
+                        modifier = Modifier.padding(horizontal = spacing3X),
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
 
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Center
+                        ) {
+                            Text(
+                                "${stringResource(MR.strings.current_version)}:",
+                                style = body_large,
+                                modifier = Modifier.weight(.8f),
+                            )
+                            ChipsView(
+                                chipsItem = ChipsItem(
+                                    hasBorder = false,
+                                    text = DeviceInfo.getAppVersionName(),
+                                    chipsColor = subtleDefault,
+                                    borderWidth = 0.dp,
+                                    chipsRadius = radius2XLarge,
+                                    textColor = textPrimary,
+                                    textStyle = body_large
+                                ), modifier = Modifier.weight(.2f)
+                            )
+                        }
+                        Spacer(modifier = Modifier.padding(spacing15X))
 
-                    if (events == CheckVersionEvent.NormalUpdate || events == CheckVersionEvent.ForceUpdate) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Center
+                        ) {
+                            Text(
+                                "${stringResource(MR.strings.latest_version)}:",
+                                style = body_large,
+                                modifier = Modifier.weight(.8f),
 
-                        Text(
-                            text = stringResource(MR.strings.description_for_update),
-                            style = body_large
-                        )
+                                )
+                            ChipsView(
+                                chipsItem = ChipsItem(
+                                    hasBorder = false,
+                                    text = viewModel.versionData.value?.version_name.toString(),
+                                    chipsColor = subtleDefault,
+                                    borderWidth = 0.dp,
+                                    chipsRadius = radius2XLarge,
+                                    textColor = textPrimary,
+                                    textStyle = body_large
+                                ), modifier = Modifier.weight(.2f)
+                            )
+                        }
+
                         Spacer(modifier = Modifier.padding(spacing25X))
-                        CustomButton(
-                            customButtonData = CustomButtonData(
-                                title = stringResource(MR.strings.update),
-                                textColor = textInverse,
-                                backgroundColor = surfaceBrandDefault,
-                            ), modifier = Modifier.clickable {
 
-                                if (events == CheckVersionEvent.NormalUpdate){
-                                    eventsAbout=AboutEvent.NormUpdate
+                        if (events == CheckVersionEvent.NormalUpdate || events == CheckVersionEvent.ForceUpdate) {
 
-                                }else if(events == CheckVersionEvent.ForceUpdate){
-                                    eventsAbout=AboutEvent.ForceUpdate
+                            Text(
+                                text = stringResource(MR.strings.description_for_update),
+                                style = body_large
+                            )
+                            Spacer(modifier = Modifier.padding(spacing25X))
+                            CustomButton(
+                                customButtonData = CustomButtonData(
+                                    title = stringResource(MR.strings.update),
+                                    textColor = textInverse,
+                                    backgroundColor = surfaceBrandDefault,
+                                ), modifier = Modifier.clickable {
 
+                                    if (events == CheckVersionEvent.NormalUpdate) {
+                                        eventsAbout = AboutEvent.NormUpdate
+
+                                    } else if (events == CheckVersionEvent.ForceUpdate) {
+                                        eventsAbout = AboutEvent.ForceUpdate
+                                    }
                                 }
-
-
-                            }
-                        )
-
+                            )
+                        }
                     }
-
+                    Spacer(modifier = Modifier.padding(vertical = 30.dp))
                 }
-                Spacer(modifier = Modifier.padding(vertical = 30.dp))
-
-            }
             },
             onBackPressed = {
                 navigator.pop()
             }
         )
-
     }
 }
 

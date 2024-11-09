@@ -19,19 +19,18 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 
-import com.irancell.nwg.wfm.presentation.screens.auth.components.*
 import com.irancell.nwg.wfm.presentation.theme.*
-import dev.icerock.moko.resources.StringResource
 import dev.icerock.moko.resources.compose.stringResource
 import io.github.aakira.napier.LogLevel
 import io.github.aakira.napier.Napier
 import irancell.nwg.wfm.MR
-import irancell.nwg.wfm.getSharedPref
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import presentation.screens.auth.AuthValidation
 import presentation.screens.auth.components.AuthAlertText
 import presentation.screens.auth.components.AuthAlertTextItem
+import presentation.screens.auth.components.AuthButton
+import presentation.screens.auth.components.AuthButtonItem
 import presentation.screens.auth.components.AuthTextField
 import presentation.screens.auth.components.AuthTextFieldItem
 import presentation.screens.auth.viewmodel.LoginScreenVM
@@ -40,7 +39,6 @@ import presentation.theme.backgroundBackground3
 
 import presentation.theme.body_large
 import presentation.theme.error_5
-import utils.PhoneNumber
 import utils.ViewStates
 
 class LoginScreen() : Screen {

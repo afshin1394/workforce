@@ -30,6 +30,7 @@ import presentation.theme.textError
 import presentation.theme.textInverse
 import presentation.theme.textPrimary
 import utils.TaskState
+import utils.debounceClick
 
 @Composable
 fun ticketCard(
@@ -113,8 +114,6 @@ fun ticketCard(
                     )
                 }
                 Spacer(modifier = Modifier.padding(spacing15X))
-
-
             }
             Spacer(modifier = Modifier.padding(vertical = spacing05X))
 
@@ -146,7 +145,7 @@ fun ticketCard(
 
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Card(
-                    onClick = onMoreOptionsClick,
+                    onClick = debounceClick(onClick = onMoreOptionsClick),
                     colors = CardDefaults.cardColors(surfaceDefault),
                     modifier = Modifier
                         .weight(1f)
@@ -178,7 +177,7 @@ fun ticketCard(
                 Spacer(modifier = Modifier.width(spacing05X))
 
                 Card(
-                    onClick = onActionClick,
+                    onClick = debounceClick(onClick = onActionClick),
                     colors = CardDefaults.cardColors(surfaceBrandDefault),
                     modifier = Modifier
                         .weight(1f)

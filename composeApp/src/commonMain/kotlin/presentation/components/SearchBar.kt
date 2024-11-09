@@ -1,4 +1,4 @@
-package com.irancell.nwg.wfm.presentation.components
+package presentation.components
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
@@ -20,9 +20,16 @@ import irancell.nwg.wfm.MR
 import presentation.theme.strokeDefaultLight
 import presentation.theme.surfaceDefault
 import presentation.theme.surfaceInputDefault
+import utils.debounceClick
 
 @Composable
-fun CustomSearchBar(modifier: Modifier = Modifier,textFieldState: String="", updatedText: (text: String) -> Unit ={},hasFilter : Boolean = true,onFilterClick : () -> Unit={}) {
+fun CustomSearchBar(
+    modifier: Modifier = Modifier,
+    textFieldState: String = "",
+    updatedText: (text: String) -> Unit = {},
+    hasFilter: Boolean = true,
+    onFilterClick: () -> Unit = {}
+) {
     androidx.compose.material3.Card(
         modifier = modifier
             .background(
@@ -43,10 +50,7 @@ fun CustomSearchBar(modifier: Modifier = Modifier,textFieldState: String="", upd
                 )
                 .wrapContentHeight()
                 .padding(vertical = spacing1X, horizontal = spacing05X)
-
-
         ) {
-// Child views.
             Image(
                 painterResource(MR.images.search),
                 contentDescription = "",
@@ -54,7 +58,6 @@ fun CustomSearchBar(modifier: Modifier = Modifier,textFieldState: String="", upd
                 modifier = Modifier
                     .width(24.dp)
                     .height(24.dp)
-
             )
             Spacer(modifier = Modifier.padding(end = 6.dp))
             Column(
@@ -64,27 +67,18 @@ fun CustomSearchBar(modifier: Modifier = Modifier,textFieldState: String="", upd
                     .height(22.dp), horizontalAlignment = Alignment.Start,
                 verticalArrangement = Arrangement.Center
             ) {
-
-
                 BasicTextField(
                     modifier = modifier.fillMaxWidth(),
                     value = textFieldState,
                     onValueChange = {
                         updatedText(it)
-
-//                    scope.launch {
-//                        flowOf(it)
-//                            .debounce(300)
-//                            .distinctUntilChanged()
-//                            .collect {
-//                                updatedText(it)
-//                            }
-//                    }
                     })
 
             }
             Spacer(modifier = Modifier.padding(end = 6.dp))
             if (hasFilter) {
+                val onClickOnButton =
+                    debounceClick(debounceTime = 1000L, onClick = onFilterClick)
                 Image(
                     painterResource(MR.images.filter2),
                     contentDescription = "",
@@ -92,12 +86,9 @@ fun CustomSearchBar(modifier: Modifier = Modifier,textFieldState: String="", upd
                     modifier = Modifier
                         .width(24.dp)
                         .height(24.dp)
-                        .clickable {
-                            onFilterClick()
-                        }
+                        .clickable { onClickOnButton() }
                 )
             }
-
         }
     }
 }

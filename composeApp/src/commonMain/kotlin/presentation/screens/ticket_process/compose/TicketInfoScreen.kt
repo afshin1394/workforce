@@ -14,9 +14,8 @@ import cafe.adriel.voyager.core.registry.rememberScreen
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import com.irancell.nwg.wfm.presentation.components.bottomSingleActionComponent
+import presentation.components.bottomSingleActionComponent
 import com.irancell.nwg.wfm.presentation.theme.spacing15X
-import presentation.components.MenuItemsTopBar
 import presentation.screens.main.compose.BaseScreen
 import dev.icerock.moko.resources.compose.stringResource
 import io.github.aakira.napier.LogLevel
@@ -99,14 +98,7 @@ class TicketInfoScreen(
                         surfaceBrandDefault,
                         textInverse
                     ), onClick = {
-                        if (isClickable) {
-                            isClickable = false
-                            navigator.pop()
-                            scope.launch {
-                                delay(500)
-                                isClickable = true
-                            }
-                        }
+                        navigator.pop()
                     })
 
                 scope.launch {

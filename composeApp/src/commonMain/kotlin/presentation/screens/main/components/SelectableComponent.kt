@@ -15,6 +15,7 @@ import com.irancell.nwg.wfm.presentation.model.SelectableItem
 import com.irancell.nwg.wfm.presentation.screens.main.components.OptionsItemComponent
 import com.irancell.nwg.wfm.presentation.theme.spacing1X
 import com.irancell.nwg.wfm.presentation.theme.spacing2X
+import presentation.components.CustomSearchBar
 import presentation.theme.surfaceDefault
 
 

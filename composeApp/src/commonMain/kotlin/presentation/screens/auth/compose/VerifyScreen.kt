@@ -11,7 +11,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.blur
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.ParagraphStyle
 import androidx.compose.ui.text.SpanStyle
@@ -25,9 +24,8 @@ import cafe.adriel.voyager.core.registry.rememberScreen
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import com.irancell.nwg.wfm.presentation.components.bottomSheetDoubleActionBottomBarWithLoading
-import com.irancell.nwg.wfm.presentation.components.bottomSingleActionComponentWithLoading
-import com.irancell.nwg.wfm.presentation.screens.auth.components.*
+import presentation.components.bottomSheetDoubleActionBottomBarWithLoading
+import presentation.components.bottomSingleActionComponentWithLoading
 import com.irancell.nwg.wfm.presentation.theme.*
 import dev.icerock.moko.resources.compose.painterResource
 import dev.icerock.moko.resources.compose.stringResource
@@ -41,6 +39,8 @@ import presentation.model.BottomSheetActionModel
 import presentation.model.SingleButtonActionModel
 import presentation.screens.auth.components.AuthAlertText
 import presentation.screens.auth.components.AuthAlertTextItem
+import presentation.screens.auth.components.AuthButton
+import presentation.screens.auth.components.AuthButtonItem
 import presentation.screens.auth.components.AuthVerificationCodeRow
 import presentation.screens.auth.viewmodel.VerifyScreenVM
 import presentation.screens.main.compose.BaseScreen
@@ -67,10 +67,9 @@ class VerifyScreen(private val phoneNumber: String = "") : Screen {
         val smsCode by viewModel.otpCode.collectAsState()
         val mainScreen = rememberScreen(presentation.nav.Screen.Main.Menu.MyTickets)
         val phoneNumberState by remember { mutableStateOf(phoneNumber) }
-        var events by viewModel.eventsVersion
+        val events by viewModel.eventsVersion
         var buttonState by remember { mutableStateOf(ButtonState.IDLE) }
         val scope = rememberCoroutineScope()
-
 
         val errorMessage = stringResource(MR.strings.download_failed)
         val bottomSheetTitle: String =
@@ -83,25 +82,10 @@ class VerifyScreen(private val phoneNumber: String = "") : Screen {
                     viewModel.versionData.value?.title ?: ""
                 }
 
-                CheckVersionEvent.OkVersion -> {
-                    ""
-                }
-
-                CheckVersionEvent.Default -> {
-                    ""
-                }
-
-                CheckVersionEvent.InvalidToken -> {
-                    ""
-                }
-
                 else -> {
                     ""
                 }
             }
-
-
-
 
         BaseScreen(
             onBackPressed = {
@@ -132,7 +116,6 @@ class VerifyScreen(private val phoneNumber: String = "") : Screen {
                         }
                     }
 
-
                     CheckVersionEvent.NormalUpdate -> {
                         androidx.compose.material.Text(
                             text = viewModel.versionData.value?.description ?: "",
@@ -143,37 +126,16 @@ class VerifyScreen(private val phoneNumber: String = "") : Screen {
                         scope.launch {
                             scaffoldState.bottomSheetState.expand()
                         }
-
                     }
-
-                    CheckVersionEvent.OkVersion -> {
-
-                    }
-
-                    CheckVersionEvent.Default -> {
-
-                    }
-
-                    CheckVersionEvent.InvalidToken -> {
-
-                    }
-
 
                     else -> {}
                 }
-
             },
-
 
             bottomBarBottomSheetContent = {
                 when (events) {
-
                     CheckVersionEvent.ForceUpdate -> {
-
-
                         HideKeyboard()
-
-
                         bottomSingleActionComponentWithLoading(
                             buttonState = buttonState,
                             SingleButtonActionModel(
@@ -191,23 +153,17 @@ class VerifyScreen(private val phoneNumber: String = "") : Screen {
                                     } else {
                                         buttonState = ButtonState.IDLE
                                         scaffoldState.snackbarHostState.showSnackbar(message = errorMessage)
-
                                     }
                                 }
-
-
                             })
 
                         scope.launch {
                             scaffoldState.bottomSheetState.expand()
                         }
-
-
                     }
 
                     CheckVersionEvent.NormalUpdate -> {
                         HideKeyboard()
-
                         bottomSheetDoubleActionBottomBarWithLoading(
                             buttonState = buttonState,
                             BottomSheetActionModel(
@@ -218,10 +174,8 @@ class VerifyScreen(private val phoneNumber: String = "") : Screen {
                                 surfaceBrandDefault,
                                 textInverse
                             ), onFirstButtonClick = {
-
                                 navigator.popAll()
                                 navigator.push(mainScreen)
-
                             }, onSecondButtonClick = {
                                 buttonState = ButtonState.LOADING
                                 scope.launch {
@@ -239,33 +193,17 @@ class VerifyScreen(private val phoneNumber: String = "") : Screen {
                         scope.launch {
                             scaffoldState.bottomSheetState.expand()
                         }
-
-
                     }
-
                     CheckVersionEvent.OkVersion -> {
-
                         navigator.popAll()
                         navigator.push(mainScreen)
-
-
                     }
-
-                    CheckVersionEvent.Default -> {
-
-                    }
-
                     CheckVersionEvent.InvalidToken -> {
-
                         navigator.popAll()
                         navigator.push(mainScreen)
-
-
                     }
-
                     else -> {}
                 }
-
             },
 
             content = {
@@ -284,7 +222,6 @@ class VerifyScreen(private val phoneNumber: String = "") : Screen {
                             .height(72.dp)
                             .weight(2f)
                             .wrapContentSize()
-
                     )
                     Column(
                         modifier = Modifier
@@ -293,7 +230,6 @@ class VerifyScreen(private val phoneNumber: String = "") : Screen {
                             .weight(4f)
                             .padding(spacing2X)
                     ) {
-
 
                         Text(text =
                         buildAnnotatedString {
@@ -345,7 +281,6 @@ class VerifyScreen(private val phoneNumber: String = "") : Screen {
                         AuthButton(authButtonItem = AuthButtonItem(stringResource(MR.strings.verify))) {
                             //onClick
                             if (smsCode.length == 6) {
-                                Napier.log(LogLevel.ASSERT, "dadsd", message = smsCode)
                                 viewModel.verify(smsCode)
                             }
                         }

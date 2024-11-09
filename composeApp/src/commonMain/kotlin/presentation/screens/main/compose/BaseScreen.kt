@@ -28,7 +28,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.irancell.nwg.wfm.presentation.components.*
 import presentation.theme.backgroundBackground3
 import com.irancell.nwg.wfm.presentation.theme.radius
 import dev.icerock.moko.resources.compose.stringResource
@@ -70,6 +69,9 @@ import utils.OrientationState
 import utils.ServiceState
 import utils.VpnDetectionStates
 import androidx.compose.material.Card
+import presentation.components.CustomBottomSheet
+import presentation.components.bottomSheetDoubleActionWithMessage
+import presentation.components.customBottomSheetWithImage
 import presentation.theme.textInverse
 import presentation.theme.textInverseDisabled
 

@@ -38,7 +38,7 @@ import androidx.compose.ui.unit.sp
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import com.irancell.nwg.wfm.presentation.components.bottomSheetDoubleActionBottomBar
+import presentation.components.bottomSheetDoubleActionBottomBar
 import dev.icerock.moko.resources.compose.stringResource
 import irancell.nwg.wfm.MR
 import kotlinx.coroutines.launch

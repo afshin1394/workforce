@@ -1,5 +1,4 @@
-package com.irancell.nwg.wfm.presentation.components
-
+package presentation.components
 
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.RepeatMode
@@ -27,7 +26,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-
 import com.irancell.nwg.wfm.presentation.theme.*
 import dev.icerock.moko.resources.ImageResource
 import dev.icerock.moko.resources.StringResource
@@ -36,9 +34,6 @@ import dev.icerock.moko.resources.compose.stringResource
 import io.github.aakira.napier.Napier
 import irancell.nwg.wfm.MR
 import kotlinx.coroutines.launch
-import presentation.components.CustomButton
-import presentation.components.CustomButtonData
-import presentation.components.CustomTextButton
 import presentation.model.BottomSheetActionModel
 import presentation.model.SingleButtonActionModel
 import presentation.theme.h4
@@ -46,24 +41,24 @@ import presentation.theme.surfaceBrandDefault
 import presentation.theme.surfaceDefault
 import utils.BottomSheetTypes
 import utils.ButtonState
-
+import utils.debounceClick
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun CustomBottomSheet(
     bottomSheetState: BottomSheetState,
     title: String = "",
-    showClose:Boolean=true,
-    type:String= BottomSheetTypes.Default,
+    showClose: Boolean = true,
+    type: String = BottomSheetTypes.Default,
     hasHeader: Boolean = true,
     bottomBar: @Composable () -> Unit = { },
     content: @Composable () -> Unit = {},
     onClose: () -> Unit = {}
 ) {
-    Column() {
+    Column {
         Column(modifier = Modifier.weight(1f, false)) {
             if (hasHeader)
-                BottomSheetHead(bottomSheetState, title,showClose,type, onClose = {
+                BottomSheetHead(bottomSheetState, title, showClose, type, onClose = {
                     onClose()
                 })
             content()
@@ -72,18 +67,15 @@ fun CustomBottomSheet(
             bottomBar()
         }
     }
-
-
 }
-
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun BottomSheetHead(
     bottomSheetState: BottomSheetState = rememberBottomSheetState(initialValue = BottomSheetValue.Expanded),
     title: String = "Filter",
-    showClose:Boolean=true,
-    type:String=BottomSheetTypes.Default,
+    showClose: Boolean = true,
+    type: String = BottomSheetTypes.Default,
     onClose: () -> Unit = {}
 ) {
     val scope = rememberCoroutineScope()
@@ -94,9 +86,7 @@ fun BottomSheetHead(
             .wrapContentHeight()
             .padding(spacing2X),
     ) {
-
-
-        if (showClose){
+        if (showClose) {
             Image(
                 painter = painterResource(MR.images.close),
                 contentDescription = "ic_close",
@@ -109,11 +99,9 @@ fun BottomSheetHead(
                         onClose()
                     }.padding(spacing1X)
             )
-
         }
 
-
-        if (type == BottomSheetTypes.Default){
+        if (type == BottomSheetTypes.Default) {
             Text(
                 text = title,
                 style = h4,
@@ -128,7 +116,7 @@ fun BottomSheetHead(
                     .fillMaxWidth()
                     .wrapContentHeight()
                     .padding(spacing2X),
-                contentAlignment =  Alignment.Center
+                contentAlignment = Alignment.Center
             ) {
 
                 var scaleState by remember { mutableStateOf(1f) }
@@ -144,7 +132,6 @@ fun BottomSheetHead(
                     )
                 )
 
-
                 LaunchedEffect(Unit) {
                     scaleState = 1.2f
                 }
@@ -157,19 +144,22 @@ fun BottomSheetHead(
                         .size(70.dp)
                         .padding(spacing1X)
                 )
-
             }
-
-
         }
     }
 }
+
 @Composable
 fun bottomSheetDoubleActionBottomBar(
     bottomSheetDoubleActionModel: BottomSheetActionModel,
     onFirstButtonClick: () -> Unit = {},
     onSecondButtonClick: () -> Unit = {}
 ) {
+    val firstButtonDebouncedClick =
+        debounceClick(debounceTime = 1000L, onClick = onFirstButtonClick)
+    val secondButtonDebouncedClick =
+        debounceClick(debounceTime = 1000L, onClick = onSecondButtonClick)
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -186,7 +176,7 @@ fun bottomSheetDoubleActionBottomBar(
             ),
             modifier = Modifier
                 .weight(1f).clickable {
-                    onFirstButtonClick()
+                    firstButtonDebouncedClick()
                 }
         )
         Spacer(modifier = Modifier.padding(horizontal = spacing2X))
@@ -197,18 +187,19 @@ fun bottomSheetDoubleActionBottomBar(
                 bottomSheetDoubleActionModel.secondButtonColor
             ), modifier = Modifier
                 .weight(1f).clickable {
-                    onSecondButtonClick()
+                    secondButtonDebouncedClick()
                 }
         )
-
     }
 }
 
-
-
 @Composable
-fun bottomSingleActionComponent(singleButtonActionModel: SingleButtonActionModel, onClick : () -> Unit = {}) {
-
+fun bottomSingleActionComponent(
+    singleButtonActionModel: SingleButtonActionModel,
+    onClick: () -> Unit = {}
+) {
+    val onClickOnButton =
+        debounceClick(debounceTime = 1000L, onClick = onClick)
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -224,17 +215,17 @@ fun bottomSingleActionComponent(singleButtonActionModel: SingleButtonActionModel
                 singleButtonActionModel.buttonColor
             ),
             modifier = Modifier
-                .fillMaxWidth().clickable {
-                    onClick()
-                }
+                .fillMaxWidth().clickable { onClickOnButton() }
         )
-
     }
 }
 
 @Composable
-fun bottomSingleActionComponentWithLoading(  buttonState: ButtonState,singleButtonActionModel: SingleButtonActionModel, onClick : () -> Unit = {}) {
-
+fun bottomSingleActionComponentWithLoading(
+    buttonState: ButtonState,
+    singleButtonActionModel: SingleButtonActionModel,
+    onClick: () -> Unit = {}
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -243,16 +234,12 @@ fun bottomSingleActionComponentWithLoading(  buttonState: ButtonState,singleButt
         verticalAlignment = Alignment.Bottom,
         horizontalArrangement = Arrangement.Center
     ) {
-
-
         Button(
             colors = ButtonDefaults.buttonColors(
                 backgroundColor = surfaceBrandDefault,
                 contentColor = Color.White
             ),
-            onClick = {
-                onClick()
-            },
+            onClick = debounceClick(onClick = onClick),
             enabled = buttonState != ButtonState.LOADING
         ) {
             if (buttonState == ButtonState.LOADING) {
@@ -264,24 +251,6 @@ fun bottomSingleActionComponentWithLoading(  buttonState: ButtonState,singleButt
                 Text(text = singleButtonActionModel.buttonText)
             }
         }
-
-
-
-
-
-
-        /*        CustomButton(
-                    customButtonData = CustomButtonData(
-                        title = singleButtonActionModel.buttonText,
-                        textColor = singleButtonActionModel.buttonTextColor,
-                        singleButtonActionModel.buttonColor
-                    ),
-                    modifier = Modifier
-                        .fillMaxWidth().clickable {
-                            onClick()
-                        }
-                )*/
-
     }
 }
 
@@ -301,23 +270,18 @@ fun bottomSheetDoubleActionBottomBarWithLoading(
         verticalAlignment = Alignment.Bottom,
         horizontalArrangement = Arrangement.Center
     ) {
-
-
         Button(
             modifier = Modifier.weight(1f).height(46.dp),
             colors = ButtonDefaults.buttonColors(
                 backgroundColor = surfaceDefault,
                 contentColor = Color.Black
             ),
-            onClick = {
-                onFirstButtonClick()
-            }
+            onClick = debounceClick(onClick = onFirstButtonClick)
+
         ) {
             Text(text = bottomSheetDoubleActionModel.firstButtonText)
         }
         Spacer(modifier = Modifier.padding(horizontal = spacing2X))
-
-
 
         Button(
             modifier = Modifier.weight(1f).height(46.dp),
@@ -325,9 +289,7 @@ fun bottomSheetDoubleActionBottomBarWithLoading(
                 backgroundColor = surfaceBrandDefault,
                 contentColor = Color.White
             ),
-            onClick = {
-                onSecondButtonClick()
-            },
+            onClick = debounceClick(onClick = onSecondButtonClick),
             enabled = buttonState != ButtonState.LOADING
         ) {
             if (buttonState == ButtonState.LOADING) {
@@ -339,17 +301,6 @@ fun bottomSheetDoubleActionBottomBarWithLoading(
                 Text(text = bottomSheetDoubleActionModel.secondButtonText)
             }
         }
-        /*       CustomButton(
-                   customButtonData = CustomButtonData(
-                       title = bottomSheetDoubleActionModel.secondButtonText,
-                       textColor = bottomSheetDoubleActionModel.secondColorTextColor,
-                       bottomSheetDoubleActionModel.secondButtonColor
-                   ), modifier = Modifier
-                       .weight(1f).clickable {
-                           onSecondButtonClick()
-                       }
-               )*/
-
     }
 }
 
@@ -360,6 +311,8 @@ fun customBottomSheetWithImage(
     description: String,
     onButtonClick: () -> Unit = {},
 ) {
+    val onClickOnButton =
+        debounceClick(debounceTime = 1000L, onClick = onButtonClick)
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -394,9 +347,7 @@ fun customBottomSheetWithImage(
                 ),
                 modifier = Modifier
                     .height(48.dp)
-                    .clickable {
-                        onButtonClick()
-                    }
+                    .clickable { onClickOnButton() }
             )
         }
     }
@@ -407,21 +358,21 @@ fun customBottomSheetWithImage(
 fun bottomSheetDoubleActionWithMessage(
     bottomSheetDoubleActionModel: BottomSheetActionModel,
     title: StringResource,
-    message:StringResource,
+    message: StringResource,
     onFirstButtonClick: () -> Unit = {},
     onSecondButtonClick: () -> Unit = {}
 ) {
     val titleDialog = stringResource(title)
-    val messageDialog= stringResource(message)
+    val messageDialog = stringResource(message)
+
+    val onClickOnFirstButton = debounceClick(debounceTime = 1000L, onClick = onFirstButtonClick)
+    val onClickOnSecondButton = debounceClick(debounceTime = 1000L, onClick = onSecondButtonClick)
 
     Column(
-        modifier = Modifier
-
-            .padding(6.dp),
+        modifier = Modifier.padding(6.dp),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-
         Text(
             text = titleDialog,
             style = TextStyle(
@@ -440,8 +391,6 @@ fun bottomSheetDoubleActionWithMessage(
             ),
             modifier = Modifier.padding(end = 6.dp, start = 6.dp)
         )
-
-
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -457,9 +406,7 @@ fun bottomSheetDoubleActionWithMessage(
                     bottomSheetDoubleActionModel.firstButtonColor
                 ),
                 modifier = Modifier
-                    .weight(1f).clickable {
-                        onFirstButtonClick()
-                    }
+                    .weight(1f).clickable { onClickOnFirstButton() }
             )
             Spacer(modifier = Modifier.padding(horizontal = spacing2X))
             CustomButton(
@@ -468,12 +415,8 @@ fun bottomSheetDoubleActionWithMessage(
                     textColor = bottomSheetDoubleActionModel.secondColorTextColor,
                     bottomSheetDoubleActionModel.secondButtonColor
                 ), modifier = Modifier
-                    .weight(1f).clickable {
-                        onSecondButtonClick()
-                    }
+                    .weight(1f).clickable { onClickOnSecondButton() }
             )
-
         }
-
     }
 }
