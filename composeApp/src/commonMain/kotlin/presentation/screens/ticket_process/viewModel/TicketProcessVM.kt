@@ -347,10 +347,8 @@ class TicketProcessVM(
     }
 
     private suspend fun checkLogicsForAll(components: List<ComponentDomain>) {
-        processInParallel(components, processBlock = {componentDomain, mutex ->
-            logicCalculation.extractLogics(componentDomain).let { logics ->
-                    extractLogicsModel.addAll(logics)
-            }
+        processInParallel(components, processBlock = { componentDomain, mutex ->
+            logicCalculation.extractLogics(componentDomain)
             componentDomain.components.value?.takeIf { it.isNotEmpty() }?.let { nestedComponents ->
                 yield()  // Yield control if the workload is high
                 checkLogicsForAll(nestedComponents)  // Recursive call on nested components
@@ -361,11 +359,23 @@ class TicketProcessVM(
 
 
     private suspend fun checkAutoFillLogicForAll(components: List<ComponentDomain>) {
-        processInParallel(items = components, processBlock = {componentDomain, mutex ->
+        processInParallel(items = components, processBlock = { componentDomain, mutex ->
             logicCalculation.executeTicketAutoFillLogic(componentDomain)
             componentDomain.components.value?.takeIf { it.isNotEmpty() }?.let { nestedComponents ->
                 yield()  // Yield control to other coroutines if the workload is high
                 checkAutoFillLogicForAll(nestedComponents)  // Recursive call on nested components
+            }
+        })
+    }
+
+    private suspend fun checkRequiredAndValidateLogicForAll(components: List<ComponentDomain>) {
+        processInParallel(components, processBlock = { componentDomain, mutex ->
+            logicCalculation.extractRequiredAndValidateLogics(componentDomain).let { logics ->
+                extractLogicsModel.addAll(logics)
+            }
+            componentDomain.components.value?.takeIf { it.isNotEmpty() }?.let { nestedComponents ->
+                yield()  // Yield control if the workload is high
+                checkRequiredAndValidateLogicForAll(nestedComponents)  // Recursive call on nested components
             }
         })
     }
@@ -378,9 +388,13 @@ class TicketProcessVM(
             extractLogicsModel.clear()
 
             // Perform logic checks in the background
-
-            checkLogicsForAll(componentsCopy)
-            checkAutoFillLogicForAll(componentsCopy)
+            async {
+                checkLogicsForAll(componentsCopy)
+            }.await()
+            async {
+                checkAutoFillLogicForAll(componentsCopy)
+            }.await()
+            async { checkRequiredAndValidateLogicForAll(componentsCopy) }.await()
 
 
             withContext(Dispatchers.Main)
@@ -390,25 +404,32 @@ class TicketProcessVM(
         }
     }
 
-    fun deletePhotoWhenCheckHideLogic(componentKey:String,componentId:String){
+    fun deletePhotoWhenCheckHideLogic(componentKey: String, componentId: String) {
 
         //on ram
         val filteredListPhotoDomainList =
-            photoDomainList.filter { it.component_key ==componentKey && it.componentId == componentId }
+            photoDomainList.filter { it.component_key == componentKey && it.componentId == componentId }
         photoDomainList.removeAll(filteredListPhotoDomainList)
 
         //on database
 
         viewModelScope.launch {
-            deletePhotoByComponentKeyAndIdUseCase(DeletePhotoByComponentIdAndKeyModel(componentId,componentKey)).collect {
+            deletePhotoByComponentKeyAndIdUseCase(
+                DeletePhotoByComponentIdAndKeyModel(
+                    componentId,
+                    componentKey
+                )
+            ).collect {
                 when (it.status) {
                     AsyncStatus.ERROR -> {
                     }
+
                     AsyncStatus.LOADING -> {
                     }
 
                     AsyncStatus.EMPTY -> {
                     }
+
                     AsyncStatus.SUCCESS -> {
 
                     }
@@ -416,9 +437,6 @@ class TicketProcessVM(
             }
 
         }
-
-
-
 
 
     }

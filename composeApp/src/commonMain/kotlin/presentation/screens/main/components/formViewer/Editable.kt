@@ -44,12 +44,23 @@ import dev.icerock.moko.resources.compose.localized
 import domain.models.form_struct.ProcessLogicDomain
 import io.github.aakira.napier.LogLevel
 import io.github.aakira.napier.Napier
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 import presentation.theme.strokeDefaultLight
 import presentation.theme.surfaceBrandDefault
 import presentation.theme.surfaceBrandDisabled
 import presentation.theme.textInverseDisabled
 import presentation.theme.textSecondary
 
+@OptIn(FlowPreview::class)
 @Composable
 fun Editable(
     type: TypeEditable,
@@ -63,7 +74,9 @@ fun Editable(
     maxLines: Int,
     onValueChange: (value: String) -> Unit
 ) {
-    val valueChange = remember { mutableStateOf(processLogicDomain.calculatedValue ?: value) }
+    val initialCalculatedValue = processLogicDomain.calculatedValue ?: value
+    val valueChange = remember { mutableStateOf(initialCalculatedValue) }
+
 
     val disableLogic = processLogicDomain.disabled || disable
     val hideLogic = processLogicDomain.shouldHide
@@ -74,6 +87,24 @@ fun Editable(
     val hasInitialMessageLogic = processLogicDomain.hasInitialMessage
     val isAutoFilling = processLogicDomain.isAutoFillLoading
 
+    val valueChangeFlow = remember { MutableStateFlow(valueChange.value) }
+
+
+    LaunchedEffect(Unit) {
+        valueChangeFlow
+            .debounce(200  ) // Only emit if 500 ms has passed since the last change
+            .distinctUntilChanged() // Only emit if the value has actually changed
+            .flatMapLatest { latestValue ->
+                flow {
+                    emit(latestValue)
+                }
+            }
+            .collectLatest { latestValue ->
+                if (!disableLogic && !readOnlyLogic ) {
+                    onValueChange(latestValue)
+                }
+            }
+    }
     val textFieldBackground =
         if (validateLogic || (requiredLogic && !hasInitialMessageLogic)) {
             Color.Red
@@ -82,7 +113,6 @@ fun Editable(
         } else {
             strokeDefaultLight
         }
-
     if (hideLogic) {
         valueChange.value = ""
         processLogicDomain.calculatedValue = ""
@@ -117,6 +147,7 @@ fun Editable(
                     .wrapContentHeight()
                     .padding(4.dp)
             ) {
+
                 if (isAutoFilling) {
                     val infiniteTransition = rememberInfiniteTransition()
                     val progress by infiniteTransition.animateFloat(
@@ -179,8 +210,9 @@ fun Editable(
                     value = valueChange.value,
                     onValueChange = {
                         if (!disableLogic && !readOnlyLogic && it != valueChange.value) {
-                            valueChange.value = it
-                            onValueChange(valueChange.value)
+                            valueChange.value = it // Update UI immediately
+                            valueChangeFlow.value = it // Emit new value to flow
+
                         }
                     },
                     modifier = if (isAutoFilling) {
@@ -197,7 +229,7 @@ fun Editable(
                                 shape = RoundedCornerShape(15.dp)
                             )
                     },
-                    readOnly = if (isAutoFilling) true else readOnlyLogic,
+                    readOnly = readOnlyLogic,
                     shape = RoundedCornerShape(15.dp),
                     textStyle = TextStyle(color = textSecondary),
                     colors = TextFieldDefaults.colors(
@@ -210,15 +242,16 @@ fun Editable(
                     ),
                 )
 
-                if (validateLogic || (requiredLogic && !hasInitialMessageLogic)) {
-                    errorMessageLogic?.let {
-                        Text(
-                            text = errorMessageLogic.localized(),
-                            color = Color.Red,
-                            style = TextStyle(fontSize = 12.sp),
-                            modifier = Modifier.padding(top = 4.dp)
-                        )
-                    }
+
+            }
+            if (validateLogic || (requiredLogic && !hasInitialMessageLogic)) {
+                errorMessageLogic?.let {
+                    Text(
+                        text = errorMessageLogic.localized(),
+                        color = Color.Red,
+                        style = TextStyle(fontSize = 12.sp),
+                        modifier = Modifier.padding(top = 4.dp)
+                    )
                 }
             }
         }

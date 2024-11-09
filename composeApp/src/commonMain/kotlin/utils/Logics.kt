@@ -1,21 +1,15 @@
 package utils
 
-import androidx.compose.runtime.Composable
-import data.network.response.task.Component
+
 import data.network.response.task.logic.LogicDomain
-import dev.icerock.moko.resources.compose.localized
 import dev.icerock.moko.resources.desc.ResourceFormatted
 import dev.icerock.moko.resources.desc.ResourceFormattedStringDesc
 import dev.icerock.moko.resources.desc.StringDesc
-import domain.models.DeletePhotoByComponentIdAndKeyModel
 import domain.models.form_struct.ComponentDomain
-import domain.models.form_struct.ValueDate
 import domain.models.form_struct.ValueDomain
 import domain.models.form_struct.logic.ConditionDomain
 import domain.models.ticket.PhaseDomain
 import domain.models.ticket.TicketDetailRequestDomain
-import domain.usecase.ResultStatus
-import domain.usecase.usecase.photo.DeletePhotoByComponentKeyAndIdUseCase
 import domain.usecase.usecase.ticket.GetTicketDetailsUseCase
 import io.github.aakira.napier.LogLevel
 import io.github.aakira.napier.Napier
@@ -24,7 +18,6 @@ import irancell.nwg.wfm.MR
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
-import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -39,56 +32,15 @@ class LogicCalculation(
     val getTicketDetailsUseCase: GetTicketDetailsUseCase by inject()
     lateinit var ticketId: String
     val validationErrorList = mutableListOf<ExtractLogicsModel>()
-
-
-
-    suspend fun extractLogics(component: ComponentDomain): MutableList<ExtractLogicsModel> = coroutineScope {
-        validationErrorList.clear()
-
+    suspend fun extractRequiredAndValidateLogics(component: ComponentDomain): MutableList<ExtractLogicsModel> =
+        coroutineScope {
+            validationErrorList.clear()
             component.logics?.forEach { logic ->
                 var hasLogic = false
                 val typeLogic: String
                 val idCmp = component.id ?: ""
 
-            when (logic.logicType) {
-                LogicType.Hide -> {
-                    typeLogic = LogicType.Hide
-                    val expressionSatisfied = evaluateLogics(component, logic)
-
-                    component.updateProcessLogicDomain(
-                        component.processLogicDomain.value.copy(shouldHide = expressionSatisfied)
-                    )
-                    if (expressionSatisfied){
-
-                        if (component.type==FormViewerTypes.ImageView){
-                            hasLogic = true
-                            validationErrorList.add(ExtractLogicsModel(hasLogic, typeLogic, component.id?:"",component.key?:""))
-                        }
-
-                        component.clearValues()
-
-                    }
-
-                    component.components.value?.forEach { nestedComponent ->
-                        nestedComponent.updateProcessLogicDomain(
-                            nestedComponent.processLogicDomain.value.copy(shouldHide = expressionSatisfied)
-                        )
-                        if (expressionSatisfied){
-                            if (nestedComponent.type==FormViewerTypes.ImageView){
-                                hasLogic = true
-                                validationErrorList.add(ExtractLogicsModel(hasLogic, typeLogic, nestedComponent.id?:"",nestedComponent.key?:""))
-                            }
-
-                            nestedComponent.clearValues()
-
-
-
-                        }
-                    }
-
-                        hasLogic = expressionSatisfied
-                    }
-
+                when (logic.logicType) {
                     LogicType.Required -> {
                         typeLogic = LogicType.Required
                         val expressionSatisfied =
@@ -102,6 +54,102 @@ class LogicCalculation(
                             validationErrorList.add(ExtractLogicsModel(hasLogic, typeLogic, idCmp))
                         }
                     }
+                    LogicType.Validate -> {
+                        typeLogic = LogicType.Validate
+                        val expressionSatisfied =
+                            evaluateValidateLogics(allComponents, component, logic)
+
+                        expressionSatisfied?.let {
+                            component.updateProcessLogicDomain(
+                                component.processLogicDomain.value.copy(
+                                    validate = it.result,
+                                    errorMessage = it.message
+                                )
+                            )
+                            hasLogic = it.result
+                        } ?: component.updateProcessLogicDomain(
+                            component.processLogicDomain.value.copy(
+                                validate = false,
+                                errorMessage = null
+                            )
+                        )
+
+                        if (hasLogic) validationErrorList.add(
+                            ExtractLogicsModel(
+                                hasLogic,
+                                typeLogic,
+                                idCmp
+                            )
+                        )
+                    }
+
+                }
+            }
+            return@coroutineScope validationErrorList
+
+        }
+
+
+
+
+    suspend fun extractLogics(component: ComponentDomain) {
+            validationErrorList.clear()
+
+            component.logics?.forEach { logic ->
+                var hasLogic = false
+                val typeLogic: String
+                val idCmp = component.id ?: ""
+
+                when (logic.logicType) {
+                    LogicType.Hide -> {
+                        typeLogic = LogicType.Hide
+                        val expressionSatisfied = evaluateLogics(component, logic)
+
+                        component.updateProcessLogicDomain(
+                            component.processLogicDomain.value.copy(shouldHide = expressionSatisfied)
+                        )
+                        if (expressionSatisfied) {
+
+                            if (component.type == FormViewerTypes.ImageView) {
+                                hasLogic = true
+                                validationErrorList.add(
+                                    ExtractLogicsModel(
+                                        hasLogic,
+                                        typeLogic,
+                                        component.id ?: "",
+                                        component.key ?: ""
+                                    )
+                                )
+                            }
+
+                            component.clearValues()
+
+                        }
+
+                        component.components.value?.forEach { nestedComponent ->
+                            nestedComponent.updateProcessLogicDomain(
+                                nestedComponent.processLogicDomain.value.copy(shouldHide = expressionSatisfied)
+                            )
+                            if (expressionSatisfied) {
+                                if (nestedComponent.type == FormViewerTypes.ImageView) {
+                                    hasLogic = true
+                                    validationErrorList.add(
+                                        ExtractLogicsModel(
+                                            hasLogic,
+                                            typeLogic,
+                                            nestedComponent.id ?: "",
+                                            nestedComponent.key ?: ""
+                                        )
+                                    )
+                                }
+
+                                nestedComponent.clearValues()
+                            }
+                        }
+
+                        hasLogic = expressionSatisfied
+                    }
+
 
                     LogicType.Disable -> {
                         val expressionSatisfied = evaluateLogics(component, logic)
@@ -135,34 +183,6 @@ class LogicCalculation(
                         hasLogic = updatedValue.isNotEmpty()
                     }
 
-                    LogicType.Validate -> {
-                        typeLogic = LogicType.Validate
-                        val expressionSatisfied =
-                            evaluateValidateLogics(allComponents, component, logic)
-
-                        expressionSatisfied?.let {
-                            component.updateProcessLogicDomain(
-                                component.processLogicDomain.value.copy(
-                                    validate = it.result,
-                                    errorMessage = it.message
-                                )
-                            )
-                            hasLogic = it.result
-                        } ?: component.updateProcessLogicDomain(
-                            component.processLogicDomain.value.copy(
-                                validate = false,
-                                errorMessage = null
-                            )
-                        )
-
-                        if (hasLogic) validationErrorList.add(
-                            ExtractLogicsModel(
-                                hasLogic,
-                                typeLogic,
-                                idCmp
-                            )
-                        )
-                    }
 
                     LogicType.Bind -> {
                         val listOfBinding = logic.getListOfBindingComponents()
@@ -180,9 +200,8 @@ class LogicCalculation(
                         hasLogic = updatedValue.isNotEmpty()
                     }
                 }
-            }
 
-            return@coroutineScope validationErrorList
+            }
         }
 
     suspend fun executeTicketAutoFillLogic(component: ComponentDomain) {
@@ -1071,13 +1090,13 @@ class LogicCalculation(
                                 if (componentDomain.type == FormViewerTypes.Datetime) {
                                     expressionResults[i].add(
                                         ValidateLogicResult(
-                                            (cmpValue
-                                                ?: 0.0) < (value?.toDoubleOrNull() ?: 0.0),
+                                            ((cmpValue
+                                                ?: 0.0) > (value?.toDoubleOrNull() ?: 0.0)),
                                             StringDesc.ResourceFormatted(
                                                 MR.strings.NotGreaterThan,
                                                 (getLocalDateTimeFromLong(
                                                     value?.toLong() ?: 0L
-                                                ).format("yyyy-MM-dd HH:mm:ss")).toString()
+                                                ).format("yyyy-MM-dd HH:mm:ss"))
                                             )
                                         )
                                     )
@@ -1415,7 +1434,7 @@ class LogicCalculation(
                                 cmpValue?.let {
                                     expressionResults[i].add(
                                         ValidateLogicResult(
-                                            !((cmpValue
+                                            ((cmpValue
                                                 ?: 0.0) <= (value?.toDoubleOrNull() ?: 0.0)),
                                             StringDesc.ResourceFormatted(
                                                 MR.strings.NotLessThanOrEqualTo,
