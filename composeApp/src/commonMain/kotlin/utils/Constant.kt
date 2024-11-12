@@ -36,14 +36,14 @@ object LOCATION_RECORDS {
 }
 
 object BASE_USECASE {
-    const val MAX_RETRY_COUNT = 1
+    const val MAX_RETRY_COUNT = 2
     const val INITIAL_RETRY_DELAY = 200L
 }
 
 object AlarmAction {
     object UPDATE {
         const val title = "UPDATE"
-        const val interval = 15000L
+        const val interval = 7000L
     }
 
     object STORE_LOCATION {

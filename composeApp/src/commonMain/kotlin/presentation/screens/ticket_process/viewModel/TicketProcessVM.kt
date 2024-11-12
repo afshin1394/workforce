@@ -28,6 +28,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.yield
 import presentation.model.ExtractLogicsModel
@@ -159,9 +160,10 @@ class TicketProcessVM(
                                 async {
                                     validateComponents(tempComponentList, true, true)
                                 }.await()
-                                handleLogics {
-                                }
 
+                                handleLogics {
+
+                                }
                                 updateState(ViewStates.Success())
 
 
@@ -342,41 +344,55 @@ class TicketProcessVM(
 
     }
 
-    private suspend fun checkLogicsForAll(components: List<ComponentDomain>) {
-        processInParallel(components, processBlock = { componentDomain, mutex ->
-            logicCalculation.extractLogics(componentDomain).let { logics ->
-                extractLogicsModel.addAll(logics)
-            }
-            componentDomain.components.value?.takeIf { it.isNotEmpty() }?.let { nestedComponents ->
-                yield()  // Yield control if the workload is high
-                checkLogicsForAll(nestedComponents)  // Recursive call on nested components
-            }
-        })
+        private suspend fun checkHideLogics(components: List<ComponentDomain>) {
+            processInParallel(components, processBlock = { componentDomain, mutex ->
+                logicCalculation.extractHideLogic(componentDomain).let { logics ->
+                    mutex.withLock {
+                        extractLogicsModel.addAll(logics)
+                    }
+                }
+                componentDomain.components.value?.takeIf { it.isNotEmpty() }?.let { nestedComponents ->
+                    yield()  // Yield control if the workload is high
+                    checkHideLogics(nestedComponents)  // Recursive call on nested components
+                }
+            })
 
-    }
+        }
 
-
-    private suspend fun checkAutoFillLogicForAll(components: List<ComponentDomain>) {
-        processInParallel(items = components, processBlock = { componentDomain, mutex ->
-            logicCalculation.extractTicketAutoFillLogics(componentDomain)
-            componentDomain.components.value?.takeIf { it.isNotEmpty() }?.let { nestedComponents ->
-                yield()  // Yield control to other coroutines if the workload is high
-                checkAutoFillLogicForAll(nestedComponents)  // Recursive call on nested components
-            }
-        })
-    }
 
     private suspend fun checkRequiredAndValidateLogicForAll(components: List<ComponentDomain>) {
         processInParallel(components, processBlock = { componentDomain, mutex ->
             logicCalculation.extractRequiredAndValidateLogics(componentDomain).let { logics ->
-                extractLogicsModel.addAll(logics)
-            }
+                mutex.withLock {
+                    extractLogicsModel.addAll(logics)
+                }            }
             componentDomain.components.value?.takeIf { it.isNotEmpty() }?.let { nestedComponents ->
                 yield()  // Yield control if the workload is high
                 checkRequiredAndValidateLogicForAll(nestedComponents)  // Recursive call on nested components
             }
         })
     }
+
+    private suspend fun checkOfflineValueModifierLogics(components: List<ComponentDomain>) {
+        processInParallel(items = components, processBlock = { componentDomain, mutex ->
+            logicCalculation.extractOfflineValueModifierLogics(componentDomain)
+            componentDomain.components.value?.takeIf { it.isNotEmpty() }?.let { nestedComponents ->
+                yield()  // Yield control to other coroutines if the workload is high
+                checkOfflineValueModifierLogics(nestedComponents)  // Recursive call on nested components
+            }
+        })
+    }
+
+    private suspend fun checkValueModifierLogics(components: List<ComponentDomain>) {
+        processInParallel(items = components, processBlock = { componentDomain, mutex ->
+            logicCalculation.extractValueModifierLogics(componentDomain)
+            componentDomain.components.value?.takeIf { it.isNotEmpty() }?.let { nestedComponents ->
+                yield()  // Yield control to other coroutines if the workload is high
+                checkValueModifierLogics(nestedComponents)  // Recursive call on nested components
+            }
+        })
+    }
+
 
 
     suspend fun handleLogics(onResult: (MutableList<ExtractLogicsModel>) -> Unit) {
@@ -386,10 +402,10 @@ class TicketProcessVM(
             extractLogicsModel.clear()
 
             // Perform logic checks in the background
-            checkLogicsForAll(componentsCopy)
-            checkAutoFillLogicForAll(componentsCopy)
+            checkHideLogics(componentsCopy)
+            checkValueModifierLogics(componentsCopy)
             checkRequiredAndValidateLogicForAll(componentsCopy)
-
+            checkOfflineValueModifierLogics(componentsCopy)
 
             withContext(Dispatchers.Main)
             {
@@ -406,7 +422,6 @@ class TicketProcessVM(
         photoDomainList.removeAll(filteredListPhotoDomainList)
 
         //on database
-
         viewModelScope.launch {
             deletePhotoByComponentKeyAndIdUseCase(
                 DeletePhotoByComponentIdAndKeyModel(

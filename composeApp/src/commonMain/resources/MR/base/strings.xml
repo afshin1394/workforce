@@ -147,16 +147,16 @@
     <string name="save_change">SaveChange</string>
     <string name="unauthorized">Your request is no longer valid please login again!</string>
 
-    <string name="Equal">Number must be equal to %s</string>
-    <string name="NotEqual">Number must not be equal to %s</string>
-    <string name="GreaterThan">Number must be greater than %s</string>
-    <string name="NotGreaterThan">Number must not be greater than %s</string>
-    <string name="GreaterOrEqualTo">Number must be greater than or equal to %s</string>
-    <string name="NotGreaterOrEqualTo">Number must not be greater than or equal to %s</string>
-    <string name="LessThan">Number must be less than %s</string>
-    <string name="NotLessThan">Number must not be less than %s</string>
-    <string name="LessThanOrEqualTo">Number must be less than or equal to %s</string>
-    <string name="NotLessThanOrEqualTo">Number must not be less than or equal to %s</string>
+    <string name="Equal">ٰvalue must be equal to %s</string>
+    <string name="NotEqual">ٰvalue must not be equal to %s</string>
+    <string name="GreaterThan">ٰvalue must be greater than %s</string>
+    <string name="NotGreaterThan">ٰvalue must not be greater than %s</string>
+    <string name="GreaterOrEqualTo">ٰvalue must be greater than or equal to %s</string>
+    <string name="NotGreaterOrEqualTo">ٰvalue must not be greater than or equal to %s</string>
+    <string name="LessThan">ٰvalue must be less than %s</string>
+    <string name="NotLessThan">ٰvalue must not be less than %s</string>
+    <string name="LessThanOrEqualTo">ٰvalue must be less than or equal to %s</string>
+    <string name="NotLessThanOrEqualTo">ٰvalue must not be less than or equal to %s</string>
 
     <string name="i_ticket">iTicket</string>
     <string name="field_required">This field is required.</string>

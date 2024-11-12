@@ -68,8 +68,8 @@ abstract class BaseUseCase<out Type, in Params> {
         }
         .catch { exception ->
             val resultStatus = (exception as? Exception)?.handleError() ?: ResultStatus.EXCEPTION
-            emit(AsyncResult.Error(exception?.message ?: "no message", resultStatus))
-            SentryLog(exception?.stackTraceToString() ?: "no stack trace")
+            emit(AsyncResult.Error(exception.message ?: "no message", resultStatus))
+            SentryLog(exception.stackTraceToString() ?: "no stack trace")
         }
 
 

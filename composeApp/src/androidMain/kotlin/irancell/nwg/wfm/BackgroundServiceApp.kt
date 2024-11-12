@@ -201,7 +201,7 @@ internal actual class BackgroundServiceApp : Service(), KoinComponent {
                         startUpdateAlarm()
 
                         if (_serviceState.value != ServiceState.Suspend) {
-                            updateTask()
+                          updateTask()
                         }
                     }
                 }

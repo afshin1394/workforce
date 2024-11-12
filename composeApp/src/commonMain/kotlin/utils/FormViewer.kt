@@ -60,7 +60,7 @@ fun initialize(
     onClickImage: (indexPhotoSelected: Int, componentKey: String, componentId: String, componentDomain: ComponentDomain) -> Unit,
     currentParentIndex: List<Int> = listOf(),
 ) {
-
+    val componentsState = remember { components }
     Napier.log(LogLevel.ASSERT, tag = "indexFile", message = "indexFile${savedIndex}")
     val indexChildSaveable = rememberSaveable { mutableStateOf(savedIndex) }
     val indexParentSaveable = rememberSaveable { mutableStateOf<Int?>(null) }
@@ -90,7 +90,7 @@ fun initialize(
         modifier = modifier,
         contentPadding = PaddingValues(bottom = 100.dp)
     ) {
-        itemsIndexed(components, key = { _, item -> item.id!! }) { index, item ->
+        itemsIndexed(componentsState, key = { _, item -> item.id!! }) { index, item ->
             val valuesState by item.valuesState
             val nestedComponentsState by remember { item.components }
             val processLogicDomainState by remember { item.processLogicDomain }
