@@ -315,8 +315,14 @@ class TicketProcessScreen(
                         }, onDeletePhoto = {
                             viewModel.updatePositionSelected(it)
                             viewModel.events.value = TicketProcessEvent.DeletePhoto
-                        }, onSaveChangeAngle = {
-                            viewModel.photoDomainList = it.toMutableStateList()
+                        }, onSaveChangeAngle = {updatedList ->
+                            updatedList.forEach { updatedItem ->
+                                val indexToUpdate = viewModel.photoDomainList.indexOfFirst { it.index_row == updatedItem.index_row  && it.componentId==updatedItem.componentId}
+
+                                if (indexToUpdate != -1) {
+                                    viewModel.photoDomainList[indexToUpdate] = updatedItem
+                                }
+                            }
                             viewModel.events.value = TicketProcessEvent.Default
                         })
 

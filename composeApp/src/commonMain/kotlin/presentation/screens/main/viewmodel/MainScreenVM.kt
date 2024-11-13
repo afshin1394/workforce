@@ -735,7 +735,7 @@ class MainScreenVM(
 
     private val photoDomain = MutableStateFlow<PhotoDomain>(
         PhotoDomain(
-            selectedTask.value?.basic_info?.ticket_number ?: "0", "0", "0", 0, "", "", "0"
+            selectedTask.value?.basic_info?.ticket_number ?: "0", "0", "0", 0, "", "", 0F
         )
     )
     var photoDomainList = mutableStateListOf<PhotoDomain>()
@@ -788,7 +788,7 @@ class MainScreenVM(
     private fun updatePhotoDomain(imgUri: String) {
 
         photoDomain.value = PhotoDomain(
-            selectedTask.value?.basic_info?.ticket_number ?: "0", "0", "0", 0, imgUri, "", "0"
+            selectedTask.value?.basic_info?.ticket_number ?: "0", "0", "0", 0, imgUri, "", 0F
         )
         photoDomainList.add(photoDomain.value)
     }

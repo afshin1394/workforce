@@ -12,5 +12,5 @@ import androidx.room.PrimaryKey
      val index_row: Long,
      val origin_uri: String,
      val edited_uri: String,
-     val angle: String,
+     val angle: Float,
 )

@@ -1,23 +1,14 @@
 package presentation.screens.main.components
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -29,14 +20,10 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import com.irancell.nwg.wfm.presentation.theme.spacing05X
 import com.skydoves.landscapist.ImageOptions
@@ -46,35 +33,33 @@ import domain.models.PhotoDomain
 import io.github.aakira.napier.LogLevel
 import io.github.aakira.napier.Napier
 import irancell.nwg.wfm.MR
-import irancell.nwg.wfm.ParseUri
-import irancell.nwg.wfm.UriToImageBitmap
-import irancell.nwg.wfm.getDpi
+import irancell.nwg.wfm.RotateImageUri
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import presentation.screens.main.components.formViewer.draw.ControlsBarPreview
-
 import presentation.theme.surfaceDefault
+
 
 
 @Composable
 fun PhotoPreviewComponent(
 
-     photoDomainList:MutableList<PhotoDomain>,
-     positionPhotoSelected:Int,
-     onEditPhotoClick:(position:Int)->Unit,
-     onDeletePhoto:(position:Int)->Unit={},
-     onSaveChangeAngle:(MutableList<PhotoDomain>)->Unit={}
+    photoDomainList: MutableList<PhotoDomain>,
+    positionPhotoSelected: Int,
+    onEditPhotoClick: (position: Int) -> Unit,
+    onDeletePhoto: (position: Int) -> Unit = {},
+    onSaveChangeAngle:(MutableList<PhotoDomain>)->Unit={}
 
 ) {
 
     var selectedItemImage by remember { mutableStateOf(positionPhotoSelected) }
     val imageSelected = remember { mutableStateOf("") }
-    val angle = remember { mutableStateOf(0f) }
+    val angle = remember { mutableStateOf(photoDomainList[selectedItemImage].angle) }
     val isRotate = remember { mutableStateOf(false) }
     var firstTimeInitPager by remember { mutableStateOf(true) }
     var photoDomainList = photoDomainList
 
 
+    val scope = rememberCoroutineScope()
 
 
     Column(
@@ -84,8 +69,7 @@ fun PhotoPreviewComponent(
             .padding(horizontal = spacing05X)
             .verticalScroll(
                 rememberScrollState()
-            )
-            ,verticalArrangement = Arrangement.Center,
+            ), verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
 
@@ -106,9 +90,9 @@ fun PhotoPreviewComponent(
                 items = photoDomainList,
                 firstTimeInit = firstTimeInitPager,
                 modifier = Modifier
-                .weight(0.8F)
-                .clipToBounds()
-                .fillMaxWidth(),
+                    .weight(0.8F)
+                    .clipToBounds()
+                    .fillMaxWidth(),
 
                 initialIndex = selectedItemImage,
                 itemSpacing = 30.dp,
@@ -128,17 +112,23 @@ fun PhotoPreviewComponent(
                 },
                 contentFactory = { item ->
 
-                        CoilImage(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .aspectRatio(0.8f)
-                                .rotate(item.angle.toFloat()),
-                            imageModel = { if (item.edited_uri == "") item.origin_uri else item.edited_uri },
-                            imageOptions = ImageOptions(
-                                contentScale = ContentScale.Fit,
-                                alignment = Alignment.Center
-                            )
+                    CoilImage(
+                        modifier =
+                        if(isRotate.value) Modifier
+                            .fillMaxSize()
+                            .aspectRatio(0.8f)
+                            .rotate(item.angle) else     Modifier
+                            .fillMaxSize()
+                            .aspectRatio(0.8f)
+
+
+                        ,
+                        imageModel = { if (item.edited_uri == "") item.origin_uri else item.edited_uri },
+                        imageOptions = ImageOptions(
+                            contentScale = ContentScale.Fit,
+                            alignment = Alignment.Center
                         )
+                    )
 
                 }
             )
@@ -157,45 +147,50 @@ fun PhotoPreviewComponent(
 
 
             onRotateClick = {
-                firstTimeInitPager=false
-                isRotate.value = true
-                angle.value = (angle.value + 90)
+                    firstTimeInitPager = false
+                    isRotate.value = true
+                    angle.value = (angle.value + 90)
 
-                photoDomainList.getOrNull(selectedItemImage)?.let {
-
-                    photoDomainList[selectedItemImage] =
-                        it.copy(angle = angle.value.toString())
-
-                }
+                    photoDomainList.getOrNull(selectedItemImage)?.let {
+                        photoDomainList[selectedItemImage] =
+                            it.copy(
+                                angle = angle.value,
+                            )
+                    }
             },
 
 
             onEditClick = {
-                firstTimeInitPager=false
+                firstTimeInitPager = false
                 onEditPhotoClick(selectedItemImage)
 
             }, onDeletePhoto = {
-                firstTimeInitPager=false
+                firstTimeInitPager = false
                 onDeletePhoto(selectedItemImage)
 
+
             }, onSaveClick = {
-                firstTimeInitPager=false
+                firstTimeInitPager = false
+
+
+                photoDomainList.getOrNull(selectedItemImage)?.let {
+
+                    photoDomainList[selectedItemImage] = it.copy(
+                        origin_uri =  RotateImageUri(it.origin_uri, it.component_key, if (it.isFirstClick) it.angle+90 else it.angle)
+                        , isFirstClick = false
+                    )
+                }
+
+
                 onSaveChangeAngle(photoDomainList)
+
 
             },
             isRotate = isRotate
         )
 
 
-
-
-
-
-
-
     }
-
-
 
 
 }

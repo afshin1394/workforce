@@ -501,7 +501,7 @@ class TicketProcessVM(
             0,
             "",
             "",
-            "0"
+            0F
         )
     )
 
@@ -572,7 +572,7 @@ class TicketProcessVM(
             (photoDomainList.size + 1L),
             imgUri,
             "",
-            "0"
+            0F
         )
         photoDomainList.add(photoDomain.value)
 

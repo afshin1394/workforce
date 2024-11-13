@@ -60,7 +60,7 @@ class FormViewerScreenVM(
             0,
             "",
             "",
-            "0"
+            0F
         )
     )
     var photoDomainList = mutableStateListOf<PhotoDomain>()

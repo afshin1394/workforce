@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 4,
-    "identityHash": "0c588c63184c8d57a39954efff2f79ba",
+    "identityHash": "6f9f19db29ef84a3a4250bf24fe419b5",
     "entities": [
       {
         "tableName": "ProfileEntity",
@@ -341,7 +341,7 @@
       },
       {
         "tableName": "PhotoEntity",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `ticket_number` TEXT NOT NULL, `componentId` TEXT NOT NULL, `component_key` TEXT NOT NULL, `index_row` INTEGER NOT NULL, `origin_uri` TEXT NOT NULL, `edited_uri` TEXT NOT NULL, `angle` TEXT NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `ticket_number` TEXT NOT NULL, `componentId` TEXT NOT NULL, `component_key` TEXT NOT NULL, `index_row` INTEGER NOT NULL, `origin_uri` TEXT NOT NULL, `edited_uri` TEXT NOT NULL, `angle` REAL NOT NULL)",
         "fields": [
           {
             "fieldPath": "pk",
@@ -388,7 +388,7 @@
           {
             "fieldPath": "angle",
             "columnName": "angle",
-            "affinity": "TEXT",
+            "affinity": "REAL",
             "notNull": true
           }
         ],
@@ -570,7 +570,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '0c588c63184c8d57a39954efff2f79ba')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '6f9f19db29ef84a3a4250bf24fe419b5')"
     ]
   }
 }

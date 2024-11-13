@@ -598,7 +598,7 @@ class MainScreen(
                                 onDeletePhoto = {
                                     viewModel.updatePositionSelected(it)
                                     viewModel.updateState(MainEvent.DeletePhoto)
-                                }, onSaveChangeAngle = {
+                                }, onSaveChangeAngle =  {updatedList ->
                                     viewModel.updateState(MainEvent.SuspendTicket)
                                 })
 
