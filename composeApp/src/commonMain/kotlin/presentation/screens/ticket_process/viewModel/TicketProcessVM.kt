@@ -407,9 +407,13 @@ class TicketProcessVM(
             checkRequiredAndValidateLogicForAll(componentsCopy)
             checkOfflineValueModifierLogics(componentsCopy)
 
-            withContext(Dispatchers.Main)
-            {
-                onResult(extractLogicsModel)
+//
+
+            // Make a copy of extractLogicsModel before switching to the main thread
+            val resultCopy = ArrayList(extractLogicsModel)
+
+            withContext(Dispatchers.Main) {
+                onResult(resultCopy)
             }
         }
     }

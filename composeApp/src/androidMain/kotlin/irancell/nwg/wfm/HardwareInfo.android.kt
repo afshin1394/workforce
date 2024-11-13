@@ -25,7 +25,7 @@ actual fun hardwareInfo(): Semaphore {
 
     val semaphore = Semaphore(semaphoreCount)
 
-    println("Hardware Info: Cores: $availableCores, RAM: $totalRam MB, Semaphore Count: $semaphoreCount")
+//    println("Hardware Info: Cores: $availableCores, RAM: $totalRam MB, Semaphore Count: $semaphoreCount")
 
     return semaphore
 }

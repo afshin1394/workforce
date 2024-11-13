@@ -11,12 +11,11 @@ fun getCurrentDate() : String {
    return Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).toString()
 }
 fun getCurrentDateLocalDateTime() : LocalDateTime {
-    return Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
+    return Clock.System.now().toLocalDateTime(TimeZone.UTC)
 }
 
-
 fun getLocalDateTimeFromLong(long: Long): LocalDateTime {
-    return Instant.fromEpochMilliseconds(long).toLocalDateTime(TimeZone.currentSystemDefault())
+    return Instant.fromEpochMilliseconds(long).toLocalDateTime(TimeZone.UTC)
 }
 
 fun  String.parsGpsDateTime() : String{

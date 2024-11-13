@@ -167,12 +167,6 @@ fun initialize(
                                     newValue
                                 )
                                 item.updateValues(listOf(updatedValueDomain))
-
-                                onChanges(
-                                    item,
-                                    listOf(updatedValueDomain)
-                                )
-
                             }
                         )
                     }

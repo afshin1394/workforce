@@ -197,7 +197,6 @@ internal actual class BackgroundServiceApp : Service(), KoinComponent {
                     }
 
                     AlarmAction.UPDATE.title -> {
-                        print("serviceStateSuspend ${_serviceState.value}")
                         startUpdateAlarm()
 
                         if (_serviceState.value != ServiceState.Suspend) {

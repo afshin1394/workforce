@@ -40,81 +40,90 @@ class LogicCalculation(
     val affectedComponents = mutableListOf<ComponentDomain>()
 
 
-    suspend fun extractRequiredAndValidateLogics(component: ComponentDomain): MutableList<ExtractLogicsModel> =
-        coroutineScope {
-            component.logics?.forEach { logic ->
-                var hasLogic = false
-                val typeLogic: String
-                val idCmp = component.id ?: ""
+    suspend fun extractRequiredAndValidateLogics(component: ComponentDomain): MutableList<ExtractLogicsModel> = coroutineScope {
+        if (!component.processLogicDomain.value.shouldHide) {
+                component.logics?.forEach { logic ->
+                    var hasLogic = false
+                    val typeLogic: String
+                    val idCmp = component.id ?: ""
 
-                when (logic.logicType) {
+                    when (logic.logicType) {
 
 
-                    LogicType.Required -> {
-                        typeLogic = LogicType.Required
-                        val expressionSatisfied =
-                            evaluateLogics(component, logic) && !component.hasValue()
-                        component.updateProcessLogicDomain(
-                            component.processLogicDomain.value.copy(required = expressionSatisfied)
-                        )
-
-                        if (expressionSatisfied) {
-                            hasLogic = true
-                            validationErrorList.add(ExtractLogicsModel(hasLogic, typeLogic, idCmp))
-                        }
-                    }
-
-                    LogicType.Validate -> {
-                        typeLogic = LogicType.Validate
-                        val expressionSatisfied =
-                            evaluateValidateLogics(allComponents, component, logic)
-
-                        expressionSatisfied?.let {
+                        LogicType.Required -> {
+                            typeLogic = LogicType.Required
+                            val expressionSatisfied =
+                                evaluateLogics(component, logic) && !component.hasValue()
                             component.updateProcessLogicDomain(
+                                component.processLogicDomain.value.copy(required = expressionSatisfied)
+                            )
+
+                            if (expressionSatisfied) {
+                                hasLogic = true
+                                validationErrorList.add(
+                                    ExtractLogicsModel(
+                                        hasLogic,
+                                        typeLogic,
+                                        idCmp
+                                    )
+                                )
+                            }
+                        }
+
+                        LogicType.Validate -> {
+                            typeLogic = LogicType.Validate
+                            val expressionSatisfied =
+                                evaluateValidateLogics(allComponents, component, logic)
+
+                            expressionSatisfied?.let {
+                                component.updateProcessLogicDomain(
+                                    component.processLogicDomain.value.copy(
+                                        validate = it.result,
+                                        errorMessage = it.message
+                                    )
+                                )
+                                hasLogic = it.result
+                            } ?: component.updateProcessLogicDomain(
                                 component.processLogicDomain.value.copy(
-                                    validate = it.result,
-                                    errorMessage = it.message
+                                    validate = false,
+                                    errorMessage = null
                                 )
                             )
-                            hasLogic = it.result
-                        } ?: component.updateProcessLogicDomain(
-                            component.processLogicDomain.value.copy(
-                                validate = false,
-                                errorMessage = null
+
+                            if (hasLogic) validationErrorList.add(
+                                ExtractLogicsModel(
+                                    hasLogic,
+                                    typeLogic,
+                                    idCmp
+                                )
                             )
-                        )
+                        }
 
-                        if (hasLogic) validationErrorList.add(
-                            ExtractLogicsModel(
-                                hasLogic,
-                                typeLogic,
-                                idCmp
+                        LogicType.Disable -> {
+                            val expressionSatisfied = evaluateLogics(component, logic)
+                            component.updateProcessLogicDomain(
+                                component.processLogicDomain.value.copy(disabled = expressionSatisfied)
                             )
-                        )
+                            hasLogic = expressionSatisfied
+                        }
+
+                        LogicType.ReadOnly -> {
+                            val expressionSatisfied = evaluateLogics(component, logic)
+                            component.updateProcessLogicDomain(
+                                component.processLogicDomain.value.copy(readOnly = expressionSatisfied)
+                            )
+                            hasLogic = expressionSatisfied
+                        }
+
+
                     }
-
-                    LogicType.Disable -> {
-                        val expressionSatisfied = evaluateLogics(component, logic)
-                        component.updateProcessLogicDomain(
-                            component.processLogicDomain.value.copy(disabled = expressionSatisfied)
-                        )
-                        hasLogic = expressionSatisfied
-                    }
-
-                    LogicType.ReadOnly -> {
-                        val expressionSatisfied = evaluateLogics(component, logic)
-                        component.updateProcessLogicDomain(
-                            component.processLogicDomain.value.copy(readOnly = expressionSatisfied)
-                        )
-                        hasLogic = expressionSatisfied
-                    }
-
-
                 }
-            }
-            return@coroutineScope validationErrorList
 
-        }
+            }
+
+        return@coroutineScope validationErrorList
+
+    }
 
 
     suspend fun extractHideLogic(component: ComponentDomain): MutableList<ExtractLogicsModel> =
@@ -184,145 +193,144 @@ class LogicCalculation(
         }
 
     suspend fun extractOfflineValueModifierLogics(component: ComponentDomain) {
-        component.logics?.forEach { logic ->
+        if (!component.processLogicDomain.value.shouldHide) {
 
-            var hasLogic = false
-            val typeLogic: String
-            val idCmp = component.id ?: ""
-            when (logic.logicType) {
-                LogicType.Calculate -> {
-                    val result = checkCalculation(logic)
+            component.logics?.forEach { logic ->
 
-                    val updatedValue = result ?: ""
-                    component.values = listOf(
-                        updateValueDomain(
-                            component.values?.getOrNull(0) ?: ValueDomain(), updatedValue
+                when (logic.logicType) {
+                    LogicType.Calculate -> {
+                        val result = checkCalculation(logic)
+
+                        val updatedValue = result ?: ""
+                        component.values = listOf(
+                            updateValueDomain(
+                                component.values?.getOrNull(0) ?: ValueDomain(), updatedValue
+                            )
                         )
-                    )
-                    component.updateProcessLogicDomain(
-                        component.processLogicDomain.value.copy(calculatedValue = updatedValue)
-                    )
-                    hasLogic = updatedValue.isNotEmpty()
-                }
-
-                LogicType.Bind -> {
-                    val listOfBinding = logic.getListOfBindingComponents()
-
-                    val updatedValue = listOfBinding.getOrNull(0) ?: ""
-                    component.values = listOf(
-                        updateValueDomain(
-                            component.values?.getOrNull(0) ?: ValueDomain(), updatedValue
+                        component.updateProcessLogicDomain(
+                            component.processLogicDomain.value.copy(calculatedValue = updatedValue)
                         )
-                    )
-                    component.updateProcessLogicDomain(
-                        component.processLogicDomain.value.copy(calculatedValue = updatedValue)
-                    )
-                    hasLogic = updatedValue.isNotEmpty()
+                    }
+
+                    LogicType.Bind -> {
+                        val listOfBinding = logic.getListOfBindingComponents()
+
+                        val updatedValue = listOfBinding.getOrNull(0) ?: ""
+                        component.values = listOf(
+                            updateValueDomain(
+                                component.values?.getOrNull(0) ?: ValueDomain(), updatedValue
+                            )
+                        )
+                        component.updateProcessLogicDomain(
+                            component.processLogicDomain.value.copy(calculatedValue = updatedValue)
+                        )
+                    }
                 }
             }
         }
     }
 
     suspend fun extractValueModifierLogics(component: ComponentDomain) {
+        var shouldBreak = false
         component.logics?.forEach { logic ->
-
-            var hasLogic = false
-            val typeLogic: String
-            val idCmp = component.id ?: ""
             when (logic.logicType) {
-
 
                 LogicType.Ticket_Auto_Fill -> {
                     if (!component.processLogicDomain.value.shouldHide) {
-                        val deferredCalls = mutableListOf<Deferred<Unit>>() // Store async calls
 
-                        component.logics.forEach { logic ->
-                            logic.ticketAutoFillLogicDomain?.options?.forEach { option ->
-                                option.phaseName?.let { phaseName ->
-                                    option.property?.let { property ->
 
-                                        // Set isAutoFillLoading to true
-                                        component.updateProcessLogicDomain(
-                                            component.processLogicDomain.value.copy(
-                                                isAutoFillLoading = true
-                                            )
+                        for (logic in component.logics) {
+
+                            for (option in logic.ticketAutoFillLogicDomain?.options.orEmpty()) {
+                                if(shouldBreak) break
+                                val phaseName = option.phaseName
+                                val property = option.property
+
+                                if (phaseName != null && property != null) {
+                                    // Set isAutoFillLoading to true
+                                    component.updateProcessLogicDomain(
+                                        component.processLogicDomain.value.copy(
+                                            isAutoFillLoading = true
                                         )
-                                        deferredCalls.add(CoroutineScope(Dispatchers.IO).async {
-                                            getTicketDetailsUseCase(
-                                                Pair(
-                                                    ticketId,
-                                                    TicketDetailRequestDomain(
-                                                        listOf(PhaseDomain(phaseName, property))
-                                                    )
+                                    )
+
+
+                                        getTicketDetailsUseCase(
+                                            Pair(
+                                                ticketId,
+                                                TicketDetailRequestDomain(
+                                                    listOf(PhaseDomain(phaseName, property))
                                                 )
-                                            ).collect { result ->
-                                                when (result.status) {
-                                                    AsyncStatus.EMPTY -> {
-                                                        // Handle empty case if needed
-                                                    }
+                                            )
+                                        ).collect { result ->
 
-                                                    AsyncStatus.ERROR -> {
-                                                        // Handle error case if needed
-                                                    }
+                                            when (result.status) {
+                                                AsyncStatus.EMPTY -> {
+                                                    // Handle empty case if needed
+                                                }
 
-                                                    AsyncStatus.LOADING -> {
-                                                        // Handle loading case if needed
-                                                    }
+                                                AsyncStatus.ERROR -> {
+                                                    // Handle error case if needed
+                                                }
 
-                                                    AsyncStatus.SUCCESS -> {
-                                                        result.data?.keys?.forEach { key ->
-                                                            result.data[key]?.let { resultData ->
-                                                                var value = resultData
+                                                AsyncStatus.LOADING -> {
+                                                    // Handle loading case if needed
+                                                }
 
-                                                                if (resultData.isNotEmpty()) {
-                                                                    if (component.type == FormViewerTypes.Datetime ||
-                                                                        component.type == FormViewerTypes.Time ||
-                                                                        component.type == FormViewerTypes.Date
-                                                                    ) {
-                                                                        value =
-                                                                            resultData.parsServerDateTime()
-                                                                    }
+                                                AsyncStatus.SUCCESS -> {
+                                                    result.data?.keys?.forEach { key ->
+                                                        result.data[key]?.let { resultData ->
+                                                            var value = resultData
 
-                                                                    val updatedValueDomain =
-                                                                        updateValueDomain(
-                                                                            component.values?.get(0)
-                                                                                ?: ValueDomain(),
-                                                                            value
-                                                                        )
-
-                                                                    // Update component values
-                                                                    component.updateValues(
-                                                                        listOf(
-                                                                            updatedValueDomain
-                                                                        )
-                                                                    )
-
-                                                                    // Update process logic domain
-                                                                    component.updateProcessLogicDomain(
-                                                                        component.processLogicDomain.value.copy(
-                                                                            calculatedValue = value,
-                                                                        )
-                                                                    )
+                                                            if (resultData.isNotEmpty()) {
+                                                                if (component.type == FormViewerTypes.Datetime ||
+                                                                    component.type == FormViewerTypes.Time ||
+                                                                    component.type == FormViewerTypes.Date
+                                                                ) {
+                                                                    value =
+                                                                        resultData.parsServerDateTime()
                                                                 }
+
+                                                                val updatedValueDomain =
+                                                                    updateValueDomain(
+                                                                        component.values?.get(0)
+                                                                            ?: ValueDomain(),
+                                                                        value
+                                                                    )
+
+                                                                // Update component values
+                                                                component.updateValues(
+                                                                    listOf(updatedValueDomain)
+                                                                )
+
+                                                                // Update process logic domain
+                                                                component.updateProcessLogicDomain(
+                                                                    component.processLogicDomain.value.copy(
+                                                                        calculatedValue = value,
+                                                                    )
+                                                                )
+                                                                shouldBreak = true
+                                                                // Set flag to break out of all loops
+                                                                return@collect
                                                             }
                                                         }
                                                     }
                                                 }
-                                            }
-                                        })
-                                    }
+
+                                        }
+
                                 }
                             }
-                            deferredCalls.awaitAll()
-
-                            component.updateProcessLogicDomain(
-                                component.processLogicDomain.value.copy(
-                                    isAutoFillLoading = false,
-                                )
-                            )
                         }
-                    }
 
+
+                        component.updateProcessLogicDomain(
+                            component.processLogicDomain.value.copy(
+                                isAutoFillLoading = false,
+                            )
+                        )
+                    }
+                }
                 }
             }
         }
