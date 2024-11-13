@@ -8,7 +8,9 @@ import androidx.compose.ui.Modifier
 import com.irancell.nwg.wfm.presentation.components.ItemComponent
 import dev.icerock.moko.resources.compose.stringResource
 import irancell.nwg.wfm.MR
+import irancell.nwg.wfm.getSharedPref
 import presentation.model.ItemComponentModel
+import utils.Language
 import utils.debounceClick
 import utils.defaultDebounceClick
 
@@ -30,22 +32,41 @@ fun MoreOptions(
 
     Column(modifier = Modifier.fillMaxWidth()) {
         ItemComponent(
-            itemComponentModel = ItemComponentModel(text = stringResource(MR.strings.ticket_info)),
+            itemComponentModel = ItemComponentModel(
+                text = stringResource(MR.strings.ticket_info), hasImage = true, imageResource =
+                if (getSharedPref().getString(Language) == "fa") MR.images.chevron_left
+                else MR.images.chevron_right
+            ),
             modifier = Modifier.clickable {
                 onTicketInfoDebounce()
             })
         ItemComponent(
-            itemComponentModel = ItemComponentModel(text = stringResource(MR.strings.suspend_ticket)),
+            itemComponentModel = ItemComponentModel(
+                text = stringResource(MR.strings.suspend_ticket),
+                hasImage = true,
+                imageResource = if (getSharedPref().getString(Language) == "fa") MR.images.chevron_left
+                else MR.images.chevron_right
+            ),
             modifier = Modifier.clickable {
                 onSuspendDebounce()
             })
         ItemComponent(
-            itemComponentModel = ItemComponentModel(text = stringResource(MR.strings.cancel_ticket)),
+            itemComponentModel = ItemComponentModel(
+                text = stringResource(MR.strings.cancel_ticket),
+                hasImage = true,
+                imageResource = if (getSharedPref().getString(Language) == "fa") MR.images.chevron_left
+                else MR.images.chevron_right
+            ),
             modifier = Modifier.clickable {
                 onCancelDebounce()
             })
         ItemComponent(
-            itemComponentModel = ItemComponentModel(text = stringResource(MR.strings.openInMap)),
+            itemComponentModel = ItemComponentModel(
+                text = stringResource(MR.strings.openInMap),
+                hasImage = true,
+                imageResource = if (getSharedPref().getString(Language) == "fa") MR.images.chevron_left
+                else MR.images.chevron_right
+            ),
             modifier = Modifier.clickable {
                 onOpenInMapDebounce()
             })
