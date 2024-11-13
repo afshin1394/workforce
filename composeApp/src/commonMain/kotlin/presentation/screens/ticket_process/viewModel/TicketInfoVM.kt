@@ -1,6 +1,8 @@
 package presentation.screens.ticket_process.viewModel
 
 import androidx.compose.runtime.mutableStateListOf
+import com.benasher44.uuid.Uuid
+import com.benasher44.uuid.uuid4
 import data.network.response.task.task.InitForm
 
 import domain.models.PhotoDomain
@@ -64,6 +66,7 @@ class TicketInfoVM(
                         updateState(ViewStates.Success())
 
                         it.data?.let {
+                            initFormsState.add(InitFormDomain("ticket_number", ticketNumber))
                             initFormsState .addAll(it.initForms)
                         }
                     }

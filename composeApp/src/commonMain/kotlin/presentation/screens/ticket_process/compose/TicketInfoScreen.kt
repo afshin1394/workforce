@@ -38,10 +38,9 @@ class TicketInfoScreen(
     private val ticketId: String,
     private val ticket_number: String
 ) : Screen {
-    @OptIn(ExperimentalMaterialApi::class, FlowPreview::class)
+    @OptIn(ExperimentalMaterialApi::class)
     @Composable
     override fun Content() {
-
 
         Napier.log(
             LogLevel.ASSERT,
@@ -71,6 +70,7 @@ class TicketInfoScreen(
 
         val viewState by viewModel.state.collectAsState()
         var isClickable by remember { mutableStateOf(true) }
+        val initFormState = remember { viewModel.initFormsState }
 
         LaunchedEffect(Unit) {
             viewModel.getInitialForm(ticket_number)
@@ -111,7 +111,7 @@ class TicketInfoScreen(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     contentPadding = PaddingValues(bottom = 100.dp)
                 ) {
-                    items(viewModel.initFormsState) { item ->
+                    items(initFormState) { item ->
                         SimpleEditable(item.key, item.value)
                     }
                 }

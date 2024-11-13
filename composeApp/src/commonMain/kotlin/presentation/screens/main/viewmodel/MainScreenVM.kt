@@ -58,6 +58,7 @@ import utils.AvailabilityObjectId
 import utils.AvailabilityStatus
 import utils.BaseViewModel
 import utils.ServiceState
+import utils.TicketId
 import utils.TicketNumber
 import utils.ViewStates
 import utils.getCurrentDate
@@ -107,6 +108,9 @@ class MainScreenVM(
     private val _ticketNumber =
         MutableStateFlow(getSharedPref().getString(TicketNumber).orEmpty())
     var ticketNumber = _ticketNumber.asStateFlow()
+    private val _ticketId =
+        MutableStateFlow(getSharedPref().getString(TicketId).orEmpty())
+    var ticketId = _ticketId.asStateFlow()
     var selectedTask: MutableState<TaskDomain?> = mutableStateOf(null)
     private val _events = MutableStateFlow<MainEvent>(MainEvent.Default)
     var events = _events.asStateFlow()
@@ -127,12 +131,15 @@ class MainScreenVM(
         getProfileName()
         getTasks()
         updateTicketNumber("")
+        updateTicketId("")
         collectTicketListState()
     }
-    fun addTasks(tasks :List<TaskDomain>){
+
+    fun addTasks(tasks: List<TaskDomain>) {
         _tasks.addAll(tasks)
     }
-    fun clearTasks(){
+
+    fun clearTasks() {
         _tasks.clear()
     }
 
@@ -523,10 +530,6 @@ class MainScreenVM(
         _openCamera.update { openCamera }
     }
 
-    fun updateTicketNumber(ticketNum: String) {
-        _ticketNumber.update { ticketNum }
-        getSharedPref().put(TicketNumber, ticketNumber.value)
-    }
 
     fun getTasks() {
         viewModelScope.launch(Dispatchers.Main) {
@@ -880,12 +883,23 @@ class MainScreenVM(
                         }
                         updateState(ViewStates.Success())
                         updateTicketNumber(selectedTask.value?.basic_info?.ticket_number ?: "")
+                        updateTicketId(selectedTask.value?.basic_info?.ticket_id.toString())
                     }
 
                     else -> {}
                 }
             }
         }
+    }
+
+    fun updateTicketNumber(ticketNum: String) {
+        _ticketNumber.update { ticketNum }
+        getSharedPref().put(TicketNumber, ticketNumber.value)
+    }
+
+    fun updateTicketId(ticketIdentifier: String) {
+        _ticketId.update { ticketIdentifier }
+        getSharedPref().put(TicketId, ticketId.value)
     }
 
     private fun saveAndDeletePhotoByComponentKey() {
@@ -941,7 +955,7 @@ class MainScreenVM(
         }
     }
 
-    fun logoutCallApi(onSuccess : ()-> Unit) {
+    fun logoutCallApi(onSuccess: () -> Unit) {
         viewModelScope.launch {
             logoutUseCase(Unit).collect {
                 when (it.status) {

@@ -60,6 +60,7 @@ import presentation.screens.main.components.PhotoPreviewComponent
 import presentation.screens.main.components.SuspendTicketBottomBarComponent
 import presentation.screens.main.components.SuspendTicketContentComponent
 import presentation.screens.main.viewmodel.TicketListStatus
+import presentation.screens.ticket_process.compose.TicketInfoScreen
 import presentation.screens.ticket_process.compose.TicketProcessScreen
 import presentation.theme.body_large
 import presentation.theme.body_small
@@ -72,9 +73,7 @@ import utils.AvailabilityStatus
 import utils.NetworkStates
 import utils.ServiceState
 
-class MainScreen(
-
-) : Screen {
+class MainScreen() : Screen {
     @OptIn(ExperimentalMaterialApi::class)
     @Composable
     override fun Content() {
@@ -179,6 +178,7 @@ class MainScreen(
                 MainEvent.ShowAcceptTicketDialog -> {
                     stringResource(MR.strings.continue_flow_title)
                 }
+
 
                 else -> {
                     ""
@@ -475,6 +475,7 @@ class MainScreen(
                             }
                         }
 
+
                         else -> {}
                     }
                 },
@@ -548,7 +549,15 @@ class MainScreen(
                         }
 
                         MainEvent.MoreOptions -> {
-                            MoreOptions(onCancelClick = {
+                            MoreOptions(onTicketInfoClick = {
+                                navigator.push(
+                                    TicketInfoScreen(
+                                        ticketId = viewModel.ticketId.value,
+                                        ticket_number = viewModel.ticketNumber.value
+                                    )
+                                )
+                            },
+                                onCancelClick = {
                                 viewModel.updateState(MainEvent.CancelTicket)
                             }, onSuspendClick = {
                                 viewModel.photoDomainList.clear()
@@ -718,6 +727,7 @@ class MainScreen(
 
                         }
 
+
                         else -> {}
                     }
 
@@ -824,6 +834,8 @@ class MainScreen(
                             TicketListScreen(
                                 searchText = "",
                                 onEvent = { mainEvent: MainEvent, task: TaskDomain? ->
+                                    viewModel.updateTicketId(task?.basic_info?.ticket_id.toString())
+                                    viewModel.updateTicketNumber(task?.basic_info?.ticket_number.toString())
                                     viewModel.updateState(mainEvent)
                                     viewModel.selectedTask.value = task
                                     viewModel.resetSuspendTask()
