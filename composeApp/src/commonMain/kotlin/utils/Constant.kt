@@ -15,6 +15,7 @@ const val isRunningGPS = "isRunningGPS"
 const val ModeApp = "modeApp"
 const val IsScrollDateTimePickerInList = "isScrollDateTimePickerInList"
 const val TicketNumber = "TicketNumber"
+const val TicketId = "TicketId"
 const val ORIENTATION = "orientation"
 
 const val DeploymentBASEURL = "http://mobile.ios.mtnirancell.ir/api/"
@@ -196,3 +197,5 @@ object BottomSheetTypes {
 enum class ButtonState {
     IDLE, LOADING, COMPLETED
 }
+
+const val defaultDebounceClick = 500L

@@ -57,6 +57,7 @@ import presentation.theme.surfaceDefault
 import presentation.theme.textInverse
 import presentation.theme.textPrimary
 import utils.FormViewerTypes
+import utils.LogicType
 import utils.PROCEED
 import utils.ViewStates
 import utils.initialize
@@ -91,6 +92,8 @@ class TicketProcessScreen(
         val updateTaskCompleteState = viewModel.updateTasksComplete.collectAsState()
         val scrollingState = viewModel.scrollingPosition.collectAsState()
         val saveDataStatus by viewModel.saveDataStatus.collectAsState()
+
+        val componentListState = remember { viewModel.tempComponentList }
 
         LaunchedEffect(Unit) {
             viewModel.updateTicketId(ticketId)
@@ -187,20 +190,10 @@ class TicketProcessScreen(
             typeBottomSheet = if (viewModel.events.value == TicketProcessEvent.TicketFlowCompleted) "Success" else "Default",
             bottomSheetHasHeader = viewModel.events.value != TicketProcessEvent.Default,
             topBar = {
-                TicketProcessTopBar(stringResource(MR.strings.ticket_process), onInfoClick = {
+                TicketProcessTopBar(ticketNumber, onInfoClick = {
                     viewModel.storeStepBeforeTicketInfo()
                 }, onBackClick = {
-                    Napier.log(
-                        LogLevel.ASSERT, tag = "backButtonEvent", message = isClickable.toString()
-                    )
-                    if (isClickable) {
-                        isClickable = false
-                        backClick()
-                        scope.launch {
-                            delay(500)
-                            isClickable = true
-                        }
-                    }
+                    backClick()
                 })
             },
             bottomSheetTitle = bottomSheetTitle,
@@ -415,7 +408,7 @@ class TicketProcessScreen(
                             taskID = currentLevelState.toString(),
                             modifier = Modifier,
                             photoDomainList = viewModel.photoDomainList,
-                            components = viewModel.tempComponentList,
+                            components = componentListState,
                             onClickImage = { index, key, id, component ->
                                 viewModel.tempComponent.value = component
                                 componentKey = key
@@ -431,22 +424,28 @@ class TicketProcessScreen(
                                 )
                                 scope.launch(Dispatchers.Default) {
                                     async {
-                                        viewModel.handleLogics { logicsList ->
-                                            val filteredList =
-                                                logicsList.filter { it.typeLogic == "Hide" }
-                                            if (filteredList.isNotEmpty()) {
-                                                filteredList.forEach { item ->
-                                                    viewModel.deletePhotoWhenCheckHideLogic(item.componentKey,item.componentId)
-                                                }
+                                        validateComponent(
+                                            component,
+                                            false,
+                                            listValueDomain,
+                                            initialCheckingFileUpload = false
+                                        )
+                                    }.await()
+
+                                    viewModel.handleLogics { logicsList ->
+                                        val filteredList =
+                                            logicsList.filter { it.typeLogic == LogicType.Hide }
+                                        if (filteredList.isNotEmpty()) {
+                                            filteredList.forEach { item ->
+                                                viewModel.deletePhotoWhenCheckHideLogic(
+                                                    item.componentKey,
+                                                    item.componentId
+                                                )
                                             }
                                         }
-                                    }.await()
-                                    validateComponent(
-                                        component,
-                                        false,
-                                        listValueDomain,
-                                        initialCheckingFileUpload = false
-                                    )
+
+                                    }
+
 
 
 
@@ -493,7 +492,8 @@ class TicketProcessScreen(
 
 
             },
-            onCloseBottomSheet = {
+            onCloseBottomSheet =
+            {
                 when (viewModel.events.value) {
                     TicketProcessEvent.PhotoPreview -> {
                         viewModel.events.value = TicketProcessEvent.Default
@@ -516,7 +516,8 @@ class TicketProcessScreen(
                 isBottomSheetOpen = false
 
             },
-            onBackPressed = {
+            onBackPressed =
+            {
 
                 Napier.log(
                     LogLevel.ASSERT, tag = "backButtonEvent", message = isClickable.toString()
@@ -534,15 +535,15 @@ class TicketProcessScreen(
         )
     }
 
-    private fun List<ComponentDomain>.findComponentById(id: String?): ComponentDomain? {
-        for (component in this) {
-            if (component.id == id) {
-                return component
-            }
-            component.components.value?.findComponentById(id)?.let { return it }
-        }
-        return null
-    }
+//    private fun List<ComponentDomain>.findComponentById(id: String?): ComponentDomain? {
+//        for (component in this) {
+//            if (component.id == id) {
+//                return component
+//            }
+//            component.components.value?.findComponentById(id)?.let { return it }
+//        }
+//        return null
+//    }
 
     fun ComponentDomain.isSelectableValue() =
         this.type == FormViewerTypes.Checklist || this.type == FormViewerTypes.Radio || this.type == FormViewerTypes.Select || this.type == FormViewerTypes.Multi

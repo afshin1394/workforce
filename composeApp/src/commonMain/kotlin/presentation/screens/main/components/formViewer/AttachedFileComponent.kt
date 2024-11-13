@@ -19,13 +19,18 @@ import irancell.nwg.wfm.MR
 import presentation.theme.strokeDefaultLight
 import presentation.theme.surfaceBrandDefault
 import presentation.theme.surfaceDefault
+import utils.debounceClick
+import utils.defaultDebounceClick
 
 
 @Composable
 fun AttachedFileComponent(modifier: Modifier = Modifier,backgroundColor : Color, onAttachClick : () -> Unit = {}) {
+    val onAttachClickDebounce =
+        debounceClick(debounceTime = defaultDebounceClick, onClick = onAttachClick)
+
     Card(modifier = modifier.size(98.dp)
         .clickable {
-            onAttachClick()
+            onAttachClickDebounce()
         }
         .background(
             color = backgroundColor,
