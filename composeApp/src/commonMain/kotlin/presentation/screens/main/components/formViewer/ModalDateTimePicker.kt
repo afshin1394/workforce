@@ -267,10 +267,10 @@ fun ModalDateTimePicker(
                     readOnly = true,
                     shape = RoundedCornerShape(15.dp),
                     textStyle = TextStyle(color = textSecondary),
-                    colors = TextFieldDefaults.colors(
-                        focusedIndicatorColor = if (readOnlyLogic || disableLogic) surfaceBrandDisabled else Color.Transparent,
-                        disabledIndicatorColor = if (readOnlyLogic || disableLogic) surfaceBrandDisabled else Color.Transparent,
-                        unfocusedIndicatorColor = if (readOnlyLogic || disableLogic) surfaceBrandDisabled else Color.Transparent,
+                    colors =  TextFieldDefaults.colors(
+                        focusedIndicatorColor = Color.Transparent,
+                        unfocusedIndicatorColor = Color.Transparent,
+                        disabledIndicatorColor = Color.Transparent,
                         focusedContainerColor = if (readOnlyLogic || disableLogic) surfaceBrandDisabled else Color.White,
                         unfocusedContainerColor = if (readOnlyLogic || disableLogic) surfaceBrandDisabled else Color.White,
                         disabledContainerColor = if (readOnlyLogic || disableLogic) surfaceBrandDisabled else Color.White

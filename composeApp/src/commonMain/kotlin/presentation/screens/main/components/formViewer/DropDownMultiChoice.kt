@@ -63,6 +63,7 @@ import dev.icerock.moko.resources.compose.stringResource
 import dev.icerock.moko.resources.desc.ResourceFormattedStringDesc
 import domain.models.form_struct.ProcessLogicDomain
 import domain.models.form_struct.ValueDomain
+import presentation.theme.iconPrimary
 import presentation.theme.strokeDefaultDark
 import presentation.theme.strokeDefaultLight
 import presentation.theme.subtleDefault
@@ -112,9 +113,7 @@ fun DropDownMultiChoice(
         remember { mutableStateListOf<ValueDomain>().apply { addAll(itemList.filter { it.isSelected }) } }
     LaunchedEffect(hideLogic) {
         if (hideLogic) {
-
             selectedItems.clear()
-
         }
     }
 
@@ -228,7 +227,7 @@ fun DropDownMultiChoice(
 
                 Icon(
                     painter = painterResource(MR.images.close),
-                    tint = backgroundColor,
+                    tint = iconPrimary,
                     contentDescription = "deleteAllSelected",
                     modifier = Modifier
                         .width(26.dp)
@@ -238,7 +237,6 @@ fun DropDownMultiChoice(
                             selectedItems.clear()
                             itemList.forEach { it.isSelected = false }
                             onItemSelected(selectedItems, null)
-
                         }
                 )
 
@@ -253,7 +251,7 @@ fun DropDownMultiChoice(
                                 searchedText = ""
                             }
                         },
-                    tint = backgroundColor,
+                    tint = iconPrimary,
                 )
 
 
@@ -333,10 +331,7 @@ fun DropDownMultiChoice(
                                     .clickable {
 
                                     }
-
-
                             )
-
                         },
                         colors = TextFieldDefaults.colors(
                             focusedIndicatorColor = if (readOnlyLogic || disableLogic) surfaceBrandDisabled else Color.Transparent,

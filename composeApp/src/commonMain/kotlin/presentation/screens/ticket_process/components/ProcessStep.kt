@@ -6,6 +6,7 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -17,6 +18,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -30,6 +32,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.irancell.nwg.wfm.presentation.theme.radiusLarge
 
@@ -44,6 +47,11 @@ import presentation.theme.surfaceSuccessStrong
 import presentation.theme.textInverse
 import presentation.theme.body_small
 import presentation.theme.caption
+import presentation.theme.surfaceBrandDisabled
+import presentation.theme.surfaceDisabled
+import presentation.theme.textBrand
+import presentation.theme.textInverseDisabled
+import presentation.theme.textSecondary
 
 
 @Composable
@@ -51,8 +59,11 @@ fun ProcessStep(
     modifier: Modifier = Modifier,
     level: Int ,
     levelText: String ,
+    isEdited : Boolean
 ) {
-
+    val boxColor = if (isEdited) surfaceSuccessStrong else surfaceDisabled
+    val textBoxColor = if(isEdited) textInverse else textInverseDisabled
+    val textColor = if (isEdited) textSecondary else textInverseDisabled
 
     Column(
         modifier = modifier.wrapContentSize(),
@@ -64,18 +75,27 @@ fun ProcessStep(
                 .clip(
                     CircleShape
                 )
-                .background(surfaceBrandDefault)
+                .background(boxColor)
             , contentAlignment = Alignment.Center
         ) {
             Text(
                 text = level.toString(),
-                style = body_small,
-                color = textInverse,
+                style = caption,
+                color = textBoxColor,
                 textAlign = TextAlign.Center
             )
         }
         Spacer(modifier = Modifier.padding(spacing05X))
-        Text(modifier = Modifier.wrapContentWidth(),text = levelText, style = caption, textAlign = TextAlign.Center, maxLines = 1)
+        Text(
+            text = levelText,
+            color = textColor,
+            style = caption,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis, // This ensures text doesn’t exceed width
+            textAlign = TextAlign.Center,
+            softWrap = false, // Avoid wrapping to another line
+            modifier = Modifier.wrapContentWidth()
+        )
         Spacer(modifier = Modifier.padding(spacing05X))
     }
 }
@@ -114,7 +134,7 @@ fun ProcessStepSelected(
                 .clip(
                     CircleShape
                 )
-                .background(surfaceSuccessStrong)
+                .background(surfaceBrandDefault)
             , contentAlignment = Alignment.Center
         ) {
             Text(
@@ -128,14 +148,22 @@ fun ProcessStepSelected(
             )
         }
         Spacer(modifier = Modifier.padding(spacing05X))
-        Text(modifier = Modifier.wrapContentWidth(),text = levelText, style = caption, textAlign = TextAlign.Center, maxLines = 1)
+        Text(
+            text = levelText,
+            color = textBrand,
+            style = caption,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis, // This ensures text doesn’t exceed width
+            textAlign = TextAlign.Center,
+            softWrap = false, // Avoid wrapping to another line
+            modifier = Modifier.wrapContentWidth()
+        )
         Spacer(modifier = Modifier.padding(spacing05X))
     }
 }
 
 @Composable
 fun processBar(list: List<StepDetail>, currentLevelStep : Int ) {
-
     Row(
         modifier = Modifier
             .wrapContentSize()
@@ -153,12 +181,12 @@ fun processBar(list: List<StepDetail>, currentLevelStep : Int ) {
             ProcessStep(
                 Modifier
                     .weight(1f)
-                    , process.id + 1, process.name
+                    , process.id + 1, process.name , process.isEdited.value
             )
             }
             if (list.size - 1 != index)
                 Box(modifier = Modifier
-                    .weight(1f)
+                    .weight(0.75f)
                     .height(2.dp)
                     .background(strokeDefaultLight))
 

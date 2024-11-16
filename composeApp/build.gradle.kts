@@ -171,8 +171,8 @@ android {
         applicationId = "irancell.nwg.wfm"
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
-        versionCode = 22
-        versionName = "0.2.2"
+        versionCode = 23
+        versionName = "0.2.3"
     }
     packaging {
         resources {

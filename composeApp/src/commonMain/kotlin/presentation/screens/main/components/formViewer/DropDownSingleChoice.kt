@@ -56,6 +56,7 @@ import dev.icerock.moko.resources.desc.ResourceFormattedStringDesc
 import domain.models.form_struct.ProcessLogicDomain
 import domain.models.form_struct.ValueDomain
 import irancell.nwg.wfm.MR
+import presentation.theme.iconPrimary
 import presentation.theme.strokeDefaultDark
 import presentation.theme.strokeDefaultLight
 import presentation.theme.surfaceBrandDark
@@ -168,7 +169,7 @@ fun DropDownSingleChoice(
                             "deleteAllSelected",
                             Modifier.width(28.dp).height(28.dp).padding(end = 8.dp)
                                 .clickable { selectedText = "" },
-                            tint = backgroundColor
+                            tint = iconPrimary
                         )
                         Icon(
                             icon,
@@ -179,7 +180,7 @@ fun DropDownSingleChoice(
                                     searchedText = ""
                                 }
                             },
-                            tint = backgroundColor
+                            tint = iconPrimary
                         )
 
                     }

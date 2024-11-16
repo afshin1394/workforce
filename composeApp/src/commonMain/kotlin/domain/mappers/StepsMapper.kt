@@ -37,7 +37,8 @@ fun List<Activity>.toActivityDomains(): List<ActivityDomain?> {
                 it.kind ?: "",
                 it1,
                 it.tag ?: 1,
-                it.form_id ?: 1
+                it.form_id ?: 1,
+                edited = false
             )
         }
     }
@@ -132,7 +133,8 @@ fun StepsEntity.toActivityDomain(): ActivityDomain {
                 .toFormStructDomain()
         ),
         form_id = this.pk.toInt(),
-        tag = this.tag
+        tag = this.tag,
+        edited = this.edited
     )
 }
 

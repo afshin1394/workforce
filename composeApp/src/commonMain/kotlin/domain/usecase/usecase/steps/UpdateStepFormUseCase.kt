@@ -1,6 +1,8 @@
 package domain.usecase.usecase.steps
 
 
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
 import arrow.core.Tuple4
 import arrow.core.Tuple5
 import arrow.core.Tuple6
@@ -45,7 +47,7 @@ data class StructureActivity(
     val stepDetails: List<StepDetail>,
 )
 
-data class StepDetail(val id: Int, val name: String)
+data class StepDetail(val id: Int, val name: String , var isEdited : MutableState<Boolean> = mutableStateOf(false))
 class UpdateStepFormUseCase(
     private val iStepsRepository: IStepsRepository,
     private val iStepPointerRepository: IStepPointerRepository,
@@ -60,10 +62,7 @@ class UpdateStepFormUseCase(
         val dict = mutableMapOf<String, Any>()
         val dictImages = mutableMapOf<String, Any>()
         Napier.log(LogLevel.ASSERT, tag = "processType", message = params.second)
-        val stepList: List<ActivityDomain> =
-            iStepsRepository.getStepsByTicketNumber(params.first).toActivityDomainList()
 
-        val stepListSorted = stepList.sortedBy { it.id }
         val stepPointerDomain = iStepPointerRepository.getActiveActivityByTicketNumber(params.first)
 
         if (params.second != PROCEED.INITIAL) {
@@ -76,9 +75,12 @@ class UpdateStepFormUseCase(
                 ),
             )
         }
+       val stepList =
+            iStepsRepository.getStepsByTicketNumber(params.first).toActivityDomainList()
+        val stepListSorted = stepList.sortedBy { it.id }
 
         val stepDetails = stepListSorted.mapIndexed { int, step ->
-            StepDetail(int, step.title)
+            StepDetail(int, step.title, mutableStateOf(step.edited))
         }
         var index = stepListSorted.indexOfFirst { it.id == stepPointerDomain.activeActivity }
         if (index == -1) index = 0

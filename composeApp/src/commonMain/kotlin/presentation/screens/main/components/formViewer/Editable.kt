@@ -212,7 +212,6 @@ fun Editable(
                         if (!disableLogic && !readOnlyLogic && it != valueChange.value) {
                             valueChange.value = it // Update UI immediately
                             valueChangeFlow.value = it // Emit new value to flow
-
                         }
                     },
                     modifier = if (isAutoFilling) {
@@ -233,14 +232,15 @@ fun Editable(
                     shape = RoundedCornerShape(15.dp),
                     textStyle = TextStyle(color = textSecondary),
                     colors = TextFieldDefaults.colors(
-                        focusedIndicatorColor = if (readOnlyLogic || disableLogic) surfaceBrandDisabled else Color.Transparent,
-                        disabledIndicatorColor = if (readOnlyLogic || disableLogic) surfaceBrandDisabled else Color.Transparent,
-                        unfocusedIndicatorColor = if (readOnlyLogic || disableLogic) surfaceBrandDisabled else Color.Transparent,
+                        focusedIndicatorColor = Color.Transparent,
+                        unfocusedIndicatorColor = Color.Transparent,
+                        disabledIndicatorColor = Color.Transparent,
                         focusedContainerColor = if (readOnlyLogic || disableLogic) surfaceBrandDisabled else Color.White,
                         unfocusedContainerColor = if (readOnlyLogic || disableLogic) surfaceBrandDisabled else Color.White,
                         disabledContainerColor = if (readOnlyLogic || disableLogic) surfaceBrandDisabled else Color.White
                     ),
                 )
+
 
 
             }

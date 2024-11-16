@@ -81,6 +81,8 @@ val surfacePressed = gray_3
 
 val surfaceDefault = gray_1
 
+val surfaceDisabled = gray_2
+
 val surfaceDefaultLight = gray_4
 
 val surfaceInputDefault = gray_1

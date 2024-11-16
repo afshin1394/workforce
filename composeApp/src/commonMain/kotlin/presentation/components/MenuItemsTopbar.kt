@@ -138,7 +138,7 @@ fun TicketProcessTopBar(
             )
 
             Image(
-                painter = painterResource(MR.images.info_square),
+                painter = painterResource(MR.images.info_filled),
                 contentDescription = "TicketInfo",
                 modifier = Modifier
                     .weight(.1f)

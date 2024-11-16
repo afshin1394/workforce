@@ -13,4 +13,5 @@ data class ActivityDomain(
     val form : FormDomain,
     val tag : Long,
     val form_id : Int,
+    val edited : Boolean
     )

@@ -1,6 +1,7 @@
 package utils
 
 import irancell.nwg.wfm.MR
+import irancell.nwg.wfm.getSharedPref
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDateTime
@@ -11,14 +12,14 @@ fun getCurrentDate() : String {
    return Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).toString()
 }
 fun getCurrentDateLocalDateTime() : LocalDateTime {
-    return Clock.System.now().toLocalDateTime(TimeZone.UTC)
+    return Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
 }
 
 fun getLocalDateTimeFromLong(long: Long): LocalDateTime {
-    return Instant.fromEpochMilliseconds(long).toLocalDateTime(TimeZone.UTC)
+    return Instant.fromEpochMilliseconds(long).toLocalDateTime(TimeZone.currentSystemDefault())
 }
 
-fun  String.parsGpsDateTime() : String{
+fun  String.parsGpsDateTime() : String {
     val inputDateTime = parseDateTime(this)
     return formatDateTime(inputDateTime)
 }
@@ -29,12 +30,13 @@ fun String.parsServerDateTime() : String {
 }
 fun LocalDateTime.localDateTimeToMilliseconds(): Long {
     // Convert LocalDateTime to milliseconds since the epoch
-    return this.toInstant(TimeZone.UTC).toEpochMilliseconds()
+    return this.toInstant(TimeZone.currentSystemDefault()).toEpochMilliseconds()
 }
 
 
 fun compareLocalDateTimes(dateTime1: LocalDateTime, dateTime2: LocalDateTime): Int {
-    return dateTime1.compareTo(dateTime2) // Negative if dateTime1 < dateTime2, positive if >, 0 if equal
+    // Negative if dateTime1 < dateTime2, positive if >, 0 if equal
+    return dateTime1.compareTo(dateTime2)
 }
 
 
@@ -131,7 +133,44 @@ fun Long.convertMillisToTime(): String {
     val days = this / (24 * 60 * 60 * 1000)
     val hours = (this / (60 * 60 * 1000)) % 24
     val minutes = (this / (60 * 1000)) % 60
+    val isFarsi  = getSharedPref().getString(Language) == "fa"
+    // Helper function to convert digits to Farsi numerals if needed
 
-    return "$days days, $hours hours, $minutes minutes"
+
+    // Define text labels based on language
+    val dayLabel = if (isFarsi) "روز" else "day"
+    val hourLabel = if (isFarsi) "ساعت" else "hour"
+    val minuteLabel = if (isFarsi) "دقیقه" else "minute"
+
+    // Collect non-zero parts in order: days, hours, minutes
+    val parts = mutableListOf<String>()
+    if (days > 0) parts.add("${formatNumber(days)} $dayLabel${if (days > 1 && !isFarsi) "s" else ""}")
+    if (hours > 0) parts.add("${formatNumber(hours)} $hourLabel${if (hours > 1 && !isFarsi) "s" else ""}")
+    if (minutes > 0) parts.add("${formatNumber(minutes)} $minuteLabel${if (minutes > 1 && !isFarsi) "s" else ""}")
+
+    // Join parts in correct order, defaulting to "0 minutes" or "۰ دقیقه" if all are zero
+    return if (parts.isNotEmpty()) parts.joinToString(if (isFarsi) "، " else ", ")
+    else "${formatNumber(0)} ${minuteLabel}"
 }
 
+fun formatNumber(value: Long): String {
+    return if (getSharedPref().getString(Language) == "fa") {
+        value.toString().map {
+            when (it) {
+                '0' -> '۰'
+                '1' -> '۱'
+                '2' -> '۲'
+                '3' -> '۳'
+                '4' -> '۴'
+                '5' -> '۵'
+                '6' -> '۶'
+                '7' -> '۷'
+                '8' -> '۸'
+                '9' -> '۹'
+                else -> it
+            }
+        }.joinToString("")
+    } else {
+        value.toString()
+    }
+}
