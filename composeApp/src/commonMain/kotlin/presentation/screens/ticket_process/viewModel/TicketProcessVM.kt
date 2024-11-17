@@ -95,7 +95,7 @@ class TicketProcessVM(
     private val _ticketNumber = MutableStateFlow("0")
     val ticketNumber = _ticketNumber.asStateFlow()
 
-    private val _ticketFlowCompleted = MutableStateFlow(false)
+    private val _ticketFlowCompleted = MutableStateFlow(true)
     var ticketFlowCompleted = _ticketFlowCompleted.asStateFlow()
 
     fun updateTicketFlowState(completed: Boolean) {

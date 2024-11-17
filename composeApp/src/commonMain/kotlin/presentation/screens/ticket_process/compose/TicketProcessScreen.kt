@@ -88,6 +88,7 @@ class TicketProcessScreen(
         val savedIndex by viewModel.savedIndex.collectAsState()
         val savedParentIndex by viewModel.savedParentIndex.collectAsState()
         var isClickable by remember { mutableStateOf(true) }
+        var isClickBack by remember { mutableStateOf(true) }
         val mainScreen = rememberScreen(Menu.MyTickets)
         val updateTaskCompleteState = viewModel.updateTasksComplete.collectAsState()
         val scrollingState = viewModel.scrollingPosition.collectAsState()
@@ -191,9 +192,16 @@ class TicketProcessScreen(
             bottomSheetHasHeader = viewModel.events.value != TicketProcessEvent.Default,
             topBar = {
                 TicketProcessTopBar(ticketNumber, onInfoClick = {
-                    viewModel.storeStepBeforeTicketInfo()
+                    if(isClickBack) {
+                        viewModel.storeStepBeforeTicketInfo()
+                    }
                 }, onBackClick = {
-                    backClick()
+
+                    if(isClickBack){
+                        backClick()
+
+                    }
+
                 })
             },
             bottomSheetTitle = bottomSheetTitle,
@@ -232,6 +240,7 @@ class TicketProcessScreen(
                         bottomSingleActionComponent(SingleButtonActionModel(
                             stringResource(MR.strings.resume), surfaceBrandDefault, textInverse
                         ), onClick = {
+                            isClickBack=false
                             scope.launch {
                                 val errors = async {
                                     validateComponents(
@@ -285,6 +294,7 @@ class TicketProcessScreen(
                         bottomSingleActionComponent(SingleButtonActionModel(
                             stringResource(MR.strings.submit), surfaceBrandDefault, textInverse
                         ), onClick = {
+                            isClickBack=false
                             viewModel.updateTicketFlowState(false)
                             viewModel.updateTasks()
                         })
@@ -524,7 +534,9 @@ class TicketProcessScreen(
                 )
                 if (isClickable) {
                     isClickable = false
-                    backClick()
+                    if(isClickBack){
+                        backClick()
+                    }
                     scope.launch {
                         delay(500)
                         isClickable = true
