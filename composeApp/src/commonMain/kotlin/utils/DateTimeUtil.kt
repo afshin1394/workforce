@@ -75,7 +75,7 @@ fun String.parseLocalDateTime(): LocalDateTime? {
 }
 
 
-fun parseServerDateTime(input : String) : LocalDateTime{
+fun parseServerDateTime(input : String) : LocalDateTime {
     val monthMap = mapOf(
         "01" to Month.JANUARY, "02" to Month.FEBRUARY, "03" to Month.MARCH,
         "04" to Month.APRIL, "05" to Month.MAY, "06" to Month.JUNE,
