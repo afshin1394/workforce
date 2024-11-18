@@ -1,7 +1,10 @@
 package presentation.screens.ticket_process.viewModel
 
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import arrow.core.Tuple5
 import arrow.core.Tuple6
 import dev.icerock.moko.resources.desc.StringDesc
@@ -112,6 +115,10 @@ class TicketProcessVM(
     var updateTasksComplete = _updateTasksComplete.asStateFlow()
 
 
+    private val _isClickBack = MutableStateFlow(true)
+    var isClickBack = _isClickBack.asStateFlow()
+
+
     val logicCalculation: LogicCalculation = LogicCalculation(viewModelScope, tempComponentList)
     var extractLogicsModel = mutableListOf<ExtractLogicsModel>()
 
@@ -192,6 +199,7 @@ class TicketProcessVM(
             message = _stepEvent.value.toString()
         )
         if (_currentLevel.value == _stepDetails.value.size - 1 && proceed != PROCEED.PREVIOUS) {
+            updateClickBackBtn(false)
             storeLastStep()
 
         } else {
@@ -336,6 +344,10 @@ class TicketProcessVM(
 
     fun updateTicketNumber(ticketNumber: String) {
         _ticketNumber.update { ticketNumber }
+    }
+
+    fun updateClickBackBtn(isClickBackBtn: Boolean) {
+        _isClickBack.update { isClickBackBtn }
     }
 
     fun updateTempComponentList(newList: List<ComponentDomain>) {
