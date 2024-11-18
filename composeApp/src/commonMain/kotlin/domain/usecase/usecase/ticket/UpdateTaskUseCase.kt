@@ -143,7 +143,7 @@ class UpdateTaskUseCase(
     private fun getInsertingValues(
         editedTicketNumbers: List<String>,
         stepEntities: List<StepsEntity>
-    ): List<StepsEntity> = stepEntities.filter { it.ticketNumber !in editedTicketNumbers }
+    ): List<StepsEntity> = stepEntities.filter { (it.ticketNumber !in editedTicketNumbers)}
 
     private fun getSendInsertingValues(
         editedTicketNumbers: List<String>,

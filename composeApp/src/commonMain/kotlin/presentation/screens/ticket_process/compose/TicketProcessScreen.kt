@@ -140,7 +140,6 @@ class TicketProcessScreen(
 
             TicketProcessEvent.Default -> {
                 ""
-
             }
 
             TicketProcessEvent.InProgress -> {
@@ -200,9 +199,7 @@ class TicketProcessScreen(
 
                     if(isClickableBackBtn.value){
                         backClick()
-
                     }
-
                 })
             },
             bottomSheetTitle = bottomSheetTitle,
