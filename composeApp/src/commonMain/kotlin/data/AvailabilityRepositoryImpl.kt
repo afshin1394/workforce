@@ -14,11 +14,17 @@ import data.network.response.availability.AvailabilityNetworkResponse
 import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.http.HttpStatusCode
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 class AvailabilityRepositoryImpl(
     private val httpClient: HttpClient
 ) : IAvailabilityRepository {
     override suspend fun fetchAvailability(): AvailabilityNetworkResponse {
+        GlobalScope.launch(Dispatchers.Main) {
+            println("fetchAvailability AvailabilityRepositoryImpl")
+        }
         return httpClient.get("workforce_management/user/is_online/").body<AvailabilityNetworkResponse>()
     }
 

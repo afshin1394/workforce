@@ -127,7 +127,6 @@ class MainScreenVM(
 
     init {
         traceNetwork()
-        getCurrentAvailability()
         getProfileName()
         getTasks()
         updateTicketNumber("")
@@ -324,7 +323,7 @@ class MainScreenVM(
 
 
     private fun getCurrentAvailability() {
-        Napier.log(LogLevel.ASSERT, "getCurrentAvailability", message = "sdasddad")
+        println("getCurrentAvailability ")
 
         viewModelScope.launch(Dispatchers.Main) {
             getAvailabilityUseCase(

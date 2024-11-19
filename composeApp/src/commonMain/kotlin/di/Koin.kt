@@ -1,5 +1,6 @@
 package di
 
+import com.benasher44.uuid.uuid4
 import io.ktor.client.*
 import presentation.screens.main.viewmodel.MainScreenVM
 import com.irancell.nwg.wfm.presentation.screens.main.viewmodel.SettingScreenVM
@@ -108,92 +109,92 @@ import utils.Token
 
 fun repositoryModule() = module {
     //Repositories
-    single<IGeneralLocationRepository> {
+    factory<IGeneralLocationRepository> {
         GeneralLocationRepositoryImpl(
             get(),
             get(named("tokenized"))
         )
     }
 
-    single<IGeneralLocationRepository> {
+    factory<IGeneralLocationRepository> {
         GeneralLocationRepositoryImpl(
             get(), get(named("tokenized"))
         )
     }
-    single<IAvailabilityRepository> { AvailabilityRepositoryImpl(get(named("tokenized"))) }
-    single<ISuspendTaskRepository> { SuspendTaskRepositoryImpl(get(), get(named("tokenized"))) }
-    single<IAuthRepository> {
+    factory<IAvailabilityRepository> { AvailabilityRepositoryImpl(get(named("tokenized"))) }
+    factory<ISuspendTaskRepository> { SuspendTaskRepositoryImpl(get(), get(named("tokenized"))) }
+    factory<IAuthRepository> {
         AuthRepositoryImpl(
             get(named("noToken")),
             get(named("tokenized")),
             get()
         )
     }
-    single<ITaskRepository> { TaskRepositoryImpl(get(named("tokenized")), get()) }
-    single<IProfileRepository> { ProfileRepositoryImpl(get(named("tokenized")), get()) }
-    single<IInitialFormRepository> { InitialFormRepositoryImpl(get()) }
-    single<IPhotoRepository> { PhotoRepositoryImpl(get()) }
-    single<IStepsRepository> { StepsRepositoryImpl(get(named("tokenized")), get()) }
-    single<IStepPointerRepository> { StepPointerRepositoryImpl(get()) }
-    single<ISendStepsRepository> { SendStepRepositoryImpl(get(), get(named("tokenized"))) }
-    single<IUploadRepository> { UploadRepositoryImpl(get(named("tokenized"))) }
-    single<IVersionRepository> {
+    factory<ITaskRepository> { TaskRepositoryImpl(get(named("tokenized")), get()) }
+    factory<IProfileRepository> { ProfileRepositoryImpl(get(named("tokenized")), get()) }
+    factory<IInitialFormRepository> { InitialFormRepositoryImpl(get()) }
+    factory<IPhotoRepository> { PhotoRepositoryImpl(get()) }
+    factory<IStepsRepository> { StepsRepositoryImpl(get(named("tokenized")), get()) }
+    factory<IStepPointerRepository> { StepPointerRepositoryImpl(get()) }
+    factory<ISendStepsRepository> { SendStepRepositoryImpl(get(), get(named("tokenized"))) }
+    factory<IUploadRepository> { UploadRepositoryImpl(get(named("tokenized"))) }
+    factory<IVersionRepository> {
         VersionRepositoryImpl(
             get(named("noToken")),
             get(named("tokenized"))
         )
     }
-    single<ITicketRepository> { TicketRepositoryImpl(get(named("tokenized"))) }
-    single<IIpDetectionRepository> { IpDetectionRepositoryImpl(get(named("ipDetection"))) }
+    factory<ITicketRepository> { TicketRepositoryImpl(get(named("tokenized"))) }
+    factory<IIpDetectionRepository> { IpDetectionRepositoryImpl(get(named("ipDetection"))) }
 }
 
 fun useCaseModule() = module {
     //UseCases
-    single { GetGeneralLocationListUseCase(get()) }
-    single { GetAvailabilityUseCase(get()) }
-    single { StoreAvailabilityUseCase() }
-    single { SendLocationToServerUseCase(get()) }
-    single { StoreLocationDataUseCase(get()) }
-    single { ChangeServerAvailabilityUseCase(get()) }
-    single { GetAvailabilityObjectIdUseCase() }
-    single { LoginUseCase(get()) }
-    single { GetTasksUseCase(get()) }
-    single { UpdateTaskUseCase(get(), get(), get(), get(), get()) }
-    single { LoginUseCase(get()) }
-    single { VerifyUseCase(get()) }
-    single { ResendUseCase(get()) }
-    single { StoreSuspendTaskUseCase(get()) }
-    single { GetSuspendTaskByIdUseCase(get()) }
-    single { StoreProfileUseCase(get()) }
-    single { GetProfileUseCase(get()) }
-    single { DeleteByTaskIdUseCase(get()) }
-    single { GetInitialFormByTask(get()) }
-    single { LogoutUseCase(get(), get()) }
-    single { InsertPhotoUseCase(get()) }
-    single { GetPhotoByComponentKeyUseCase(get()) }
-    single { DeleteByComponentKeyUseCase(get()) }
-    single { DeletePhotoByComponentKeyAndIdUseCase(get()) }
-    single { UpdateStepFormUseCase(get(), get(), get(), get()) }
-    single { StoreStepFormUseCase(get(), get(), get(), get()) }
-    single { CheckForEditedTicketUseCase(get()) }
-    single { StoreKeyValueUseCase(get(), get(), get()) }
-    single { SendFileToServerUseCase(get()) }
-    single { StoreKeyValueUseCase(get(), get(), get()) }
-    single { SendStepsOfTicketToServerUseCase(get(), get(), get(), get(), get()) }
-    single { UpdateIsEditedTicketUseCase(get()) }
-    single { UpdateUnSendLocationUseCase(get()) }
-    single { DeleteSendLocationUseCase(get()) }
-    single { SendVersionToServerUseCase(get()) }
-    single { GetVersionOfServerUseCase(get()) }
-    single { GetTicketDetailsUseCase(get()) }
-    single { IpDetectionUseCase(get()) }
-    single { AutoLogoutUseCase(get()) }
+    factory { GetGeneralLocationListUseCase(get()) }
+    factory { GetAvailabilityUseCase(get()) }
+    factory { StoreAvailabilityUseCase() }
+    factory { SendLocationToServerUseCase(get()) }
+    factory { StoreLocationDataUseCase(get()) }
+    factory { ChangeServerAvailabilityUseCase(get()) }
+    factory { GetAvailabilityObjectIdUseCase() }
+    factory { LoginUseCase(get()) }
+    factory { GetTasksUseCase(get()) }
+    factory { UpdateTaskUseCase(get(), get(), get(), get(), get()) }
+    factory { LoginUseCase(get()) }
+    factory { VerifyUseCase(get()) }
+    factory { ResendUseCase(get()) }
+    factory { StoreSuspendTaskUseCase(get()) }
+    factory { GetSuspendTaskByIdUseCase(get()) }
+    factory { StoreProfileUseCase(get()) }
+    factory { GetProfileUseCase(get()) }
+    factory { DeleteByTaskIdUseCase(get()) }
+    factory { GetInitialFormByTask(get()) }
+    factory { LogoutUseCase(get(), get()) }
+    factory { InsertPhotoUseCase(get()) }
+    factory { GetPhotoByComponentKeyUseCase(get()) }
+    factory { DeleteByComponentKeyUseCase(get()) }
+    factory { DeletePhotoByComponentKeyAndIdUseCase(get()) }
+    factory { UpdateStepFormUseCase(get(), get(), get(), get()) }
+    factory { StoreStepFormUseCase(get(), get(), get(), get()) }
+    factory { CheckForEditedTicketUseCase(get()) }
+    factory { StoreKeyValueUseCase(get(), get(), get()) }
+    factory { SendFileToServerUseCase(get()) }
+    factory { StoreKeyValueUseCase(get(), get(), get()) }
+    factory { SendStepsOfTicketToServerUseCase(get(), get(), get(), get(), get()) }
+    factory { UpdateIsEditedTicketUseCase(get()) }
+    factory { UpdateUnSendLocationUseCase(get()) }
+    factory { DeleteSendLocationUseCase(get()) }
+    factory { SendVersionToServerUseCase(get()) }
+    factory { GetVersionOfServerUseCase(get()) }
+    factory { GetTicketDetailsUseCase(get()) }
+    factory { IpDetectionUseCase(get()) }
+    factory { AutoLogoutUseCase(get()) }
 
 }
 
 fun httpModule() = module {
 
-    single(named("tokenized")) {
+    factory(named("tokenized")) {
         HttpClient {
             expectSuccess = true
             install(ContentNegotiation) {
@@ -205,12 +206,13 @@ fun httpModule() = module {
             }
             configure()
             defaultRequest {
-                url(ProductionBASEURL)
+                url(DeploymentBASEURL)
                 contentType(ContentType.Application.Json)
                 headers {
                     append(
                         "Authorization", "Token ${getSharedPref().getString(Token)}"
                     )
+                    append("uuid", uuid4().toString())
                     append("Content-Type", "application/json")
                     append("accept", "application/json")
                 }
@@ -228,7 +230,7 @@ fun httpModule() = module {
             }
         }
     }
-    single(named("noToken")) {
+    factory(named("noToken")) {
         HttpClient {
             expectSuccess = true
             install(ContentNegotiation) {
@@ -240,9 +242,10 @@ fun httpModule() = module {
             }
             configure()
             defaultRequest {
-                url(ProductionBASEURL)
+                url(DeploymentBASEURL)
                 contentType(ContentType.Application.Json)
                 headers {
+                    append("uuid", uuid4().toString())
                     append("Content-Type", "application/json")
                     append("accept", "application/json")
                 }
