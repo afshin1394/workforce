@@ -39,8 +39,10 @@ class LogoutUseCase(
             }
             BackgroundServiceApp.stopBackgroundService()
             val language= getSharedPref().getString(Language)
+            val typeUpdate= getSharedPref().getString(UpdateType)
             getSharedPref().deleteAll()
             getSharedPref().put(Language,language?:"en")
+            getSharedPref().put(UpdateType,typeUpdate?:UpdateTaskListTypes.Auto)
             iAuthRepository.deleteAllTableDB()
             Napier.log(LogLevel.ASSERT, "Logout", message = "Availability")
             InternalStorage.clearCache(provideAppContext())
