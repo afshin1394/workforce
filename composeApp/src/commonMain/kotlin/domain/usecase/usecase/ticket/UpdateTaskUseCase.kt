@@ -33,8 +33,10 @@ class UpdateTaskUseCase(
 ) : BaseUseCase<List<TaskEntity>, Unit>() {
 
     override suspend fun run(params: Unit): List<TaskEntity> {
-        val tasks = iTaskRepository.fetchWorks()
 
+        val tasks = iTaskRepository.fetchWorks()
+        println("CallApi  task       ${tasks}")
+        Napier.log(LogLevel.ASSERT, tag = "CallApi  task   stepsYO", message = "0")
         val initialTasks = tasks.details
             .mapNotNull { task ->
                 task.initial_form?.let {
@@ -54,6 +56,8 @@ class UpdateTaskUseCase(
             processBlock = { task, mutex ->
                 task.basic_info.ticket_number?.let { ticketNumber ->
                     val stepList = iStepsRepository.fetch(ticketNumber)
+                    println(" CallApi  step       ${stepList}")
+                    Napier.log(LogLevel.ASSERT, tag = "CallApi  step   stepsYO", message = "1")
                     val localStepEntities = stepList.toStepDetailsEntity(ticketNumber)
                     val activeActivityId = stepList.stepDetails.firstOrNull()
                         ?.acitivities?.firstOrNull()?.id
@@ -71,7 +75,7 @@ class UpdateTaskUseCase(
             }
         )
 
-        Napier.log(LogLevel.ASSERT, tag = "stepsYO", message = "3")
+        Napier.log(LogLevel.ASSERT, tag = "CallApi     stepsYO", message = "2")
 
 
         iTaskRepository.deleteAll()
@@ -80,13 +84,13 @@ class UpdateTaskUseCase(
         val uniqueTasks = tasks.details.toTaskEntityList().distinctBy { it.ticket_number }
         iTaskRepository.insertAll(uniqueTasks)
 
-        Napier.log(LogLevel.ASSERT, tag = "stepsYO", message = "4")
+        Napier.log(LogLevel.ASSERT, tag = "stepsYO", message = "3")
 
         iInitialFormRepository.deleteAll()
         iInitialFormRepository.resetEntitySequence()
         iInitialFormRepository.insertAll(initialTasks)
 
-        Napier.log(LogLevel.ASSERT, tag = "stepsYO", message = "5")
+        Napier.log(LogLevel.ASSERT, tag = "stepsYO", message = "4")
 
         updateDatabaseWithStepsData(
             editedTickets = iSendStepsRepository.getEditedTickets(),
@@ -94,7 +98,7 @@ class UpdateTaskUseCase(
             stepPointerEntities
         )
 
-        Napier.log(LogLevel.ASSERT, tag = "stepsYO", message = "6")
+        Napier.log(LogLevel.ASSERT, tag = "stepsYO", message = "5")
 
 
         return uniqueTasks

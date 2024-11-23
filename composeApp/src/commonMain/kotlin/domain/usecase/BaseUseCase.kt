@@ -42,6 +42,7 @@ abstract class BaseUseCase<out Type, in Params> {
 
         try {
             val result = run(params)
+            println("stepsYO   ${"start"}")
 
             if (result is List<*> && result.isEmpty()) {
                 Napier.log(
@@ -51,6 +52,7 @@ abstract class BaseUseCase<out Type, in Params> {
                 )
                 emit(AsyncResult.Empty(null, false))
             } else {
+                println("stepsYO   ${"Success"}")
                 emit(AsyncResult.Success(result, ResultStatus.SUCCESS))
             }
         } catch (exception: Exception) {
@@ -58,6 +60,7 @@ abstract class BaseUseCase<out Type, in Params> {
         }
     }
         .retry(retries = MAX_RETRY_COUNT.toLong()) { cause ->
+            println("stepsYO   ${"retry"}")
             if (cause is Exception) {
                 Napier.log(LogLevel.ASSERT, tag = "UnitOfWork", message = "ERROR ${cause.message}")
                 delay(INITIAL_RETRY_DELAY) // Wait for 4000 ms before retrying
@@ -67,6 +70,7 @@ abstract class BaseUseCase<out Type, in Params> {
             }
         }
         .catch { exception ->
+            println("stepsYO   ${"catch"}")
             val resultStatus = (exception as? Exception)?.handleError() ?: ResultStatus.EXCEPTION
             emit(AsyncResult.Error(exception.message ?: "no message", resultStatus))
             SentryLog(exception.stackTraceToString() ?: "no stack trace")

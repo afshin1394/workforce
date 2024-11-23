@@ -218,11 +218,11 @@ fun httpModule() = module {
                 }
             }
 
-            install(HttpTimeout) {
-                requestTimeoutMillis = 30000
-                connectTimeoutMillis = 5000
-                socketTimeoutMillis = 30000
-            }
+//            install(HttpTimeout) {
+//                requestTimeoutMillis = 30000
+//                connectTimeoutMillis = 5000
+//                socketTimeoutMillis = 30000
+//            }
             addDefaultResponseValidation()
             install(Logging) {
                 logger = Logger.DEFAULT
@@ -251,11 +251,11 @@ fun httpModule() = module {
                 }
             }
 
-            install(HttpTimeout) {
-                requestTimeoutMillis = 30000
-                connectTimeoutMillis = 5000
-                socketTimeoutMillis = 30000
-            }
+//            install(HttpTimeout) {
+//                requestTimeoutMillis = 30000
+//                connectTimeoutMillis = 5000
+//                socketTimeoutMillis = 30000
+//            }
             addDefaultResponseValidation()
             install(Logging) {
                 logger = Logger.DEFAULT
@@ -300,11 +300,11 @@ fun httpModule() = module {
                 }
             }
 
-            install(HttpTimeout) {
+       /*     install(HttpTimeout) {
                 requestTimeoutMillis = 30000
                 connectTimeoutMillis = 5000
                 socketTimeoutMillis = 30000
-            }
+            }*/
 
             addDefaultResponseValidation()
 

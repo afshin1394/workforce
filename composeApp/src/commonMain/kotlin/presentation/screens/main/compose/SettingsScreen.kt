@@ -36,11 +36,15 @@ import presentation.theme.textBrand
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import presentation.components.MenuItemsTopBar
-import presentation.screens.main.components.SelectableSingleItemComponent
-import presentation.screens.main.components.SelectableSingleItemComponentStringResource
+
+import presentation.screens.main.components.SelectableSingleLanguageItemComponentStringResource
+import presentation.screens.main.components.SelectableSingleModeAppItemComponentStringResource
+import presentation.screens.main.components.SelectableSingleUpdateTypeItemComponentStringResource
 import utils.Language
 import utils.ModeApp
 import utils.SelectLanguage
+import utils.UpdateTaskListTypes
+import utils.UpdateType
 import utils.isRunningGPS
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -68,6 +72,9 @@ class SettingsScreen(
 
                 SettingEvent.ChangeMode -> {
                     stringResource(MR.strings.connection_status)
+                }
+                SettingEvent.UpdateTaskListType->{
+                    stringResource(MR.strings.update_task_list_types)
                 }
 
 
@@ -149,6 +156,38 @@ class SettingsScreen(
                         }
 
                     }
+                    SettingEvent.UpdateTaskListType->{
+
+
+                        ChangeUpdateTypeBottomSheetComponent(
+                            list = viewModel.mutableChangeUpdateTypeOptions,
+                            onItemSelected = { index, selectableItem ->
+
+                                scope.launch(Dispatchers.Main) {
+
+                                    when (index) {
+                                        0 -> {
+                                            getSharedPref().put(UpdateType, UpdateTaskListTypes.Auto)
+                                            viewModel.events.value = SettingEvent.Default
+
+                                        }
+
+                                        1 -> {
+                                            getSharedPref().put(UpdateType, UpdateTaskListTypes.Manual)
+                                            viewModel.events.value = SettingEvent.Default
+
+                                        }
+
+                                    }
+
+
+                                }
+                            })
+                        scope.launch {
+                            scaffoldState.bottomSheetState.expand()
+                        }
+
+                    }
 
                     SettingEvent.Default -> {
                         scope.launch {
@@ -174,7 +213,7 @@ class SettingsScreen(
                     ), modifier = Modifier.clickable {
                         viewModel.events.value = SettingEvent.ChangeLanguage
                     })
-                    val tagSelectMode = if (getSharedPref().getString(ModeApp) == "on") MR.strings.online
+             /*       val tagSelectMode = if (getSharedPref().getString(ModeApp) == "on") MR.strings.online
                     else MR.strings.offline
                     ItemComponent(itemComponentModel = ItemComponentModel(
                         text = stringResource(MR.strings.connection_status),
@@ -185,6 +224,19 @@ class SettingsScreen(
                         tagColor = subtleDefault
                     ), modifier = Modifier.clickable {
                         viewModel.events.value = SettingEvent.ChangeMode
+                    })*/
+
+                    val tagSelectUpdateType = if (getSharedPref().getString(UpdateType) == UpdateTaskListTypes.Auto) MR.strings.auto
+                    else MR.strings.manual
+                    ItemComponent(itemComponentModel = ItemComponentModel(
+                        text = stringResource(MR.strings.update_task_list_types),
+                        hasTag = true,
+                        color = Color.Transparent,
+                        textTag = stringResource(tagSelectUpdateType),
+                        textTagColor = textBrand,
+                        tagColor = subtleDefault
+                    ), modifier = Modifier.clickable {
+                        viewModel.events.value = SettingEvent.UpdateTaskListType
                     })
 
                 }
@@ -214,7 +266,7 @@ fun ChangeLanguageBottomSheetComponent(
     list: MutableList<SelectableItemStringResource>,
     onItemSelected: (Int, SelectableItemStringResource) -> Unit
 ) {
-    SelectableSingleItemComponentStringResource(
+    SelectableSingleLanguageItemComponentStringResource(
         selectableItems = list,
         itemSelected = getSharedPref().getString(Language) ?: "",
         onOptionSelected = { index, selectableItem ->
@@ -227,9 +279,22 @@ fun ChangeModeBottomSheetComponent(
     list: MutableList<SelectableItemStringResource>,
     onItemSelected: (Int, SelectableItemStringResource) -> Unit
 ) {
-    SelectableSingleItemComponentStringResource(
+    SelectableSingleModeAppItemComponentStringResource(
         selectableItems = list,
         itemSelected = getSharedPref().getString(ModeApp) ?: "",
+        onOptionSelected = { index, selectableItem ->
+            onItemSelected(index, selectableItem)
+        })
+}
+
+@Composable
+fun ChangeUpdateTypeBottomSheetComponent(
+    list: MutableList<SelectableItemStringResource>,
+    onItemSelected: (Int, SelectableItemStringResource) -> Unit
+) {
+    SelectableSingleUpdateTypeItemComponentStringResource(
+        selectableItems = list,
+        itemSelected = getSharedPref().getString(UpdateType) ?: "",
         onOptionSelected = { index, selectableItem ->
             onItemSelected(index, selectableItem)
         })

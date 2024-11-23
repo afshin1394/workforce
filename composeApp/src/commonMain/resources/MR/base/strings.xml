@@ -193,4 +193,8 @@
     <string name="Of">of</string>
     <string name="edit">Edit</string>
 
+    <string name="auto">Auto</string>
+    <string name="manual">Manual</string>
+    <string name="update_task_list_types">Update task list types</string>
+
 </resources>

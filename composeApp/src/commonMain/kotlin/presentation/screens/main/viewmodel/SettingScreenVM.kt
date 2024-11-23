@@ -12,6 +12,9 @@ import irancell.nwg.wfm.MR
 import irancell.nwg.wfm.getSharedPref
 import utils.BaseViewModel
 import utils.Language
+import utils.ModeApp
+import utils.UpdateTaskListTypes
+import utils.UpdateType
 
 class SettingScreenVM : BaseViewModel() {
 
@@ -25,7 +28,12 @@ class SettingScreenVM : BaseViewModel() {
 
 
     val mutableChangeModeOptions =  mutableStateListOf(
-        SelectableItemStringResource(1, MR.strings.online, false),
-        SelectableItemStringResource(2, MR.strings.offline, false),
+        SelectableItemStringResource(1, MR.strings.online, if (getSharedPref().getString(ModeApp) == "on") false else true,"on"),
+        SelectableItemStringResource(2, MR.strings.offline, if (getSharedPref().getString(ModeApp) == "of") false else true,"of"),
+    )
+
+    val mutableChangeUpdateTypeOptions =  mutableStateListOf(
+        SelectableItemStringResource(1, MR.strings.auto, if (getSharedPref().getString(UpdateType) == UpdateTaskListTypes.Auto) false else true , UpdateTaskListTypes.Auto ),
+        SelectableItemStringResource(2, MR.strings.manual,  if (getSharedPref().getString(UpdateType) ==  UpdateTaskListTypes.Manual) false else true,UpdateTaskListTypes.Manual),
     )
 }

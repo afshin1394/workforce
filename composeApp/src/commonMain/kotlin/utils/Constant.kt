@@ -17,6 +17,7 @@ const val IsScrollDateTimePickerInList = "isScrollDateTimePickerInList"
 const val TicketNumber = "TicketNumber"
 const val TicketId = "TicketId"
 const val ORIENTATION = "orientation"
+const val UpdateType = "updateType"
 
 const val DeploymentBASEURL = "http://mobile.ios.mtnirancell.ir/api/"
 const val ProductionBASEURL = "https://ios.mtnirancell.ir/api/"
@@ -193,6 +194,12 @@ object BottomSheetTypes {
 
 }
 
+
+object UpdateTaskListTypes {
+    const val Manual = "manual"
+    const val Auto = "auto"
+
+}
 
 enum class ButtonState {
     IDLE, LOADING, COMPLETED

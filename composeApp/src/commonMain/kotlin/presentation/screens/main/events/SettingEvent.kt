@@ -5,4 +5,5 @@ sealed interface SettingEvent : Event {
    data object Default : SettingEvent
    data object ChangeLanguage : SettingEvent
    data object ChangeMode : SettingEvent
+   data object UpdateTaskListType : SettingEvent
 }

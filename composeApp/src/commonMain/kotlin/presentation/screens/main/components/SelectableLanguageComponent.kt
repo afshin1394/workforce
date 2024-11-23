@@ -31,67 +31,13 @@ import presentation.theme.surfaceDefault
 import presentation.theme.textBrand
 import presentation.theme.textSecondary
 import utils.Language
-
-
-
-
-@Composable
-fun SelectableSingleItemComponent(
-    selectableItems: MutableList<SelectableItem> =
-        mutableStateListOf(
-            SelectableItem(1, "Equipment failure", false),
-            SelectableItem(2, "Weather condition", false),
-            SelectableItem(3, "Travel restrictions", false),
-            SelectableItem(4, "Location Constraints", false),
-            SelectableItem(5, "Blocked road", false),
-            SelectableItem(6, "Other", false)
-        ),
-    itemSelected:String,
-    onOptionSelected: (index: Int, selectableItem: SelectableItem) -> Unit,
-
-) {
-
-    val selectableItemsState by remember {
-        mutableStateOf(selectableItems)
-    }
-
-
-    Column(
-        Modifier
-            .background(color = surfaceDefault)
-            .padding(spacing2X)
-    ) {
-
-
-
-
-        var select by remember { mutableStateOf(itemSelected) }
-
-        LazyColumn() {
-            itemsIndexed(items = selectableItemsState) { index, item ->
-
-
-
-                OptionsItemComponent(item=item,isSelected = select==item.text.lowercase().take(2), onItemSelected = {
-                    select=item.text.lowercase().take(2)
-                    if (getSharedPref().getString(Language)!=select){
-                        onOptionSelected(index, item)
-                    }
-
-                })
-
-            }
-        }
-    }
-
-
-}
+import utils.ModeApp
+import utils.UpdateType
 
 
 @Composable
-fun SelectableSingleItemComponentStringResource(
+fun SelectableSingleLanguageItemComponentStringResource(
     selectableItems: MutableList<SelectableItemStringResource>,
-
     itemSelected:String,
     onOptionSelected: (index: Int, selectableItem: SelectableItemStringResource) -> Unit,
 
@@ -113,13 +59,14 @@ fun SelectableSingleItemComponentStringResource(
 
         var select by remember { mutableStateOf(itemSelected) }
 
+
         LazyColumn() {
             itemsIndexed(items = selectableItemsState) { index, item ->
 
-                val text = item.languageType
+                val text = item.selectItemType
 
                 OptionsItemComponentStringResource(item=item
-                    ,isSelected = select== item.languageType.lowercase().take(2),
+                    ,isSelected = select== item.selectItemType.lowercase().take(2),
                     onItemSelected = {
                     select= text.lowercase().take(2)
                     if (getSharedPref().getString(Language)!=select){
@@ -136,30 +83,97 @@ fun SelectableSingleItemComponentStringResource(
 }
 
 
+
 @Composable
-fun OptionsItemComponent(item: SelectableItem, isSelected:Boolean, onItemSelected:()->Unit){
+fun SelectableSingleModeAppItemComponentStringResource(
+    selectableItems: MutableList<SelectableItemStringResource>,
+    itemSelected:String,
+    onOptionSelected: (index: Int, selectableItem: SelectableItemStringResource) -> Unit,
 
-
-    Surface(
-        modifier = Modifier.
-        fillMaxWidth()
-            .padding(spacing1X)
-            .clickable {
-
-                onItemSelected()
-            },
-        tonalElevation = 3.dp,
-        shape = MaterialTheme.shapes.medium,
-        color = if (isSelected) brand_blue_3 else surfaceDefault
     ) {
 
-        Text(
-            text = item.text,
-            color = if (isSelected) textBrand else textSecondary,
-            style = body_large,
-            modifier = Modifier
-                .padding(vertical = spacing15X, horizontal = spacing15X)
-        )
+    val selectableItemsState by remember {
+        mutableStateOf(selectableItems)
+    }
+
+
+    Column(
+        Modifier
+            .background(color = surfaceDefault)
+            .padding(spacing2X)
+    ) {
+
+
+
+
+        var select by remember { mutableStateOf(itemSelected) }
+
+
+        LazyColumn() {
+            itemsIndexed(items = selectableItemsState) { index, item ->
+
+                val text = item.selectItemType
+
+                OptionsItemComponentStringResource(item=item
+                    ,isSelected = select== item.selectItemType.lowercase(),
+                    onItemSelected = {
+                        select= text.lowercase()
+                        if (getSharedPref().getString(ModeApp)!=select){
+                            onOptionSelected(index, item)
+                        }
+
+                    })
+
+            }
+        }
+    }
+
+
+}
+
+
+@Composable
+fun SelectableSingleUpdateTypeItemComponentStringResource(
+    selectableItems: MutableList<SelectableItemStringResource>,
+    itemSelected:String,
+    onOptionSelected: (index: Int, selectableItem: SelectableItemStringResource) -> Unit,
+
+    ) {
+
+    val selectableItemsState by remember {
+        mutableStateOf(selectableItems)
+    }
+
+
+    Column(
+        Modifier
+            .background(color = surfaceDefault)
+            .padding(spacing2X)
+    ) {
+
+
+
+
+        var select by remember { mutableStateOf(itemSelected) }
+
+
+        LazyColumn() {
+            itemsIndexed(items = selectableItemsState) { index, item ->
+
+                val text = item.selectItemType
+
+                OptionsItemComponentStringResource(item=item
+                    ,isSelected = select== item.selectItemType.lowercase(),
+                    onItemSelected = {
+                        select= text.lowercase().take(2)
+                        if (getSharedPref().getString(UpdateType)!=select){
+                            onOptionSelected(index, item)
+                        }
+
+                    })
+
+            }
+        }
     }
 
 

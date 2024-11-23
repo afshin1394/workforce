@@ -28,9 +28,12 @@ import domain.models.task.TaskDomain
 import io.github.aakira.napier.LogLevel
 import io.github.aakira.napier.Napier
 import irancell.nwg.wfm.MR
+import irancell.nwg.wfm.getSharedPref
 import kotlinx.coroutines.launch
 import presentation.screens.main.viewmodel.MainScreenVM
 import utils.TaskState
+import utils.UpdateTaskListTypes
+import utils.UpdateType
 
 @OptIn(ExperimentalMaterialApi::class, ExperimentalFoundationApi::class)
 @Composable
@@ -46,12 +49,14 @@ fun TicketListScreen(
 
     fun refresh() =
         refreshScope.launch {
+
+            println("onStartCommand: CallApi  UpdateUseCase       ${"PullRefresh"}")
             refreshing = true
             viewModel.updateTask()
             refreshing = false
         }
 
-    val refreshState = rememberPullRefreshState(refreshing, ::refresh)
+   val refreshState = rememberPullRefreshState(refreshing, ::refresh)
 
 //    val context = LocalContext.current
     var searchTextState by remember {
@@ -90,7 +95,7 @@ fun TicketListScreen(
                 it.id.toString()
             }
         }
-        Box(Modifier.pullRefresh(refreshState)) {
+       Box(modifier = if (getSharedPref().getString(UpdateType)==UpdateTaskListTypes.Manual) Modifier.pullRefresh(refreshState) else Modifier) {
             LazyColumn(
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -121,20 +126,7 @@ fun TicketListScreen(
                     val keySet = mutableSetOf<Any>()
 
                     Napier.log(LogLevel.ASSERT, "refreshing", message = refreshing.toString())
-                    itemsIndexed(items = filteredList,
-//                        key = { index, item ->
-//                            var key = if (index == 0) index else item.basic_info.ticket_id
-//                            if (!keySet.add(key)) {
-//                                Napier.log(
-//                                    LogLevel.ERROR,
-//                                    "Duplicate Key Detected",
-//                                    message = "Duplicate key: $key found at index: $index"
-//                                )
-//                                keySet.add("unique_${item.basic_info.ticket_id}")
-//                                key = item.basic_info.ticket_id + index
-//                            }
-//                            key
-//                        }
+                    itemsIndexed(items = filteredList
                     ) { _: Int, item: TaskDomain ->
                         ticketCard(modifier = Modifier.animateItemPlacement(tween(1500))
                             .wrapContentHeight()
@@ -157,7 +149,8 @@ fun TicketListScreen(
                     }
                 }
             }
+           if (getSharedPref().getString(UpdateType)==UpdateTaskListTypes.Manual)
             PullRefreshIndicator(refreshing, refreshState, Modifier.align(Alignment.TopCenter))
-        }
+       }
     }
 }

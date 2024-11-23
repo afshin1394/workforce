@@ -39,6 +39,8 @@ import presentation.screens.main.viewmodel.TicketListStatus
 import utils.AlarmAction
 import utils.AsyncStatus
 import utils.ServiceState
+import utils.UpdateTaskListTypes
+import utils.UpdateType
 import utils.getCurrentDate
 import java.util.concurrent.TimeUnit
 import kotlin.math.log
@@ -199,8 +201,12 @@ internal actual class BackgroundServiceApp : Service(), KoinComponent {
                     AlarmAction.UPDATE.title -> {
                         startUpdateAlarm()
 
-                        if (_serviceState.value != ServiceState.Suspend) {
-                          updateTask()
+                        if (_serviceState.value != ServiceState.Suspend  ) {
+                            if (getSharedPref().getString(UpdateType)==UpdateTaskListTypes.Auto){
+                                updateTask()
+
+                            }
+
                         }
                     }
                 }
@@ -284,7 +290,8 @@ internal actual class BackgroundServiceApp : Service(), KoinComponent {
                     }
 
                     AsyncStatus.SUCCESS -> {
-                        Log.i("getAllTask", "onStartCommand: CallApi" + it.data)
+                        Log.e("getAllTask", "onStartCommand: CallApi" + it.data)
+                        println("getAllTask onStartCommand: CallApi   ${it.data}" )
                         _ticketListState.update { TicketListStatus.Filled }
                     }
 

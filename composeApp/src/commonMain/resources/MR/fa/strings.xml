@@ -185,4 +185,8 @@
     <string name="Of">از</string>
     <string name="edit">ویرایش</string>
 
+    <string name="auto">خودکار</string>
+    <string name="manual">دستی</string>
+    <string name="update_task_list_types">به روز رسانی لیست وظایف</string>
+
 </resources>

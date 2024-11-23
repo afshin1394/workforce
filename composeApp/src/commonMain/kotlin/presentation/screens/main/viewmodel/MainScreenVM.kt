@@ -155,6 +155,7 @@ class MainScreenVM(
             BackgroundServiceApp.ticketListState.collect {
                 when (it) {
                     TicketListStatus.Filled -> {
+                        println("getAllTask onStartCommand: CallApi  " )
                         _ticketListStatus.update { TicketListStatus.Filled }
                     }
 
