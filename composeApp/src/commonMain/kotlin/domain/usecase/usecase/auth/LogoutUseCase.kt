@@ -14,6 +14,8 @@ import irancell.nwg.wfm.provideAppContext
 import utils.Availability
 import utils.AvailabilityObjectId
 import utils.Language
+import utils.UpdateTaskListTypes
+import utils.UpdateType
 
 
 class LogoutUseCase(
@@ -52,8 +54,10 @@ class LogoutUseCase(
 
             }
             val language= getSharedPref().getString(Language)
+            val typeUpdate= getSharedPref().getString(UpdateType)
             getSharedPref().deleteAll()
             getSharedPref().put(Language,language?:"en")
+            getSharedPref().put(UpdateType,typeUpdate?:UpdateTaskListTypes.Auto)
             iAuthRepository.deleteAllTableDB()
             InternalStorage.clearCache(provideAppContext())
             Napier.log(LogLevel.ASSERT, "Logout", message = "App data folders deleted")
