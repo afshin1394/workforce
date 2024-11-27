@@ -206,7 +206,7 @@ fun httpModule() = module {
             }
             configure()
             defaultRequest {
-                url(DeploymentBASEURL)
+                url(DevelopmentBASEURL)
                 contentType(ContentType.Application.Json)
                 headers {
                     append(
@@ -242,7 +242,7 @@ fun httpModule() = module {
             }
             configure()
             defaultRequest {
-                url(DeploymentBASEURL)
+                url(DevelopmentBASEURL)
                 contentType(ContentType.Application.Json)
                 headers {
                     append("uuid", uuid4().toString())

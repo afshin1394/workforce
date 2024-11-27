@@ -1033,7 +1033,7 @@ class LogicCalculation(
                                                         ?.let { currentValue ->
                                                             expressionResults[i].add(
                                                                 ValidateLogicResult(
-                                                                    !(fieldValue + conditionValue > currentValue),
+                                                                    !(fieldValue + conditionValue >= currentValue),
                                                                     StringDesc.ResourceFormatted(
                                                                         MR.strings.NotGreaterThan,
                                                                         (fieldValue + conditionValue).toString()
@@ -1055,7 +1055,7 @@ class LogicCalculation(
                                                         ?.let { currentValue ->
                                                             expressionResults[i].add(
                                                                 ValidateLogicResult(
-                                                                    !(fieldValue - conditionValue > currentValue),
+                                                                    !(fieldValue - conditionValue >= currentValue),
                                                                     StringDesc.ResourceFormatted(
                                                                         MR.strings.NotGreaterThan,
                                                                         (fieldValue - conditionValue).toString()
@@ -1076,7 +1076,7 @@ class LogicCalculation(
                                                         ?.let { currentValue ->
                                                             expressionResults[i].add(
                                                                 ValidateLogicResult(
-                                                                    !(fieldValue * conditionValue > currentValue),
+                                                                    !(fieldValue * conditionValue >= currentValue),
                                                                     StringDesc.ResourceFormatted(
                                                                         MR.strings.NotGreaterThan,
                                                                         (fieldValue * conditionValue).toString()
@@ -1098,7 +1098,7 @@ class LogicCalculation(
                                                             if (conditionValue != 0.0f)
                                                                 expressionResults[i].add(
                                                                     ValidateLogicResult(
-                                                                        !(fieldValue / conditionValue > currentValue),
+                                                                        !(fieldValue / conditionValue >= currentValue),
                                                                         StringDesc.ResourceFormatted(
                                                                             MR.strings.NotGreaterThan,
                                                                             (fieldValue / conditionValue).toString()
@@ -1266,7 +1266,7 @@ class LogicCalculation(
                                                         ?.let { currentValue ->
                                                             expressionResults[i].add(
                                                                 ValidateLogicResult(
-                                                                    !(fieldValue + conditionValue < currentValue),
+                                                                    !(fieldValue + conditionValue <= currentValue),
                                                                     StringDesc.ResourceFormatted(
                                                                         MR.strings.NotLessThan,
                                                                         (fieldValue + conditionValue).toString()
@@ -1288,7 +1288,7 @@ class LogicCalculation(
                                                         ?.let { currentValue ->
                                                             expressionResults[i].add(
                                                                 ValidateLogicResult(
-                                                                    !(fieldValue - conditionValue < currentValue),
+                                                                    !(fieldValue - conditionValue <= currentValue),
                                                                     StringDesc.ResourceFormatted(
                                                                         MR.strings.NotLessThan,
                                                                         (fieldValue - conditionValue).toString()
@@ -1309,7 +1309,7 @@ class LogicCalculation(
                                                         ?.let { currentValue ->
                                                             expressionResults[i].add(
                                                                 ValidateLogicResult(
-                                                                    !(fieldValue * conditionValue < currentValue),
+                                                                    !(fieldValue * conditionValue <= currentValue),
                                                                     StringDesc.ResourceFormatted(
                                                                         MR.strings.NotLessThan,
                                                                         (fieldValue * conditionValue).toString()
@@ -1330,7 +1330,7 @@ class LogicCalculation(
                                                             if (conditionValue != 0.0f)
                                                                 expressionResults[i].add(
                                                                     ValidateLogicResult(
-                                                                        !(fieldValue / conditionValue < currentValue),
+                                                                        !(fieldValue / conditionValue <= currentValue),
                                                                         StringDesc.ResourceFormatted(
                                                                             MR.strings.NotLessThan,
                                                                             (fieldValue / conditionValue).toString()
@@ -1377,7 +1377,7 @@ class LogicCalculation(
                                                         ?.let { currentValue ->
                                                             expressionResults[i].add(
                                                                 ValidateLogicResult(
-                                                                    !(fieldValue + conditionValue <= currentValue),
+                                                                    !(fieldValue + conditionValue < currentValue),
                                                                     StringDesc.ResourceFormatted(
                                                                         MR.strings.NotLessThanOrEqualTo,
                                                                         (fieldValue + conditionValue).toString()
@@ -1399,7 +1399,7 @@ class LogicCalculation(
                                                         ?.let { currentValue ->
                                                             expressionResults[i].add(
                                                                 ValidateLogicResult(
-                                                                    !(fieldValue - conditionValue <= currentValue),
+                                                                    !(fieldValue - conditionValue < currentValue),
                                                                     StringDesc.ResourceFormatted(
                                                                         MR.strings.NotLessThanOrEqualTo,
                                                                         (fieldValue - conditionValue).toString()
@@ -1420,7 +1420,7 @@ class LogicCalculation(
                                                         ?.let { currentValue ->
                                                             expressionResults[i].add(
                                                                 ValidateLogicResult(
-                                                                    !(fieldValue * conditionValue <= currentValue),
+                                                                    !(fieldValue * conditionValue < currentValue),
                                                                     StringDesc.ResourceFormatted(
                                                                         MR.strings.NotLessThanOrEqualTo,
                                                                         (fieldValue * conditionValue).toString()
@@ -1442,7 +1442,7 @@ class LogicCalculation(
                                                             if (conditionValue != 0.0f)
                                                                 expressionResults[i].add(
                                                                     ValidateLogicResult(
-                                                                        !(fieldValue / conditionValue <= currentValue),
+                                                                        !(fieldValue / conditionValue < currentValue),
                                                                         StringDesc.ResourceFormatted(
                                                                             MR.strings.NotLessThanOrEqualTo,
                                                                             (fieldValue / conditionValue).toString()
