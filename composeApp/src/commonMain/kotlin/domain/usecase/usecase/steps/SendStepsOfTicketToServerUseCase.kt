@@ -173,8 +173,6 @@ class SendStepsOfTicketToServerUseCase(
         iSendStepsRepository.deleteAllSendSteps(arrayListOf(params))
         iStepsRepository.deleteAllSteps(arrayListOf(params))
         iStepPointerRepository.deleteAllStepPointers(arrayListOf(params))
-
-
     }
 
     private fun List<ComponentDomain>.findComponentsByType(type: String): List<ComponentDomain> {

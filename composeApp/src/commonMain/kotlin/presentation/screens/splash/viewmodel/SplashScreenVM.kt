@@ -99,6 +99,8 @@ class SplashScreenVM(
                             eventsVersion.value = CheckVersionEvent.OkVersion
                         }
                     }
+
+                    else -> {}
                 }
             }
 
@@ -129,6 +131,8 @@ class SplashScreenVM(
                         )
 
                     }
+
+                    else -> {}
                 }
             }
         }
