@@ -25,7 +25,7 @@ interface StepsDao {
     @Query("SELECT * FROM StepsEntity")
     suspend fun selectAll(): List<StepsEntity>
 
-    @Query("SELECT * FROM StepsEntity WHERE ticketNumber = :ticketNumber  ORDER BY activityId")
+    @Query("SELECT * FROM StepsEntity WHERE ticketNumber = :ticketNumber  GROUP BY activityId ORDER BY activityId")
     suspend fun selectStepsByTicketNumber(ticketNumber: String) : List<StepsEntity>
 
     @Query("SELECT ticketNumber FROM StepsEntity WHERE edited = 1")
