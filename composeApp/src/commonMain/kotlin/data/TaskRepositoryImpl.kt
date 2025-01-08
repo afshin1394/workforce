@@ -14,7 +14,7 @@ class TaskRepositoryImpl(
     private val db: AppDatabase
 ) : ITaskRepository {
     override suspend fun fetchWorks(): TasksNetworkResponse {
-           return httpClient.get("workforce_management/user/my-tasks/")
+           return httpClient.get("workforce_management/user/v1/my-tasks/")
                 .body<TasksNetworkResponse>()
 
     }
@@ -36,4 +36,7 @@ class TaskRepositoryImpl(
     }
 
 
+    override suspend fun getTaskByTicketNumber(ticketNumber: String): TaskEntity? {
+        return db.taskDao().getTaskByTicketNumber(ticketNumber)
+    }
 }

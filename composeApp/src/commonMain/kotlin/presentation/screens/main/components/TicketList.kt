@@ -103,23 +103,16 @@ fun TicketListScreen(
                     .background(color = backgroundBackground3)
                     .padding(horizontal = spacing2X)
             ) {
-                val filteredList = tasks.filter {
-                    it.basic_info.ticket_number?.lowercase()
-                        ?.contains(searchTextState.lowercase()) == true ||
-                            it.basic_info.ticket_state?.lowercase()
-                                ?.contains(searchTextState.lowercase()) == true ||
-                            it.basic_info.location?.lowercase()
-                                ?.contains(searchTextState.lowercase()) == true ||
-                            it.basic_info.city?.lowercase()
-                                ?.contains(searchTextState.lowercase()) == true ||
-                            it.basic_info.province?.lowercase()
-                                ?.contains(searchTextState.lowercase()) == true ||
-                            it.basic_info.site?.lowercase()
-                                ?.contains(searchTextState.lowercase()) == true ||
-                            it.basic_info.region?.lowercase()
-                                ?.contains(searchTextState.lowercase()) == true
+                val filteredList = tasks.filter { task ->
+
+
+                    task.properties.any { property ->
+                        property.key.lowercase().contains(searchTextState.lowercase()) ||
+                                property.value.lowercase().contains(searchTextState.lowercase())||
+                                task.ticket_number.contains(searchTextState)
+                    }
                 }.filter {
-                    it.basic_info.instanceStateId.toString().contains(selectState.lowercase())
+                    it.instanceStateId.toString().contains(selectState.lowercase())
                 }
                 Napier.log(LogLevel.ASSERT, "selectState", message = selectState)
                 if (!refreshing) {

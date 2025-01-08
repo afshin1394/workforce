@@ -574,7 +574,7 @@ class MainScreen() : Screen {
 
                         MainEvent.SuspendTicket -> {
                             SuspendTicketContentComponent(
-                                ticketNumber = viewModel.selectedTask.value!!.basic_info.ticket_number
+                                ticketNumber = viewModel.selectedTask.value!!.ticket_number
                                     ?: "0",
                                 photoDomainList = viewModel.photoDomainList,
                                 suspendTaskDomain = suspendTaskState,
@@ -780,7 +780,7 @@ class MainScreen() : Screen {
                         LaunchedEffect(Unit) {
                             navigator.push(
                                 TicketProcessScreen(
-                                    viewModel.selectedTask.value?.basic_info?.ticket_id.toString(),
+                                    viewModel.selectedTask.value?.ticket_id.toString(),
                                     viewModel.ticketNumber.value
                                 )
                             )
@@ -834,8 +834,8 @@ class MainScreen() : Screen {
                             TicketListScreen(
                                 searchText = "",
                                 onEvent = { mainEvent: MainEvent, task: TaskDomain? ->
-                                    viewModel.updateTicketId(task?.basic_info?.ticket_id.toString())
-                                    viewModel.updateTicketNumber(task?.basic_info?.ticket_number.toString())
+                                    viewModel.updateTicketId(task?.ticket_id.toString())
+                                    viewModel.updateTicketNumber(task?.ticket_number.toString())
                                     viewModel.updateState(mainEvent)
                                     viewModel.selectedTask.value = task
                                     viewModel.resetSuspendTask()

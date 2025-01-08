@@ -18,10 +18,20 @@ import kotlinx.serialization.json.Json
 import utils.FormViewerTypes
 
 fun TaskStepResponse.toStepDetailsDomain(): List<StepDetailDomain> =
-    this.stepDetails.map {
+    this.detail.map {
         StepDetailDomain(
-            init_wi = it.init_wi,
-            acitivities = it.acitivities.toActivityDomains()
+
+            activity_id = it.activity_id,
+            activity_title = it.activity_title,
+            activity_process_id = it.activity_process_id,
+            activity_task_group = it.activity_task_group?:"",
+            activity_kind = it.activity_kind,
+            activity_form = it.activity_form,
+            workflow_activity_tags_id = it.workflow_activity_tags_id,
+            form_name = it.form_name,
+            form_structure = it.form_structure.toFormStructDomain(),
+
+
         )
     }
 
@@ -60,63 +70,74 @@ fun FormStruct.toFormStructDomain() = FormStructDomain(
 fun Component.isSelectable() =
     this.type == FormViewerTypes.Checklist || this.type == FormViewerTypes.Radio || this.type == FormViewerTypes.Select || this.type == FormViewerTypes.Multi
 
+
 fun TaskStepResponse.toStepDetailsEntity(ticketNumber: String): List<StepsEntity> {
-    return if (this.stepDetails.isNotEmpty()) {
-        this.stepDetails[0].let { stepDetail ->
-            stepDetail.acitivities.map { activity ->
-                val updatedFormStruct = activity.form?.form_structure?.copy(
-                    components = activity.form.form_structure.components?.map { component ->
-                        if (component.isSelectable() && component.defaultValue != null) {
-                            val defaultValueString = when (component.defaultValue) {
-                                is String -> component.defaultValue
-                                else -> component.defaultValue.toString()
-                            }
-                            val updatedValues = component.values?.map { value ->
-                                if (value.value == defaultValueString) {
-                                    value.copy(isSelected = true)
-                                } else {
-                                    value
-                                }
-                            } ?: emptyList()
 
-                            component.copy(
-                                values = updatedValues
-                            )
-                        } else if (component.defaultValue != null) {
-                            val existingValues = component.values ?: emptyList()
-                            val defaultValueString = when (component.defaultValue) {
-                                is String -> component.defaultValue
-                                else -> component.defaultValue.toString()
-                            }
-                            component.copy(
-                                values = existingValues + Value(defaultValueString)
-                            )
-                        } else {
-                            component
+    return if (this.detail.isNotEmpty()) {
+        this.detail.map { stepDetail ->
+
+
+
+            val updatedFormStruct = stepDetail.form_structure.copy(
+                components = stepDetail.form_structure.components?.map { component ->
+                    if (component.isSelectable() && component.defaultValue != null) {
+                        val defaultValueString = when (component.defaultValue) {
+                            is String -> component.defaultValue
+                            else -> component.defaultValue.toString()
                         }
-                    }
-                )
 
-                StepsEntity(
-                    pk = 0,
-                    title = activity.title ?: "",
-                    tag = activity.tag ?: -1,
-                    ticketNumber = ticketNumber,
-                    wi = stepDetail.init_wi,
-                    activityId = activity.id ?: -1,
-                    formStructure = Json.encodeToString(
-                        FormStruct.serializer(),
-                        updatedFormStruct ?: activity.form!!.form_structure
-                    ),
-                    edited = false,
-                    isSent = false
-                )
-            }
+                        val updatedValues = component.values?.map { value ->
+                            if (value.value == defaultValueString) {
+                                value.copy(isSelected = true)
+                            } else {
+                                value
+                            }
+                        } ?: emptyList()
+
+                        component.copy(values = updatedValues)
+
+                    } else if (component.defaultValue != null) {
+                        val existingValues = component.values ?: emptyList()
+                        val defaultValueString = when (component.defaultValue) {
+                            is String -> component.defaultValue
+                            else -> component.defaultValue.toString()
+                        }
+                        component.copy(
+                            values = existingValues + Value(defaultValueString)
+                        )
+
+                    } else {
+                        component
+                    }
+                }
+            )
+
+
+            StepsEntity(
+                pk = 0,
+                title = stepDetail.activity_title,
+                tag = stepDetail.workflow_activity_tags_id,
+                ticketNumber = ticketNumber,
+
+                wi = 0,
+                activityId = stepDetail.activity_id,
+
+                formStructure = Json.encodeToString(
+                    FormStruct.serializer(),
+                    updatedFormStruct
+                ),
+                edited = false,
+                isSent = false
+            )
         }
     } else {
         emptyList()
     }
 }
+
+
+
+
 
 
 fun StepsEntity.toActivityDomain(): ActivityDomain {

@@ -465,6 +465,9 @@ class MainScreenVM(
 
     data class FilterModel(val type: FilterType, val filter: StateFilter)
 
+
+
+
     fun getActiveFilterItems() {
         val filterMaps: ArrayList<FilterModel> = arrayListOf()
 
@@ -479,32 +482,16 @@ class MainScreenVM(
         var tasksList: List<TaskDomain> = tasks.toList()
 
         for (key in filterMaps) {
-            tasksList = when (key.type) {
-                FilterType.REGION -> {
-                    val filteredByRegion =
-                        tasksList.filter { it.basic_info.region == key.filter.title }
-                    filteredByRegion
+            tasksList = tasksList.filter { task ->
+                task.properties.any { property ->
+                    property.key.equals(key.filter.title , ignoreCase = true) &&
+                            property.value.equals(key.filter.title, ignoreCase = true)
                 }
-
-                FilterType.STATE -> {
-                    val filteredByState =
-                        tasksList.filter { it.basic_info.ticket_state == key.filter.title }
-                    filteredByState
-                }
-
-                FilterType.SEVERITY_LEVEL -> {
-                    val filteredBySeverity =
-                        tasksList.filter { it.basic_info.level == key.filter.title }
-                    filteredBySeverity
-                }
-
-                else -> tasksList
             }
         }
 
         clearTasks()
         addTasks(tasksList)
-
     }
 
     fun removeAllFilters() {
@@ -581,7 +568,7 @@ class MainScreenVM(
 
     val suspendTaskDomain = MutableStateFlow<SuspendTaskDomain>(
         SuspendTaskDomain(
-            selectedTask.value?.basic_info?.ticket_number ?: "0",
+            selectedTask.value?.ticket_number ?: "0",
             "",
             "",
             "",
@@ -596,7 +583,7 @@ class MainScreenVM(
     fun loadSuspendTask() {
         viewModelScope.launch {
             selectedTask.value?.let {
-                getSuspendTaskByIdUseCase(it.basic_info.ticket_number ?: "0").collect {
+                getSuspendTaskByIdUseCase(it.ticket_number ?: "0").collect {
                     when (it.status) {
                         AsyncStatus.ERROR -> {
 //                            handleError(it.resultStatus)
@@ -628,7 +615,7 @@ class MainScreenVM(
         Location.start { }
         Napier.log(LogLevel.ASSERT, "atttac", message = suspendTaskDomain.value.attachmentsUri)
         viewModelScope.launch {
-            selectedTask.value?.basic_info?.ticket_number?.let {
+            selectedTask.value?.ticket_number?.let {
                 deleteByTaskIdUseCase(it).collect {
                     when (it.status) {
                         AsyncStatus.ERROR -> {
@@ -721,7 +708,7 @@ class MainScreenVM(
 
     fun resetSuspendTask() {
         suspendTaskDomain.value = SuspendTaskDomain(
-            selectedTask.value?.basic_info?.ticket_number ?: "0",
+            selectedTask.value?.ticket_number ?: "0",
             "",
             "",
             "",
@@ -738,7 +725,7 @@ class MainScreenVM(
 
     private val photoDomain = MutableStateFlow<PhotoDomain>(
         PhotoDomain(
-            selectedTask.value?.basic_info?.ticket_number ?: "0", "0", "0", 0, "", "", 0F
+            selectedTask.value?.ticket_number ?: "0", "0", "0", 0, "", "", 0F
         )
     )
     var photoDomainList = mutableStateListOf<PhotoDomain>()
@@ -748,7 +735,7 @@ class MainScreenVM(
         viewModelScope.launch {
 
             getPhotoByComponentKeyUseCase(
-                selectedTask.value?.basic_info?.ticket_number ?: "0"
+                selectedTask.value?.ticket_number ?: "0"
             ).collect {
                 when (it.status) {
                     AsyncStatus.ERROR -> {
@@ -770,7 +757,7 @@ class MainScreenVM(
                         it.data?.let { it1 ->
                             for (i in it1.indices) {
                                 photoDomain.value = PhotoDomain(
-                                    selectedTask.value?.basic_info?.ticket_number ?: "0",
+                                    selectedTask.value?.ticket_number ?: "0",
                                     "0",
                                     "0",
                                     i.toLong(),
@@ -791,7 +778,7 @@ class MainScreenVM(
     private fun updatePhotoDomain(imgUri: String) {
 
         photoDomain.value = PhotoDomain(
-            selectedTask.value?.basic_info?.ticket_number ?: "0", "0", "0", 0, imgUri, "", 0F
+            selectedTask.value?.ticket_number ?: "0", "0", "0", 0, imgUri, "", 0F
         )
         photoDomainList.add(photoDomain.value)
     }
@@ -803,7 +790,7 @@ class MainScreenVM(
             for (i in photoDomainList.indices) {
                 insertPhotoUseCase(
                     PhotoDomain(
-                        selectedTask.value?.basic_info?.ticket_number ?: "0",
+                        selectedTask.value?.ticket_number ?: "0",
                         "0",
                         "0",
                         photoDomainList[i].index_row,
@@ -863,7 +850,7 @@ class MainScreenVM(
     fun checkIfTicketIsEdited() {
         viewModelScope.launch {
             checkForEditedTicketUseCase(
-                selectedTask.value?.basic_info?.ticket_number ?: ""
+                selectedTask.value?.ticket_number ?: ""
             ).collect {
                 when (it.status) {
                     AsyncStatus.ERROR -> {
@@ -882,8 +869,8 @@ class MainScreenVM(
 
                         }
                         updateState(ViewStates.Success())
-                        updateTicketNumber(selectedTask.value?.basic_info?.ticket_number ?: "")
-                        updateTicketId(selectedTask.value?.basic_info?.ticket_id.toString())
+                        updateTicketNumber(selectedTask.value?.ticket_number ?: "")
+                        updateTicketId(selectedTask.value?.ticket_id.toString())
                     }
 
                     else -> {}
@@ -904,7 +891,7 @@ class MainScreenVM(
 
     private fun saveAndDeletePhotoByComponentKey() {
         viewModelScope.launch {
-            selectedTask.value?.basic_info?.ticket_number?.let {
+            selectedTask.value?.ticket_number?.let {
                 deleteByComponentKeyUseCase(it).collect {
                     when (it.status) {
                         AsyncStatus.ERROR -> {
@@ -933,7 +920,7 @@ class MainScreenVM(
         viewModelScope.launch {
             updateIsEditedTicketUseCase(
                 Pair(
-                    selectedTask.value?.basic_info?.ticket_number.toString(), isEdited
+                    selectedTask.value?.ticket_number.toString(), isEdited
                 )
             ).collect {
                 when (it.status) {
@@ -1022,7 +1009,7 @@ class MainScreenVM(
     fun openInMapHandler() {
         viewModelScope.launch {
             getInitialFormByTask(
-                selectedTask.value?.basic_info?.ticket_number ?: ""
+                selectedTask.value?.ticket_number ?: ""
             ).collect { it ->
                 when (it.status) {
                     AsyncStatus.SUCCESS -> {

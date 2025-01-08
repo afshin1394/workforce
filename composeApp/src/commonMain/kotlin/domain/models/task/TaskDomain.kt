@@ -2,11 +2,18 @@ package domain.models.task
 
 import domain.models.form_struct.InitialFormDomain
 
+
+
 data class TaskDomain(
-    val basic_info: BasicInfoDomain,
-    val initial_form: InitialFormDomain? = null,
+    val ticket_id:Int,
+    val ticket_number: String,
+    val ticket_state: String,
+    val activity_id: Long,
+    val activity__title: String,
+    val instanceStateId: Int?,
+    val properties: List<PropertiesDomain>
 ){
     override fun toString(): String {
-        return "TaskDomain(basic_info=$basic_info, initial_form=$initial_form)"
+        return "TaskDomain(basic_info=$properties)"
     }
 }

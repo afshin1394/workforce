@@ -22,7 +22,7 @@ class StepsRepositoryImpl(
     private val db: AppDatabase,
 ) : IStepsRepository {
     override suspend fun fetch(queryParam: String): TaskStepResponse {
-        val request = httpClient.get("workforce_management/user/steps/") {
+        val request = httpClient.get("workforce_management/user/v1/steps/") {
             parameter("search_p", queryParam)
         }
         if (request.status == HttpStatusCode.OK) {

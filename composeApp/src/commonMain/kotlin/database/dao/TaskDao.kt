@@ -24,4 +24,7 @@ interface TaskDao {
     @Query("UPDATE TaskEntity SET ticket_state = :ticketState WHERE ticket_number = :ticketNumber")
     suspend fun updateStatus(ticketNumber: String, ticketState: String)
 
+    @Query("SELECT * FROM TaskEntity WHERE ticket_number = :ticketNumber LIMIT 1")
+    suspend fun getTaskByTicketNumber(ticketNumber: String): TaskEntity?
+
 }

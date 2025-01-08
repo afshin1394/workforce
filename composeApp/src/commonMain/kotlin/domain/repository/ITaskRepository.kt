@@ -15,5 +15,7 @@ interface ITaskRepository {
 
   suspend fun resetEntitySequence()
 
+  suspend fun getTaskByTicketNumber(ticketNumber: String): TaskEntity?
+
 
 }

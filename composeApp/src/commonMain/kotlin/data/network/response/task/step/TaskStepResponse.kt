@@ -6,5 +6,10 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class TaskStepResponse(
     @SerialName("detail")
-    val stepDetails : List<StepDetail>
-)
+    val detail : List<StepDetail>
+){
+    override fun toString(): String {
+        return "$detail )"
+    }
+
+}

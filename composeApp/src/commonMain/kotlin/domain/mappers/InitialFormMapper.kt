@@ -24,6 +24,7 @@ import data.network.response.task.logic.TicketAutoFillLogic
 import data.network.response.task.logic.TicketAutoFillLogicDomain
 import data.network.response.task.logic.TicketAutoFillOption
 import data.network.response.task.task.InitForm
+import data.network.response.task.task.InstanceTicketsBasicInformationValues
 import database.entity.InitialFormEntity
 import domain.models.form_struct.ComponentDomain
 import domain.models.form_struct.logic.ConditionDomain
@@ -36,7 +37,7 @@ import domain.models.form_struct.ValidateDomain
 import domain.models.form_struct.ValueDate
 import domain.models.form_struct.ValueDomain
 import domain.models.form_struct.logic.TicketAutoFillOptionDomain
-import domain.models.task.InitFormDomain
+import domain.models.task.InstanceTicketsBasicInformationValuesDomain
 
 private fun mapSubtypeToType(subtype: String?): String? {
     return when (subtype) {
@@ -90,9 +91,9 @@ fun List<InitialFormEntity>.toInitialFormDomainList(): List<InitialFormDomain> {
 }
 
 
-fun List<InitForm>.toInitFormDomainList(): List<InitFormDomain> {
+fun List<InstanceTicketsBasicInformationValues>.toInitFormDomainList(): List<InstanceTicketsBasicInformationValuesDomain> {
     return map {
-        InitFormDomain(it.key, it.value)
+        InstanceTicketsBasicInformationValuesDomain(it.key, it.value)
     }
 }
 
@@ -430,6 +431,224 @@ fun List<ConditionDomain>.toCondition(): List<Condition> {
 fun OperatorDomain.toOperator(): Operator {
     return Operator(this.title, this.symbol ?: "")
 }
+
+/*fun InstanceTicketsBasicInformationValues.toInitFormList(): List<InitForm> {
+    val initFormList = mutableListOf<InitForm>()
+
+
+    initFormList.add(InitForm("title", title))
+    initFormList.add(InitForm("region", region))
+    initFormList.add(InitForm("vendor", vendor))
+    initFormList.add(InitForm("activity_type", activity_type))
+    initFormList.add(InitForm("rollback_plan", rollback_plan))
+    initFormList.add(InitForm("subcontractor", subcontractor))
+    initFormList.add(InitForm("logical_access", logical_access))
+    initFormList.add(InitForm("need_kpi_check", need_kpi_check))
+    initFormList.add(InitForm("service_affect", service_affect))
+    initFormList.add(InitForm("datetime_ea1pqd", datetime_ea1pqd))
+    initFormList.add(InitForm("physical_access", physical_access))
+    initFormList.add(InitForm("physical_change", physical_change))
+    initFormList.add(InitForm("planned_end_time", planned_end_time))
+    initFormList.add(InitForm("uat_descriptions", uatDescriptions))
+    initFormList.add(InitForm("implementer_group", implementer_group))
+    initFormList.add(InitForm("objective_product", objective_product))
+    initFormList.add(InitForm("planned_start_time", planned_start_time))
+    initFormList.add(InitForm("other_objective_nes", other_objective_nes))
+    initFormList.add(InitForm("planned_time_details", planned_time_details))
+    initFormList.add(InitForm("planned_time_duration_day", planned_time_duration_day))
+    initFormList.add(InitForm("brief_description_of_change", brief_description_of_change))
+    initFormList.add(InitForm("mtncounterpart_of_implementer", mtncounterpart_of_implementer))
+    initFormList.add(InitForm("impacted_vip_or_vvip_site_list", impacted_vip_or_vvip_site_list))
+    initFormList.add(InitForm("name_of_implementation_support", name_of_implementation_support))
+    initFormList.add(InitForm("work_plan_and_sequence_of_actions", work_plan_and_sequence_of_actions))
+    initFormList.add(InitForm("phone_no_of_implementation_support", phone_no_of_implementation_support))
+    initFormList.add(InitForm("post_implementation_actions_and_plans", post_implementation_actions_and_plans))
+    initFormList.add(InitForm("reason_requirement_of_cr_implementation", reason_requirement_of_cr_implementation))
+    initFormList.add(InitForm("is_shared_account", is_shared_account?:""))
+    initFormList.add(InitForm("implementer_node_user_account", implementer_node_user_account?:""))
+
+
+    initFormList.add(
+        InitForm(
+            "mtni_manager_approval_for_using_shared_account",
+            mtni_manager_approval_for_using_shared_account?.joinToString(",") ?: ""
+        )
+    )
+
+    if (province.isNotEmpty()) {
+        initFormList.add(
+            InitForm(
+                "province",
+                province.joinToString(",") { it }
+            )
+        )
+    }
+
+
+    new_e_tilt?.let {
+        if (it.isNotEmpty()) {
+            initFormList.add(
+                InitForm(
+                    "new_e_tilt",
+                    it.joinToString(",") { jsonElement -> jsonElement.toString() }
+                )
+            )
+        }
+    }
+    new_height?.let {
+        if (it.isNotEmpty()) {
+            initFormList.add(
+                InitForm(
+                    "new_height",
+                    it.joinToString(",") { je -> je.toString() }
+                )
+            )
+        }
+    }
+    new_m_tilt?.let {
+        if (it.isNotEmpty()) {
+            initFormList.add(
+                InitForm(
+                    "new_m_tilt",
+                    it.joinToString(",") { je -> je.toString() }
+                )
+            )
+        }
+    }
+    val observerList = cr_observer.toStringList()
+    if (observerList.isNotEmpty()) {
+        initFormList.add(
+            InitForm(
+                "cr_observer",
+                observerList.joinToString(",")
+            )
+        )
+    }
+    new_azimuth?.let {
+        if (it.isNotEmpty()) {
+            initFormList.add(
+                InitForm(
+                    "new_azimuth",
+                    it.joinToString(",") { je -> je.toString() }
+                )
+            )
+        }
+    }
+    related_oss?.let {
+        if (it.isNotEmpty()) {
+            initFormList.add(
+                InitForm(
+                    "related_oss",
+                    it.joinToString(",") { je -> je.toString() }
+                )
+            )
+        }
+    }
+    sector_name?.let {
+        if (it.isNotEmpty()) {
+            initFormList.add(
+                InitForm(
+                    "sector_name",
+                    it.joinToString(",") { je -> je.toString() }
+                )
+            )
+        }
+    }
+    Objective_nes?.let {
+        if (it.isNotEmpty()) {
+            initFormList.add(
+                InitForm(
+                    "Objective_nes",
+                    it.joinToString(",") { je -> je.toString() }
+                )
+            )
+        }
+    }
+    freq_band_mhz?.let {
+        if (it.isNotEmpty()) {
+            initFormList.add(
+                InitForm(
+                    "freq_band_mhz",
+                    it.joinToString(",") { je -> je.toString() }
+                )
+            )
+        }
+    }
+    original_e_tilt?.let {
+        if (it.isNotEmpty()) {
+            initFormList.add(
+                InitForm(
+                    "original_e_tilt",
+                    it.joinToString(",") { je -> je.toString() }
+                )
+            )
+        }
+    }
+    original_height?.let {
+        if (it.isNotEmpty()) {
+            initFormList.add(
+                InitForm(
+                    "original_height",
+                    it.joinToString(",") { je -> je.toString() }
+                )
+            )
+        }
+    }
+    original_m_tilt?.let {
+        if (it.isNotEmpty()) {
+            initFormList.add(
+                InitForm(
+                    "original_m_tilt",
+                    it.joinToString(",") { je -> je.toString() }
+                )
+            )
+        }
+    }
+    original_azimuth?.let {
+        if (it.isNotEmpty()) {
+            initFormList.add(
+                InitForm(
+                    "original_azimuth",
+                    it.joinToString(",") { je -> je.toString() }
+                )
+            )
+        }
+    }
+    textfield_89b2yi?.let {
+        if (it.isNotEmpty()) {
+            initFormList.add(
+                InitForm(
+                    "textfield_89b2yi",
+                    it.joinToString(",") { je -> je.toString() }
+                )
+            )
+        }
+    }
+
+
+    script_and_documents?.toStringList()?.let { list ->
+        if (list.isNotEmpty()) {
+            initFormList.add(
+                InitForm(
+                    "script_and_documents",
+                    list.joinToString(",")
+                )
+            )
+        }
+    }
+    uat_document_attachment?.toStringList()?.let { list ->
+        if (list.isNotEmpty()) {
+            initFormList.add(
+                InitForm(
+                    "uat_document_attachment",
+                    list.joinToString(",")
+                )
+            )
+        }
+    }
+
+    return initFormList
+}*/
 
 
 

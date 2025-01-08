@@ -1,13 +1,8 @@
 package presentation.screens.ticket_process.viewModel
 
 import androidx.compose.runtime.mutableStateListOf
-import com.benasher44.uuid.Uuid
-import com.benasher44.uuid.uuid4
-import data.network.response.task.task.InitForm
 
-import domain.models.PhotoDomain
-import domain.models.task.InitFormDomain
-import domain.models.task.TaskDomain
+import domain.models.task.InstanceTicketsBasicInformationValuesDomain
 
 import domain.usecase.usecase.initialForm.GetInitialFormByTask
 
@@ -27,7 +22,7 @@ class TicketInfoVM(
 ) : BaseViewModel() {
 
 
-    val initFormsState = mutableStateListOf<InitFormDomain>()
+    val initFormsState = mutableStateListOf<InstanceTicketsBasicInformationValuesDomain>()
 
 
 
@@ -66,7 +61,7 @@ class TicketInfoVM(
                         updateState(ViewStates.Success())
 
                         it.data?.let {
-                            initFormsState.add(InitFormDomain("ticket_number", ticketNumber))
+                            initFormsState.add(InstanceTicketsBasicInformationValuesDomain("ticket_number", ticketNumber))
                             initFormsState .addAll(it.initForms)
                         }
                     }

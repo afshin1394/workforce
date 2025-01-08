@@ -1,8 +1,12 @@
 package domain.mappers
 
 import data.network.response.task.task.Detail
+import data.network.response.task.task.InstanceTicketsBasicInformationValues
+import data.network.response.task.task.InstanceTicketsProperties
 import database.entity.TaskEntity
 import domain.models.task.BasicInfoDomain
+import domain.models.task.InstanceTicketsBasicInformationValuesDomain
+import domain.models.task.PropertiesDomain
 import domain.models.task.TaskDomain
 
 import utils.TaskState
@@ -10,15 +14,12 @@ import utils.TaskState
 
 fun Detail.toTaskEntity(): TaskEntity {
     return TaskEntity(
-        ticket_id = this.basic_info.ticket_id.toInt(),
-        ticket_number = this.basic_info.ticket_number ?: "",
-        ticket_state = this.basic_info.ticket_state ?: "",
-        city = this.basic_info.city ?: "",
-        site = this.basic_info.site ?: "",
-        level = this.basic_info.level ?: "",
-        region = this.basic_info.region ?: "",
-        location = this.basic_info.location ?: "",
-        province = this.basic_info.province ?: ""
+        ticket_id = this.instance__tickets__id,
+        ticket_number = this.instance__tickets__number,
+        ticket_state = this.instance__tickets__state ?: "",
+        activity__title = this.activity__title,
+        activity_id = this.activity_id,
+        properties = this.instance__tickets__properties
     )
 }
 
@@ -54,22 +55,26 @@ fun List<Detail>.toTaskEntityList(): List<TaskEntity> {
 
 fun TaskEntity.toTaskDomain(): TaskDomain {
     return TaskDomain(
-        initial_form = null,
-        basic_info = BasicInfoDomain(
-            ticket_id = this.ticket_id,
-            ticket_number = this.ticket_number,
-            ticket_state = this.ticket_state,
-            level = this.level,
-            location = this.location,
-            site = this.site,
-            region = this.region,
-            province = this.province,
-            city = this.city,
-            instanceStateId = checkForInstanceStateId(this.ticket_state),
-        )
+
+        ticket_id=this.ticket_id,
+        ticket_number=this.ticket_number,
+        ticket_state=this.ticket_state,
+        activity_id = this.activity_id,
+        activity__title = this.activity__title,
+        instanceStateId = checkForInstanceStateId(this.ticket_state),
+        properties=this.properties.toPropertiesDomainList()
     )
 
 }
+
+
+
+fun List<InstanceTicketsProperties>.toPropertiesDomainList(): List<PropertiesDomain> {
+    return map {
+        PropertiesDomain(it.key, it.value)
+    }
+}
+
 
 
 fun List<TaskEntity>.toTaskDomainList(): List<TaskDomain> {

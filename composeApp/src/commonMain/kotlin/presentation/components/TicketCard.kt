@@ -53,9 +53,10 @@ fun ticketCard(
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.Start,
         ) {
+
             Row(verticalAlignment = Alignment.CenterVertically) {
                 androidx.compose.material3.Text(
-                    text = task.basic_info.ticket_number ?: "",
+                    text = task.ticket_number ?: "",
                     style = body_large_strong,
                     maxLines = 1,
                     modifier = Modifier
@@ -66,86 +67,25 @@ fun ticketCard(
             }
             Spacer(modifier = Modifier.padding(vertical = spacing05X))
 
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Start
-            ) {
-                Card(
-                    colors = CardDefaults.cardColors(surfaceErrorLight),
-                    modifier = Modifier
-                        .background(
-                            color = surfaceErrorLight,
-                            shape = RoundedCornerShape(size = radius)
-                        )
-                        .padding(
-                            start = spacing15X,
-                            top = spacing05X,
-                            end = spacing15X,
-                            bottom = spacing05X
-                        )
 
-                ) {
-                    androidx.compose.material3.Text(
-                        text = task.basic_info.province.toString(),
-                        style = body_small,
-                        color = textError
-                    )
-                }
-                Spacer(modifier = Modifier.padding(spacing15X))
-
-                Card(
-                    colors = CardDefaults.cardColors(subtleDefault),
-                    modifier = Modifier
-                        .background(
-                            color = subtleDefault,
-                            shape = RoundedCornerShape(size = radius)
-                        )
-                        .padding(
-                            start = spacing15X,
-                            top = spacing05X,
-                            end = spacing15X,
-                            bottom = spacing05X
-                        )
-
-                ) {
-                    androidx.compose.material3.Text(
-                        text = task.basic_info.region.toString(),
-                        style = body_small, color = textBrand
-                    )
-                }
-                Spacer(modifier = Modifier.padding(spacing15X))
+            task.properties.forEach { property ->
+                androidx.compose.material3.Text(
+                    text = "${property.key}: ${property.value}",
+                    style = body_small,
+                    color = textBrand,
+                    modifier = Modifier.padding(vertical = spacing05X)
+                )
             }
+
             Spacer(modifier = Modifier.padding(vertical = spacing05X))
 
+
             Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Start
+                horizontalArrangement = Arrangement.spacedBy(spacing05X),
+                modifier = Modifier.fillMaxWidth()
             ) {
                 Card(
-                    colors = CardDefaults.cardColors(subtleDefault),
-                    modifier = Modifier
-                        .background(
-                            color = subtleDefault,
-                            shape = RoundedCornerShape(size = radius)
-                        )
-                        .padding(
-                            start = spacing15X,
-                            top = spacing05X,
-                            end = spacing15X,
-                            bottom = spacing05X
-                        )
-                ) {
-                    androidx.compose.material3.Text(
-                        text = task.basic_info.site.toString(),
-                        style = body_small, color = textBrand
-                    )
-                }
-            }
-            Spacer(modifier = Modifier.padding(vertical = spacing05X))
-
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Card(
-                    onClick = debounceClick(onClick = onMoreOptionsClick),
+                    onClick = onMoreOptionsClick,
                     colors = CardDefaults.cardColors(surfaceDefault),
                     modifier = Modifier
                         .weight(1f)
@@ -164,20 +104,13 @@ fun ticketCard(
                             text = stringResource(MR.strings.more_options),
                             color = textPrimary,
                             style = body_large,
-                            fontSize = 16.sp,
-                            maxLines = 1,
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = spacing05X)
+                            textAlign = TextAlign.Center
                         )
                     }
                 }
 
-                Spacer(modifier = Modifier.width(spacing05X))
-
                 Card(
-                    onClick = debounceClick(onClick = onActionClick),
+                    onClick = onActionClick,
                     colors = CardDefaults.cardColors(surfaceBrandDefault),
                     modifier = Modifier
                         .weight(1f)
@@ -185,7 +118,7 @@ fun ticketCard(
                         .border(
                             width = 1.dp,
                             color = strokeDefaultLight,
-                            shape = RoundedCornerShape(size = 12.dp)
+                            shape = RoundedCornerShape(size = radiusLarge)
                         )
                 ) {
                     Box(
@@ -196,11 +129,7 @@ fun ticketCard(
                             text = stringResource(MR.strings.accept),
                             color = textInverse,
                             style = body_large,
-                            maxLines = 1,
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = spacing05X)
+                            textAlign = TextAlign.Center
                         )
                     }
                 }
@@ -208,5 +137,6 @@ fun ticketCard(
         }
     }
 }
+
 
 
