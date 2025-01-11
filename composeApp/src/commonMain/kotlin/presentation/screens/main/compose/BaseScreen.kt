@@ -74,6 +74,7 @@ import presentation.components.bottomSheetDoubleActionWithMessage
 import presentation.components.customBottomSheetWithImage
 import presentation.theme.textInverse
 import presentation.theme.textInverseDisabled
+import utils.DeviceSafetyStates
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
@@ -104,8 +105,10 @@ fun <T : BaseViewModel> BaseScreen(
     val state by viewModel.state.collectAsState()
     val gpsState by viewModel.gpsState.collectAsState()
     val vpnDetectionStates by viewModel.vpnDetectionStates.collectAsState()
+    val isDeviceSafeState by viewModel.isDeviceSafeState.collectAsState()
     val isDrawerInitialized = remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
+    val deviceSafetyScaffoldState = rememberBottomSheetScaffoldState()
     val vpnScaffoldState = rememberBottomSheetScaffoldState()
     val gpsScaffoldState = rememberBottomSheetScaffoldState()
     val networkState by viewModel.networkState.collectAsState()
@@ -120,6 +123,7 @@ fun <T : BaseViewModel> BaseScreen(
             LifecycleEvent.ON_RESUME -> {
                 viewModel.updateLifeCycleEventState(LifecycleEvent.ON_ANY)
                 viewModel.restrictForeignIp()
+                viewModel.detectDeviceSafety()
                 Napier.log(
                     LogLevel.INFO,
                     tag = "onResumeBaseScreen",
@@ -172,6 +176,34 @@ fun <T : BaseViewModel> BaseScreen(
             }
         }
 
+        @Composable
+        fun showDeviceSafetyHandler() {
+            when (isDeviceSafeState) {
+                DeviceSafetyStates.ShowBottomSheet -> {
+                    customBottomSheetWithImage(
+                        BottomSheetActionModel(
+                            "",
+                            surfaceBrandDefault,
+                            surfaceBrandDefault,
+                        ),
+                        description = stringResource(MR.strings.device_not_safe),
+                        imageResource = MR.images.warning,
+                    )
+                    scope.launch {
+                        deviceSafetyScaffoldState.bottomSheetState.expand()
+                    }
+                }
+
+                DeviceSafetyStates.HideBottomSheet -> {
+                    scope.launch {
+                        deviceSafetyScaffoldState.bottomSheetState.collapse()
+                    }
+                }
+
+                else -> {}
+            }
+        }
+
         if (hasDrawer) {
             ModalDrawer(modifier = Modifier.background(color = backgroundBackground3),
                 gesturesEnabled = hasSwipeDrawer,
@@ -192,6 +224,10 @@ fun <T : BaseViewModel> BaseScreen(
                             vpnScaffoldState
                         }
 
+                        isDeviceSafeState == DeviceSafetyStates.ShowBottomSheet -> {
+                            deviceSafetyScaffoldState
+                        }
+
                         gpsState == GpsState.Disabled -> {
                             gpsScaffoldState
                         }
@@ -208,6 +244,10 @@ fun <T : BaseViewModel> BaseScreen(
                         when {
                             vpnDetectionStates is VpnDetectionStates.ShowBottomSheet -> {
                                 showVpnBottomSheetHandler()
+                            }
+
+                            isDeviceSafeState is DeviceSafetyStates.ShowBottomSheet -> {
+                                showDeviceSafetyHandler()
                             }
 
                             gpsState is GpsState.Disabled -> {
@@ -406,6 +446,10 @@ fun <T : BaseViewModel> BaseScreen(
                         vpnScaffoldState
                     }
 
+                    isDeviceSafeState == DeviceSafetyStates.ShowBottomSheet -> {
+                        deviceSafetyScaffoldState
+                    }
+
                     gpsState == GpsState.Disabled -> {
                         gpsScaffoldState
                     }
@@ -424,6 +468,10 @@ fun <T : BaseViewModel> BaseScreen(
                     when {
                         vpnDetectionStates is VpnDetectionStates.ShowBottomSheet -> {
                             showVpnBottomSheetHandler()
+                        }
+
+                        isDeviceSafeState is DeviceSafetyStates.ShowBottomSheet -> {
+                            showDeviceSafetyHandler()
                         }
 
                         gpsState is GpsState.Disabled -> {

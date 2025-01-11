@@ -15,6 +15,7 @@ import irancell.nwg.wfm.LifecycleEvent
 import irancell.nwg.wfm.MR
 import irancell.nwg.wfm.Orientation
 import irancell.nwg.wfm.getOrientation
+import irancell.nwg.wfm.isRootedOrEmulator
 import irancell.nwg.wfm.provideAppContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -52,6 +53,12 @@ sealed class VpnDetectionStates {
     data object ShowBottomSheet : VpnDetectionStates()
 }
 
+sealed class DeviceSafetyStates {
+    data object Default : DeviceSafetyStates()
+    data object HideBottomSheet : DeviceSafetyStates()
+    data object ShowBottomSheet : DeviceSafetyStates()
+}
+
 sealed interface GpsState {
     data object Default : GpsState
     data object Enabled : GpsState
@@ -74,13 +81,15 @@ sealed interface OrientationState {
 
 open class BaseViewModel : ViewModel(), KoinComponent {
     private val ipDetectionUseCase: IpDetectionUseCase by inject()
-    private val autoLogoutUseCase : AutoLogoutUseCase by inject()
+    private val autoLogoutUseCase: AutoLogoutUseCase by inject()
     val loading = MutableStateFlow(false)
     private val _state = MutableStateFlow<ViewStates>(ViewStates.Default)
     private val _serviceState = MutableStateFlow<ServiceState>(ServiceState.Normal)
     private val _networkState = MutableStateFlow<NetworkStates>(NetworkStates.Default)
     private val _vpnDetectionState =
         MutableStateFlow<VpnDetectionStates>(VpnDetectionStates.Default)
+    private val _isDeviceSafeState =
+        MutableStateFlow<DeviceSafetyStates>(DeviceSafetyStates.Default)
     private val _gpsState = MutableStateFlow<GpsState>(GpsState.Default)
     private val _lifeCycleEvent = MutableStateFlow(LifecycleEvent.ON_ANY)
     private val _orientationState = MutableStateFlow<OrientationState>(OrientationState.Default)
@@ -89,6 +98,7 @@ open class BaseViewModel : ViewModel(), KoinComponent {
     val serviceState = _serviceState.asStateFlow()
     val networkState = _networkState.asStateFlow()
     val vpnDetectionStates = _vpnDetectionState.asStateFlow()
+    val isDeviceSafeState = _isDeviceSafeState.asStateFlow()
     val gpsState = _gpsState.asStateFlow()
     val orientationState = _orientationState.asStateFlow()
     private val konnectivity: Konnectivity = Konnectivity()
@@ -112,19 +122,16 @@ open class BaseViewModel : ViewModel(), KoinComponent {
         viewModelScope.launch {
             BackgroundServiceApp.serviceState.collect {
                 Napier.log(LogLevel.ASSERT, tag = "autoLogoutUseCase", message = it.toString())
-
                 when (it) {
-
                     is ServiceState.Faulty -> {
-                        autoLogoutUseCase(Unit).collect{
-                           val result = it
-                            when{
-                                result.status == AsyncStatus.SUCCESS->{
+                        autoLogoutUseCase(Unit).collect {
+                            val result = it
+                            when {
+                                result.status == AsyncStatus.SUCCESS -> {
                                     _serviceState.update { ServiceState.Faulty(MR.strings.unauthorized) }
                                 }
                             }
                         }
-
                     }
 
                     ServiceState.NotRunning -> {
@@ -140,12 +147,19 @@ open class BaseViewModel : ViewModel(), KoinComponent {
                     else -> {}
                 }
             }
-
         }
     }
 
     fun updateLifeCycleEventState(event: LifecycleEvent) {
         _lifeCycleEvent.update { event }
+    }
+
+    fun detectDeviceSafety() {
+        if (isRootedOrEmulator()) {
+            _isDeviceSafeState.update { DeviceSafetyStates.ShowBottomSheet }
+        } else {
+            _isDeviceSafeState.update { DeviceSafetyStates.HideBottomSheet }
+        }
     }
 
     fun restrictForeignIp() {
@@ -167,6 +181,7 @@ open class BaseViewModel : ViewModel(), KoinComponent {
                     AsyncStatus.EMPTY -> {
 
                     }
+
                     AsyncStatus.SUCCESS -> {
                         if (it.data.toString() != "IR") {
                             _vpnDetectionState.update { VpnDetectionStates.ShowBottomSheet }
@@ -293,6 +308,6 @@ open class BaseViewModel : ViewModel(), KoinComponent {
 
     fun updateServiceState(serviceState: ServiceState) {
 
-     _serviceState.update { serviceState }
+        _serviceState.update { serviceState }
     }
 }
