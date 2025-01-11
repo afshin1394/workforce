@@ -1,35 +1,50 @@
 package irancell.nwg.wfm
-const val SP_NAME = "wfm_preference"
+
+import android.content.Context
+import android.content.SharedPreferences
+import androidx.security.crypto.EncryptedSharedPreferences
+import androidx.security.crypto.MasterKey
+
+const val SP_NAME = "secure_wfm_preference"
 
 actual fun KMMContext.putInt(key: String, value: Int) {
-    getSpEditor().putInt(key, value).apply()
+    getSecureSpEditor().putInt(key, value).apply()
 }
 
 actual fun KMMContext.getInt(key: String, default: Int): Int {
-    return  getSp().getInt(key, default )
+    return getSecureSp().getInt(key, default)
 }
 
 actual fun KMMContext.putString(key: String, value: String) {
-    getSpEditor().putString(key, value).apply()
+    getSecureSpEditor().putString(key, value).apply()
 }
 
 actual fun KMMContext.getString(key: String): String? {
-    return  getSp().getString(key, null)
+    return getSecureSp().getString(key, null)
 }
 
 actual fun KMMContext.putBool(key: String, value: Boolean) {
-    getSpEditor().putBoolean(key, value).apply()
+    getSecureSpEditor().putBoolean(key, value).apply()
 }
 
 actual fun KMMContext.getBool(key: String, default: Boolean): Boolean {
-    return getSp().getBoolean(key, default)
+    return getSecureSp().getBoolean(key, default)
 }
 
-private fun KMMContext.getSp() = getSharedPreferences(SP_NAME, 0)
+private fun KMMContext.getSecureSp(): SharedPreferences {
+    return EncryptedSharedPreferences.create(
+        this,
+        SP_NAME,
+        MasterKey.Builder(this)
+            .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
+            .build(),
+        EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+        EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+    )
+}
 
-private fun KMMContext.getSpEditor() = getSp().edit()
+private fun KMMContext.getSecureSpEditor() = getSecureSp().edit()
 
 actual fun KMMContext.delete() {
-    getSpEditor().clear().apply()
+    getSecureSpEditor().clear().apply()
 }
-

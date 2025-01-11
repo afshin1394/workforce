@@ -92,8 +92,8 @@ kotlin {
                 implementation(libs.konnectivity)
                 implementation(libs.room.runtime)
                 implementation(libs.sqlite.bundled)
-
                 implementation(libs.landscapist.coil3)
+                implementation(libs.security.crypto)
             }
         }
 
@@ -109,16 +109,12 @@ kotlin {
                 implementation(libs.androidx.activity.compose)
                 implementation(libs.compose.ui.tooling)
                 implementation(libs.play.service.location)
-
                 implementation(libs.koin.android)
                 implementation(libs.ktor.client.okhttp)
                 implementation(libs.ktor.client.logging)
                 implementation(libs.accompanist.permission)
-
                 implementation(libs.osmdroid.android)
                 implementation(libs.kotlin.reflect)
-
-
             }
         }
 
@@ -128,7 +124,6 @@ kotlin {
 
             dependencies {
                 implementation(libs.ktor.client.darwin)
-
             }
         }
         val iosArm64Test by getting {
@@ -136,27 +131,21 @@ kotlin {
 
             dependencies {
                 implementation(libs.ktor.client.darwin)
-
             }
         }
         val iosX64Main by getting {
             dependsOn(commonMain)
 
             dependencies {
-
                 implementation(libs.ktor.client.darwin)
-
             }
         }
         val iosSimulatorArm64Main by getting {
             dependsOn(commonMain)
-
             dependencies {
                 implementation(libs.ktor.client.darwin)
-
             }
         }
-
     }
 }
 
@@ -217,6 +206,7 @@ dependencies {
     implementation(libs.androidx.appcompat)
     implementation(libs.androidx.material)
     implementation(libs.androidx.constraintlayout)
+    implementation(libs.androidx.security.crypto.ktx)
     debugImplementation(libs.compose.ui.tooling)
     commonMainApi(libs.bundles.moko.resources)
     add("kspCommonMainMetadata", libs.room.compiler)
