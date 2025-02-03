@@ -6,6 +6,8 @@ import domain.models.form_struct.InitialFormDomain
 
 data class TaskDomain(
     val ticket_id:Int,
+    val ticket_type_id:Int,
+    val instancePrefix :String,
     val ticket_number: String,
     val ticket_state: String,
     val activity_id: Long,
@@ -14,6 +16,6 @@ data class TaskDomain(
     val properties: List<PropertiesDomain>
 ){
     override fun toString(): String {
-        return "TaskDomain(basic_info=$properties)"
+        return "$instancePrefix"
     }
 }

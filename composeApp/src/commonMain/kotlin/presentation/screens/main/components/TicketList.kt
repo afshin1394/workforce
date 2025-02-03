@@ -24,12 +24,15 @@ import presentation.theme.backgroundBackground3
 import com.irancell.nwg.wfm.presentation.theme.spacing15X
 import com.irancell.nwg.wfm.presentation.theme.spacing2X
 import dev.icerock.moko.resources.compose.stringResource
+import domain.mappers.toStateFilterList
+import domain.models.task.ActivityListDomain
 import domain.models.task.TaskDomain
 import io.github.aakira.napier.LogLevel
 import io.github.aakira.napier.Napier
 import irancell.nwg.wfm.MR
 import irancell.nwg.wfm.getSharedPref
 import kotlinx.coroutines.launch
+import presentation.model.StateFilter
 import presentation.screens.main.viewmodel.MainScreenVM
 import utils.TaskState
 import utils.UpdateTaskListTypes
@@ -39,6 +42,7 @@ import utils.UpdateType
 @Composable
 fun TicketListScreen(
     tasks: List<TaskDomain>,
+    tasksActivityListFilter: List<ActivityListDomain>,
     searchText: String = "",
     onEvent: (mainEvents: MainEvent, selectedTask: TaskDomain?) -> Unit = { _: MainEvent, _: TaskDomain? -> },
     onAccept: (item: TaskDomain) -> Unit,
@@ -46,6 +50,9 @@ fun TicketListScreen(
 ) {
     val refreshScope = rememberCoroutineScope()
     var refreshing by remember { mutableStateOf(false) }
+
+
+
 
     fun refresh() =
         refreshScope.launch {
@@ -66,6 +73,24 @@ fun TicketListScreen(
         mutableStateOf("")
     }
 
+
+
+    val dynamicFilterList = tasksActivityListFilter.toStateFilterList()
+
+    val finalFilterList = buildList {
+        add(
+            StateFilter(
+                id = TaskState.All.id,
+                title = stringResource(MR.strings.all),
+                isActive = true
+            )
+        )
+        addAll(dynamicFilterList)
+    }
+
+    var selectedFilterTitle by remember {
+        mutableStateOf(finalFilterList.firstOrNull()?.title ?: "")
+    }
     Column(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -82,17 +107,21 @@ fun TicketListScreen(
             }, onFilterClick = {
                 onEvent(MainEvent.ActionFilter, null)
             })
+
+
         FilterRow(
             Modifier
                 .fillMaxWidth()
                 .padding(horizontal = spacing2X),
-            itemTitleSelected = stringResource(MR.strings.all)
+            itemTitleSelected = selectedFilterTitle
+            ,
+            items = finalFilterList
         ) {
-
+            selectedFilterTitle = it.title
             selectState = if (it.id == TaskState.All.id) {
                 ""
             } else {
-                it.id.toString()
+                it.title
             }
         }
        Box(modifier = if (getSharedPref().getString(UpdateType)==UpdateTaskListTypes.Manual) Modifier.pullRefresh(refreshState) else Modifier) {
@@ -112,7 +141,8 @@ fun TicketListScreen(
                                 task.ticket_number.contains(searchTextState)
                     }
                 }.filter {
-                    it.instanceStateId.toString().contains(selectState.lowercase())
+                    println("filterChip   ${it.activity__title.lowercase()}   ${selectState.lowercase()}")
+                    it.activity__title.lowercase().contains(selectState.lowercase())
                 }
                 Napier.log(LogLevel.ASSERT, "selectState", message = selectState)
                 if (!refreshing) {
@@ -121,7 +151,7 @@ fun TicketListScreen(
                     Napier.log(LogLevel.ASSERT, "refreshing", message = refreshing.toString())
                     itemsIndexed(items = filteredList
                     ) { _: Int, item: TaskDomain ->
-                        ticketCard(modifier = Modifier.animateItemPlacement(tween(1500))
+                        ticketCard(modifier = Modifier
                             .wrapContentHeight()
                             .fillMaxWidth()
                             .padding(top = spacing15X),

@@ -14,6 +14,7 @@ import database.dao.StepPointerDao
 import database.dao.StepsDao
 import database.dao.SuspendTaskDao
 import database.dao.TaskDao
+import database.entity.ActivityListEntity
 import database.entity.GeneralLocationEntity
 import database.entity.InitialFormEntity
 import database.entity.PhotoEntity
@@ -29,7 +30,7 @@ import database.type_converter.InitFormTypeConverter
 
 //update in database version due to PhotoEntity migration ----> angle : String -> Float
 @Database(
-    entities = [ProfileEntity::class, RoleEntity::class, GeneralLocationEntity::class, TaskEntity::class, SuspendTaskEntity::class, InitialFormEntity::class, PhotoEntity::class, StepsEntity::class,StepPointerEntity::class,SendStepsEntity::class],
+    entities = [ProfileEntity::class, RoleEntity::class, GeneralLocationEntity::class, TaskEntity::class, SuspendTaskEntity::class, InitialFormEntity::class, PhotoEntity::class, StepsEntity::class,StepPointerEntity::class,SendStepsEntity::class,ActivityListEntity::class],
     version = 5
 )
 @TypeConverters(InitFormTypeConverter::class)

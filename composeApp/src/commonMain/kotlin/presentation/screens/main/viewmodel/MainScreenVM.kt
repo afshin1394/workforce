@@ -14,6 +14,7 @@ import domain.models.PhotoDomain
 import presentation.model.StateFilter
 import presentation.screens.main.events.MainEvent
 import domain.models.SuspendTaskDomain
+import domain.models.task.ActivityListDomain
 import domain.models.task.TaskDomain
 import domain.usecase.usecase.auth.LogoutUseCase
 import domain.usecase.usecase.availability.ChangeServerAvailabilityUseCase
@@ -32,6 +33,7 @@ import domain.usecase.usecase.steps.UpdateIsEditedTicketUseCase
 import domain.usecase.usecase.suspendTask.DeleteByTaskIdUseCase
 import domain.usecase.usecase.suspendTask.GetSuspendTaskByIdUseCase
 import domain.usecase.usecase.suspendTask.StoreSuspendTaskUseCase
+import domain.usecase.usecase.ticket.GetActivityListUseCase
 import domain.usecase.usecase.ticket.GetTasksUseCase
 import domain.usecase.usecase.ticket.UpdateTaskUseCase
 import io.github.aakira.napier.LogLevel
@@ -51,7 +53,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
-import presentation.model.Task
 import utils.AsyncResult
 import utils.AsyncStatus
 import utils.AvailabilityObjectId
@@ -90,6 +91,7 @@ class MainScreenVM(
     private val deleteSendLocationUseCase: DeleteSendLocationUseCase,
     private val updateTaskUseCase: UpdateTaskUseCase,
     private val getInitialFormByTask: GetInitialFormByTask,
+    private  val getActivityListUseCase: GetActivityListUseCase
 ) : BaseViewModel() {
     private val _availability = MutableStateFlow(false)
     val availability = _availability.asStateFlow()
@@ -97,6 +99,11 @@ class MainScreenVM(
     val openCamera = _openCamera.asStateFlow()
     private val _tasks = mutableStateListOf<TaskDomain>()
     val tasks: List<TaskDomain> = _tasks
+
+    private val _tasksActivityList = mutableStateListOf<ActivityListDomain>()
+    val tasksActivityList: List<ActivityListDomain> = _tasksActivityList
+
+
     private val _profileName = MutableStateFlow("")
     val profileName = _profileName.asStateFlow()
     private val _reload = MutableStateFlow(false)
@@ -120,18 +127,24 @@ class MainScreenVM(
     private val _showAcceptDialog = MutableStateFlow(false)
     var showAcceptDialog = _showAcceptDialog.asStateFlow()
     val generalLocationList = mutableStateListOf<GeneralLocationEntity>()
-    private val konnectivity: Konnectivity = Konnectivity()
+     val konnectivity: Konnectivity = Konnectivity()
     private val _ticketListStatus =
         MutableStateFlow<TicketListStatus>(TicketListStatus.UnRecognized)
     val ticketListStatus = _ticketListStatus.asStateFlow()
-
+    private var selectedTicketType: String? = null
     init {
+        Napier.log(
+            LogLevel.ASSERT, "getAllWorksUseCase", message = " call function init"
+        )
         traceNetwork()
         getProfileName()
         getTasks()
+        getActivityList()
         updateTicketNumber("")
         updateTicketId("")
         collectTicketListState()
+
+
     }
 
     fun addTasks(tasks: List<TaskDomain>) {
@@ -172,12 +185,19 @@ class MainScreenVM(
         }
     }
 
+
+
+
+
+
+
     private fun traceNetwork() {
         viewModelScope.launch(Dispatchers.Main) {
             konnectivity.currentNetworkConnectionState.collect { connection ->
                 when (connection) {
                     NetworkConnection.NONE -> {
                         updateAvailabilityState(AvailabilityStatus.NoInternet)
+                        println("checkUpdate")
                     }
 
                     else -> {
@@ -195,6 +215,25 @@ class MainScreenVM(
             }
         }
     }
+
+    private fun filterTasksForNoInternet() {
+
+
+
+            val filteredTasks = _tasks.filter { it.instancePrefix.contains("w") }
+
+
+            _tasks.clear()
+            _tasks.addAll(filteredTasks)
+
+
+
+
+
+    }
+
+
+
 
 
     private fun startWorkerManager() {
@@ -461,14 +500,86 @@ class MainScreenVM(
         )
     )
 
-    val filterSectionItems: MutableList<FilterSectionItem> = mutableListOf(items, items2, items3)
 
+
+    fun createTicketTypeFilterSection(tasks: List<TaskDomain>): FilterSectionItem {
+
+        val distinctPrefixes = tasks.map { it.instancePrefix }.distinct()
+
+
+        val prefixFilters = distinctPrefixes.mapIndexed { index, prefix ->
+            StateFilter(
+
+                id = index + 1,
+                title = prefix,
+                isActive = false ,
+                type = FilterType.TICKET_TYPE
+            )
+        }
+
+
+        return FilterSectionItem(
+            title = "Ticket Type",
+            filterStates = ArrayList(prefixFilters)
+        )
+    }
+
+  // val filterSectionItems: MutableList<FilterSectionItem> = mutableListOf(items, items2, items3)
+
+
+
+    private val _filterSectionItems = mutableStateListOf<FilterSectionItem>()
+    val filterSectionItems: MutableList<FilterSectionItem> get() = _filterSectionItems
+
+
+
+    private fun buildFiltersFromTasks() {
+
+        val filterTicketType = createTicketTypeFilterSection(_tasks)
+        _filterSectionItems.clear()
+/*        _filterSectionItems.add(items)
+        _filterSectionItems.add(items2)
+        _filterSectionItems.add(items3)*/
+       _filterSectionItems.add(filterTicketType)
+
+
+    }
     data class FilterModel(val type: FilterType, val filter: StateFilter)
 
-
-
-
     fun getActiveFilterItems() {
+     val filterMaps: ArrayList<FilterModel> = arrayListOf()
+
+        filterSectionItems.forEach { section ->
+            section.filterStates.forEach { filterState ->
+                if (filterState.isActive) {
+
+                    if (filterState.type == FilterType.TICKET_TYPE) {
+                        selectedTicketType = filterState.title
+                    }
+                    filterMaps.add(FilterModel(filterState.type, filterState))
+                }
+            }
+        }
+
+        var tasksList: List<TaskDomain> = tasks.toList()
+
+       for (key in filterMaps) {
+            tasksList = when (key.type) {
+                FilterType.TICKET_TYPE -> {
+                    val filteredByTicketType =
+                        tasksList.filter { it.instancePrefix == key.filter.title }
+                    filteredByTicketType
+                }
+                else -> tasksList
+            }
+        }
+       clearTasks()
+        addTasks(tasksList)
+
+    }
+
+
+  /*  fun getActiveFilterItems() {
         val filterMaps: ArrayList<FilterModel> = arrayListOf()
 
         filterSectionItems.forEach { section ->
@@ -492,7 +603,8 @@ class MainScreenVM(
 
         clearTasks()
         addTasks(tasksList)
-    }
+    }*/
+
 
     fun removeAllFilters() {
         filterSectionItems.forEach {
@@ -503,8 +615,13 @@ class MainScreenVM(
                 }
             }
         }
+        selectedTicketType = null
         clearTasks()
         addTasks(tasks)
+    }
+
+    fun clearFilters() {
+        _filterSectionItems.clear()
     }
 
     fun openCamera() {
@@ -517,7 +634,7 @@ class MainScreenVM(
         _openCamera.update { openCamera }
     }
 
-
+    private var isFiltersBuilt = false
     fun getTasks() {
         viewModelScope.launch(Dispatchers.Main) {
             delay(1000)
@@ -548,18 +665,109 @@ class MainScreenVM(
 
                     AsyncStatus.SUCCESS -> {
                         clearTasks()
+
                         updateState(ViewStates.Success())
                         Napier.log(
                             LogLevel.ASSERT, "getAllWorksUseCase", message = "SUCCESS: " + it.data
                         )
                         it.data?.let { it1 ->
-                            addTasks(it1)
+
+
+                             addTasks(it1)
+
+
+
                             _reload.update { true }
-                            getActiveFilterItems()
+
+                            if (!isFiltersBuilt) {
+
+                                buildFiltersFromTasks()
+                                isFiltersBuilt = true
+                            }
+
+
+
+                                konnectivity.currentNetworkConnectionState.collect { connection ->
+                                    if (connection == NetworkConnection.NONE) {
+                                        isFiltersBuilt = false
+                                        clearFilters()
+                                        filterTasksForNoInternet()
+
+                                    } else {
+                                        getActiveFilterItems()
+
+                                    }
+                                }
+
+
+
+
                         }
+
                         Napier.log(
                             LogLevel.ASSERT, "getAllWorksUseCase", message = "initialTasks: $tasks"
                         )
+                    }
+                }
+            }
+        }
+    }
+
+     fun getActivityList() {
+        viewModelScope.launch(Dispatchers.Main) {
+
+            getActivityListUseCase(Unit).collect {
+                when (it.status) {
+                    AsyncStatus.ERROR -> {
+
+                        handleError(it.resultStatus)
+                        Napier.log(
+                            LogLevel.ASSERT, "getActivityListUseCase", message = "ERROR: " + it.message
+                        )
+                    }
+
+                    AsyncStatus.LOADING -> {
+                        _reload.update { false }
+                        Napier.log(LogLevel.ASSERT, "getActivityListUseCase", message = "LOADING: ")
+
+                    }
+
+                    AsyncStatus.EMPTY -> {
+                        updateState(ViewStates.EMPTY)
+                        Napier.log(
+                            LogLevel.ASSERT, "getActivityListUseCase", message = "EMPTY: ${it.data}"
+                        )
+                        _reload.update { true }
+                    }
+
+                    AsyncStatus.SUCCESS -> {
+                        _tasksActivityList.clear()
+                        updateState(ViewStates.Success())
+
+                        it.data?.let { it1 ->
+
+                            println("Comparing: instancePrefix=    ${it.data}")
+
+
+                            val filteredActivities = selectedTicketType?.let { prefix ->
+                                it1.filter { act ->
+                                    println("Comparing: instancePrefix='${act.instancePrefix}', prefix='${prefix}'")
+                                    act.instancePrefix.trim().equals(prefix.trim(), ignoreCase = true)
+                                }
+                            } ?: it1
+
+                           _tasksActivityList.addAll(filteredActivities)
+
+                            println("Comparing: instancePrefix=    ${filteredActivities.size}")
+
+
+
+                            Napier.log(
+                                LogLevel.ASSERT, "getActivityListUseCase", message = "SUCCESS: $it1"
+                            )
+
+                        }
+
                     }
                 }
             }

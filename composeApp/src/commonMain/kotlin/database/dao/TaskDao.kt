@@ -4,6 +4,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import database.entity.ActivityListEntity
 import database.entity.TaskEntity
 
 @Dao
@@ -15,11 +16,17 @@ interface TaskDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAll(task: List<TaskEntity>)
 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertAllActivityList(task: List<ActivityListEntity>)
+
     @Query("DELETE FROM TaskEntity")
     suspend fun deleteAll()
 
     @Query("SELECT * FROM TaskEntity ORDER BY ticket_id DESC")
     suspend fun selectAll(): List<TaskEntity>
+
+    @Query("SELECT * FROM ActivityListEntity ")
+    suspend fun selectAllActivityList(): List<ActivityListEntity>
 
     @Query("UPDATE TaskEntity SET ticket_state = :ticketState WHERE ticket_number = :ticketNumber")
     suspend fun updateStatus(ticketNumber: String, ticketState: String)

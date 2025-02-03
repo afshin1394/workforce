@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 5,
-    "identityHash": "7f7b0824e455f406395a5a361849fdb2",
+    "identityHash": "ebec96b725afa9e4feeb54272600380d",
     "entities": [
       {
         "tableName": "ProfileEntity",
@@ -179,12 +179,24 @@
       },
       {
         "tableName": "TaskEntity",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`ticket_id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `ticket_number` TEXT NOT NULL, `ticket_state` TEXT NOT NULL, `activity_id` INTEGER NOT NULL, `activity__title` TEXT NOT NULL, `properties` TEXT NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`ticket_id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `ticket_type_id` INTEGER NOT NULL, `instancePrefix` TEXT NOT NULL, `ticket_number` TEXT NOT NULL, `ticket_state` TEXT NOT NULL, `activity_id` INTEGER NOT NULL, `activity__title` TEXT NOT NULL, `properties` TEXT NOT NULL)",
         "fields": [
           {
             "fieldPath": "ticket_id",
             "columnName": "ticket_id",
             "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ticket_type_id",
+            "columnName": "ticket_type_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "instancePrefix",
+            "columnName": "instancePrefix",
+            "affinity": "TEXT",
             "notNull": true
           },
           {
@@ -548,11 +560,45 @@
             "pk"
           ]
         }
+      },
+      {
+        "tableName": "ActivityListEntity",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `id` INTEGER, `title` TEXT, `instancePrefix` TEXT NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "pk",
+            "columnName": "pk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "title",
+            "columnName": "title",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "instancePrefix",
+            "columnName": "instancePrefix",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "pk"
+          ]
+        }
       }
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '7f7b0824e455f406395a5a361849fdb2')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'ebec96b725afa9e4feeb54272600380d')"
     ]
   }
 }

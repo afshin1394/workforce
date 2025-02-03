@@ -18,6 +18,7 @@ import presentation.screens.splash.events.PermissionEvent
 import utils.AsyncStatus
 import utils.BaseViewModel
 import androidx.compose.runtime.State
+import com.plusmobileapps.konnectivity.Konnectivity
 import domain.models.version.GetVersionDomain
 import domain.usecase.usecase.profile.StoreProfileUseCase
 import irancell.nwg.wfm.getSharedPref
@@ -37,7 +38,7 @@ class SplashScreenVM(
 
     private val _versionData = mutableStateOf<GetVersionDomain?>(null)
     val versionData: State<GetVersionDomain?> = _versionData
-
+     val konnectivity: Konnectivity = Konnectivity()
     init {
         checkVersionOfServer()
         InternalStorage.initWFMImages(provideAppContext())

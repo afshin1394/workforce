@@ -16,6 +16,8 @@ data class Detail(
     val instance__tickets__properties:List<InstanceTicketsProperties>,
     @SerialName("instance__tickets__id")
     val  instance__tickets__id:Int,
+    @SerialName("instance__tickets__ticket_id")
+    val  instance__tickets__ticket_id:Int,
     @SerialName("instance__tickets__state")
     val instance__tickets__state:String,
     @SerialName("instance__tickets__basic_information__values")

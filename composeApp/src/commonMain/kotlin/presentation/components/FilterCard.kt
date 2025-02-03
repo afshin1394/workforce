@@ -67,16 +67,8 @@ fun FilterCard(item: StateFilter, isSelected: Boolean, onItemSelected: () -> Uni
 fun FilterRow(
     modifier: Modifier = Modifier,
     itemTitleSelected: String,
-    items: List<StateFilter> = arrayListOf(
-        StateFilter(TaskState.All.id, stringResource(MR.strings.all), false),
-        StateFilter(TaskState.Draft.id, stringResource(MR.strings.draft), false),
-        StateFilter(TaskState.Running.id, stringResource(MR.strings.running), false),
-        StateFilter(TaskState.Cancelled.id, stringResource(MR.strings.cancel), false),
-        StateFilter(TaskState.Suspended.id, stringResource(MR.strings.suspended), false),
-        StateFilter(TaskState.Completed.id, stringResource(MR.strings.completed), false),
-
-
-        ), updateFilter: (stateFilter: StateFilter) -> Unit = {}
+    items: List<StateFilter>,
+    updateFilter: (stateFilter: StateFilter) -> Unit = {}
 ) {
 
 

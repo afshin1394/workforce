@@ -2,6 +2,7 @@ package presentation.screens.main.compose
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -31,6 +32,7 @@ import com.irancell.nwg.wfm.presentation.components.*
 import presentation.screens.main.events.MainEvent
 import presentation.screens.main.viewmodel.MainScreenVM
 import com.irancell.nwg.wfm.presentation.theme.*
+import com.plusmobileapps.konnectivity.NetworkConnection
 import dev.icerock.moko.resources.compose.painterResource
 import presentation.screens.main.components.TicketListScreen
 import dev.icerock.moko.resources.compose.stringResource
@@ -105,6 +107,14 @@ class MainScreen() : Screen {
         val networkState by viewModel.networkState.collectAsState()
 
 
+        val connectivityState = remember { mutableStateOf<NetworkConnection>(NetworkConnection.NONE) }
+
+
+        LaunchedEffect(Unit) {
+           viewModel. konnectivity.currentNetworkConnectionState.collect { connection ->
+                connectivityState.value = connection
+            }
+        }
         LaunchedEffect(true) {
 
             showContent = true
@@ -483,9 +493,23 @@ class MainScreen() : Screen {
                     when (eventsState) {
                         MainEvent.ActionFilter -> {
 
-                            CustomFilterSectionPreview(viewModel.filterSectionItems)
-                            scope.launch {
-                                scaffoldState.bottomSheetState.expand()
+                            if (viewModel.filterSectionItems.isNotEmpty()) {
+                                CustomFilterSectionPreview(viewModel.filterSectionItems)
+                                scope.launch {
+                                    scaffoldState.bottomSheetState.expand()
+                                }
+                            } else {
+
+                                Box(
+                                    modifier = Modifier
+                                        .padding(16.dp)
+                                ) {
+                                    Text(
+                                        text = "No filters to show.",
+                                        style = MaterialTheme.typography.h6,
+                                        modifier = Modifier.align(Alignment.Center)
+                                    )
+                                }
                             }
                         }
 
@@ -814,9 +838,11 @@ class MainScreen() : Screen {
                             viewModel.updateCameraStatus(false)
                         }
                     }
+                   if (connectivityState.value != NetworkConnection.NONE) {
                     if (availability) {
                         if (reloadState) {
                             viewModel.getTasks()
+                           viewModel.getActivityList()
                         }
                         Column(
                             modifier = Modifier
@@ -841,6 +867,7 @@ class MainScreen() : Screen {
                                     viewModel.resetSuspendTask()
                                 },
                                 tasks = viewModel.tasks,
+                                tasksActivityListFilter = viewModel.tasksActivityList,
                                 onAccept = {
                                     viewModel.checkIfTicketIsEdited()
                                     viewModel.selectedTask.value = it
@@ -849,6 +876,44 @@ class MainScreen() : Screen {
                                 viewModel = viewModel
                             )
                         }
+                    }
+                  } else {
+                       if (reloadState) {
+                           viewModel.getTasks()
+
+                       }
+                       Column(
+                           modifier = Modifier
+                               .fillMaxWidth(),
+                           horizontalAlignment = Alignment.CenterHorizontally
+                       ) {
+                           if (ticketListStatus == TicketListStatus.UnRecognized) {
+                               LinearProgressIndicator(
+                                   modifier = Modifier
+                                       .fillMaxWidth()
+                                       .height(1.5.dp),
+                                   color = if (networkState == NetworkStates.NetworkConnectionNONE) Color.Red else surfaceBrandDefault
+                               )
+                           }
+                           TicketListScreen(
+                               searchText = "",
+                               onEvent = { mainEvent: MainEvent, task: TaskDomain? ->
+                                   viewModel.updateTicketId(task?.ticket_id.toString())
+                                   viewModel.updateTicketNumber(task?.ticket_number.toString())
+                                   viewModel.updateState(mainEvent)
+                                   viewModel.selectedTask.value = task
+                                   viewModel.resetSuspendTask()
+                               },
+                               tasks = viewModel.tasks,
+                               tasksActivityListFilter = viewModel.tasksActivityList,
+                               onAccept = {
+                                   viewModel.checkIfTicketIsEdited()
+                                   viewModel.selectedTask.value = it
+                                   viewModel.resetSuspendTask()
+                               },
+                               viewModel = viewModel
+                           )
+                       }
                     }
                     if (viewModel.showAcceptDialog.value) {
 

@@ -66,6 +66,7 @@ import domain.usecase.usecase.steps.UpdateIsEditedTicketUseCase
 import domain.usecase.usecase.suspendTask.DeleteByTaskIdUseCase
 import domain.usecase.usecase.suspendTask.GetSuspendTaskByIdUseCase
 import domain.usecase.usecase.suspendTask.StoreSuspendTaskUseCase
+import domain.usecase.usecase.ticket.GetActivityListUseCase
 import domain.usecase.usecase.ticket.UpdateTaskUseCase
 import domain.usecase.usecase.ticket.GetTasksUseCase
 import domain.usecase.usecase.ticket.GetTicketDetailsUseCase
@@ -102,9 +103,7 @@ import presentation.screens.main.viewmodel.MapVM
 import presentation.screens.main.viewmodel.NotificationScreenVM
 import presentation.screens.splash.viewmodel.SplashScreenVM
 import presentation.screens.ticket_process.viewModel.TicketInfoVM
-import utils.DeploymentBASEURL
 import utils.DevelopmentBASEURL
-import utils.ProductionBASEURL
 import utils.Token
 
 fun repositoryModule() = module {
@@ -159,6 +158,7 @@ fun useCaseModule() = module {
     factory { GetAvailabilityObjectIdUseCase() }
     factory { LoginUseCase(get()) }
     factory { GetTasksUseCase(get()) }
+    factory { GetActivityListUseCase(get()) }
     factory { UpdateTaskUseCase(get(), get(), get(), get(), get()) }
     factory { LoginUseCase(get()) }
     factory { VerifyUseCase(get()) }
@@ -344,6 +344,7 @@ fun viewModelModule() = module {
             get(),
             get(),
             get(),
+            get()
         )
     }
     viewModelDefinition { SettingScreenVM() }

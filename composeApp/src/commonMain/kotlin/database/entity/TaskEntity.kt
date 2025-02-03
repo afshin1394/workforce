@@ -25,6 +25,8 @@ data class TaskEntity(
 @Entity
 data class TaskEntity(
     @PrimaryKey(autoGenerate = true) val ticket_id: Int,
+    val ticket_type_id:Int,
+    val instancePrefix :String,
     val ticket_number: String,
     val ticket_state: String,
     val activity_id: Long,

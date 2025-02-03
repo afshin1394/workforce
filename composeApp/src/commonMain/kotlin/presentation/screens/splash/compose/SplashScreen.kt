@@ -26,12 +26,14 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import presentation.components.bottomSheetDoubleActionBottomBarWithLoading
 import presentation.components.bottomSingleActionComponentWithLoading
 import com.irancell.nwg.wfm.presentation.theme.spacing2X
+import com.plusmobileapps.konnectivity.NetworkConnection
 import dev.icerock.moko.resources.compose.painterResource
 import dev.icerock.moko.resources.compose.stringResource
 import irancell.nwg.wfm.LifecycleEvent
 import irancell.nwg.wfm.MR
 import irancell.nwg.wfm.OnLifecycleEvent
 import irancell.nwg.wfm.checkPermission
+import irancell.nwg.wfm.getSharedPref
 import irancell.nwg.wfm.openAppSettings
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -48,6 +50,7 @@ import presentation.theme.surfaceBrandDefault
 import presentation.theme.textInverse
 import presentation.theme.textInverseDisabled
 import utils.ButtonState
+import utils.Token
 import utils.startDownloadFileApk
 
 class SplashScreen : Screen {
@@ -330,8 +333,29 @@ class SplashScreen : Screen {
 
                     CheckVersionEvent.InvalidToken -> {
                         if (permissionState == PermissionEvent.IsGranted) {
-                            navigator.popAll()
-                            navigator.push(loginScreen)
+                            scope.launch {
+
+                                viewModel.konnectivity.currentNetworkConnectionState.collect { connection ->
+                                    if (connection == NetworkConnection.NONE) {
+                                        if(getSharedPref().getString(Token)!=null ||getSharedPref().getString(Token)!=""){
+                                            navigator.popAll()
+                                            navigator.push(mainScreen)
+                                        }else{
+                                            navigator.popAll()
+                                            navigator.push(loginScreen)
+                                        }
+                                    }else{
+                                        navigator.popAll()
+                                        navigator.push(loginScreen)
+                                    }
+                                }
+
+                            }
+
+
+
+
+
 
                         }else{
                             if (permissionState == PermissionEvent.DeniedPermission) {

@@ -1,13 +1,19 @@
 package domain.mappers
 
+import data.network.response.task.activity.ActivityListResponse
 import data.network.response.task.task.Detail
 import data.network.response.task.task.InstanceTicketsBasicInformationValues
 import data.network.response.task.task.InstanceTicketsProperties
+import database.entity.ActivityListEntity
 import database.entity.TaskEntity
+import domain.models.task.ActivityListDomain
 import domain.models.task.BasicInfoDomain
 import domain.models.task.InstanceTicketsBasicInformationValuesDomain
 import domain.models.task.PropertiesDomain
 import domain.models.task.TaskDomain
+import io.ktor.util.reflect.instanceOf
+import presentation.model.FilterType
+import presentation.model.StateFilter
 
 import utils.TaskState
 
@@ -15,6 +21,8 @@ import utils.TaskState
 fun Detail.toTaskEntity(): TaskEntity {
     return TaskEntity(
         ticket_id = this.instance__tickets__id,
+        ticket_type_id = this.instance__tickets__ticket_id,
+        instancePrefix = "",
         ticket_number = this.instance__tickets__number,
         ticket_state = this.instance__tickets__state ?: "",
         activity__title = this.activity__title,
@@ -58,11 +66,28 @@ fun TaskEntity.toTaskDomain(): TaskDomain {
 
         ticket_id=this.ticket_id,
         ticket_number=this.ticket_number,
+        ticket_type_id = this.ticket_type_id,
+        instancePrefix = this.instancePrefix,
         ticket_state=this.ticket_state,
         activity_id = this.activity_id,
         activity__title = this.activity__title,
         instanceStateId = checkForInstanceStateId(this.ticket_state),
         properties=this.properties.toPropertiesDomainList()
+    )
+
+}
+
+fun TaskDomain.toTaskEntity(): TaskEntity {
+    return TaskEntity(
+
+        ticket_id=this.ticket_id,
+        ticket_number=this.ticket_number,
+        ticket_type_id = this.ticket_type_id,
+        instancePrefix = this.instancePrefix,
+        ticket_state=this.ticket_state,
+        activity_id = this.activity_id,
+        activity__title = this.activity__title,
+        properties=this.properties.toInstanceTicketsPropertiesList()
     )
 
 }
@@ -75,7 +100,11 @@ fun List<InstanceTicketsProperties>.toPropertiesDomainList(): List<PropertiesDom
     }
 }
 
-
+fun List<PropertiesDomain>.toInstanceTicketsPropertiesList(): List<InstanceTicketsProperties> {
+    return map {
+        InstanceTicketsProperties(it.key, it.value)
+    }
+}
 
 fun List<TaskEntity>.toTaskDomainList(): List<TaskDomain> {
     return map {
@@ -120,4 +149,54 @@ fun checkForInstanceStateId(ticketInstanceState: String): Int {
         }
     }
 
+}
+
+fun ActivityListResponse.toEntity(): ActivityListEntity {
+    return ActivityListEntity(
+        pk = 0,
+        id = this.id,
+        title = this.title,
+
+
+    )
+}
+
+/*fun List<ActivityListResponse>.toEntityList(): List<ActivityListEntity> {
+    return this.map { it.toEntity() }
+}*/
+
+fun ActivityListDomain.domainToEntity(): ActivityListEntity {
+    return ActivityListEntity(
+        id = this.id,
+        title = this.title,
+        instancePrefix = this.instancePrefix
+    )
+}
+fun List<ActivityListDomain>.toEntityList(): List<ActivityListEntity> {
+    return this.map { it.domainToEntity() }
+}
+
+fun ActivityListEntity.toDomain(): ActivityListDomain {
+    return ActivityListDomain(
+        id = this.id,
+        title = this.title,
+        instancePrefix=this.instancePrefix
+    )
+}
+
+fun List<ActivityListEntity>.toDomainList(): List<ActivityListDomain> {
+    return this.map { it.toDomain() }
+}
+
+fun ActivityListDomain.toStateFilter(): StateFilter {
+    return StateFilter(
+        id = this.id?.toInt() ?: 0,
+        title = this.title ?: "",
+        isActive = false,
+        type = FilterType.DEFAULT
+    )
+}
+
+fun List<ActivityListDomain>.toStateFilterList(): List<StateFilter> {
+    return this.map { it.toStateFilter() }
 }
