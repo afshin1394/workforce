@@ -71,11 +71,18 @@ abstract class BaseUseCase<out Type, in Params> {
         }
         .catch { exception ->
             println("stepsYO   ${"catch"}")
+
+            var errorMessage = exception.message ?: "Unknown error"
+
+            val regex = """"detail"\s*:\s*"([^"]+)"""".toRegex()
+            val matchResult = regex.find(errorMessage)
+            if (matchResult != null) {
+                errorMessage = matchResult.groupValues[1]
+            }
             val resultStatus = (exception as? Exception)?.handleError() ?: ResultStatus.EXCEPTION
-            emit(AsyncResult.Error(exception.message ?: "no message", resultStatus))
+            emit(AsyncResult.Error(errorMessage, resultStatus))
             SentryLog(exception.stackTraceToString() ?: "no stack trace")
         }
-
 
 
     private fun Exception.handleError(): ResultStatus {

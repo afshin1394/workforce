@@ -4,6 +4,8 @@ import com.plusmobileapps.konnectivity.Konnectivity
 import com.plusmobileapps.konnectivity.NetworkConnection
 import dev.icerock.moko.mvvm.viewmodel.ViewModel
 import dev.icerock.moko.resources.StringResource
+import dev.icerock.moko.resources.desc.StringDesc
+import dev.icerock.moko.resources.desc.desc
 import domain.usecase.ResultStatus
 import domain.usecase.usecase.auth.AutoLogoutUseCase
 import domain.usecase.usecase.ipDetection.IpDetectionUseCase
@@ -34,7 +36,7 @@ sealed class AvailabilityStatus {
 sealed class ViewStates {
     data object Default : ViewStates()
     data object Loading : ViewStates()
-    data class Error(val message: StringResource) : ViewStates()
+    data class Error(val message: String) : ViewStates()
     data class Success(val message: StringResource? = MR.strings.success) : ViewStates()
     data object EMPTY : ViewStates()
 }
@@ -246,8 +248,11 @@ open class BaseViewModel : ViewModel(), KoinComponent {
         _vpnDetectionState.update { vpnDetectionStates }
     }
 
-    fun handleError(resultStatus: ResultStatus?) {
 
+
+    fun handleError(resultStatus: ResultStatus?, errorMessage: String? = null){
+
+        val errorResource = errorMessage?.let { stringToResource(it) } ?: MR.strings.client_error.desc()
         when (resultStatus) {
             is ResultStatus.CLIENT_EXCEPTION.FORBIDDEN -> {
                 _serviceState.update { ServiceState.Faulty(MR.strings.unauthorized) }
@@ -258,35 +263,35 @@ open class BaseViewModel : ViewModel(), KoinComponent {
             }
 
             is ResultStatus.CLIENT_EXCEPTION -> {
-                _state.update { ViewStates.Error(MR.strings.client_error) }
+                _state.update { ViewStates.Error(errorMessage?:"An error has been occurred please contact support") }
             }
 
             is ResultStatus.EXCEPTION -> {
-                _state.update { ViewStates.Error(MR.strings.general_error) }
+                _state.update { ViewStates.Error(errorMessage?:"An error has been occurred please contact support") }
             }
 
             is ResultStatus.IO_EXCEPTION -> {
-                _state.update { ViewStates.Error(MR.strings.general_error) }
+                _state.update { ViewStates.Error(errorMessage?:"An error has been occurred please contact support") }
             }
 
             is ResultStatus.REDIRECT_EXCEPTION -> {
-                _state.update { ViewStates.Error(MR.strings.redirect_error) }
+                _state.update { ViewStates.Error("Redirect Exception happened") }
             }
 
             is ResultStatus.SERVER_EXCEPTION -> {
-                _state.update { ViewStates.Error(MR.strings.server_error) }
+                _state.update { ViewStates.Error("Server is not available right now, please try later") }
             }
 
             is ResultStatus.SUCCESS -> {
-                _state.update { ViewStates.Error(MR.strings.success) }
+                _state.update { ViewStates.Error("Success") }
             }
 
             is ResultStatus.TIME_OUT -> {
-                _state.update { ViewStates.Error(MR.strings.timeout_error) }
+                _state.update { ViewStates.Error("Please check your network connection") }
             }
 
             else -> {
-                _state.update { ViewStates.Error(MR.strings.general_error) }
+                _state.update { ViewStates.Error(errorMessage?:"An error has been occurred please contact support") }
             }
         }
     }

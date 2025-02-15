@@ -103,6 +103,7 @@ import presentation.screens.main.viewmodel.MapVM
 import presentation.screens.main.viewmodel.NotificationScreenVM
 import presentation.screens.splash.viewmodel.SplashScreenVM
 import presentation.screens.ticket_process.viewModel.TicketInfoVM
+import utils.DeploymentBASEURL
 import utils.DevelopmentBASEURL
 import utils.Token
 

@@ -142,6 +142,7 @@ fun <T : BaseViewModel> BaseScreen(
     ) {
         @Composable
         fun showVpnBottomSheetHandler() {
+
             when (vpnDetectionStates) {
                 VpnDetectionStates.ShowBottomSheet -> {
                     customBottomSheetWithImage(
@@ -332,8 +333,7 @@ fun <T : BaseViewModel> BaseScreen(
                                 ViewStates.EMPTY -> {}
 
                                 is ViewStates.Error -> {
-                                    val errorMessage =
-                                        stringResource((state as ViewStates.Error).message)
+                                    val errorMessage = ((state as ViewStates.Error).message)
 
                                     Napier.log(
                                         LogLevel.INFO, tag = "fkpekfpw", message = errorMessage
@@ -585,8 +585,7 @@ fun <T : BaseViewModel> BaseScreen(
 //                            }
 
                             is ViewStates.Error -> {
-                                val errorMessage =
-                                    stringResource((state as ViewStates.Error).message)
+                                val errorMessage = ((state as ViewStates.Error).message)
                                 LaunchedEffect(Unit) {
                                     scaffoldState.snackbarHostState.showSnackbar(message = errorMessage)
                                     viewModel.updateState(ViewStates.Default)

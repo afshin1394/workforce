@@ -141,7 +141,7 @@ class TicketProcessVM(
             ).collect {
                 when (it.status) {
                     AsyncStatus.ERROR -> {
-                        handleError(it.resultStatus)
+                        handleError(it.resultStatus,it.message)
                         events.value = TicketProcessEvent.Default
 
                     }
@@ -230,7 +230,7 @@ class TicketProcessVM(
             ).collect {
                 when (it.status) {
                     AsyncStatus.ERROR -> {
-                        handleError(it.resultStatus)
+                        handleError(it.resultStatus,it.message)
                     }
 
                     AsyncStatus.LOADING -> {
@@ -253,7 +253,7 @@ class TicketProcessVM(
             sendStepsOfTicketToServerUseCase(_ticketNumber.value).collect {
                 when (it.status) {
                     AsyncStatus.ERROR -> {
-                        handleError(it.resultStatus)
+                        handleError(it.resultStatus,it.message)
                     }
 
                     AsyncStatus.LOADING -> {
@@ -290,7 +290,7 @@ class TicketProcessVM(
             ).collect {
                 when (it.status) {
                     AsyncStatus.ERROR -> {
-                        handleError(it.resultStatus)
+                        handleError(it.resultStatus,it.message)
                         events.value = TicketProcessEvent.Default
 
                     }
@@ -540,7 +540,7 @@ class TicketProcessVM(
             getPhotoByComponentKeyUseCase(ticketNumber.value).collect {
                 when (it.status) {
                     AsyncStatus.ERROR -> {
-                        handleError(it.resultStatus)
+                        handleError(it.resultStatus,it.message)
                     }
 
                     AsyncStatus.LOADING -> {
@@ -681,11 +681,11 @@ class TicketProcessVM(
 
     suspend fun saveAndDeletePhotoByComponentKey() {
         if (photoDomainList.isNotEmpty()) {
-            _ticketNumber.value.let {
+            _ticketNumber.value.let { it ->
                 deleteByComponentKeyUseCase(it).collect {
                     when (it.status) {
                         AsyncStatus.ERROR -> {
-                            handleError(it.resultStatus)
+                            handleError(it.resultStatus,it.message)
                             Location.stop()
 
                         }
@@ -729,7 +729,7 @@ class TicketProcessVM(
             ).collect {
                 when (it.status) {
                     AsyncStatus.ERROR -> {
-                        handleError(it.resultStatus)
+                        handleError(it.resultStatus,it.message)
 
                     }
 
@@ -788,7 +788,7 @@ class TicketProcessVM(
             .collect {
                 when (it.status) {
                     AsyncStatus.ERROR -> {
-                        handleError(it.resultStatus)
+                        handleError(it.resultStatus,it.message)
                     }
 
                     AsyncStatus.LOADING -> {

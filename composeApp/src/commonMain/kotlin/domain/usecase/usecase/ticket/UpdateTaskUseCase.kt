@@ -128,7 +128,7 @@ class UpdateTaskUseCase(
             } ?: activityDomain
         }
 
-        println("TestListtttt ${updatedActivityList}")
+
 
         iTaskRepository.insertAllActivityList(updatedActivityList.toEntityList())
         iTaskRepository.insertAll(uniqueTasks)

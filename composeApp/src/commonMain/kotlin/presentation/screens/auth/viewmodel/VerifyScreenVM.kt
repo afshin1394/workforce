@@ -6,6 +6,7 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import com.irancell.nwg.wfm.presentation.model.View
 import data.network.request.version.VersionRequest
+import dev.icerock.moko.resources.desc.desc
 import domain.models.version.GetVersionDomain
 import domain.usecase.usecase.auth.ResendUseCase
 import domain.usecase.usecase.auth.VerifyUseCase
@@ -78,7 +79,7 @@ class VerifyScreenVM(
               verify(otpCode.value)
           }
       },{
-            updateState(ViewStates.Error(MR.strings.form))
+            updateState(ViewStates.Error("Form Viewer"))
       })
     }
 

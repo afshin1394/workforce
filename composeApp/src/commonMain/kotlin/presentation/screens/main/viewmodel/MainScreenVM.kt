@@ -371,7 +371,7 @@ class MainScreenVM(
             ).collect {
                 when (it.status) {
                     AsyncStatus.ERROR -> {
-                        handleError(it.resultStatus)
+                        handleError(it.resultStatus,it.message)
                         Napier.log(LogLevel.ASSERT, "resrrrr", message = it.resultStatus.toString())
                     }
 
@@ -404,7 +404,7 @@ class MainScreenVM(
             changeServerAvailabilityUseCase(Unit).collect { result ->
                 when (result) {
                     is AsyncResult.Error -> {
-                        handleError(result.resultStatus)
+                        handleError(result.resultStatus,result.message)
                     }
 
                     is AsyncResult.Loading -> {
@@ -642,7 +642,7 @@ class MainScreenVM(
                 when (it.status) {
                     AsyncStatus.ERROR -> {
                         //handleError(it.resultStatus)
-                        handleError(it.resultStatus)
+                        handleError(it.resultStatus,it.message)
                         Napier.log(
                             LogLevel.ASSERT, "getAllWorksUseCase", message = "ERROR: " + it.message
                         )
@@ -720,7 +720,7 @@ class MainScreenVM(
                 when (it.status) {
                     AsyncStatus.ERROR -> {
 
-                        handleError(it.resultStatus)
+                        handleError(it.resultStatus,it.message)
                         Napier.log(
                             LogLevel.ASSERT, "getActivityListUseCase", message = "ERROR: " + it.message
                         )
@@ -827,7 +827,7 @@ class MainScreenVM(
                 deleteByTaskIdUseCase(it).collect {
                     when (it.status) {
                         AsyncStatus.ERROR -> {
-                            handleError(it.resultStatus)
+                            handleError(it.resultStatus,it.message)
                             Location.stop()
                         }
 
@@ -864,7 +864,7 @@ class MainScreenVM(
             ).collect {
                 when (it.status) {
                     AsyncStatus.ERROR -> {
-                        handleError(it.resultStatus)
+                        handleError(it.resultStatus,it.message)
                         Location.stop()
                     }
 
@@ -947,7 +947,7 @@ class MainScreenVM(
             ).collect {
                 when (it.status) {
                     AsyncStatus.ERROR -> {
-                        handleError(it.resultStatus)
+                        handleError(it.resultStatus,it.message)
                     }
 
                     AsyncStatus.LOADING -> {
@@ -1010,7 +1010,7 @@ class MainScreenVM(
                 ).collect {
                     when (it.status) {
                         AsyncStatus.ERROR -> {
-                            handleError(it.resultStatus)
+                            handleError(it.resultStatus,it.message)
                         }
 
                         AsyncStatus.LOADING -> {
@@ -1062,7 +1062,7 @@ class MainScreenVM(
             ).collect {
                 when (it.status) {
                     AsyncStatus.ERROR -> {
-                        handleError(it.resultStatus)
+                        handleError(it.resultStatus,it.message)
                     }
 
                     AsyncStatus.LOADING -> {
@@ -1103,7 +1103,7 @@ class MainScreenVM(
                 deleteByComponentKeyUseCase(it).collect {
                     when (it.status) {
                         AsyncStatus.ERROR -> {
-                            handleError(it.resultStatus)
+                            handleError(it.resultStatus,it.message)
                             Location.stop()
                         }
 
@@ -1133,7 +1133,7 @@ class MainScreenVM(
             ).collect {
                 when (it.status) {
                     AsyncStatus.ERROR -> {
-                        handleError(it.resultStatus)
+                        handleError(it.resultStatus,it.message)
                     }
 
                     AsyncStatus.LOADING -> {

@@ -9,7 +9,7 @@ import irancell.nwg.wfm.getSharedPref
 
 
 suspend fun startDownloadFileApk(url: String): Boolean {
-    val url = DeploymentBASEURLForVersionFile + url
+    val url = DevelopmentBASEURLForVersionFile + url
 
 
     if (getSharedPref().getString(FileApk).isNullOrEmpty()) {

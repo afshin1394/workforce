@@ -46,7 +46,7 @@ class TicketInfoVM(
             getInitialFormByTask(ticketNumber).collect {
                 when (it.status) {
                     AsyncStatus.ERROR -> {
-                        handleError(it.resultStatus)
+                        handleError(it.resultStatus,it.message)
                     }
 
                     AsyncStatus.LOADING -> {

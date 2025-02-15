@@ -63,7 +63,8 @@ class LoginScreenVM(
             loginUseCase(LoginRequestDomain(userName, password)).collect {
                 when (it.status) {
                     AsyncStatus.ERROR -> {
-                        handleError(it.resultStatus)
+                        handleError(it.resultStatus,it.message)
+                        println("Error Massage API Hani:  ${it.message}")
                     }
 
                     AsyncStatus.LOADING -> {
