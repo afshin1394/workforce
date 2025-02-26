@@ -156,9 +156,11 @@ android {
     sourceSets["main"].manifest.srcFile("src/androidMain/AndroidManifest.xml")
     sourceSets["main"].res.srcDirs("src/androidMain/res")
     sourceSets["main"].resources.srcDirs("src/commonMain/resources")
+
+
     defaultConfig {
         applicationId = "irancell.nwg.wfm"
-        minSdk = libs.versions.android.minSdk.get().toInt()
+        minSdk = 29
         targetSdk = libs.versions.android.targetSdk.get().toInt()
         versionCode = 23
         versionName = "0.2.3"
@@ -180,7 +182,7 @@ android {
 
     buildTypes {
         getByName("release") {
-            isDebuggable = true
+            isDebuggable = false
             isMinifyEnabled = false
             signingConfig = signingConfigs.getByName("release")
         }

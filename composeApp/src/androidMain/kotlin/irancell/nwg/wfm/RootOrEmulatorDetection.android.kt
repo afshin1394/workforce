@@ -1,7 +1,10 @@
 package irancell.nwg.wfm
 
+import android.content.Context
 import android.os.Build
 import java.io.File
+import java.io.IOException
+import java.net.Socket
 
 actual fun isRootedOrEmulator(): Boolean {
     return isRooted() || isEmulator()
@@ -35,22 +38,31 @@ private fun isRooted(): Boolean {
     return isRootBinaryPresent || isDangerousPropertySet
 }
 
+
+
 private fun isEmulator(): Boolean {
-    val buildProps = listOf(
-        Build.FINGERPRINT,
-        Build.MODEL,
-        Build.MANUFACTURER,
-        Build.BRAND,
-        Build.HARDWARE,
-        Build.PRODUCT,
-        Build.DEVICE
-    )
-    return buildProps.any {
-        it.contains("generic", ignoreCase = true) ||
-                it.contains("emulator", ignoreCase = true) ||
-                it.contains("sdk", ignoreCase = true) ||
-                it.contains("x86", ignoreCase = true) ||
-                it.contains("goldfish", ignoreCase = true) ||
-                it.contains("ranchu", ignoreCase = true)
-    }
+    return Build.MANUFACTURER.contains("Genymotion")
+            || Build.MODEL.contains("google_sdk")
+            || Build.MODEL.toLowerCase().contains("droid4x")
+            || Build.MODEL.contains("Emulator")
+            || Build.MODEL.contains("Android SDK built for x86")
+            || Build.HARDWARE == "goldfish"
+            || Build.HARDWARE == "vbox86"
+            || Build.HARDWARE.toLowerCase().contains("nox")
+            || Build.FINGERPRINT.startsWith("generic")
+            || Build.PRODUCT == "sdk"
+            || Build.PRODUCT == "google_sdk"
+            || Build.PRODUCT == "sdk_x86"
+            || Build.PRODUCT == "vbox86p"
+            || Build.PRODUCT.toLowerCase().contains("nox")
+            || Build.BOARD.toLowerCase().contains("nox")
+
+            || Build.MODEL.toLowerCase().contains("G011A")
+            || Build.MANUFACTURER.toLowerCase().contains("google")
+            || Build.PRODUCT.toLowerCase().contains("G011A")
+            || Build.HARDWARE.toLowerCase().contains("intel")
+            || Build.BRAND.toLowerCase().contains("google")
+            || Build.DEVICE.toLowerCase().contains("G011A")
+            || Build.BOARD.toLowerCase().contains("msm8998")
+            || (Build.BRAND.startsWith("generic") &&    Build.DEVICE.startsWith("generic"))
 }

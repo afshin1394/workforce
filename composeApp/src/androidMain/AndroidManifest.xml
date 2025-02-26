@@ -46,18 +46,12 @@
 <!--            android:configChanges="orientation|screenSize|screenLayout|keyboardHidden|mnc|colorMode|density|fontScale|fontWeightAdjustment|keyboard|layoutDirection|locale|mcc|navigation|smallestScreenSize|touchscreen|uiMode"-->
 <!--            android:exported="true" />-->
         <receiver android:name=".ChangeGpsReceiver"
-            android:exported="true">
+            android:exported="false">
             <intent-filter>
                 <action android:name="android.location.PROVIDERS_CHANGED" />
             </intent-filter>
         </receiver>
 
-        <receiver android:name=".ChangeOrientationReceiver"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.CONFIGURATION_CHANGED" />
-            </intent-filter>
-        </receiver>
         <receiver
             android:name=".SMSBroadcastReceiver"
             android:exported="true"
