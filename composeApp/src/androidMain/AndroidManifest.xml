@@ -24,10 +24,8 @@
     <uses-permission android:name="android.permission.RECEIVE_SMS" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
         android:maxSdkVersion="32" />
-    <uses-permission android:name="android.permission.SEND_SMS"/>
-    <uses-permission
-        android:name="android.permission.QUERY_ALL_PACKAGES"
-        tools:ignore="QueryAllPackagesPermission" />
+
+
     <application
         android:name=".Android.App"
         android:allowBackup="false"
@@ -80,7 +78,7 @@
         </activity>
         <meta-data android:name="io.sentry.auto-init" android:value="false" />
             <!-- Required: set your sentry.io project identifier (DSN) -->
-            <meta-data android:name="io.sentry.dsn" android:value="http://556521e62d1a1e27e53b0fc902bf330c@10.224.235.38:10041/6" />
+          <!--  <meta-data android:name="io.sentry.dsn" android:value="http://556521e62d1a1e27e53b0fc902bf330c@10.224.235.38:10041/6" />-->
 
             <!-- enable automatic breadcrumbs for user interactions (clicks, swipes, scrolls) -->
             <meta-data android:name="io.sentry.traces.user-interaction.enable" android:value="true" />

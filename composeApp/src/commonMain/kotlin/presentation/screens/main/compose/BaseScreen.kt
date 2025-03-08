@@ -123,7 +123,7 @@ fun <T : BaseViewModel> BaseScreen(
             LifecycleEvent.ON_RESUME -> {
                 viewModel.updateLifeCycleEventState(LifecycleEvent.ON_ANY)
                 viewModel.restrictForeignIp()
-                viewModel.detectDeviceSafety()
+              //  viewModel.detectDeviceSafety()
                 Napier.log(
                     LogLevel.INFO,
                     tag = "onResumeBaseScreen",

@@ -21,6 +21,9 @@ plugins {
 
 sentry {
     // List the build types that should be ignored (e.g. "release").
+
+
+    autoUploadProguardMapping.set(false) // غیرفعال کردن آپلود خودکار
     ignoredBuildTypes.set(setOf("debug"))
 
 }
@@ -183,7 +186,12 @@ android {
     buildTypes {
         getByName("release") {
             isDebuggable = false
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            isShrinkResources = true  
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
             signingConfig = signingConfigs.getByName("release")
         }
     }
