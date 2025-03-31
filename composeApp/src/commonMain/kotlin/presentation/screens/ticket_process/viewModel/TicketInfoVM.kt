@@ -63,6 +63,7 @@ class TicketInfoVM(
                         it.data?.let {
                             initFormsState.add(InstanceTicketsBasicInformationValuesDomain("ticket_number", ticketNumber))
                             initFormsState .addAll(it.initForms)
+                            println("khoda komak   ${it.initStructure.components!![0].injected_value?:"kkk"}")
                         }
                     }
                 }

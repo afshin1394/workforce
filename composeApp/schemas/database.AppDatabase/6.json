@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 6,
-    "identityHash": "ebec96b725afa9e4feeb54272600380d",
+    "identityHash": "c161177232208dcb80ad88ab075af582",
     "entities": [
       {
         "tableName": "ProfileEntity",
@@ -305,7 +305,7 @@
       },
       {
         "tableName": "InitialFormEntity",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `ticket_number` TEXT NOT NULL, `initFormList` TEXT NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `ticket_number` TEXT NOT NULL, `initForms` TEXT NOT NULL, `initFormJson` TEXT NOT NULL)",
         "fields": [
           {
             "fieldPath": "pk",
@@ -320,8 +320,14 @@
             "notNull": true
           },
           {
-            "fieldPath": "initFormList",
-            "columnName": "initFormList",
+            "fieldPath": "initForms",
+            "columnName": "initForms",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "initFormJson",
+            "columnName": "initFormJson",
             "affinity": "TEXT",
             "notNull": true
           }
@@ -598,7 +604,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'ebec96b725afa9e4feeb54272600380d')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'c161177232208dcb80ad88ab075af582')"
     ]
   }
 }

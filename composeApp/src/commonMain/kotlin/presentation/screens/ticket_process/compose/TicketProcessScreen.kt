@@ -384,12 +384,21 @@ class TicketProcessScreen(
             content = {
                 when (saveDataStatus) {
                     SaveDataStatus.Success -> {
+
                         navigator.push(
-                            TicketInfoScreen(
+                            TicketStructureInfoScreen(
                                 ticketId = viewModel.ticketId.value,
                                 ticket_number = viewModel.ticketNumber.value
                             )
                         )
+
+
+            /*            navigator.push(
+                            TicketInfoScreen(
+                                ticketId = viewModel.ticketId.value,
+                                ticket_number = viewModel.ticketNumber.value
+                            )
+                        )*/
                     }
 
                     SaveDataStatus.UnRecognized -> {}

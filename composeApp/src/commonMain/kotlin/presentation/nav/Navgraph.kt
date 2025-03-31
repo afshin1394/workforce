@@ -12,6 +12,7 @@ import presentation.screens.main.compose.FormViewerScreen
 import presentation.screens.main.compose.GpsTrackingReportScreen
 import presentation.screens.main.compose.SettingsScreen
 import presentation.screens.ticket_process.compose.TicketProcessScreen
+import presentation.screens.ticket_process.compose.TicketStructureInfoScreen
 
 //@file:OptIn(ExperimentalMaterialApi::class)
 //package com.irancell.nwg.wfm.presentation.nav
@@ -338,6 +339,9 @@ import presentation.screens.ticket_process.compose.TicketProcessScreen
             }
             register<Screen.TicketProcess.TicketInfo> { provider->
                 TicketInfoScreen(provider.ticketId,provider.ticketNumber)
+            }
+            register<Screen.TicketProcess.TicketInfo> { provider->
+                TicketStructureInfoScreen(provider.ticketId,provider.ticketNumber)
             }
             register<Screen.TicketProcess.TicketProcessScreen> { provider->
                 TicketProcessScreen(provider.ticketId,provider.ticketNumber)

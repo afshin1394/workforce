@@ -144,3 +144,14 @@ object AnySerializer : KSerializer<Any> {
         }
     }
 }
+
+fun Any?.toSafeString(): String {
+    return when (this) {
+        null -> ""
+        is String -> this
+        is Number, is Boolean -> this.toString()
+        is List<*> -> this.joinToString(", ") { it.toSafeString() }
+        is Map<*, *> -> this.entries.joinToString(", ") { "${it.key}: ${it.value.toSafeString()}" }
+        else -> this.toString()
+    }
+}

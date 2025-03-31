@@ -19,7 +19,8 @@ class InitialFormRepositoryImpl(
         return db.initialFormDao().selectByTicketNumber(ticketNumber = ticket_number)
             ?: InitialFormEntity(
                 ticket_number = "1",
-                initFormList = arrayListOf()
+                initForms = arrayListOf(),
+                initFormJson = ""
             )
 
     }

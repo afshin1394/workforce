@@ -1,0 +1,14 @@
+package domain.models.form_struct
+
+data class InitFormStructDomain(
+    val id: String? = null,
+    val hide: String? = null,
+    val type: String? = null,
+    var components: List<InitComponentDomain>? = null,
+    val conditional: ConditionalDomain? = null,
+    val schemaVersion: Int? = null,
+) {
+    override fun toString(): String {
+        return "FormStructDomain(id=$id, hide=$hide, type=$type, components=$components, conditional=$conditional, schemaVersion=$schemaVersion)"
+    }
+}

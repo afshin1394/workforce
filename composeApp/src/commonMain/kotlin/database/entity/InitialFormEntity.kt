@@ -10,5 +10,6 @@ import domain.models.task.InstanceTicketsBasicInformationValuesDomain
  data class InitialFormEntity(
     @PrimaryKey(autoGenerate = true) val pk: Long = 0,
     val ticket_number: String,
-    val initFormList: List<InstanceTicketsBasicInformationValues>
+    val initForms: List<InstanceTicketsBasicInformationValues>,
+    val initFormJson: String
 )

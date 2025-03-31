@@ -9,27 +9,29 @@ data class Detail(
 
 
     @SerialName("id")
-    val id:Int,
+    val id: Int,
     @SerialName("instance__tickets__number")
-    val instance__tickets__number:String,
+    val instance__tickets__number: String,
     @SerialName("instance__tickets__properties")
-    val instance__tickets__properties:List<InstanceTicketsProperties>,
+    val instance__tickets__properties: List<InstanceTicketsProperties>,
     @SerialName("instance__tickets__id")
-    val  instance__tickets__id:Int,
+    val instance__tickets__id: Int,
     @SerialName("instance__tickets__ticket_id")
-    val  instance__tickets__ticket_id:Int,
+    val instance__tickets__ticket_id: Int,
     @SerialName("instance__tickets__state")
-    val instance__tickets__state:String,
+    val instance__tickets__state: String,
     @SerialName("instance__tickets__basic_information__values")
-    val instance__tickets__basic_information__values:List<InstanceTicketsBasicInformationValues>,
+    val instance__tickets__basic_information__values: List<InstanceTicketsBasicInformationValues>,
     @SerialName("activity_id")
-    val activity_id:Long,
+    val activity_id: Long,
     @SerialName("activity__title")
-    val activity__title:String
+    val activity__title: String,
+    @SerialName("init_structure")
+    val init_structure: InitStructure
 
 
-){
+) {
     override fun toString(): String {
-        return "Detail(instance__tickets__number=$instance__tickets__number,activity__title=$activity__title )"
+        return "init_structure=$init_structure"
     }
 }

@@ -64,6 +64,7 @@ import presentation.screens.main.components.SuspendTicketContentComponent
 import presentation.screens.main.viewmodel.TicketListStatus
 import presentation.screens.ticket_process.compose.TicketInfoScreen
 import presentation.screens.ticket_process.compose.TicketProcessScreen
+import presentation.screens.ticket_process.compose.TicketStructureInfoScreen
 import presentation.theme.body_large
 import presentation.theme.body_small
 import presentation.theme.surfaceBrandDefault
@@ -574,12 +575,21 @@ class MainScreen() : Screen {
 
                         MainEvent.MoreOptions -> {
                             MoreOptions(onTicketInfoClick = {
+
                                 navigator.push(
-                                    TicketInfoScreen(
+                                    TicketStructureInfoScreen(
                                         ticketId = viewModel.ticketId.value,
                                         ticket_number = viewModel.ticketNumber.value
                                     )
                                 )
+
+
+                            /*    navigator.push(
+                                    TicketInfoScreen(
+                                        ticketId = viewModel.ticketId.value,
+                                        ticket_number = viewModel.ticketNumber.value
+                                    )
+                                )*/
                             },
                                 onCancelClick = {
                                 viewModel.updateState(MainEvent.CancelTicket)

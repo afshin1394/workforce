@@ -103,6 +103,7 @@ import presentation.screens.main.viewmodel.MapVM
 import presentation.screens.main.viewmodel.NotificationScreenVM
 import presentation.screens.splash.viewmodel.SplashScreenVM
 import presentation.screens.ticket_process.viewModel.TicketInfoVM
+import presentation.screens.ticket_process.viewModel.TicketStructureInfoVM
 import utils.DeploymentBASEURL
 import utils.DevelopmentBASEURL
 import utils.Token
@@ -354,6 +355,7 @@ fun viewModelModule() = module {
     viewModelDefinition { VerifyScreenVM(get(), get(), get(), get(), get()) }
     viewModelDefinition { SplashScreenVM(get(), get()) }
     viewModelDefinition { TicketInfoVM(get()) }
+    viewModelDefinition { TicketStructureInfoVM(get()) }
     viewModelDefinition { TicketProcessVM(get(), get(), get(), get(), get(), get(), get(),get()) }
     viewModelDefinition { FormViewerScreenVM(get(), get()) }
     viewModelDefinition { MapVM() }

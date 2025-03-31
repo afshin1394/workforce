@@ -17,7 +17,7 @@ class TaskRepositoryImpl(
     private val db: AppDatabase
 ) : ITaskRepository {
     override suspend fun fetchWorks(): TasksNetworkResponse {
-           return httpClient.get("workforce_management/user/v1/my-tasks/")
+           return httpClient.get("workforce_management/user/v2/my-tasks/")
                 .body<TasksNetworkResponse>()
 
     }

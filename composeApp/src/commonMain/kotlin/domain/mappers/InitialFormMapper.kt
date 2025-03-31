@@ -4,6 +4,7 @@ import data.network.response.task.Component
 import data.network.response.task.Condition
 import data.network.response.task.Conditional
 import data.network.response.task.Expression
+import data.network.response.task.FormStruct
 import data.network.response.task.Layout
 import data.network.response.task.Operator
 import data.network.response.task.Validate
@@ -23,12 +24,22 @@ import data.network.response.task.logic.LogicDomain
 import data.network.response.task.logic.TicketAutoFillLogic
 import data.network.response.task.logic.TicketAutoFillLogicDomain
 import data.network.response.task.logic.TicketAutoFillOption
+import data.network.response.task.step.Form
+import data.network.response.task.task.InitComponent
+import data.network.response.task.task.InitCondition
+import data.network.response.task.task.InitExpression
 import data.network.response.task.task.InitForm
+import data.network.response.task.task.InitLogic
+import data.network.response.task.task.InitOperator
+import data.network.response.task.task.InitStructure
 import data.network.response.task.task.InstanceTicketsBasicInformationValues
 import database.entity.InitialFormEntity
 import domain.models.form_struct.ComponentDomain
 import domain.models.form_struct.logic.ConditionDomain
 import domain.models.form_struct.ConditionalDomain
+import domain.models.form_struct.FormStructDomain
+import domain.models.form_struct.InitComponentDomain
+import domain.models.form_struct.InitFormStructDomain
 import domain.models.form_struct.logic.ExpressionDomain
 import domain.models.form_struct.InitialFormDomain
 import domain.models.form_struct.LayoutDomain
@@ -36,8 +47,11 @@ import domain.models.form_struct.OperatorDomain
 import domain.models.form_struct.ValidateDomain
 import domain.models.form_struct.ValueDate
 import domain.models.form_struct.ValueDomain
+import domain.models.form_struct.logic.InitLogicDomain
 import domain.models.form_struct.logic.TicketAutoFillOptionDomain
+import domain.models.steps.FormDomain
 import domain.models.task.InstanceTicketsBasicInformationValuesDomain
+import kotlinx.serialization.json.Json
 
 private fun mapSubtypeToType(subtype: String?): String? {
     return when (subtype) {
@@ -80,16 +94,84 @@ private fun List<Component>.updateComponentTypesReverse(): List<Component> {
 }
 
 
+
+
+
 fun InitialFormEntity.toInitialFormDomain(): InitialFormDomain {
-    return InitialFormDomain(this.ticket_number, this.initFormList.toInitFormDomainList())
+    val json = Json { ignoreUnknownKeys = true }
+
+    val initStruct = json.decodeFromString(InitStructure.serializer(), this.initFormJson)
+
+    return InitialFormDomain(
+        ticket_number = this.ticket_number,
+        initForms = this.initForms.toInitFormDomainList(),
+        initStructure = initStruct.toInitFormStructDomain()
+    )
 }
 
-fun List<InitialFormEntity>.toInitialFormDomainList(): List<InitialFormDomain> {
+
+fun InitStructure.toInitFormStructDomain() = InitFormStructDomain(
+    this.id,
+    this.hide,
+    this.type,
+    this.components?.toInitComponentDomain(),
+    this.conditional?.toConditionalDomain(),
+    this.schemaVersion
+)
+
+fun List<InitComponent>.toInitComponentDomain(): List<InitComponentDomain> {
     return map {
-        it.toInitialFormDomain()
+        InitComponentDomain(
+            id = it.id,
+            it.key,
+            hide = it.hide,
+            type = it.type,
+            label = it.label,
+            readOnly = it.readOnly ?: false,
+            repeatable = it.repeatable ?: false,
+            removable = it.removable ?: false,
+            subType = it.subType,
+            isMulti = it.isMulti ?: false,
+            values = it.values?.toValueDomain(),
+            conditional = it.conditional?.toConditionalDomain(),
+            _components = it.components?.toInitComponentDomain(),
+            injected_value = it.injected_value,
+            logics = it.logics?.toInitLogicDomain()
+        )
     }
 }
 
+fun List<InitLogic>.toInitLogicDomain(): List<InitLogicDomain> {
+    return map {
+        InitLogicDomain(
+            it.logicType,
+            it.experssions?.toInitExpressionDomain(),
+        )
+    }
+}
+
+fun List<InitExpression>.toInitExpressionDomain(): List<ExpressionDomain> {
+    return map {
+        ExpressionDomain(it.conditions?.toInitConditionDomain())
+    }
+}
+
+fun List<InitCondition>.toInitConditionDomain(): List<ConditionDomain> {
+    return map {
+        ConditionDomain(
+            it.firstFieldKey,
+            it.secondFieldKey,
+            it.firstOperator?.toInitOperatorDomain(),
+            it.secondOperator?.toInitOperatorDomain(),
+            value = it.value,
+            values = it.values
+        )
+    }
+}
+
+fun InitOperator.toInitOperatorDomain(): OperatorDomain {
+    return OperatorDomain(this.title, this.symbol)
+}
 
 fun List<InstanceTicketsBasicInformationValues>.toInitFormDomainList(): List<InstanceTicketsBasicInformationValuesDomain> {
     return map {

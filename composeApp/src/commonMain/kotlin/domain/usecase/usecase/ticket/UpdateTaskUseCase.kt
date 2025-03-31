@@ -1,6 +1,7 @@
 package domain.usecase.usecase.ticket
 
 import data.network.response.task.activity.ActivityListResponse
+import data.network.response.task.task.InitStructure
 import database.entity.InitialFormEntity
 import database.entity.SendStepsEntity
 import database.entity.StepPointerEntity
@@ -28,6 +29,7 @@ import toSendStepEntity
 import toStepDetailsEntity
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.json.Json
 import utils.processInParallel
 
 class UpdateTaskUseCase(
@@ -48,18 +50,25 @@ class UpdateTaskUseCase(
                 instancePrefix = "NoN"
             )
         }
+        Napier.log(LogLevel.ASSERT, tag = "TasssssssssskkkkkkkkV2", message = "yessss0")
         val tasks = iTaskRepository.fetchWorks()
 
-        Napier.log(LogLevel.ASSERT, tag = "CallApi  task   stepsYOMMMM", message = tasks.details.toString())
-        val initialTasks = tasks.details
-            .mapNotNull { task ->
-                task.instance__tickets__basic_information__values?.let {newModel ->
-                    InitialFormEntity(
-                        ticket_number = task.instance__tickets__number ?: "",
-                        initFormList = newModel
-                    )
-                }
-            }
+        Napier.log(LogLevel.ASSERT, tag = "TasssssssssskkkkkkkkV2", message = "yessss")
+        Napier.log(LogLevel.ASSERT, tag = "TasssssssssskkkkkkkkV2", message = tasks.details.toString())
+        val initialTasks = tasks.details.mapNotNull { task ->
+            val basicInfoList = task.instance__tickets__basic_information__values
+            val initStructure = task.init_structure
+
+            if (basicInfoList != null && initStructure != null) {
+                val json = Json.encodeToString(InitStructure.serializer(), initStructure)
+
+                InitialFormEntity(
+                    ticket_number = task.instance__tickets__number ?: "",
+                    initForms = basicInfoList,
+                    initFormJson = json
+                )
+            } else null
+        }
 
         val domainList = tasks.details.toTaskEntityList().toTaskDomainList()
 
