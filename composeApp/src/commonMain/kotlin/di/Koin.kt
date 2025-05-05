@@ -221,9 +221,9 @@ fun httpModule() = module {
             }
 
             install(HttpTimeout) {
-                requestTimeoutMillis = 30000
+                requestTimeoutMillis = 1200000
                 connectTimeoutMillis = 5000
-                socketTimeoutMillis = 30000
+                socketTimeoutMillis = 1200000
             }
             addDefaultResponseValidation()
             install(Logging) {
@@ -254,9 +254,9 @@ fun httpModule() = module {
             }
 
             install(HttpTimeout) {
-                requestTimeoutMillis = 30000
+                requestTimeoutMillis = 1200000
                 connectTimeoutMillis = 5000
-                socketTimeoutMillis = 30000
+                socketTimeoutMillis = 1200000
             }
             addDefaultResponseValidation()
             install(Logging) {
@@ -303,9 +303,9 @@ fun httpModule() = module {
             }
 
             install(HttpTimeout) {
-                requestTimeoutMillis = 30000
+                requestTimeoutMillis = 1200000
                 connectTimeoutMillis = 5000
-                socketTimeoutMillis = 30000
+                socketTimeoutMillis = 1200000
             }
 
             addDefaultResponseValidation()
