@@ -24,13 +24,11 @@
     <uses-permission android:name="android.permission.RECEIVE_SMS" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
         android:maxSdkVersion="32" />
-    <uses-permission android:name="android.permission.SEND_SMS"/>
-    <uses-permission
-        android:name="android.permission.QUERY_ALL_PACKAGES"
-        tools:ignore="QueryAllPackagesPermission" />
+
+
     <application
         android:name=".Android.App"
-        android:allowBackup="true"
+        android:allowBackup="false"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:hardwareAccelerated="true"
@@ -46,18 +44,12 @@
 <!--            android:configChanges="orientation|screenSize|screenLayout|keyboardHidden|mnc|colorMode|density|fontScale|fontWeightAdjustment|keyboard|layoutDirection|locale|mcc|navigation|smallestScreenSize|touchscreen|uiMode"-->
 <!--            android:exported="true" />-->
         <receiver android:name=".ChangeGpsReceiver"
-            android:exported="true">
+            android:exported="false">
             <intent-filter>
                 <action android:name="android.location.PROVIDERS_CHANGED" />
             </intent-filter>
         </receiver>
 
-        <receiver android:name=".ChangeOrientationReceiver"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.CONFIGURATION_CHANGED" />
-            </intent-filter>
-        </receiver>
         <receiver
             android:name=".SMSBroadcastReceiver"
             android:exported="true"
@@ -86,7 +78,7 @@
         </activity>
         <meta-data android:name="io.sentry.auto-init" android:value="false" />
             <!-- Required: set your sentry.io project identifier (DSN) -->
-            <meta-data android:name="io.sentry.dsn" android:value="http://556521e62d1a1e27e53b0fc902bf330c@10.224.235.38:10041/6" />
+          <!--  <meta-data android:name="io.sentry.dsn" android:value="http://556521e62d1a1e27e53b0fc902bf330c@10.224.235.38:10041/6" />-->
 
             <!-- enable automatic breadcrumbs for user interactions (clicks, swipes, scrolls) -->
             <meta-data android:name="io.sentry.traces.user-interaction.enable" android:value="true" />

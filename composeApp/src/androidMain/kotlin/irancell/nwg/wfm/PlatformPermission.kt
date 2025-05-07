@@ -22,7 +22,7 @@ actual fun checkPermission(granted : () -> Unit, showRational : () -> Unit) {
         android.Manifest.permission.CAMERA,
         android.Manifest.permission.ACCESS_COARSE_LOCATION,
         android.Manifest.permission.ACCESS_FINE_LOCATION,
-        android.Manifest.permission.SEND_SMS
+
     )
     val allPermissionState = rememberMultiplePermissionsState(permissions)
 

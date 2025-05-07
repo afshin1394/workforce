@@ -21,6 +21,9 @@ plugins {
 
 sentry {
     // List the build types that should be ignored (e.g. "release").
+
+
+    autoUploadProguardMapping.set(false) // غیرفعال کردن آپلود خودکار
     ignoredBuildTypes.set(setOf("debug"))
 
 }
@@ -92,8 +95,8 @@ kotlin {
                 implementation(libs.konnectivity)
                 implementation(libs.room.runtime)
                 implementation(libs.sqlite.bundled)
-
                 implementation(libs.landscapist.coil3)
+                implementation(libs.security.crypto)
             }
         }
 
@@ -109,16 +112,12 @@ kotlin {
                 implementation(libs.androidx.activity.compose)
                 implementation(libs.compose.ui.tooling)
                 implementation(libs.play.service.location)
-
                 implementation(libs.koin.android)
                 implementation(libs.ktor.client.okhttp)
                 implementation(libs.ktor.client.logging)
                 implementation(libs.accompanist.permission)
-
                 implementation(libs.osmdroid.android)
                 implementation(libs.kotlin.reflect)
-
-
             }
         }
 
@@ -128,7 +127,6 @@ kotlin {
 
             dependencies {
                 implementation(libs.ktor.client.darwin)
-
             }
         }
         val iosArm64Test by getting {
@@ -136,27 +134,21 @@ kotlin {
 
             dependencies {
                 implementation(libs.ktor.client.darwin)
-
             }
         }
         val iosX64Main by getting {
             dependsOn(commonMain)
 
             dependencies {
-
                 implementation(libs.ktor.client.darwin)
-
             }
         }
         val iosSimulatorArm64Main by getting {
             dependsOn(commonMain)
-
             dependencies {
                 implementation(libs.ktor.client.darwin)
-
             }
         }
-
     }
 }
 
@@ -167,9 +159,11 @@ android {
     sourceSets["main"].manifest.srcFile("src/androidMain/AndroidManifest.xml")
     sourceSets["main"].res.srcDirs("src/androidMain/res")
     sourceSets["main"].resources.srcDirs("src/commonMain/resources")
+
+
     defaultConfig {
         applicationId = "irancell.nwg.wfm"
-        minSdk = libs.versions.android.minSdk.get().toInt()
+        minSdk = 29
         targetSdk = libs.versions.android.targetSdk.get().toInt()
         versionCode = 24
         versionName = "0.2.4"
@@ -191,8 +185,13 @@ android {
 
     buildTypes {
         getByName("release") {
-            isDebuggable = true
-            isMinifyEnabled = false
+            isDebuggable = false
+            isMinifyEnabled = true
+            isShrinkResources = true  
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
             signingConfig = signingConfigs.getByName("release")
         }
     }
@@ -217,6 +216,7 @@ dependencies {
     implementation(libs.androidx.appcompat)
     implementation(libs.androidx.material)
     implementation(libs.androidx.constraintlayout)
+    implementation(libs.androidx.security.crypto.ktx)
     debugImplementation(libs.compose.ui.tooling)
     commonMainApi(libs.bundles.moko.resources)
     add("kspCommonMainMetadata", libs.room.compiler)

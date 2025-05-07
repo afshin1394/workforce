@@ -14,6 +14,8 @@
     <string name="description_for_update">You are using an old version of the app. Please update and
         enjoy the latest version.
     </string>
+    <string name="device_not_safe">Application is not available for rooted or emulator devices!
+    </string>
     <string name="update">Update</string>
     <string name="openInMap">Open in map</string>
     <string name="service_unavailable">Service is unavailable</string>
