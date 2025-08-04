@@ -11,6 +11,7 @@ data class InstanceTicketsBasicInformationValues(
     val key : String,
     @SerialName("values")
     val value : String,
+
 )
 
 

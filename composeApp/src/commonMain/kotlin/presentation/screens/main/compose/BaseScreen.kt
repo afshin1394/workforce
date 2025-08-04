@@ -147,34 +147,34 @@ fun <T : BaseViewModel> BaseScreen(
         @Composable
         fun showVpnBottomSheetHandler() {
 
-            when (vpnDetectionStates) {
-                VpnDetectionStates.ShowBottomSheet -> {
-                    customBottomSheetWithImage(
-                        BottomSheetActionModel(
-                            stringResource(MR.strings.go_to_setting),
-                            surfaceBrandDefault,
-                            surfaceBrandDefault,
-                        ),
-                        description = stringResource(MR.strings.vpn_detected_description),
-                        imageResource = MR.images.disconnected,
-                        onButtonClick = {
-                            openVpnSettings()
-                            viewModel.updateState(ViewStates.Default)
-                        },
-                    )
-                    scope.launch {
-                        vpnScaffoldState.bottomSheetState.expand()
-                    }
-                }
-
-                VpnDetectionStates.HideBottomSheet -> {
-                    scope.launch {
-                        vpnScaffoldState.bottomSheetState.collapse()
-                    }
-                }
-
-                else -> {}
-            }
+//            when (vpnDetectionStates) {
+//                VpnDetectionStates.ShowBottomSheet -> {
+//                    customBottomSheetWithImage(
+//                        BottomSheetActionModel(
+//                            stringResource(MR.strings.go_to_setting),
+//                            surfaceBrandDefault,
+//                            surfaceBrandDefault,
+//                        ),
+//                        description = stringResource(MR.strings.vpn_detected_description),
+//                        imageResource = MR.images.disconnected,
+//                        onButtonClick = {
+//                            openVpnSettings()
+//                            viewModel.updateState(ViewStates.Default)
+//                        },
+//                    )
+//                    scope.launch {
+//                        vpnScaffoldState.bottomSheetState.expand()
+//                    }
+//                }
+//
+//                VpnDetectionStates.HideBottomSheet -> {
+//                    scope.launch {
+//                        vpnScaffoldState.bottomSheetState.collapse()
+//                    }
+//                }
+//
+//                else -> {}
+//            }
         }
 
         @Composable

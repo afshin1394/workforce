@@ -20,7 +20,9 @@ import data.TaskRepositoryImpl
 import data.TicketRepositoryImpl
 import data.UploadRepositoryImpl
 import data.VersionRepositoryImpl
+import data.DownloadRepositoryImpl
 import domain.repository.IAuthRepository
+import domain.repository.IDownloadRepository
 import domain.repository.IAvailabilityRepository
 import domain.repository.IGeneralLocationRepository
 import domain.repository.IInitialFormRepository
@@ -69,11 +71,19 @@ import domain.usecase.usecase.suspendTask.StoreSuspendTaskUseCase
 import domain.usecase.usecase.ticket.GetActivityListUseCase
 import domain.usecase.usecase.ticket.UpdateTaskUseCase
 import domain.usecase.usecase.ticket.GetTasksUseCase
+import domain.usecase.usecase.ticket.GetTasksPaginatedUseCase
 import domain.usecase.usecase.ticket.GetTicketDetailsUseCase
 import domain.usecase.usecase.upload.SendFileToServerUseCase
 import domain.usecase.usecase.version.GetVersionOfServerUseCase
 import domain.usecase.usecase.version.SendVersionToServerUseCase
+import domain.usecase.usecase.download.CompleteDownloadFlowUseCase
+import domain.usecase.usecase.download.StartDownloadUseCase
+import domain.usecase.usecase.download.GetChunkUseCase
+import domain.usecase.usecase.download.GetStepsByTicketUseCase
+import domain.usecase.usecase.database.CheckDatabaseDataUseCase
+import domain.usecase.usecase.database.ClearDatabaseUseCase
 import io.ktor.client.HttpClient
+import data.network.configureNetworking
 import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.addDefaultResponseValidation
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
@@ -104,6 +114,7 @@ import presentation.screens.main.viewmodel.NotificationScreenVM
 import presentation.screens.splash.viewmodel.SplashScreenVM
 import presentation.screens.ticket_process.viewModel.TicketInfoVM
 import presentation.screens.ticket_process.viewModel.TicketStructureInfoVM
+import presentation.screens.download.viewmodel.DownloadViewModel
 import utils.DeploymentBASEURL
 import utils.DevelopmentBASEURL
 import utils.Token
@@ -147,6 +158,7 @@ fun repositoryModule() = module {
     }
     factory<ITicketRepository> { TicketRepositoryImpl(get(named("tokenized"))) }
     factory<IIpDetectionRepository> { IpDetectionRepositoryImpl(get(named("ipDetection"))) }
+    factory<IDownloadRepository> { DownloadRepositoryImpl(get(named("tokenized"))) }
 }
 
 fun useCaseModule() = module {
@@ -160,6 +172,7 @@ fun useCaseModule() = module {
     factory { GetAvailabilityObjectIdUseCase() }
     factory { LoginUseCase(get()) }
     factory { GetTasksUseCase(get()) }
+    factory { GetTasksPaginatedUseCase(get()) }
     factory { GetActivityListUseCase(get()) }
     factory { UpdateTaskUseCase(get(), get(), get(), get(), get()) }
     factory { LoginUseCase(get()) }
@@ -191,6 +204,12 @@ fun useCaseModule() = module {
     factory { GetTicketDetailsUseCase(get()) }
     factory { IpDetectionUseCase(get()) }
     factory { AutoLogoutUseCase(get()) }
+    factory { StartDownloadUseCase(get()) }
+    factory { GetChunkUseCase(get()) }
+    factory { GetStepsByTicketUseCase(get()) }
+    factory { CompleteDownloadFlowUseCase(get(), get(), get(), get(), get()) }
+    factory { CheckDatabaseDataUseCase(get()) }
+    factory { ClearDatabaseUseCase(get(), get()) }
 
 }
 
@@ -198,7 +217,7 @@ fun httpModule() = module {
 
     factory(named("tokenized")) {
         HttpClient {
-            expectSuccess = true
+            expectSuccess = false // Changed to handle errors properly
             install(ContentNegotiation) {
                 json(Json {
                     ignoreUnknownKeys = true
@@ -206,6 +225,7 @@ fun httpModule() = module {
                     isLenient = true
                 })
             }
+            configureNetworking() // Use improved configuration
             configure()
             defaultRequest {
                 url(DevelopmentBASEURL)
@@ -221,20 +241,16 @@ fun httpModule() = module {
             }
 
             install(HttpTimeout) {
-                requestTimeoutMillis = 1200000
-                connectTimeoutMillis = 5000
-                socketTimeoutMillis = 1200000
+                requestTimeoutMillis = 60000 // Reduced from 20 minutes to 1 minute
+                connectTimeoutMillis = 10000 // Increased to 10 seconds
+                socketTimeoutMillis = 60000 // Reduced from 20 minutes to 1 minute
             }
             addDefaultResponseValidation()
-            install(Logging) {
-                logger = Logger.DEFAULT
-                level = LogLevel.ALL
-            }
         }
     }
     factory(named("noToken")) {
         HttpClient {
-            expectSuccess = true
+            expectSuccess = false // Changed to handle errors properly
             install(ContentNegotiation) {
                 json(Json {
                     ignoreUnknownKeys = true
@@ -242,6 +258,7 @@ fun httpModule() = module {
                     isLenient = true
                 })
             }
+            configureNetworking() // Use improved configuration
             configure()
             defaultRequest {
                 url(DevelopmentBASEURL)
@@ -254,15 +271,11 @@ fun httpModule() = module {
             }
 
             install(HttpTimeout) {
-                requestTimeoutMillis = 1200000
-                connectTimeoutMillis = 5000
-                socketTimeoutMillis = 1200000
+                requestTimeoutMillis = 60000 // Reduced from 20 minutes to 1 minute
+                connectTimeoutMillis = 10000 // Increased to 10 seconds
+                socketTimeoutMillis = 60000 // Reduced from 20 minutes to 1 minute
             }
             addDefaultResponseValidation()
-            install(Logging) {
-                logger = Logger.DEFAULT
-                level = LogLevel.ALL
-            }
         }
     }
     single(named("ipDetection")) {
@@ -303,17 +316,13 @@ fun httpModule() = module {
             }
 
             install(HttpTimeout) {
-                requestTimeoutMillis = 1200000
-                connectTimeoutMillis = 5000
-                socketTimeoutMillis = 1200000
+                requestTimeoutMillis = 30000 // Reduced timeout for IP detection
+                connectTimeoutMillis = 10000
+                socketTimeoutMillis = 30000
             }
 
             addDefaultResponseValidation()
-
-            install(Logging) {
-                logger = Logger.DEFAULT
-                level = LogLevel.ALL
-            }
+            configureNetworking() // Use improved configuration
         }
     }
 }
@@ -346,6 +355,7 @@ fun viewModelModule() = module {
             get(),
             get(),
             get(),
+            get(),
             get()
         )
     }
@@ -353,7 +363,7 @@ fun viewModelModule() = module {
     viewModelDefinition { GpsTrackingReportScreenVM(get()) }
     viewModelDefinition { LoginScreenVM(get()) }
     viewModelDefinition { VerifyScreenVM(get(), get(), get(), get(), get()) }
-    viewModelDefinition { SplashScreenVM(get(), get()) }
+    viewModelDefinition { SplashScreenVM(get(), get(), get(), get()) }
     viewModelDefinition { TicketInfoVM(get()) }
     viewModelDefinition { TicketStructureInfoVM(get()) }
     viewModelDefinition { TicketProcessVM(get(), get(), get(), get(), get(), get(), get(),get()) }
@@ -361,4 +371,5 @@ fun viewModelModule() = module {
     viewModelDefinition { MapVM() }
     viewModelDefinition { AccountScreenVM(get()) }
     viewModelDefinition { NotificationScreenVM() }
+    viewModelDefinition { DownloadViewModel(get(), get()) }
 }

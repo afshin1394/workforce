@@ -29,6 +29,7 @@ const val DevelopmentBASEURLForVersionFile = "https://uat.ios.mtnirancell.ir/"
 
 
 const val FileApk = "fileApk"
+const val FileTasks = "fileTasks"
 
 
 
@@ -39,13 +40,13 @@ object LOCATION_RECORDS {
 
 object BASE_USECASE {
     const val MAX_RETRY_COUNT = 2
-    const val INITIAL_RETRY_DELAY = 200L
+    const val INITIAL_RETRY_DELAY = 1000L // Increased from 200ms to 1 second to avoid log flooding
 }
 
 object AlarmAction {
     object UPDATE {
         const val title = "UPDATE"
-        const val interval = 20000L
+        const val interval = 60000L
     }
 
     object STORE_LOCATION {

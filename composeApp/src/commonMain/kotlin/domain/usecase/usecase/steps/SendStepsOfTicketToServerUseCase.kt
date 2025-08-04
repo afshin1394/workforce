@@ -21,7 +21,7 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.jsonObject
-import toActivityDomainList
+import domain.mappers.toActivityDomainList
 import utils.FormViewerTypes
 import utils.convertToZip
 import utils.formatUploadDomainList

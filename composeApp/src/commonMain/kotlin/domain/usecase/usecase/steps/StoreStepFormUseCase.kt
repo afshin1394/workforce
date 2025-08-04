@@ -24,7 +24,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import toActivityDomain
+import domain.mappers.toActivityDomain
 import utils.FormViewerTypes
 import utils.LogicCalculation
 import utils.parsGpsDateTime

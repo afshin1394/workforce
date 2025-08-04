@@ -43,4 +43,22 @@ class StepPointerRepositoryImpl(private val db : AppDatabase) : IStepPointerRepo
         db.stepPointerDao().updateIsEdited(ticketNumber,isEdited)
     }
 
+    override suspend fun deleteAllExcept(ticketNumbers: List<String>) {
+        if (ticketNumbers.isEmpty()) {
+            db.stepPointerDao().deleteAll(emptyList())
+        } else {
+            db.stepPointerDao().deleteAllExcept(ticketNumbers)
+        }
+    }
+
+    override suspend fun deleteSpecific(ticketNumbers: List<String>) {
+        if (ticketNumbers.isNotEmpty()) {
+            db.stepPointerDao().deleteSpecific(ticketNumbers)
+        }
+    }
+
+    override suspend fun getModifiedTicketNumbers(): List<String> {
+        return db.stepPointerDao().selectModifiedTicketNumbers()
+    }
+
 }

@@ -9,7 +9,6 @@ import io.ktor.client.plugins.ClientRequestException
 import io.ktor.client.plugins.HttpRequestTimeoutException
 import io.ktor.client.plugins.RedirectResponseException
 import io.ktor.client.plugins.ServerResponseException
-import io.ktor.http.HttpStatusCode
 import io.ktor.http.HttpStatusCode.Companion.BadGateway
 import io.ktor.http.HttpStatusCode.Companion.BadRequest
 import io.ktor.http.HttpStatusCode.Companion.Forbidden
@@ -37,40 +36,65 @@ import utils.BASE_USECASE.MAX_RETRY_COUNT
 abstract class BaseUseCase<out Type, in Params> {
 
     abstract suspend fun run(params: Params): Type
+    
+    private val useCaseName: String
+        get() = this::class.simpleName ?: "UnknownUseCase"
+    
     suspend operator fun invoke(params: Params) = flow {
         emit(AsyncResult.Loading(null, isLoading = true))
+        
+        Napier.log(
+            LogLevel.DEBUG,
+            tag = "BaseUseCase",
+            message = "[$useCaseName] Starting execution with params: $params"
+        )
 
         try {
             val result = run(params)
-            println("stepsYO   ${"start"}")
-
+            
             if (result is List<*> && result.isEmpty()) {
                 Napier.log(
-                    LogLevel.ASSERT,
+                    LogLevel.INFO,
                     tag = "BaseUseCase",
-                    message = "BaseUseCase ${(result as List<*>).size}"
+                    message = "[$useCaseName] Returned empty list"
                 )
                 emit(AsyncResult.Empty(null, false))
             } else {
-                println("stepsYO   ${"Success"}")
+                Napier.log(
+                    LogLevel.DEBUG,
+                    tag = "BaseUseCase",
+                    message = "[$useCaseName] Success with result type: ${result?.let { it::class.simpleName }}"
+                )
                 emit(AsyncResult.Success(result, ResultStatus.SUCCESS))
             }
         } catch (exception: Exception) {
+            Napier.log(
+                LogLevel.ERROR,
+                tag = "BaseUseCase",
+                message = "[$useCaseName] Exception occurred: ${exception.message}"
+            )
             throw exception // Rethrow exception to be caught by retry or catch
         }
     }
         .retry(retries = MAX_RETRY_COUNT.toLong()) { cause ->
-            println("stepsYO   ${"retry"}")
             if (cause is Exception) {
-                Napier.log(LogLevel.ASSERT, tag = "UnitOfWork", message = "ERROR ${cause.message}")
-                delay(INITIAL_RETRY_DELAY) // Wait for 4000 ms before retrying
+                Napier.log(
+                    LogLevel.WARNING,
+                    tag = "BaseUseCase",
+                    message = "[$useCaseName] Retry attempt due to: ${cause::class.simpleName} - ${cause.message}"
+                )
+                delay(INITIAL_RETRY_DELAY)
                 true // Continue retrying
             } else {
                 false // Stop retrying if it's not an exception
             }
         }
         .catch { exception ->
-            println("stepsYO   ${"catch"}")
+            Napier.log(
+                LogLevel.ERROR,
+                tag = "BaseUseCase",
+                message = "[$useCaseName] Final error after retries: ${exception::class.simpleName} - ${exception.message}"
+            )
 
             var errorMessage = exception.message ?: "Unknown error"
 

@@ -2,6 +2,8 @@ package presentation.screens.splash.compose
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.material.BottomSheetScaffoldState
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.SnackbarDuration
@@ -20,7 +22,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.registry.rememberScreen
-import cafe.adriel.voyager.core.screen.Screen
+import cafe.adriel.voyager.core.screen.Screen as VoyagerScreen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import presentation.components.bottomSheetDoubleActionBottomBarWithLoading
@@ -28,6 +30,7 @@ import presentation.components.bottomSingleActionComponentWithLoading
 import com.irancell.nwg.wfm.presentation.theme.spacing2X
 import com.plusmobileapps.konnectivity.NetworkConnection
 import dev.icerock.moko.resources.compose.painterResource
+import presentation.nav.Screen
 import dev.icerock.moko.resources.compose.stringResource
 import irancell.nwg.wfm.LifecycleEvent
 import irancell.nwg.wfm.MR
@@ -53,9 +56,9 @@ import utils.ButtonState
 import utils.Token
 import utils.startDownloadFileApk
 
-class SplashScreen : Screen {
+class SplashScreen : VoyagerScreen {
 
-    @OptIn(ExperimentalMaterialApi::class)
+    @OptIn(ExperimentalMaterialApi::class, ExperimentalFoundationApi::class)
     @Composable
     override fun Content() {
 
@@ -63,7 +66,6 @@ class SplashScreen : Screen {
         val scope = rememberCoroutineScope()
         val navigator = LocalNavigator.currentOrThrow
         val loginScreen = rememberScreen(presentation.nav.Screen.Auth.Login)
-        val mainScreen = rememberScreen(presentation.nav.Screen.Main.Menu.MyTickets)
         val viewModel: SplashScreenVM = koinInject()
         var buttonState by remember { mutableStateOf(ButtonState.IDLE) }
         val permissionState by viewModel.permissionState.collectAsState()
@@ -81,6 +83,25 @@ class SplashScreen : Screen {
 
         OnLifecycleEvent { _, event ->
             viewModel.updateLifeCycleEventState(event as LifecycleEvent)
+        }
+        
+        // Remember screens for navigation
+        val downloadScreen = rememberScreen(Screen.Download)
+        val mainScreen = rememberScreen(Screen.Main.Menu.MyTickets)
+        
+        // Handle navigation events
+        LaunchedEffect(events) {
+            when (events) {
+                CheckVersionEvent.NavigateToDownload -> {
+                    navigator.replace(downloadScreen)
+                }
+                CheckVersionEvent.NavigateToMain -> {
+                    navigator.replace(mainScreen)
+                }
+                else -> {
+                    // Handle other events as before
+                }
+            }
         }
 
         val errorMessage = stringResource(MR.strings.download_failed)
@@ -101,7 +122,12 @@ class SplashScreen : Screen {
                 CheckVersionEvent.InvalidToken->{
                     ""
                 }
-
+                CheckVersionEvent.NavigateToDownload -> {
+                    ""
+                }
+                CheckVersionEvent.NavigateToMain -> {
+                    ""
+                }
             }
 
         BaseScreen(
@@ -157,6 +183,14 @@ class SplashScreen : Screen {
 
                     CheckVersionEvent.InvalidToken -> {
 
+                    }
+                    
+                    CheckVersionEvent.NavigateToDownload -> {
+                        // No bottom sheet content needed
+                    }
+                    
+                    CheckVersionEvent.NavigateToMain -> {
+                        // No bottom sheet content needed
                     }
                 }
 
@@ -333,23 +367,13 @@ class SplashScreen : Screen {
 
                     CheckVersionEvent.InvalidToken -> {
                         if (permissionState == PermissionEvent.IsGranted) {
-                            scope.launch {
-
-                                viewModel.konnectivity.currentNetworkConnectionState.collect { connection ->
-                                    if (connection == NetworkConnection.NONE) {
-                                        if(getSharedPref().getString(Token)!=null ||getSharedPref().getString(Token)!=""){
-                                            navigator.popAll()
-                                            navigator.push(mainScreen)
-                                        }else{
-                                            navigator.popAll()
-                                            navigator.push(loginScreen)
-                                        }
-                                    }else{
-                                        navigator.popAll()
-                                        navigator.push(loginScreen)
-                                    }
-                                }
-
+                            // Check token and navigate without blocking Flow collection
+                            if(getSharedPref().getString(Token) != null && getSharedPref().getString(Token) != ""){
+                                navigator.popAll()
+                                navigator.push(mainScreen)
+                            } else {
+                                navigator.popAll()
+                                navigator.push(loginScreen)
                             }
 
 
@@ -386,6 +410,14 @@ class SplashScreen : Screen {
                         }
 
                     }
+                    
+                    CheckVersionEvent.NavigateToDownload -> {
+                        // No bottom bar content needed
+                    }
+                    
+                    CheckVersionEvent.NavigateToMain -> {
+                        // No bottom bar content needed
+                    }
                 }
 
             }, content = {
@@ -414,6 +446,13 @@ class SplashScreen : Screen {
                                 .height(72.dp)
                                 .wrapContentSize()
                                 .align(Alignment.Center)
+                                .combinedClickable(
+                                    onLongClick = {
+                                        // Long press to clear database for testing
+                                        viewModel.clearDatabaseForTesting()
+                                    },
+                                    onClick = { /* Regular click does nothing */ }
+                                )
                         )
                         Text(
                             modifier = Modifier

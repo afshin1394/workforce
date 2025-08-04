@@ -5,7 +5,7 @@ import domain.repository.ISendStepsRepository
 import domain.repository.IStepPointerRepository
 import domain.repository.IStepsRepository
 import domain.usecase.BaseUseCase
-import toActivityDomain
+import domain.mappers.toActivityDomain
 import utils.toJson
 
 class StoreKeyValueUseCase(

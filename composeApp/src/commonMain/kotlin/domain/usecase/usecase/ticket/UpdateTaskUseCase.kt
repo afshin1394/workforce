@@ -25,8 +25,9 @@ import io.github.aakira.napier.LogLevel
 import io.github.aakira.napier.Napier
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
-import toSendStepEntity
-import toStepDetailsEntity
+import kotlinx.coroutines.sync.Mutex
+import domain.mappers.toSendStepEntity
+import domain.mappers.toStepDetailsEntity
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
@@ -39,8 +40,9 @@ class UpdateTaskUseCase(
     private val iStepPointerRepository: IStepPointerRepository,
     private val iSendStepsRepository: ISendStepsRepository,
 ) : BaseUseCase<List<TaskEntity>, Unit>() {
+    private val mutex = Mutex()
 
-    override suspend fun run(params: Unit): List<TaskEntity> {
+    override suspend fun run(params: Unit): List<TaskEntity> = mutex.withLock {
         val ticketAllMiniList = iTaskRepository.fetchTicketAllMini()
         val activityResponseList: List<ActivityListResponse> = iTaskRepository.fetchActivityList()
         val activityDomainList: List<ActivityListDomain> = activityResponseList.map { response ->
@@ -51,117 +53,117 @@ class UpdateTaskUseCase(
             )
         }
         Napier.log(LogLevel.ASSERT, tag = "TasssssssssskkkkkkkkV2", message = "yessss0")
-        val tasks = iTaskRepository.fetchWorks()
+        iTaskRepository.downloadTasks()
 
         Napier.log(LogLevel.ASSERT, tag = "TasssssssssskkkkkkkkV2", message = "yessss")
-        Napier.log(LogLevel.ASSERT, tag = "TasssssssssskkkkkkkkV2", message = tasks.details.toString())
-        val initialTasks = tasks.details.mapNotNull { task ->
-            val basicInfoList = task.instance__tickets__basic_information__values
-            val initStructure = task.init_structure
-
-            if (basicInfoList != null && initStructure != null) {
-                val json = Json.encodeToString(InitStructure.serializer(), initStructure)
-
-                InitialFormEntity(
-                    ticket_number = task.instance__tickets__number ?: "",
-                    initForms = basicInfoList,
-                    initFormJson = json
-                )
-            } else null
-        }
-
-        val domainList = tasks.details.toTaskEntityList().toTaskDomainList()
-
-
-
-        val domainListWithPrefix = domainList.map { domain ->
-            val prefix = ticketAllMiniList
-                .firstOrNull { mini ->
-                    mini.pk == domain.ticket_type_id }
-                ?.instancePrefix
-
-            domain.copy(instancePrefix = prefix?:"")
-        }
-
-        val stepEntities = mutableListOf<StepsEntity>()
-        val stepPointerEntities = mutableListOf<StepPointerEntity>()
-
-        val existingEditedTickets = iSendStepsRepository.getEditedTickets()
-        val filteredExistingEditedTickets = existingEditedTickets.filterNot { ticketNumber ->
-            val task = domainListWithPrefix.find { it.ticket_number == ticketNumber }
-            val existingTask = task?.let { iTaskRepository.getTaskByTicketNumber(it.ticket_number) }
-            existingTask != null && existingTask.activity_id != task.activity_id
-        }
+//        Napier.log(LogLevel.ASSERT, tag = "TasssssssssskkkkkkkkV2", message = tasks.details.toString())
+//        val initialTasks = tasks.details.mapNotNull { task ->
+//            val basicInfoList = task.instance__tickets__basic_information__values
+//            val initStructure = task.init_structure
+//
+//            if (basicInfoList != null && initStructure != null) {
+//                val json = Json.encodeToString(InitStructure.serializer(), initStructure)
+//
+//                InitialFormEntity(
+//                    ticket_number = task.instance__tickets__number ?: "",
+//                    initForms = basicInfoList,
+//                    initFormJson = json
+//                )
+//            } else null
+//        }
+//
+//        val domainList = tasks.details.toTaskEntityList().toTaskDomainList()
+//
+//
+//
+//        val domainListWithPrefix = domainList.map { domain ->
+//            val prefix = ticketAllMiniList
+//                .firstOrNull { mini ->
+//                    mini.pk == domain.ticket_type_id }
+//                ?.instancePrefix
+//
+//            domain.copy(instancePrefix = prefix?:"")
+//        }
+//
+//        val stepEntities = mutableListOf<StepsEntity>()
+//        val stepPointerEntities = mutableListOf<StepPointerEntity>()
+//
+//        val existingEditedTickets = iSendStepsRepository.getEditedTickets()
+//        val filteredExistingEditedTickets = existingEditedTickets.filterNot { ticketNumber ->
+//            val task = domainListWithPrefix.find { it.ticket_number == ticketNumber }
+//            val existingTask = task?.let { iTaskRepository.getTaskByTicketNumber(it.ticket_number) }
+//            existingTask != null && existingTask.activity_id != task.activity_id
+//        }
 
 
      /*   val stepList = iStepsRepository.fetch("NWG-PRO-CRE-20250104-00028")
         println(" CallApi  step Testtt     ${"NWG-PRO-CRE-20250104-00028"} ${stepList}")*/
 
-       processInParallel(
-            items = domainListWithPrefix,
-            processBlock = { task, mutex ->
-                task.ticket_number?.let { ticketNumber ->
-                    val stepList = iStepsRepository.fetch(ticketNumber)
-                    Napier.log(LogLevel.ASSERT, tag = "CallApi  step   stepsYO", message = "1")
-                    val localStepEntities = stepList.toStepDetailsEntity(ticketNumber)
-                    Napier.log(LogLevel.ASSERT, tag = "CallApi  step   stepsYO0", message = stepList.toStepDetailsEntity(ticketNumber).toString())
-                    val activeActivityId = stepList.detail.firstOrNull()?.activity_id
-                        stepEntities.addAll(localStepEntities)
-                        activeActivityId?.let {
-                            stepPointerEntities.add(
-                                StepPointerEntity(
-                                    ticketNumber = ticketNumber,
-                                    activeActivity = it,
-                                    edited = false
-                                )
-                            )
-                        }
-                }
-            }
-        )
+//       processInParallel(
+//            items = domainListWithPrefix,
+//            processBlock = { task, mutex ->
+//                task.ticket_number?.let { ticketNumber ->
+//                    val stepList = iStepsRepository.fetch(ticketNumber)
+//                    Napier.log(LogLevel.ASSERT, tag = "CallApi  step   stepsYO", message = "1")
+//                    val localStepEntities = stepList.toStepDetailsEntity(ticketNumber)
+//                    Napier.log(LogLevel.ASSERT, tag = "CallApi  step   stepsYO0", message = stepList.toStepDetailsEntity(ticketNumber).toString())
+//                    val activeActivityId = stepList.detail.firstOrNull()?.activity_id
+//                        stepEntities.addAll(localStepEntities)
+//                        activeActivityId?.let {
+//                            stepPointerEntities.add(
+//                                StepPointerEntity(
+//                                    ticketNumber = ticketNumber,
+//                                    activeActivity = it,
+//                                    edited = false
+//                                )
+//                            )
+//                        }
+//                }
+//            }
+//        )
 
         Napier.log(LogLevel.ASSERT, tag = "CallApi     stepsYO", message = "2")
 
+//
+//        iTaskRepository.deleteAll()
+//        iTaskRepository.resetEntitySequence()
+//
+//       // val uniqueTasks = tasks.details.toTaskEntityList().distinctBy { it.ticket_number }
+//
+//        val uniqueTasks = domainListWithPrefix.map { domain -> domain.toTaskEntity() }.distinctBy { it.ticket_number }
+//
+//        val taskDomainMap: Map<String, TaskEntity> = uniqueTasks.associateBy { it.activity__title }
+//        val updatedActivityList: List<ActivityListDomain> = activityDomainList.map { activityDomain ->
+//            taskDomainMap[activityDomain.title]?.let { matchingTask ->
+//                activityDomain.copy(instancePrefix = matchingTask.instancePrefix)
+//            } ?: activityDomain
+//        }
+//
+//
+//
+//        iTaskRepository.insertAllActivityList(updatedActivityList.toEntityList())
+//        iTaskRepository.insertAll(uniqueTasks)
+//
+//
+//        Napier.log(LogLevel.ASSERT, tag = "stepsYO", message = "3")
+//
+//        iInitialFormRepository.deleteAll()
+//        iInitialFormRepository.resetEntitySequence()
+//        iInitialFormRepository.insertAll(initialTasks)
+//
+//        Napier.log(LogLevel.ASSERT, tag = "stepsYO", message = "4")
+//        Napier.log(LogLevel.ASSERT, tag = "stepsYO77", message = filteredExistingEditedTickets.toString())
+//
+//        updateDatabaseWithStepsData(
+//            editedTickets = filteredExistingEditedTickets,
+//            stepEntities,
+//            stepPointerEntities
+//        )
+//
+//        Napier.log(LogLevel.ASSERT, tag = "stepsYO", message = "5")
 
-        iTaskRepository.deleteAll()
-        iTaskRepository.resetEntitySequence()
 
-       // val uniqueTasks = tasks.details.toTaskEntityList().distinctBy { it.ticket_number }
-
-        val uniqueTasks = domainListWithPrefix.map { domain -> domain.toTaskEntity() }.distinctBy { it.ticket_number }
-
-        val taskDomainMap: Map<String, TaskEntity> = uniqueTasks.associateBy { it.activity__title }
-        val updatedActivityList: List<ActivityListDomain> = activityDomainList.map { activityDomain ->
-            taskDomainMap[activityDomain.title]?.let { matchingTask ->
-                activityDomain.copy(instancePrefix = matchingTask.instancePrefix)
-            } ?: activityDomain
-        }
-
-
-
-        iTaskRepository.insertAllActivityList(updatedActivityList.toEntityList())
-        iTaskRepository.insertAll(uniqueTasks)
-
-
-        Napier.log(LogLevel.ASSERT, tag = "stepsYO", message = "3")
-
-        iInitialFormRepository.deleteAll()
-        iInitialFormRepository.resetEntitySequence()
-        iInitialFormRepository.insertAll(initialTasks)
-
-        Napier.log(LogLevel.ASSERT, tag = "stepsYO", message = "4")
-        Napier.log(LogLevel.ASSERT, tag = "stepsYO77", message = filteredExistingEditedTickets.toString())
-
-        updateDatabaseWithStepsData(
-            editedTickets = filteredExistingEditedTickets,
-            stepEntities,
-            stepPointerEntities
-        )
-
-        Napier.log(LogLevel.ASSERT, tag = "stepsYO", message = "5")
-
-
-        return uniqueTasks
+        return emptyList()
     }
 
     private suspend fun updateDatabaseWithStepsData(

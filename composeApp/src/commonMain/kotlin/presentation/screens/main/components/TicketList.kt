@@ -7,12 +7,14 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.compose.material.pullrefresh.PullRefreshIndicator
 import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
@@ -56,10 +58,9 @@ fun TicketListScreen(
 
     fun refresh() =
         refreshScope.launch {
-
             println("onStartCommand: CallApi  UpdateUseCase       ${"PullRefresh"}")
             refreshing = true
-            viewModel.updateTask()
+            viewModel.refreshTasks()
             refreshing = false
         }
 
@@ -102,8 +103,13 @@ fun TicketListScreen(
                 .padding(horizontal = spacing2X)
                 .fillMaxWidth(),
             textFieldState = searchTextState,
-            updatedText = {
-                searchTextState = it
+            updatedText = { newText ->
+                searchTextState = newText
+                if (newText.isBlank()) {
+                    viewModel.clearSearch()
+                } else if (newText.length >= 2) { // Search after typing at least 2 characters
+                    viewModel.searchTasks(newText)
+                }
             }, onFilterClick = {
                 onEvent(MainEvent.ActionFilter, null)
             })
@@ -150,7 +156,7 @@ fun TicketListScreen(
 
                     Napier.log(LogLevel.ASSERT, "refreshing", message = refreshing.toString())
                     itemsIndexed(items = filteredList
-                    ) { _: Int, item: TaskDomain ->
+                    ) { index: Int, item: TaskDomain ->
                         ticketCard(modifier = Modifier
                             .wrapContentHeight()
                             .fillMaxWidth()
@@ -169,6 +175,32 @@ fun TicketListScreen(
                                 onEvent(MainEvent.MoreOptions, item)
                             }
                         )
+                        
+                        // Load more items when approaching the end  
+                        if (index >= filteredList.size - 2 && index == filteredList.lastIndex) {
+                            LaunchedEffect(index) {
+                                val hasNextPage = viewModel.hasNextPage.value
+                                val isLoadingMore = viewModel.isLoadingMore.value
+                                if (!isLoadingMore && hasNextPage) {
+                                    viewModel.loadNextPage()
+                                }
+                            }
+                        }
+                    }
+                    
+                    // Loading indicator for pagination inside LazyColumn  
+                    item {
+                        val isLoadingMore by viewModel.isLoadingMore.collectAsState()
+                        if (isLoadingMore) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(16.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                CircularProgressIndicator()
+                            }
+                        }
                     }
                 }
             }

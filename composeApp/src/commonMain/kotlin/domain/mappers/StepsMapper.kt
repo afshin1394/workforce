@@ -1,3 +1,5 @@
+package domain.mappers
+
 import data.network.response.task.Component
 import data.network.response.task.FormStruct
 import data.network.response.task.Value

@@ -6,7 +6,7 @@ import platform.Foundation.NSUserDomainMask
 import platform.Foundation.stringByAppendingPathComponent
 import kotlin.native.concurrent.freeze
 
-actual suspend fun PerformDownload(url: String): Result<DownloadResult> ?{
+actual suspend fun PerformDownload(url: String,fileName : String): Result<DownloadResult> ?{
     return try {
         val paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, true)
         val documentsDirectory = paths.first() as String
@@ -25,3 +25,6 @@ actual suspend fun PerformDownload(url: String): Result<DownloadResult> ?{
         Result.failure(e)
     }
 }
+
+
+actual suspend fun PerformGZIPDownload(url : String,fileName: String,onProgress: (DownloadState) -> Unit)  {}

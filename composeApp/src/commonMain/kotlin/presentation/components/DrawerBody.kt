@@ -34,6 +34,11 @@ fun DrawerBody( onItemClick: (navRoute : Screen.Main.Menu) -> Unit={}) {
             onItemClick(Screen.Main.Menu.About)
 
         }
+        DrawerMenuItem(modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = spacing2X),MR.images.arrow_down, stringResource(MR.strings.download)) {
+            onItemClick(Screen.Main.Menu.Download)
+        }
 //        DrawerMenuItem(modifier = Modifier
 //            .fillMaxWidth()
 //            .padding(start = spacing2X),MR.images.location, stringResource(MR.strings.gps_tracker)) {

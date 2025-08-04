@@ -34,6 +34,7 @@ sealed class Screen() : ScreenProvider {
     data object Splash : Screen()
     data object VpnDetection : Screen()
     data object CRScreen : Screen()
+    data object Download : Screen()
 
     sealed class Main() : Screen() {
         sealed class Menu() : Main() {
@@ -43,6 +44,7 @@ sealed class Screen() : ScreenProvider {
             data object FormViewer : Menu()
             data object MyTickets : Menu()
             data object GpsTrackingReport : Menu()
+            data object Download : Menu()
         }
 
         data object AccountInfo : Main()

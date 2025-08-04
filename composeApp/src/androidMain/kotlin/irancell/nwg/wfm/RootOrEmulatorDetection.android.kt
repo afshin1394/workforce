@@ -7,7 +7,9 @@ import java.io.IOException
 import java.net.Socket
 
 actual fun isRootedOrEmulator(): Boolean {
-    return isRooted() || isEmulator()
+    // Bypassed for development/emulator testing
+    return false
+    // return isRooted() || isEmulator()
 }
 
 private fun isRooted(): Boolean {

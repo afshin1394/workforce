@@ -38,5 +38,13 @@ interface StepsDao {
     @Query("SELECT * FROM StepsEntity WHERE ticketNumber = :ticketNumber AND  activityId = :activityId LIMIT 1")
     suspend fun selectStepsByTicketNumberAndActivityId(ticketNumber: String,activityId : Long) : StepsEntity
 
+    @Query("DELETE FROM StepsEntity")
+    suspend fun deleteAll()
+
+    @Query("DELETE FROM StepsEntity WHERE ticketNumber NOT IN (:ticketNumbers)")
+    suspend fun deleteAllExcept(ticketNumbers: List<String>)
+
+    @Query("DELETE FROM StepsEntity WHERE ticketNumber IN (:ticketNumbers)")
+    suspend fun deleteSpecific(ticketNumbers: List<String>)
 
 }

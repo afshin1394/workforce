@@ -8,6 +8,9 @@ actual class FileDestination(private val path: String) {
         val nsData = data.toNSData()
         nsData.writeToFile(path, true)
     }
+    actual fun writeStreamed(writeBlock: (buffer: (ByteArray) -> Unit) -> Unit) {
+
+    }
 }
 
 fun ByteArray.toNSData(): NSData {

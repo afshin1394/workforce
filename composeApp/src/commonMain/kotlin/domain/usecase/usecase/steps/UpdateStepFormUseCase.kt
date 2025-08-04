@@ -31,8 +31,8 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
-import toActivityDomain
-import toActivityDomainList
+import domain.mappers.toActivityDomain
+import domain.mappers.toActivityDomainList
 import utils.FormViewerTypes
 import utils.LogicCalculation
 import utils.PROCEED

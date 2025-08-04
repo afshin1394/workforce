@@ -9,24 +9,20 @@ plugins {
     alias(libs.plugins.jetbrainsCompose)
     alias(libs.plugins.kotlinx.serialization)
     alias(libs.plugins.ksp)
-    alias(libs.plugins.room)
+    // alias(libs.plugins.room)
     alias(libs.plugins.compose.compiler)
-
     id("dev.icerock.mobile.multiplatform-resources")
-
-    id("io.sentry.android.gradle") version "3.12.0"
-
-
+    // id("io.sentry.android.gradle") version "3.12.0"
 }
 
-sentry {
-    // List the build types that should be ignored (e.g. "release").
-
-
-    autoUploadProguardMapping.set(false) // غیرفعال کردن آپلود خودکار
-    ignoredBuildTypes.set(setOf("debug"))
-
-}
+// sentry {
+//     // List the build types that should be ignored (e.g. "release").
+// 
+// 
+//     autoUploadProguardMapping.set(false) // غیرفعال کردن آپلود خودکار
+//     ignoredBuildTypes.set(setOf("debug"))
+// 
+// }
 
 kotlin {
 
@@ -207,9 +203,9 @@ android {
 
 }
 
-room {
-    schemaDirectory("$projectDir/schemas")
-}
+// room {
+//     schemaDirectory("$projectDir/schemas")
+// }
 
 
 dependencies {
@@ -219,15 +215,15 @@ dependencies {
     implementation(libs.androidx.security.crypto.ktx)
     debugImplementation(libs.compose.ui.tooling)
     commonMainApi(libs.bundles.moko.resources)
-    add("kspCommonMainMetadata", libs.room.compiler)
+    // add("kspCommonMainMetadata", libs.room.compiler)
 
 }
 
-tasks.withType<org.jetbrains.kotlin.gradle.dsl.KotlinCompile<*>>().configureEach {
-    if (name != "kspCommonMainKotlinMetadata") {
-        dependsOn("kspCommonMainKotlinMetadata")
-    }
-}
+// tasks.withType<org.jetbrains.kotlin.gradle.dsl.KotlinCompile<*>>().configureEach {
+//     if (name != "kspCommonMainKotlinMetadata") {
+//         dependsOn("kspCommonMainKotlinMetadata")
+//     }
+// }
 
 multiplatformResources {
     multiplatformResourcesPackage = "irancell.nwg.wfm"

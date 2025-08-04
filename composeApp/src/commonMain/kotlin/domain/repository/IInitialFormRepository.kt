@@ -11,6 +11,8 @@ interface IInitialFormRepository {
     suspend fun getInitialFormByTicketNumber(ticketNumber : String) : InitialFormEntity
 
     suspend fun deleteAll()
+    suspend fun deleteAllExcept(ticketNumbers: List<String>)
+    suspend fun deleteSpecific(ticketNumbers: List<String>)
 
     suspend fun resetEntitySequence()
 }

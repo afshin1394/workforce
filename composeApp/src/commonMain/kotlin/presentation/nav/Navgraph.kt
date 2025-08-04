@@ -13,6 +13,7 @@ import presentation.screens.main.compose.GpsTrackingReportScreen
 import presentation.screens.main.compose.SettingsScreen
 import presentation.screens.ticket_process.compose.TicketProcessScreen
 import presentation.screens.ticket_process.compose.TicketStructureInfoScreen
+import presentation.screens.download.compose.DownloadScreen
 
 //@file:OptIn(ExperimentalMaterialApi::class)
 //package com.irancell.nwg.wfm.presentation.nav
@@ -308,6 +309,10 @@ import presentation.screens.ticket_process.compose.TicketStructureInfoScreen
         screenModule {
             register<Screen.Splash> {
                 SplashScreen()
+            }
+            
+            register<Screen.Download> {
+                DownloadScreen()
             }
 
             register<Screen.Auth.Login> {

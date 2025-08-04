@@ -15,7 +15,7 @@ import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.client.request.parameter
 import io.ktor.http.HttpStatusCode
-import toActivityDomainList
+import domain.mappers.toActivityDomainList
 
 class StepsRepositoryImpl(
     private val httpClient: HttpClient,
@@ -86,6 +86,24 @@ class StepsRepositoryImpl(
         formStructure: String,
     ) {
         db.stepDao().updateFormStructure(ticketNumber, activityId, formStructure)
+    }
+
+    override suspend fun deleteAll() {
+        db.stepDao().deleteAll()
+    }
+
+    override suspend fun deleteAllExcept(ticketNumbers: List<String>) {
+        if (ticketNumbers.isEmpty()) {
+            db.stepDao().deleteAll()
+        } else {
+            db.stepDao().deleteAllExcept(ticketNumbers)
+        }
+    }
+
+    override suspend fun deleteSpecific(ticketNumbers: List<String>) {
+        if (ticketNumbers.isNotEmpty()) {
+            db.stepDao().deleteSpecific(ticketNumbers)
+        }
     }
 
 }

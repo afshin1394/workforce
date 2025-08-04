@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(./gradlew:*)",
+      "Bash(rm:*)",
+      "Bash(grep:*)",
+      "Bash(find:*)",
+      "Bash(kotlinc-jvm:*)",
+      "Bash(adb:*)",
+      "Bash(where adb)",
+      "Bash($ANDROID_HOME/platform-tools/adb:*)",
+      "Bash(ls:*)",
+      "Bash(curl:*)",
+      "Bash(.gradlew build)",
+      "Bash(python:*)",
+      "Bash(emulator:*)"
+    ],
+    "deny": []
+  }
+}

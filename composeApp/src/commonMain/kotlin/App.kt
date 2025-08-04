@@ -13,18 +13,21 @@ import org.jetbrains.compose.resources.ExperimentalResourceApi
 
 import org.koin.core.context.startKoin
 import presentation.screens.splash.compose.SplashScreen
+import irancell.nwg.wfm.initializeLogging
 
 @OptIn(ExperimentalResourceApi::class)
 @Composable
 fun App() {
-
+    
+    initializeLogging()
+    
     startKoin {
         modules(  httpModule(),
             repositoryModule(), useCaseModule(), viewModelModule(), platformModule)
     }
-    Navigator(SplashScreen()){
-        SlideTransition(it)
-    }
+    Navigator(screen = SplashScreen(), content = { navigator ->
+        SlideTransition(navigator)
+    })
 
 //    MaterialTheme {
 //        var showContent by remember { mutableStateOf(false) }

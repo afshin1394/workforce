@@ -21,6 +21,8 @@ import androidx.compose.runtime.State
 import com.plusmobileapps.konnectivity.Konnectivity
 import domain.models.version.GetVersionDomain
 import domain.usecase.usecase.profile.StoreProfileUseCase
+import domain.usecase.usecase.database.CheckDatabaseDataUseCase
+import domain.usecase.usecase.database.ClearDatabaseUseCase
 import irancell.nwg.wfm.getSharedPref
 
 import utils.FileApk
@@ -28,6 +30,8 @@ import utils.FileApk
 class SplashScreenVM(
     private val getVersionOfServerUseCase: GetVersionOfServerUseCase,
     private val storeProfileUseCase: StoreProfileUseCase,
+    private val checkDatabaseDataUseCase: CheckDatabaseDataUseCase,
+    private val clearDatabaseUseCase: ClearDatabaseUseCase
 ) : BaseViewModel() {
 
     private val _permissionState =
@@ -92,12 +96,12 @@ class SplashScreenVM(
 
                                 else -> {
                                     getSharedPref().put(FileApk, "")
-                                    eventsVersion.value = CheckVersionEvent.OkVersion
+                                    checkDatabaseAndNavigate()
                                 }
                             }
                         } ?: run {
                             getSharedPref().put(FileApk, "")
-                            eventsVersion.value = CheckVersionEvent.OkVersion
+                            checkDatabaseAndNavigate()
                         }
                     }
 
@@ -146,6 +150,52 @@ class SplashScreenVM(
 
     fun changeStateDenied() {
         _permissionState.update { PermissionEvent.CheckPermission }
+    }
+    
+    private fun checkDatabaseAndNavigate() {
+        viewModelScope.launch {
+            checkDatabaseDataUseCase(Unit).collect {
+                when (it.status) {
+                    AsyncStatus.SUCCESS -> {
+                        if (it.data == true) {
+                            // Database has data, navigate to main screen
+                            eventsVersion.value = CheckVersionEvent.NavigateToMain
+                        } else {
+                            // Database is empty, navigate to download screen
+                            eventsVersion.value = CheckVersionEvent.NavigateToDownload
+                        }
+                    }
+                    AsyncStatus.ERROR -> {
+                        // On error, assume database is empty and go to download
+                        eventsVersion.value = CheckVersionEvent.NavigateToDownload
+                    }
+                    else -> {
+                        // Loading or other states, do nothing for now
+                    }
+                }
+            }
+        }
+    }
+    
+    // Testing method to clear database and force download flow
+    fun clearDatabaseForTesting() {
+        viewModelScope.launch {
+            clearDatabaseUseCase(Unit).collect { result ->
+                when (result.status) {
+                    AsyncStatus.SUCCESS -> {
+                        Napier.log(LogLevel.INFO, tag = "SplashScreenVM", message = "Database cleared successfully")
+                        // After clearing, force navigation to download
+                        eventsVersion.value = CheckVersionEvent.NavigateToDownload
+                    }
+                    AsyncStatus.ERROR -> {
+                        Napier.log(LogLevel.ERROR, tag = "SplashScreenVM", message = "Failed to clear database: ${result.message}")
+                    }
+                    else -> {
+                        // Loading state
+                    }
+                }
+            }
+        }
     }
 
 }

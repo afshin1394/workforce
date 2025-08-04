@@ -66,6 +66,7 @@ class VerifyScreen(private val phoneNumber: String = "") : Screen {
         val finishTimer by viewModel.finishTimer.collectAsState()
         val smsCode by viewModel.otpCode.collectAsState()
         val mainScreen = rememberScreen(presentation.nav.Screen.Main.Menu.MyTickets)
+        val downloadScreen = rememberScreen(presentation.nav.Screen.Download)
         val phoneNumberState by remember { mutableStateOf(phoneNumber) }
         val events by viewModel.eventsVersion
         var buttonState by remember { mutableStateOf(ButtonState.IDLE) }
@@ -175,7 +176,7 @@ class VerifyScreen(private val phoneNumber: String = "") : Screen {
                                 textInverse
                             ), onFirstButtonClick = {
                                 navigator.popAll()
-                                navigator.push(mainScreen)
+                                navigator.push(downloadScreen)
                             }, onSecondButtonClick = {
                                 buttonState = ButtonState.LOADING
                                 scope.launch {
@@ -196,11 +197,11 @@ class VerifyScreen(private val phoneNumber: String = "") : Screen {
                     }
                     CheckVersionEvent.OkVersion -> {
                         navigator.popAll()
-                        navigator.push(mainScreen)
+                        navigator.push(downloadScreen)
                     }
                     CheckVersionEvent.InvalidToken -> {
                         navigator.popAll()
-                        navigator.push(mainScreen)
+                        navigator.push(downloadScreen)
                     }
                     else -> {}
                 }

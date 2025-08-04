@@ -8,6 +8,21 @@
     <string name="cancel_ticket">کنسل کردن تیکت</string>
     <string name="photo_for_ticket_suspend">عکس بابت تیکت های متوقف شده</string>
     <string name="save_photo_gallery">افزودن عکس در گالری</string>
+    <!-- Download Screen Strings -->
+    <string name="downloading_data">بارگیری اطلاعات</string>
+    <string name="download_data">بارگیری اطلاعات</string>
+    <string name="please_wait_downloading">لطفا منتظر بمانید تا تسک‌ها و اطلاعات شما بارگیری شوند</string>
+    <string name="refresh_all_data_description">بروزرسانی تمام تسک‌ها و اطلاعات از سرور</string>
+    <string name="download_failed_try_again">بارگیری ناموفق بود. لطفا دوباره تلاش کنید.</string>
+    <string name="download_fresh_data_description">بارگیری اطلاعات جدید از سرور برای بروزرسانی تمام تسک‌ها و اطلاعات</string>
+    <string name="retry_download">تلاش مجدد بارگیری</string>
+    <string name="start_download">شروع بارگیری</string>
+    <string name="chunks_downloaded">بخش‌های بارگیری شده</string>
+    <string name="tasks_processed">تسک‌های پردازش شده</string>
+    <string name="download_error">خطا در بارگیری</string>
+    <string name="retry">تلاش مجدد</string>
+    <string name="download_completed">بارگیری کامل شد</string>
+    <string name="redirecting_to_main">انتقال به صفحه اصلی...</string>
     <string name="about_application">درباره اپلیکیشن</string>
     <string name="current_version">ورژن فعلی شما</string>
     <string name="latest_version">آخرین ورژن</string>

@@ -26,4 +26,10 @@ interface InitialFormDao {
 
     @Query("UPDATE sqlite_sequence SET seq = 0 WHERE name = 'InitialFormEntity'")
     suspend fun resetSequence()
+
+    @Query("DELETE FROM InitialFormEntity WHERE ticket_number NOT IN (:ticketNumbers)")
+    suspend fun deleteAllExcept(ticketNumbers: List<String>)
+
+    @Query("DELETE FROM InitialFormEntity WHERE ticket_number IN (:ticketNumbers)")
+    suspend fun deleteSpecific(ticketNumbers: List<String>)
 }

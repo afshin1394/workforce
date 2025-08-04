@@ -8,7 +8,10 @@ interface IStepPointerRepository {
     suspend fun insertAll(pointers : List<StepPointerEntity>)
     suspend fun deleteAll(editedAvailableTickets : List<String>)
     suspend fun deleteAllStepPointers(tickets : List<String>)
+    suspend fun deleteAllExcept(ticketNumbers: List<String>)
+    suspend fun deleteSpecific(ticketNumbers: List<String>)
     suspend fun getEditedTickets() : List<String>
+    suspend fun getModifiedTicketNumbers(): List<String>
     suspend fun getActiveActivityByTicketNumber(ticketNumber : String) : StepPointerDomain
     suspend fun checkIfTicketIsEdited(ticketNumber: String) : Boolean
     suspend fun resetEntitySequence()

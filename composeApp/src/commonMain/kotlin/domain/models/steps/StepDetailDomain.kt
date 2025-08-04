@@ -6,7 +6,6 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 data class StepDetailDomain(
-
     val activity_id : Long,
     val activity_title : String,
     val activity_process_id : Long,
@@ -16,5 +15,4 @@ data class StepDetailDomain(
     val workflow_activity_tags_id : Long,
     val form_name : String,
     val form_structure : FormStructDomain
-
 )

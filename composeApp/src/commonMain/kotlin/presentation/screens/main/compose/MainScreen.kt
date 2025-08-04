@@ -47,6 +47,7 @@ import irancell.nwg.wfm.InternalStorage
 import irancell.nwg.wfm.MR
 import irancell.nwg.wfm.provideAppContext
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.delay
 import org.koin.compose.koinInject
 import presentation.components.CustomTopAppBar
 import presentation.components.DrawerBody
@@ -65,6 +66,7 @@ import presentation.screens.main.viewmodel.TicketListStatus
 import presentation.screens.ticket_process.compose.TicketInfoScreen
 import presentation.screens.ticket_process.compose.TicketProcessScreen
 import presentation.screens.ticket_process.compose.TicketStructureInfoScreen
+import presentation.screens.download.compose.DownloadScreen
 import presentation.theme.body_large
 import presentation.theme.body_small
 import presentation.theme.surfaceBrandDefault
@@ -76,7 +78,7 @@ import utils.AvailabilityStatus
 import utils.NetworkStates
 import utils.ServiceState
 
-class MainScreen() : Screen {
+class MainScreen(private val forceReload: Boolean = false) : Screen {
     @OptIn(ExperimentalMaterialApi::class)
     @Composable
     override fun Content() {
@@ -111,15 +113,22 @@ class MainScreen() : Screen {
         val connectivityState = remember { mutableStateOf<NetworkConnection>(NetworkConnection.NONE) }
 
 
-        LaunchedEffect(Unit) {
-           viewModel. konnectivity.currentNetworkConnectionState.collect { connection ->
+        LaunchedEffect(viewModel.konnectivity) {
+           viewModel.konnectivity.currentNetworkConnectionState.collect { connection ->
                 connectivityState.value = connection
             }
         }
-        LaunchedEffect(true) {
-
+        LaunchedEffect(Unit) {
             showContent = true
-
+        }
+        
+        // Force reload if coming from download screen
+        LaunchedEffect(forceReload) {
+            if (forceReload) {
+                viewModel.updateReloadState(true)
+                viewModel.refreshTasks()
+                viewModel.getActivityList()
+            }
         }
 
         val suspendItems by lazy {
@@ -238,6 +247,7 @@ class MainScreen() : Screen {
                         },
                         onNotificationClick = {
                             scope.launch {
+//                                viewModel.updateTask()
                                 scaffoldState.snackbarHostState.showSnackbar(message = underDevelopment)
                             }
 //                        navigator.push(notificationScreen)
@@ -295,6 +305,10 @@ class MainScreen() : Screen {
                                         scaffoldState.snackbarHostState.showSnackbar(message = underDevelopment)
                                     }
 //                                navigator.push(formViewerScreen)
+                                }
+
+                                Menu.Download -> {
+                                    navigator.push(DownloadScreen())
                                 }
 
                                 else -> {}
@@ -477,7 +491,9 @@ class MainScreen() : Screen {
                                     scope.launch {
                                         viewModel.selectedTask.value?.let {
                                             viewModel.updateEdited(true)
+                                            viewModel.updateIsEditedTicket(true) // Immediately update state
                                             viewModel.updateState(MainEvent.Default)
+                                            viewModel.updateShowAcceptDialog(false)
                                         }
                                     }
                                 })
@@ -792,6 +808,10 @@ class MainScreen() : Screen {
                                 )
                             }
                         }
+                        TicketListStatus.Loading->{
+                            CircularProgressIndicator()
+
+                        }
 
                         else -> {}
                     }
@@ -807,17 +827,23 @@ class MainScreen() : Screen {
                     if (eventsState == MainEvent.OpenInMap)
                         viewModel.openInMapHandler()
 
-                    if (isTicketEditedState) {
-                        viewModel.updateIsEditedTicket(false)
-                        viewModel.updateState(MainEvent.Default)
-
-                        LaunchedEffect(Unit) {
-                            navigator.push(
-                                TicketProcessScreen(
-                                    viewModel.selectedTask.value?.ticket_id.toString(),
-                                    viewModel.ticketNumber.value
+                    // Handle navigation to ticket process screen
+                    val navigationRequest by viewModel.navigationRequest.collectAsState()
+                    navigationRequest?.let { (ticketId, ticketNumber) ->
+                        LaunchedEffect(ticketId, ticketNumber) {
+                            // Clear the navigation request immediately to prevent re-triggering
+                            viewModel.clearNavigationRequest()
+                            viewModel.updateIsEditedTicket(false)
+                            viewModel.updateState(MainEvent.Default)
+                            
+                            // Navigate to the ticket process screen
+                            try {
+                                navigator.push(
+                                    TicketProcessScreen(ticketId, ticketNumber)
                                 )
-                            )
+                            } catch (e: Exception) {
+                                Napier.e("Navigation error: ${e.message}", e)
+                            }
                         }
                     }
 
@@ -851,7 +877,7 @@ class MainScreen() : Screen {
                    if (connectivityState.value != NetworkConnection.NONE) {
                     if (availability) {
                         if (reloadState) {
-                            viewModel.getTasks()
+                            viewModel.refreshTasks()
                            viewModel.getActivityList()
                         }
                         Column(
@@ -889,7 +915,7 @@ class MainScreen() : Screen {
                     }
                   } else {
                        if (reloadState) {
-                           viewModel.getTasks()
+                           viewModel.refreshTasks()
 
                        }
                        Column(
@@ -925,18 +951,9 @@ class MainScreen() : Screen {
                            )
                        }
                     }
-                    if (viewModel.showAcceptDialog.value) {
-
-                        if (isTicketEditedState) {
-                            viewModel.selectedTask.value?.let {
-                                viewModel.updateShowAcceptDialog(false)
-                                viewModel.updateState(MainEvent.Default)
-
-                            }
-                        } else {
-                            BackgroundServiceApp.updateServiceState(ServiceState.Suspend)
-                            viewModel.updateState(MainEvent.ShowAcceptTicketDialog)
-                        }
+                    if (viewModel.showAcceptDialog.value && !isTicketEditedState) {
+                        BackgroundServiceApp.updateServiceState(ServiceState.Suspend)
+                        viewModel.updateState(MainEvent.ShowAcceptTicketDialog)
                     }
                 },
                 onCloseBottomSheet = {

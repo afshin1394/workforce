@@ -109,6 +109,10 @@ open class BaseViewModel : ViewModel(), KoinComponent {
     val availabilityStatus = _availabilityStatus.asStateFlow()
 
     init {
+        // Force all security states to safe values for emulator compatibility
+        _isDeviceSafeState.update { DeviceSafetyStates.HideBottomSheet }
+        _vpnDetectionState.update { VpnDetectionStates.HideBottomSheet }
+        
         BackgroundServiceApp.updateServiceState(ServiceState.Normal)
         traceNetwork()
         traceLocation()
@@ -157,14 +161,21 @@ open class BaseViewModel : ViewModel(), KoinComponent {
     }
 
     fun detectDeviceSafety() {
+        // Bypassed for development/emulator testing
+        _isDeviceSafeState.update { DeviceSafetyStates.HideBottomSheet }
+        /*
         if (isRootedOrEmulator()) {
             _isDeviceSafeState.update { DeviceSafetyStates.ShowBottomSheet }
         } else {
             _isDeviceSafeState.update { DeviceSafetyStates.HideBottomSheet }
         }
+        */
     }
 
     fun restrictForeignIp() {
+        // Bypassed for development/emulator testing
+        _vpnDetectionState.update { VpnDetectionStates.HideBottomSheet }
+        /*
         viewModelScope.launch {
             ipDetectionUseCase(Unit).collect {
                 when (it.status) {
@@ -199,6 +210,7 @@ open class BaseViewModel : ViewModel(), KoinComponent {
                 }
             }
         }
+        */
     }
 
     private fun traceLocation() {

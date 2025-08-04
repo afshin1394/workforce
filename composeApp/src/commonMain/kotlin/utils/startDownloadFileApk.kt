@@ -13,7 +13,7 @@ suspend fun startDownloadFileApk(url: String): Boolean {
 
 
     if (getSharedPref().getString(FileApk).isNullOrEmpty()) {
-        val downloadResult = PerformDownload(url)
+        val downloadResult = PerformDownload(url,"file.zip")
 
 
         val result = downloadResult!!.getOrNull()

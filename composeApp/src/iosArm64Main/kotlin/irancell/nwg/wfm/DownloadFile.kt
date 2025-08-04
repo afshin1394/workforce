@@ -22,3 +22,9 @@ actual suspend fun DownloadFile(url: String, output: FileDestination) {
         continuation.invokeOnCancellation { task.cancel() }
     }
 }
+
+actual suspend fun DownloadGZIP(
+    url: String,
+    output: FileDestination,
+    onProgress: (DownloadState) -> Unit
+) {}

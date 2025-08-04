@@ -29,6 +29,20 @@ class InitialFormRepositoryImpl(
         db.initialFormDao().deleteAll()
     }
 
+    override suspend fun deleteAllExcept(ticketNumbers: List<String>) {
+        if (ticketNumbers.isEmpty()) {
+            db.initialFormDao().deleteAll()
+        } else {
+            db.initialFormDao().deleteAllExcept(ticketNumbers)
+        }
+    }
+
+    override suspend fun deleteSpecific(ticketNumbers: List<String>) {
+        if (ticketNumbers.isNotEmpty()) {
+            db.initialFormDao().deleteSpecific(ticketNumbers)
+        }
+    }
+
     override suspend fun resetEntitySequence() {
         db.initialFormDao().resetSequence()
     }
