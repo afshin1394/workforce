@@ -36,9 +36,6 @@ import domain.usecase.usecase.suspendTask.GetSuspendTaskByIdUseCase
 import domain.usecase.usecase.suspendTask.StoreSuspendTaskUseCase
 import domain.usecase.usecase.ticket.GetActivityListUseCase
 import domain.usecase.usecase.ticket.GetTasksUseCase
-import domain.usecase.usecase.ticket.GetTasksPaginatedUseCase
-import domain.usecase.usecase.ticket.PaginationParams
-import domain.usecase.usecase.ticket.PaginatedTasksResult
 import domain.usecase.usecase.ticket.UpdateTaskUseCase
 import io.github.aakira.napier.LogLevel
 import io.github.aakira.napier.Napier
@@ -53,6 +50,8 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
@@ -79,7 +78,6 @@ class MainScreenVM(
     private val getAvailabilityUseCase: GetAvailabilityUseCase,
     private val changeServerAvailabilityUseCase: ChangeServerAvailabilityUseCase,
     private val getTasksUseCase: GetTasksUseCase,
-    private val getTasksPaginatedUseCase: GetTasksPaginatedUseCase,
     private val storeSuspendTaskUseCase: StoreSuspendTaskUseCase,
     private val getSuspendTaskByIdUseCase: GetSuspendTaskByIdUseCase,
     private val getProfileUseCase: GetProfileUseCase,
@@ -108,31 +106,9 @@ class MainScreenVM(
     private val _tasksActivityList = mutableStateListOf<ActivityListDomain>()
     val tasksActivityList: List<ActivityListDomain> = _tasksActivityList
 
-    // Pagination state
-    private val _currentPage = MutableStateFlow(0)
-    val currentPage = _currentPage.asStateFlow()
-    
-    private val _totalPages = MutableStateFlow(0)
-    val totalPages = _totalPages.asStateFlow()
-    
-    private val _totalTaskCount = MutableStateFlow(0)
-    val totalTaskCount = _totalTaskCount.asStateFlow()
-    
-    private val _hasNextPage = MutableStateFlow(false)
-    val hasNextPage = _hasNextPage.asStateFlow()
-    
-    private val _hasPreviousPage = MutableStateFlow(false)
-    val hasPreviousPage = _hasPreviousPage.asStateFlow()
-    
-    private val _isLoadingMore = MutableStateFlow(false)
-    val isLoadingMore = _isLoadingMore.asStateFlow()
-    
-    private val _searchQuery = MutableStateFlow("")
-    val searchQuery = _searchQuery.asStateFlow()
-    
-    companion object {
-        const val PAGE_SIZE = 10
-    }
+    // REMOVED: Unused searchQuery state that was causing unnecessary recompositions
+    // private val _searchQuery = MutableStateFlow("")
+    // val searchQuery = _searchQuery.asStateFlow()
 
 
     private val _profileName = MutableStateFlow("")
@@ -174,8 +150,8 @@ class MainScreenVM(
         )
         traceNetwork()
         getProfileName()
-        // Load first page immediately on startup
-        loadTasksPaginated(page = 0, isLoadMore = false)
+        // Load all tasks immediately on startup
+        loadAllTasks()
         getActivityList()
         updateTicketNumber("")
         updateTicketId("")
@@ -225,26 +201,26 @@ class MainScreenVM(
 
     private fun traceNetwork() {
         viewModelScope.launch(Dispatchers.Main) {
-            konnectivity.currentNetworkConnectionState.collect { connection ->
-                when (connection) {
-                    NetworkConnection.NONE -> {
-                        updateAvailabilityState(AvailabilityStatus.NoInternet)
-                        println("checkUpdate")
-                    }
-
-                    else -> {
-                        getCurrentAvailability()
-                        val serviceRunning = BackgroundServiceApp.isServiceRunning()
-                        if (_availability.value) {
-                            updateAvailabilityState(
-                                if (serviceRunning) AvailabilityStatus.Available else AvailabilityStatus.NotRunning
-                            )
-                        } else {
-                            updateAvailabilityState(AvailabilityStatus.Unavailable)
+            konnectivity.currentNetworkConnectionState
+                .debounce(300) // OPTIMIZED: Debounce rapid network changes - StateFlow already has distinctUntilChanged
+                .collect { connection ->
+                    when (connection) {
+                        NetworkConnection.NONE -> {
+                            updateAvailabilityState(AvailabilityStatus.NoInternet)
+                        }
+                        else -> {
+                            // OPTIMIZED: Only get availability if not already available
+                            if (!_availability.value) {
+                                getCurrentAvailability()
+                            } else {
+                                val serviceRunning = BackgroundServiceApp.isServiceRunning()
+                                updateAvailabilityState(
+                                    if (serviceRunning) AvailabilityStatus.Available else AvailabilityStatus.NotRunning
+                                )
+                            }
                         }
                     }
                 }
-            }
         }
     }
 
@@ -353,18 +329,41 @@ class MainScreenVM(
     }
 
     fun updateIsEditedTicket(isEdited: Boolean) {
+        Napier.log(LogLevel.ASSERT, "updateIsEditedTicket", 
+            message = "Updating ticket edited state from ${_ticketIsEdited.value} to $isEdited")
+        
         _ticketIsEdited.update { isEdited }
+        
         if (isEdited) {
             selectedTask.value?.let { task ->
+                Napier.log(LogLevel.ASSERT, "updateIsEditedTicket", 
+                    message = "Ticket is edited - setting navigation request for ticket ${task.ticket_number}")
                 _navigationRequest.update { 
                     Pair(task.ticket_id.toString(), task.ticket_number ?: "") 
                 }
+            } ?: run {
+                Napier.log(LogLevel.WARNING, "updateIsEditedTicket", 
+                    message = "Ticket is edited but selectedTask is null")
             }
+        } else {
+            Napier.log(LogLevel.ASSERT, "updateIsEditedTicket", 
+                message = "Ticket is not edited - no navigation request needed")
         }
     }
 
     fun updateShowAcceptDialog(showDialog: Boolean) {
+        Napier.log(LogLevel.ASSERT, "updateShowAcceptDialog", 
+            message = "Updating accept dialog state from ${_showAcceptDialog.value} to $showDialog")
         _showAcceptDialog.update { showDialog }
+        Napier.log(LogLevel.ASSERT, "updateShowAcceptDialog", 
+            message = "Accept dialog state updated. Current value: ${_showAcceptDialog.value}")
+        
+        // Force a small delay to ensure compose recomposition
+        viewModelScope.launch {
+            kotlinx.coroutines.delay(10) // Small delay to ensure state propagation
+            Napier.log(LogLevel.ASSERT, "updateShowAcceptDialog", 
+                message = "Post-update check - showAcceptDialog: ${_showAcceptDialog.value}")
+        }
     }
     
     fun clearNavigationRequest() {
@@ -460,7 +459,7 @@ class MainScreenVM(
                             updateAvailabilityState(AvailabilityStatus.Available)
                             BackgroundServiceApp.startBackgroundService()
                             BackgroundServiceApp.updateServiceState(ServiceState.Normal)
-                            loadTasksPaginated(page = 0, isLoadMore = false)
+                            loadAllTasks()
 
                         } else {
                             updateAvailabilityState(AvailabilityStatus.Unavailable)
@@ -670,129 +669,65 @@ class MainScreenVM(
     }
 
     private var isFiltersBuilt = false
-    fun loadTasksPaginated(page: Int = 0, isLoadMore: Boolean = false, searchQuery: String? = null) {
+    fun loadAllTasks() {
         viewModelScope.launch(Dispatchers.Main) {
-            if (!isLoadMore) {
-                _isLoadingMore.update { false }
-                updateTicketListState(TicketListStatus.Loading)
-                updateState(ViewStates.Loading)
-            } else {
-                _isLoadingMore.update { true }
-            }
+            updateTicketListState(TicketListStatus.Loading)
+            updateState(ViewStates.Loading)
             
-            val params = PaginationParams(
-                page = page,
-                pageSize = PAGE_SIZE,
-                searchQuery = searchQuery?.takeIf { it.isNotBlank() }
-            )
-            
-            getTasksPaginatedUseCase(params).collect { result ->
+            getTasksUseCase(Unit).collect { result ->
                 when (result.status) {
                     AsyncStatus.ERROR -> {
                         handleError(result.resultStatus, result.message)
-                        _isLoadingMore.update { false }
-                        if (!isLoadMore) {
-                            updateState(ViewStates.Error(result.message ?: "Unknown error"))
-                        }
-                        Napier.log(LogLevel.ASSERT, "loadTasksPaginated", message = "ERROR: ${result.message}")
+                        updateState(ViewStates.Error(result.message ?: "Unknown error"))
+                        Napier.log(LogLevel.ASSERT, "loadAllTasks", message = "ERROR: ${result.message}")
                     }
 
                     AsyncStatus.LOADING -> {
-                        if (!isLoadMore) {
-                            _reload.update { false }
-                        }
-                        Napier.log(LogLevel.ASSERT, "loadTasksPaginated", message = "LOADING")
+                        _reload.update { false }
+                        Napier.log(LogLevel.ASSERT, "loadAllTasks", message = "LOADING")
                     }
 
                     AsyncStatus.EMPTY -> {
-                        if (!isLoadMore) {
-                            clearTasks()
-                            updateState(ViewStates.EMPTY)
-                            updateTicketListState(TicketListStatus.Empty)
-                        }
-                        _isLoadingMore.update { false }
-                        updatePaginationState(result.data)
-                        Napier.log(LogLevel.ASSERT, "loadTasksPaginated", message = "EMPTY")
+                        clearTasks()
+                        updateState(ViewStates.EMPTY)
+                        updateTicketListState(TicketListStatus.Empty)
+                        Napier.log(LogLevel.ASSERT, "loadAllTasks", message = "EMPTY")
                         _reload.update { true }
                     }
 
                     AsyncStatus.SUCCESS -> {
-                        if (!isLoadMore) {
-                            clearTasks()
-                        }
-                        
-                        result.data?.let { paginatedResult ->
-                            if (isLoadMore) {
-                                addTasks(paginatedResult.tasks)
-                            } else {
-                                addTasks(paginatedResult.tasks)
-                            }
-                            
-                            updatePaginationState(paginatedResult)
+                        clearTasks()
+                        result.data?.let { tasksList ->
+                            addTasks(tasksList)
                             updateState(ViewStates.Success())
                             updateTicketListState(TicketListStatus.Filled)
                             
-                            if (!isFiltersBuilt && !isLoadMore && page == 0) {
+                            if (!isFiltersBuilt) {
                                 buildFiltersFromTasks()
                                 isFiltersBuilt = true
                             }
                         }
                         
-                        _isLoadingMore.update { false }
                         _reload.update { true }
-                        Napier.log(LogLevel.ASSERT, "loadTasksPaginated", message = "SUCCESS: page=$page, totalTasks=${result.data?.totalCount}")
+                        Napier.log(LogLevel.ASSERT, "loadAllTasks", message = "SUCCESS: ${result.data?.size} tasks loaded")
                     }
                 }
             }
         }
     }
 
-    private fun updatePaginationState(paginatedResult: PaginatedTasksResult?) {
-        paginatedResult?.let { result ->
-            _currentPage.update { result.currentPage }
-            _totalPages.update { result.totalPages }
-            _totalTaskCount.update { result.totalCount }
-            _hasNextPage.update { result.hasNextPage }
-            _hasPreviousPage.update { result.hasPreviousPage }
-        }
-    }
-
-    fun loadNextPage() {
-        if (_hasNextPage.value && !_isLoadingMore.value) {
-            loadTasksPaginated(
-                page = _currentPage.value + 1,
-                isLoadMore = true,
-                searchQuery = _searchQuery.value.takeIf { it.isNotBlank() }
-            )
-        }
-    }
-
-    fun loadPreviousPage() {
-        if (_hasPreviousPage.value && !_isLoadingMore.value) {
-            loadTasksPaginated(
-                page = _currentPage.value - 1,
-                isLoadMore = false,
-                searchQuery = _searchQuery.value.takeIf { it.isNotBlank() }
-            )
-        }
-    }
-
     fun searchTasks(query: String) {
-        _searchQuery.update { query }
-        loadTasksPaginated(page = 0, isLoadMore = false, searchQuery = query)
+        // REMOVED: No longer updating unused state
+        // Filtering is handled entirely in UI composable
     }
 
     fun clearSearch() {
-        _searchQuery.update { "" }
-        loadTasksPaginated(page = 0, isLoadMore = false, searchQuery = null)
+        // REMOVED: No longer updating unused state  
+        // Filtering is handled entirely in UI composable
     }
 
     fun refreshTasks() {
-        loadTasksPaginated(
-            page = 0, 
-            isLoadMore = false, 
-            searchQuery = _searchQuery.value.takeIf { it.isNotBlank() }
-        )
+        loadAllTasks()
     }
 
     fun getTasks() {
@@ -847,17 +782,8 @@ class MainScreenVM(
 
 
 
-                            konnectivity.currentNetworkConnectionState.collect { connection ->
-                                if (connection == NetworkConnection.NONE) {
-                                    isFiltersBuilt = false
-                                    clearFilters()
-                                    filterTasksForNoInternet()
-
-                                } else {
-                                    getActiveFilterItems()
-
-                                }
-                            }
+                            // REMOVED: Network state collection moved to BaseViewModel to prevent duplication
+                            // Network-specific filtering is now handled in BaseViewModel
 
 
                         }
@@ -1217,32 +1143,76 @@ class MainScreenVM(
     }
 
     fun checkIfTicketIsEdited() {
+        val ticketNumber = selectedTask.value?.ticket_number ?: ""
+        val ticketId = selectedTask.value?.ticket_id
+        
+        Napier.log(LogLevel.ASSERT, "checkIfTicketIsEdited", 
+            message = "Starting check for ticket - Number: $ticketNumber, ID: $ticketId, selectedTask: ${selectedTask.value}")
+        
         viewModelScope.launch {
-            checkForEditedTicketUseCase(
-                selectedTask.value?.ticket_number ?: ""
-            ).collect {
+            checkForEditedTicketUseCase(ticketNumber).collect {
+                Napier.log(LogLevel.ASSERT, "checkIfTicketIsEdited", 
+                    message = "Response status: ${it.status}, data: ${it.data}, message: ${it.message}")
+
                 when (it.status) {
                     AsyncStatus.ERROR -> {
+                        Napier.log(LogLevel.ERROR, "checkIfTicketIsEdited", 
+                            message = "ERROR occurred - ResultStatus: ${it.resultStatus}, Message: ${it.message}")
                         handleError(it.resultStatus, it.message)
                     }
 
                     AsyncStatus.LOADING -> {
-                        Napier.log(LogLevel.ASSERT, "saveSuspendTask", message = "LOADING: ")
+                        Napier.log(LogLevel.ASSERT, "checkIfTicketIsEdited", message = "LOADING state")
                         updateState(ViewStates.Loading)
                     }
 
                     AsyncStatus.SUCCESS -> {
+                        Napier.log(LogLevel.ASSERT, "checkIfTicketIsEdited", 
+                            message = "SUCCESS - Data received: ${it.data}")
+                        
                         it.data?.let { isEdited ->
+                            Napier.log(LogLevel.ASSERT, "checkIfTicketIsEdited", 
+                                message = "Ticket edited status: $isEdited, updating states...")
+                            
                             _ticketIsEdited.update { isEdited }
-                            if (!isEdited) updateShowAcceptDialog(true)
 
+                            if (!isEdited) {
+                                Napier.log(LogLevel.ASSERT, "checkIfTicketIsEdited", 
+                                    message = "Ticket NOT edited - showing accept dialog")
+                                updateShowAcceptDialog(true)
+                            } else {
+                                Napier.log(LogLevel.ASSERT, "checkIfTicketIsEdited", 
+                                    message = "Ticket IS edited - navigating directly to ticket process")
+                                // Ticket was already accepted before, navigate immediately
+                                selectedTask.value?.let { task ->
+                                    Napier.log(LogLevel.ASSERT, "checkIfTicketIsEdited", 
+                                        message = "Setting navigation request for already edited ticket ${task.ticket_number}")
+                                    _navigationRequest.update { 
+                                        Pair(task.ticket_id.toString(), task.ticket_number ?: "") 
+                                    }
+
+                                } ?: run {
+                                    Napier.log(LogLevel.WARNING, "checkIfTicketIsEdited", 
+                                        message = "Cannot navigate - selectedTask is null")
+                                }
+                            }
+                        } ?: run {
+                            Napier.log(LogLevel.WARNING, "checkIfTicketIsEdited", 
+                                message = "SUCCESS but data is null")
                         }
-                        updateState(ViewStates.Success())
+                        
                         updateTicketNumber(selectedTask.value?.ticket_number ?: "")
                         updateTicketId(selectedTask.value?.ticket_id.toString())
+                        updateState(ViewStates.Success())
+
+                        Napier.log(LogLevel.ASSERT, "checkIfTicketIsEdited",
+                            message = "Updated states - ticketNumber: ${ticketNumber}, ticketId: $ticketId")
                     }
 
-                    else -> {}
+                    else -> {
+                        Napier.log(LogLevel.WARNING, "checkIfTicketIsEdited", 
+                            message = "Unhandled status: ${it.status}")
+                    }
                 }
             }
         }
@@ -1286,14 +1256,18 @@ class MainScreenVM(
     }
 
     fun updateEdited(isEdited: Boolean) {
+        val ticketNumber = selectedTask.value?.ticket_number ?: ""
+        Napier.log(LogLevel.ASSERT, "updateEdited", 
+            message = "Updating edited status for ticket $ticketNumber to $isEdited")
+        
         viewModelScope.launch {
             updateIsEditedTicketUseCase(
-                Pair(
-                    selectedTask.value?.ticket_number.toString(), isEdited
-                )
+                Pair(ticketNumber, isEdited)
             ).collect {
                 when (it.status) {
                     AsyncStatus.ERROR -> {
+                        Napier.log(LogLevel.ERROR, "updateEdited", 
+                            message = "Failed to update edited status: ${it.message}")
                         handleError(it.resultStatus, it.message)
                     }
 
@@ -1302,6 +1276,9 @@ class MainScreenVM(
                     }
 
                     AsyncStatus.SUCCESS -> {
+                        Napier.log(LogLevel.ASSERT, "updateEdited", 
+                            message = "Successfully updated edited status for ticket $ticketNumber")
+                        // After updating, check the status again
                         checkIfTicketIsEdited()
                     }
 
@@ -1342,8 +1319,8 @@ class MainScreenVM(
                     }
 
                     AsyncStatus.SUCCESS -> {
-                        // Use paginated loading instead of loading all tasks
-                        loadTasksPaginated(page = 0, isLoadMore = false)
+                        // Load all tasks
+                        loadAllTasks()
                         updateTicketListState(TicketListStatus.Filled)
                         Napier.log(LogLevel.ASSERT, "OnTasksEmpty", message = "Success")
 

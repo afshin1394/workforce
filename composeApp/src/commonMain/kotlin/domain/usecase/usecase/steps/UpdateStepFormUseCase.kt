@@ -27,6 +27,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.koin.core.component.KoinComponent
@@ -58,6 +59,24 @@ class UpdateStepFormUseCase(
     override suspend fun run(params: Tuple6<String, String, List<ComponentDomain>, List<PhotoDomain>, Int, String>): StructureActivity {
         Location.start { }
 
+        // Clean up any corrupted JSON data in the database
+        try {
+            val corruptedEntries = iStepsRepository.findCorruptedEntries()
+            if (corruptedEntries.isNotEmpty()) {
+                Napier.log(LogLevel.WARNING, 
+                    tag = "UpdateStepFormUseCase", 
+                    message = "Found ${corruptedEntries.size} corrupted entries, cleaning up...")
+                iStepsRepository.cleanupCorruptedJsonData()
+                Napier.log(LogLevel.INFO, 
+                    tag = "UpdateStepFormUseCase", 
+                    message = "Corrupted data cleaned up successfully")
+            }
+        } catch (e: Exception) {
+            Napier.log(LogLevel.ERROR, 
+                tag = "UpdateStepFormUseCase", 
+                message = "Failed to cleanup corrupted data: ${e.message}")
+        }
+
         val removablesWithParent: ArrayList<ComponentDomain> = arrayListOf()
         val dict = mutableMapOf<String, Any>()
         val dictImages = mutableMapOf<String, Any>()
@@ -65,15 +84,27 @@ class UpdateStepFormUseCase(
 
         val stepPointerDomain = iStepPointerRepository.getActiveActivityByTicketNumber(params.first)
 
+        // Optimize: Move database update to background
         if (params.second != PROCEED.INITIAL) {
-            iStepsRepository.updateFormStructure(
-                params.first,
-                stepPointerDomain.activeActivity,
-                formStructure = Json.encodeToString(
-                    FormStruct.serializer(),
-                    FormStruct(components = (params.third.toComponent()))
-                ),
-            )
+            // Use async for non-blocking database update
+            coroutineScope {
+                launch(Dispatchers.IO) {
+                    try {
+                        iStepsRepository.updateFormStructure(
+                            params.first,
+                            stepPointerDomain.activeActivity,
+                            formStructure = Json.encodeToString(
+                                FormStruct.serializer(),
+                                FormStruct(components = (params.third.toComponent()))
+                            )
+                        )
+                    } catch (e: Exception) {
+                        Napier.log(LogLevel.ERROR, 
+                            tag = "UpdateStepFormUseCase", 
+                            message = "Failed to update form structure: ${e.message}")
+                    }
+                }
+            }
         }
        val stepList =
             iStepsRepository.getStepsByTicketNumber(params.first).toActivityDomainList()
@@ -119,29 +150,41 @@ class UpdateStepFormUseCase(
 
 
 
-        try {
+        // Optimize: Get location asynchronously and only when needed
+        coroutineScope {
+            launch(Dispatchers.IO) {
+                try {
+                    // Check if location components exist before fetching location
+                    val hasLocationComponents = data.form.form_structure.components?.any {
+                        it.key in listOf("submitted_latitude", "submitted_longitude", "submitted_date")
+                    } == true || params.third.any {
+                        it.key in listOf("submitted_latitude", "submitted_longitude", "submitted_date")
+                    }
+                    
+                    if (hasLocationComponents) {
+                        val location = Location.getLastLocation()
+                        Napier.log(LogLevel.DEBUG, tag = "Location", message = "Lat: ${location.latitude}, Lng: ${location.longitude}")
 
-            val location = Location.getLastLocation()
-            Napier.log(LogLevel.ASSERT, tag = "gpsssss", message = location.latitude)
-            Napier.log(LogLevel.ASSERT, tag = "gpsssss", message = location.longitude)
+                        data.form.form_structure.components?.findComponentByKey("submitted_latitude")?.values =
+                            arrayListOf(ValueDomain("submitted_latitude", location.latitude))
+                        data.form.form_structure.components?.findComponentByKey("submitted_longitude")?.values =
+                            arrayListOf(ValueDomain("submitted_longitude", location.longitude))
+                        data.form.form_structure.components?.findComponentByKey("submitted_date")?.values =
+                            arrayListOf(ValueDomain("submitted_date", location.datetime.parsGpsDateTime()))
 
-            data.form.form_structure.components?.findComponentByKey("submitted_latitude")?.values =
-                arrayListOf(ValueDomain("submitted_latitude", location.latitude))
-            data.form.form_structure.components?.findComponentByKey("submitted_longitude")?.values =
-                arrayListOf(ValueDomain("submitted_latitude", location.longitude))
-            data.form.form_structure.components?.findComponentByKey("submitted_date")?.values =
-                arrayListOf(ValueDomain("submitted_date", location.datetime.parsGpsDateTime()))
-
-            params.third.findComponentByKey("submitted_latitude")?.values =
-                arrayListOf(ValueDomain("submitted_latitude", location.latitude))
-            params.third.findComponentByKey("submitted_longitude")?.values =
-                arrayListOf(ValueDomain("submitted_latitude", location.longitude))
-            params.third.findComponentByKey("submitted_date")?.values =
-                arrayListOf(ValueDomain("submitted_date", location.datetime.parsGpsDateTime()))
-
-
-        } catch (_: Exception) {
-
+                        params.third.findComponentByKey("submitted_latitude")?.values =
+                            arrayListOf(ValueDomain("submitted_latitude", location.latitude))
+                        params.third.findComponentByKey("submitted_longitude")?.values =
+                            arrayListOf(ValueDomain("submitted_longitude", location.longitude))
+                        params.third.findComponentByKey("submitted_date")?.values =
+                            arrayListOf(ValueDomain("submitted_date", location.datetime.parsGpsDateTime()))
+                    }
+                } catch (e: Exception) {
+                    Napier.log(LogLevel.WARNING, 
+                        tag = "UpdateStepFormUseCase", 
+                        message = "Failed to get location: ${e.message}")
+                }
+            }
         }
 
 

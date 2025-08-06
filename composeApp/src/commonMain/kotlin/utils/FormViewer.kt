@@ -6,6 +6,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.Text
+import androidx.compose.ui.graphics.Color
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 
@@ -594,6 +596,118 @@ fun initialize(
                             },
                             {}
                         )
+                    }
+
+                    FormViewerTypes.Email -> {
+                        var valueState =
+                            mutableStateOf(item.values?.get(0)?.value ?: "")
+
+                        Editable(
+                            processLogicDomain = processLogicDomainState,
+                            type = TypeEditable.EMAIL,
+                            value = valueState.value,
+                            placeholder = item.label.toString(),
+                            imeAction = ImeAction.None,
+                            keyboardType = KeyboardType.Email,
+                            readOnly = item.readOnly,
+                            disable = item.disabled,
+                            maxLines = 1,
+                            onValueChange = { newValue ->
+                                valueState.value = newValue
+                                val updatedValueDomain = updateValueDomain(
+                                    item.values?.get(0) ?: ValueDomain(), newValue
+                                )
+                                item.updateValues(listOf(updatedValueDomain))
+                                onChanges(
+                                    item,
+                                    listOf(updatedValueDomain)
+                                )
+                            }
+                        )
+                    }
+
+                    FormViewerTypes.GridField -> {
+                        // GridField is a complex component that may contain nested components
+                        // For now, handle as a group with nested components
+                        Napier.log(LogLevel.WARNING, tag = "FormViewer", message = "GridField component not fully implemented, rendering as group")
+                        val nestedComponents = nestedComponentsState
+                        if (nestedComponents != null && nestedComponents.isNotEmpty()) {
+                            initialize(
+                                isChild = true,
+                                scrollingState = scrollingState,
+                                savedIndex = savedIndex,
+                                savedParentIndex = savedParentIndex,
+                                taskID = taskID,
+                                modifier = modifier.heightIn(0.dp, 1000.dp),
+                                photoDomainList = photoDomainList,
+                                components = nestedComponents,
+                                onChanges = onChanges,
+                                onAddItem = onAddItem,
+                                onRemoveItem = onRemoveItem,
+                                onClickImage = onClickImage,
+                                currentParentIndex = updatedParentIndex
+                            )
+                        }
+                    }
+
+                    else -> {
+                        // Default case for unrecognized component types
+                        Napier.log(LogLevel.WARNING, tag = "FormViewer", message = "Unrecognized component type: ${item.type} for component ${item.id}/${item.key}")
+                        
+                        // Try to render as text field if it has values that can be edited
+                        if (item.values != null && item.values!!.isNotEmpty()) {
+                            var valueState = mutableStateOf(item.values?.get(0)?.value ?: "")
+                            
+                            Editable(
+                                processLogicDomain = processLogicDomainState,
+                                type = TypeEditable.SHORT_TEXT,
+                                value = valueState.value,
+                                placeholder = "${item.label} (${item.type})",
+                                imeAction = ImeAction.None,
+                                keyboardType = KeyboardType.Text,
+                                readOnly = item.readOnly,
+                                disable = item.disabled,
+                                maxLines = 1,
+                                onValueChange = { newValue ->
+                                    valueState.value = newValue
+                                    val updatedValueDomain = updateValueDomain(
+                                        item.values?.get(0) ?: ValueDomain(), newValue
+                                    )
+                                    item.updateValues(listOf(updatedValueDomain))
+                                    onChanges(
+                                        item,
+                                        listOf(updatedValueDomain)
+                                    )
+                                }
+                            )
+                        } else {
+                            // If it has nested components, try to render them
+                            val nestedComponents = nestedComponentsState
+                            if (!nestedComponents.isNullOrEmpty()) {
+                                initialize(
+                                    isChild = true,
+                                    scrollingState = scrollingState,
+                                    savedIndex = savedIndex,
+                                    savedParentIndex = savedParentIndex,
+                                    taskID = taskID,
+                                    modifier = modifier.heightIn(0.dp, 1000.dp),
+                                    photoDomainList = photoDomainList,
+                                    components = nestedComponents,
+                                    onChanges = onChanges,
+                                    onAddItem = onAddItem,
+                                    onRemoveItem = onRemoveItem,
+                                    onClickImage = onClickImage,
+                                    currentParentIndex = updatedParentIndex
+                                )
+                            } else {
+                                // Show a placeholder text for completely unrecognized components
+                                Text(
+                                    text = "${item.label ?: "Unknown Component"} (${item.type})",
+                                    modifier = Modifier.padding(8.dp),
+                                    color = Color.Gray
+                                )
+                            }
+                        }
                     }
                 }
             }

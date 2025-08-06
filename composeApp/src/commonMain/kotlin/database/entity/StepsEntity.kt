@@ -3,7 +3,12 @@ package database.entity
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
-@Entity(tableName = "StepsEntity")
+@Entity(
+    tableName = "StepsEntity",
+    indices = [
+        androidx.room.Index(value = ["ticketNumber", "activityId"], unique = true)
+    ]
+)
 data class StepsEntity(
     @PrimaryKey(autoGenerate = true) val pk: Long = 0,
     val ticketNumber: String,

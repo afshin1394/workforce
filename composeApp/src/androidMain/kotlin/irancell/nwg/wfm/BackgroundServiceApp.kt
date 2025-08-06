@@ -199,15 +199,14 @@ internal actual class BackgroundServiceApp : Service(), KoinComponent {
                     }
 
                     AlarmAction.UPDATE.title -> {
-                        startUpdateAlarm()
-
-                        if (_serviceState.value != ServiceState.Suspend  ) {
-                            if (getSharedPref().getString(UpdateType)==UpdateTaskListTypes.Auto){
-                                updateTask()
-
-                            }
-
-                        }
+//                        startUpdateAlarm()
+//
+//                        if (_serviceState.value != ServiceState.Suspend  ) {
+//                            if (getSharedPref().getString(UpdateType)==UpdateTaskListTypes.Auto){
+//                                updateTask()
+//                            }
+//
+//                        }
                     }
                 }
             }

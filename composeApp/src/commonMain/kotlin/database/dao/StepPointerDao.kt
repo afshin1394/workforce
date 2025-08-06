@@ -10,6 +10,9 @@ import database.entity.StepPointerEntity
 interface  StepPointerDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAll(task: List<StepPointerEntity>)
+    
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insert(stepPointer: StepPointerEntity)
 
     @Query("UPDATE sqlite_sequence SET seq = 0 WHERE name = 'StepPointerEntity'")
     suspend fun resetSequence()
@@ -25,7 +28,7 @@ interface  StepPointerDao {
     suspend fun selectAll(): List<StepPointerEntity>
 
     @Query("SELECT * FROM StepPointerEntity WHERE ticketNumber = :ticketNumber LIMIT 1")
-    suspend fun selectActiveActivityByTicketNumber(ticketNumber: String) : StepPointerEntity
+    suspend fun selectActiveActivityByTicketNumber(ticketNumber: String) : StepPointerEntity?
 
     @Query("UPDATE StepPointerEntity SET activeActivity = :activeActivity , edited = 1 WHERE ticketNumber = :ticketNumber")
     suspend fun updateActiveActivity(ticketNumber : String ,activeActivity: Long)
@@ -45,5 +48,15 @@ interface  StepPointerDao {
 
     @Query("SELECT ticketNumber FROM StepPointerEntity WHERE edited = 1")
     suspend fun selectModifiedTicketNumbers(): List<String>
+
+    @Query("""
+        DELETE FROM StepPointerEntity 
+        WHERE pk NOT IN (
+            SELECT MIN(pk) 
+            FROM StepPointerEntity 
+            GROUP BY ticketNumber
+        )
+    """)
+    suspend fun removeDuplicates()
 
 }

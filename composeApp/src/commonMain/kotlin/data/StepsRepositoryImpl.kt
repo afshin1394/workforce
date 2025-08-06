@@ -106,4 +106,12 @@ class StepsRepositoryImpl(
         }
     }
 
+    override suspend fun cleanupCorruptedJsonData() {
+        db.stepDao().cleanupCorruptedJsonData()
+    }
+
+    override suspend fun findCorruptedEntries(): List<StepsEntity> {
+        return db.stepDao().findCorruptedEntries()
+    }
+
 }

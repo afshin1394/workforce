@@ -4,6 +4,7 @@ import domain.models.PhotoDomain
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
+@Serializable
 data class ActivityDomain(
     val id : Long,
     val title : String,

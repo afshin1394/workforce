@@ -1,6 +1,7 @@
 package presentation.screens.main.compose
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -16,6 +17,7 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.*
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -68,15 +70,21 @@ import presentation.screens.ticket_process.compose.TicketProcessScreen
 import presentation.screens.ticket_process.compose.TicketStructureInfoScreen
 import presentation.screens.download.compose.DownloadScreen
 import presentation.theme.body_large
+import presentation.theme.body_large_strong
 import presentation.theme.body_small
+import presentation.theme.body_small_strong
 import presentation.theme.surfaceBrandDefault
 import presentation.theme.surfaceDefault
 import presentation.theme.textInverse
 import presentation.theme.textInverseDisabled
 import presentation.theme.textPrimary
+import presentation.theme.textSecondary
+import presentation.theme.textBrand
+import presentation.theme.textError
 import utils.AvailabilityStatus
 import utils.NetworkStates
 import utils.ServiceState
+
 
 class MainScreen(private val forceReload: Boolean = false) : Screen {
     @OptIn(ExperimentalMaterialApi::class)
@@ -85,16 +93,28 @@ class MainScreen(private val forceReload: Boolean = false) : Screen {
 
         val navigator = LocalNavigator.currentOrThrow
         val viewModel: MainScreenVM = koinInject()
-        Napier.log(LogLevel.ASSERT, "MainScreenVM", message = viewModel.toString())
+        
+        // OPTIMIZED: Use individual state observations - cleaner approach
         val availability by viewModel.availability.collectAsState()
         val openCamera by viewModel.openCamera.collectAsState()
-        val suspendTaskState by viewModel.suspendTaskDomain.collectAsState()
         val profileName by viewModel.profileName.collectAsState()
-        val positionSelectedPhotoForEdit by viewModel.positionSelected.collectAsState()
-        var indexPhotoSelected by remember { mutableStateOf(0) }
-        val isTicketEditedState by viewModel.ticketIsEdited.collectAsState()
-        var isClickable by remember { mutableStateOf(true) }
         val reloadState by viewModel.reload.collectAsState()
+        val networkState by viewModel.networkState.collectAsState()
+        val ticketListStatus by viewModel.ticketListStatus.collectAsState()
+        val availabilityStatus by viewModel.availabilityStatus.collectAsState()
+        
+        // Only observe these states when actually needed in UI
+        val suspendTaskState by remember { viewModel.suspendTaskDomain }.collectAsState()
+        val positionSelectedPhotoForEdit by remember { viewModel.positionSelected }.collectAsState()
+        val isTicketEditedState by remember { viewModel.ticketIsEdited }.collectAsState()
+        val showAcceptDialogState by remember { viewModel.showAcceptDialog }.collectAsState()
+        
+        // Debug recomposition
+        Napier.log(LogLevel.ASSERT, "MainScreen", 
+            message = "🎭 MainScreen RECOMPOSITION - showAcceptDialog: $showAcceptDialogState, isTicketEdited: $isTicketEditedState")
+        
+        var indexPhotoSelected by remember { mutableStateOf(0) }
+        var isClickable by remember { mutableStateOf(true) }
         val accountScreen = rememberScreen(AccountInfo)
         val settingsScreen = rememberScreen(Menu.Settings)
         val aboutScreen = rememberScreen(Menu.About)
@@ -104,20 +124,10 @@ class MainScreen(private val forceReload: Boolean = false) : Screen {
         val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
         val eventsState by viewModel.events.collectAsState()
         var hasDrawer by mutableStateOf(false)
-        val availabilityStatus by viewModel.availabilityStatus.collectAsState()
         var showContent by remember { mutableStateOf(false) }
-        val ticketListStatus by viewModel.ticketListStatus.collectAsState()
-        val networkState by viewModel.networkState.collectAsState()
 
 
-        val connectivityState = remember { mutableStateOf<NetworkConnection>(NetworkConnection.NONE) }
-
-
-        LaunchedEffect(viewModel.konnectivity) {
-           viewModel.konnectivity.currentNetworkConnectionState.collect { connection ->
-                connectivityState.value = connection
-            }
-        }
+        // Network state is already handled by ViewModel - no need for duplicate monitoring
         LaunchedEffect(Unit) {
             showContent = true
         }
@@ -231,17 +241,13 @@ class MainScreen(private val forceReload: Boolean = false) : Screen {
                         stringResource(MR.strings.ticket_list),
                         onNavigationItemClick = {
                             scope.launch {
-                                Napier.log(
-                                    LogLevel.ASSERT,
-                                    tag = "drawerState",
-                                    message = drawerState.isOpen.toString()
-                                )
                                 if (drawerState.isOpen) drawerState.close()
                                 else drawerState.open()
                             }
                         },
                         onAvailabilityClick = {
-                            if (availabilityStatus == AvailabilityStatus.Available || availabilityStatus == AvailabilityStatus.Unavailable) {
+                            if (availabilityStatus == AvailabilityStatus.Available || 
+                                availabilityStatus == AvailabilityStatus.Unavailable) {
                                 viewModel.updateState(MainEvent.AvailabilityStatus)
                             }
                         },
@@ -386,7 +392,7 @@ class MainScreen(private val forceReload: Boolean = false) : Screen {
                                     surfaceDefault,
                                     textPrimary,
                                     stringResource(MR.strings.delete),
-                                    Color.Red,
+                                    textError,
                                     textInverse
                                 ), onFirstButtonClick = {
                                     viewModel.updateState(MainEvent.PhotoPreview)
@@ -445,9 +451,7 @@ class MainScreen(private val forceReload: Boolean = false) : Screen {
                         }
 
                         MainEvent.AcceptTicket -> {
-                            scope.launch {
-                                scaffoldState.bottomSheetState.collapse()
-                            }
+                            // Don't collapse - let ShowAcceptTicketDialog handle the bottom sheet
                         }
 
                         MainEvent.Exit -> {
@@ -457,7 +461,7 @@ class MainScreen(private val forceReload: Boolean = false) : Screen {
                                     surfaceDefault,
                                     textPrimary,
                                     stringResource(MR.strings.exit),
-                                    Color.Red,
+                                    textError,
                                     textInverse
                                 ), onFirstButtonClick = {
                                     viewModel.updateState(MainEvent.Default)
@@ -473,6 +477,8 @@ class MainScreen(private val forceReload: Boolean = false) : Screen {
                         }
 
                         MainEvent.ShowAcceptTicketDialog -> {
+                            Napier.log(LogLevel.ASSERT, "MainScreen", 
+                                message = "Rendering ShowAcceptTicketDialog bottom sheet")
                             bottomSheetDoubleActionBottomBar(
                                 BottomSheetActionModel(
                                     stringResource(MR.strings.cancel),
@@ -482,18 +488,30 @@ class MainScreen(private val forceReload: Boolean = false) : Screen {
                                     surfaceBrandDefault,
                                     textInverse
                                 ), onFirstButtonClick = {
+                                    Napier.log(LogLevel.ASSERT, "MainScreen", 
+                                        message = "Cancel button clicked in accept dialog")
                                     scope.launch {
-                                        BackgroundServiceApp.updateServiceState(ServiceState.Normal)
+                                        // Removed ServiceState.Normal update - no longer needed for consistency
+                                        // BackgroundServiceApp.updateServiceState(ServiceState.Normal)
                                         viewModel.updateState(MainEvent.Default)
                                         viewModel.updateShowAcceptDialog(false)
                                     }
                                 }, onSecondButtonClick = {
+                                    Napier.log(LogLevel.ASSERT, "MainScreen", 
+                                        message = "Accept button clicked in dialog - selectedTask: ${viewModel.selectedTask.value?.ticket_number}")
                                     scope.launch {
-                                        viewModel.selectedTask.value?.let {
+                                        viewModel.selectedTask.value?.let { task ->
+                                            Napier.log(LogLevel.ASSERT, "MainScreen", 
+                                                message = "Processing accept for ticket ${task.ticket_number}")
                                             viewModel.updateEdited(true)
                                             viewModel.updateIsEditedTicket(true) // Immediately update state
                                             viewModel.updateState(MainEvent.Default)
                                             viewModel.updateShowAcceptDialog(false)
+                                            Napier.log(LogLevel.ASSERT, "MainScreen", 
+                                                message = "Accept processing complete for ticket ${task.ticket_number}")
+                                        } ?: run {
+                                            Napier.log(LogLevel.WARNING, "MainScreen", 
+                                                message = "Accept button clicked but selectedTask is null")
                                         }
                                     }
                                 })
@@ -519,11 +537,11 @@ class MainScreen(private val forceReload: Boolean = false) : Screen {
 
                                 Box(
                                     modifier = Modifier
-                                        .padding(16.dp)
+                                        .padding(spacing2X)
                                 ) {
                                     Text(
                                         text = "No filters to show.",
-                                        style = MaterialTheme.typography.h6,
+                                        style = body_large_strong,
                                         modifier = Modifier.align(Alignment.Center)
                                     )
                                 }
@@ -555,13 +573,13 @@ class MainScreen(private val forceReload: Boolean = false) : Screen {
                                     Image(
                                         painter = painterResource(MR.images.warning),
                                         contentDescription = "warning",
-                                        modifier = Modifier.size(24.dp)
+                                        modifier = Modifier.size(spacing3X)
                                     )
                                     Spacer(modifier = Modifier.width(spacing1X))
                                     Text(
                                         text = stringResource(MR.strings.logout_warning),
                                         style = body_small,
-                                        color = Color.Gray,
+                                        color = textSecondary,
                                         modifier = Modifier.padding(start = spacing1X)
                                     )
                                 }
@@ -766,11 +784,51 @@ class MainScreen(private val forceReload: Boolean = false) : Screen {
                         }
 
                         MainEvent.ShowAcceptTicketDialog -> {
-                            Text(
-                                text = stringResource(MR.strings.continue_flow_message),
-                                style = body_large,
-                                modifier = Modifier.padding(start = spacing2X)
-                            )
+                            Column(
+                                modifier = Modifier.padding(spacing2X),
+                                verticalArrangement = Arrangement.spacedBy(spacing1X)
+                            ) {
+                                // Show ticket details for identification
+                                viewModel.selectedTask.value?.let { task ->
+                                    Card(
+                                        backgroundColor = surfaceDefault,
+                                        modifier = Modifier.fillMaxWidth()
+                                    ) {
+                                        Column(
+                                            modifier = Modifier.padding(spacing15X)
+                                        ) {
+                                            Text(
+                                                text = "Ticket: ${task.ticket_number}",
+                                                style = body_large_strong,
+                                                color = textPrimary
+                                            )
+                                            Spacer(modifier = Modifier.height(spacing05X))
+                                            Text(
+                                                text = "Activity: ${task.activity__title}",
+                                                style = body_small_strong,
+                                                color = textSecondary
+                                            )
+                                            if (task.properties.isNotEmpty()) {
+                                                Spacer(modifier = Modifier.height(spacing05X))
+                                                task.properties.take(2).forEach { property ->
+                                                    Text(
+                                                        text = "${property.key}: ${property.value}",
+                                                        style = body_small,
+                                                        color = textSecondary
+                                                    )
+                                                }
+                                            }
+                                        }
+                                    }
+                                    Spacer(modifier = Modifier.height(spacing2X))
+                                }
+                                
+                                Text(
+                                    text = stringResource(MR.strings.continue_flow_message),
+                                    style = body_large,
+                                    color = textPrimary
+                                )
+                            }
                             scope.launch {
                                 scaffoldState.bottomSheetState.expand()
                             }
@@ -795,15 +853,13 @@ class MainScreen(private val forceReload: Boolean = false) : Screen {
                                 Image(
                                     painter = painterResource(MR.images.ic_empty),
                                     contentDescription = "empty",
-                                    modifier = Modifier.width(150.dp).height(120.dp)
+                                    modifier = Modifier.size(width = 150.dp, height = 120.dp)
                                 )
 
-                                Spacer(modifier = Modifier.height(16.dp))
+                                Spacer(modifier = Modifier.height(spacing2X))
                                 Text(
                                     text = stringResource(MR.strings.empty_list),
-                                    style = TextStyle(
-                                        fontSize = 16.sp, fontWeight = FontWeight.Bold
-                                    ),
+                                    style = body_large_strong,
                                     modifier = Modifier.wrapContentSize()
                                 )
                             }
@@ -833,8 +889,10 @@ class MainScreen(private val forceReload: Boolean = false) : Screen {
                         LaunchedEffect(ticketId, ticketNumber) {
                             // Clear the navigation request immediately to prevent re-triggering
                             viewModel.clearNavigationRequest()
-                            viewModel.updateIsEditedTicket(false)
                             viewModel.updateState(MainEvent.Default)
+                            
+                            Napier.log(LogLevel.ASSERT, "MainScreen", 
+                                message = "Navigating to TicketProcessScreen for ticket $ticketNumber")
                             
                             // Navigate to the ticket process screen
                             try {
@@ -859,40 +917,49 @@ class MainScreen(private val forceReload: Boolean = false) : Screen {
                         }
                     }
 
+                    // OPTIMIZED: Handle camera launch only when needed
                     if (openCamera) {
                         viewModel.selectedTask.value?.let {
-                            InternalStorage.createWorkItemImages(
-                                provideAppContext(), "", ""
-                            )
+                            LaunchedEffect(openCamera) {
+                                InternalStorage.createWorkItemImages(
+                                    provideAppContext(), "", ""
+                                )
+                                viewModel.updateCameraStatus(false)
+                            }
 
                             Camera.launchCamera(
-                                null, InternalStorage.getSuspendRouteOriginal(
-                                    provideAppContext()
-                                ), "Suspend"
+                                null, 
+                                InternalStorage.getSuspendRouteOriginal(provideAppContext()), 
+                                "Suspend"
                             )
-
-                            viewModel.updateCameraStatus(false)
                         }
                     }
-                   if (connectivityState.value != NetworkConnection.NONE) {
-                    if (availability) {
+                    
+                    // OPTIMIZED: Simplified conditional logic - remove duplicate code
+                    LaunchedEffect(reloadState) {
                         if (reloadState) {
                             viewModel.refreshTasks()
-                           viewModel.getActivityList()
+                            viewModel.getActivityList()
                         }
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth(),
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            if (ticketListStatus == TicketListStatus.UnRecognized) {
-                                LinearProgressIndicator(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .height(1.5.dp),
-                                    color = if (networkState == NetworkStates.NetworkConnectionNONE) Color.Red else surfaceBrandDefault
-                                )
-                            }
+                    }
+                    
+                    // OPTIMIZED: Single column for ticket list regardless of network state
+                    Column(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        if (ticketListStatus == TicketListStatus.UnRecognized) {
+                            LinearProgressIndicator(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(1.5.dp),
+                                color = if (networkState == NetworkStates.NetworkConnectionNONE) 
+                                    textError else surfaceBrandDefault
+                            )
+                        }
+                        
+                        // Show task list only when user is available
+                        if (availabilityStatus == AvailabilityStatus.Available) {
                             TicketListScreen(
                                 searchText = "",
                                 onEvent = { mainEvent: MainEvent, task: TaskDomain? ->
@@ -905,55 +972,77 @@ class MainScreen(private val forceReload: Boolean = false) : Screen {
                                 tasks = viewModel.tasks,
                                 tasksActivityListFilter = viewModel.tasksActivityList,
                                 onAccept = {
-                                    viewModel.checkIfTicketIsEdited()
+                                    Napier.log(LogLevel.ASSERT, "MainScreen", 
+                                        message = "onAccept called in TicketListScreen for ticket ${it.ticket_number}")
+                                    // Set selected task BEFORE checking if edited
                                     viewModel.selectedTask.value = it
                                     viewModel.resetSuspendTask()
+                                    // Now check if the ticket was edited before
+                                    viewModel.checkIfTicketIsEdited()
                                 },
                                 viewModel = viewModel
                             )
+                        } else {
+                            // Show message when not available
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(spacing2X),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Column(
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    verticalArrangement = Arrangement.Center
+                                ) {
+                                    Text(
+                                        text = when (availabilityStatus) {
+                                            AvailabilityStatus.Unavailable -> stringResource(MR.strings.unAvailable)
+                                            AvailabilityStatus.NotRunning -> stringResource(MR.strings.service_unavailable)
+                                            AvailabilityStatus.NoInternet -> stringResource(MR.strings.internet_unavailable)
+                                            else -> stringResource(MR.strings.empty_list)
+                                        },
+                                        style = body_large,
+                                        textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                                        modifier = Modifier.padding(spacing2X)
+                                    )
+                                    
+                                    if (availabilityStatus == AvailabilityStatus.Unavailable) {
+                                        Spacer(modifier = Modifier.height(spacing2X))
+                                        Text(
+                                            text = stringResource(MR.strings.tap_update_availability),
+                                            style = body_small,
+                                            color = textBrand,
+                                            textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                                            modifier = Modifier
+                                                .clickable {
+                                                    viewModel.updateState(MainEvent.AvailabilityStatus)
+                                                }
+                                                .padding(spacing1X)
+                                        )
+                                    }
+                                }
+                            }
                         }
                     }
-                  } else {
-                       if (reloadState) {
-                           viewModel.refreshTasks()
-
-                       }
-                       Column(
-                           modifier = Modifier
-                               .fillMaxWidth(),
-                           horizontalAlignment = Alignment.CenterHorizontally
-                       ) {
-                           if (ticketListStatus == TicketListStatus.UnRecognized) {
-                               LinearProgressIndicator(
-                                   modifier = Modifier
-                                       .fillMaxWidth()
-                                       .height(1.5.dp),
-                                   color = if (networkState == NetworkStates.NetworkConnectionNONE) Color.Red else surfaceBrandDefault
-                               )
-                           }
-                           TicketListScreen(
-                               searchText = "",
-                               onEvent = { mainEvent: MainEvent, task: TaskDomain? ->
-                                   viewModel.updateTicketId(task?.ticket_id.toString())
-                                   viewModel.updateTicketNumber(task?.ticket_number.toString())
-                                   viewModel.updateState(mainEvent)
-                                   viewModel.selectedTask.value = task
-                                   viewModel.resetSuspendTask()
-                               },
-                               tasks = viewModel.tasks,
-                               tasksActivityListFilter = viewModel.tasksActivityList,
-                               onAccept = {
-                                   viewModel.checkIfTicketIsEdited()
-                                   viewModel.selectedTask.value = it
-                                   viewModel.resetSuspendTask()
-                               },
-                               viewModel = viewModel
-                           )
-                       }
-                    }
-                    if (viewModel.showAcceptDialog.value && !isTicketEditedState) {
-                        BackgroundServiceApp.updateServiceState(ServiceState.Suspend)
-                        viewModel.updateState(MainEvent.ShowAcceptTicketDialog)
+                    // Handle accept dialog state changes
+                    LaunchedEffect(showAcceptDialogState, isTicketEditedState) {
+                        Napier.log(LogLevel.ASSERT, "MainScreen", 
+                            message = "🔄 LaunchedEffect TRIGGERED - showAcceptDialog: $showAcceptDialogState, isTicketEditedState: $isTicketEditedState")
+                        
+                        if (showAcceptDialogState) {
+                            if (!isTicketEditedState) {
+                                Napier.log(LogLevel.ASSERT, "MainScreen", 
+                                    message = "Ticket NOT edited - showing accept confirmation dialog")
+                                // Show bottom sheet for confirmation
+                                viewModel.updateState(MainEvent.ShowAcceptTicketDialog)
+                            } else {
+                                Napier.log(LogLevel.ASSERT, "MainScreen", 
+                                    message = "Ticket already edited - navigating directly without dialog")
+                                // Reset the dialog state
+                                viewModel.updateShowAcceptDialog(false)
+                                // Navigation will be handled by the navigationRequest flow
+                            }
+                        }
                     }
                 },
                 onCloseBottomSheet = {

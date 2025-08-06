@@ -1,6 +1,8 @@
 package domain.models.form_struct
 
+import kotlinx.serialization.Serializable
 
+@Serializable
 data class FormStructDomain (
     val id: String? = null,
     val hide: String?= null,

@@ -2,7 +2,6 @@ package data
 
 import data.network.BaseRepository
 import data.network.NetworkResult
-import data.network.addAuthHeader
 import data.network.addStandardHeaders
 import data.network.response.download.ChunkResponse
 import data.network.response.download.StartDownloadResponse
@@ -10,7 +9,6 @@ import data.network.response.download.StepsResponse
 import domain.repository.IDownloadRepository
 import io.github.aakira.napier.Napier
 import io.ktor.client.HttpClient
-import io.ktor.client.request.url
 import utils.LoggingConfig
 
 class DownloadRepositoryImpl(

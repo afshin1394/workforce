@@ -65,4 +65,14 @@ interface TaskDao {
     @Query("DELETE FROM TaskEntity WHERE ticket_number IN (:ticketNumbers)")
     suspend fun deleteSpecific(ticketNumbers: List<String>)
 
+    @Query("""
+        DELETE FROM TaskEntity 
+        WHERE ticket_id NOT IN (
+            SELECT MIN(ticket_id) 
+            FROM TaskEntity 
+            GROUP BY ticket_number
+        )
+    """)
+    suspend fun removeDuplicates()
+
 }

@@ -19,4 +19,8 @@ interface IStepsRepository {
     suspend fun getEditedTickets(): List<String>
     suspend fun resetEntitySequence()
     suspend fun updateFormStructure(ticketNumber: String,activityId: Long,formStructure : String)
+    
+    // Methods for cleaning up corrupted JSON data
+    suspend fun cleanupCorruptedJsonData()
+    suspend fun findCorruptedEntries(): List<StepsEntity>
 }

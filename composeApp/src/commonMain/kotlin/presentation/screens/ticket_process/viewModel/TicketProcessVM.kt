@@ -31,9 +31,11 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.yield
+import kotlinx.datetime.Clock
 import presentation.model.ExtractLogicsModel
 import presentation.screens.main.events.TicketProcessEvent
 import presentation.screens.ticket_process.events.StepEvent
@@ -60,6 +62,11 @@ class TicketProcessVM(
     private val updateTaskUseCase: UpdateTaskUseCase,
     private val deletePhotoByComponentKeyAndIdUseCase: DeletePhotoByComponentKeyAndIdUseCase
 ) : BaseViewModel() {
+    // Optimize: Add navigation mutex to prevent rapid step changes
+    private val navigationMutex = Mutex()
+    private var lastNavigationTime = 0L
+    private val navigationDebounceMs = 300L // 300ms debounce
+    
     private val _scrollingPosition = MutableStateFlow(Pair(-1, -1))
     val scrollingPosition = _scrollingPosition.asStateFlow()
 
@@ -164,13 +171,18 @@ class TicketProcessVM(
                                 tempComponentList.clear()
                                 tempComponentList.addAll(it.toList())
 
-                                async {
+                                // Optimize: Run validation and logic processing in parallel
+                                val validationJob = async(Dispatchers.Default) {
                                     validateComponents(tempComponentList, true, true)
-                                }.await()
-
-                                handleLogics {
-
                                 }
+                                
+                                val logicsJob = async(Dispatchers.Default) {
+                                    handleLogics { }
+                                }
+                                
+                                // Wait for both operations to complete
+                                validationJob.await()
+                                logicsJob.await()
                                 updateState(ViewStates.Success())
 
 
@@ -193,27 +205,40 @@ class TicketProcessVM(
 
 
     fun updateLevel(proceed: String) {
-        Napier.log(
-            LogLevel.ASSERT,
-            tag = "updateLevelupdateLevel",
-            message = _stepEvent.value.toString()
-        )
+        // Optimize: Add debouncing to prevent rapid navigation
+        viewModelScope.launch {
+            navigationMutex.withLock {
+                val currentTime = Clock.System.now().toEpochMilliseconds()
+                if (currentTime - lastNavigationTime < navigationDebounceMs) {
+                    Napier.log(LogLevel.DEBUG, tag = "Navigation", message = "Debouncing navigation request")
+                    return@withLock
+                }
+                lastNavigationTime = currentTime
+                
+                Napier.log(
+                    LogLevel.DEBUG,
+                    tag = "updateLevel",
+                    message = "Step event: ${_stepEvent.value}, proceed: $proceed"
+                )
+                
+                performStepNavigation(proceed)
+            }
+        }
+    }
+    
+    // Optimize: Extract navigation logic for better performance
+    private suspend fun performStepNavigation(proceed: String) {
         if (_currentLevel.value == _stepDetails.value.size - 1 && proceed != PROCEED.PREVIOUS) {
             updateClickBackBtn(false)
             storeLastStep()
-
         } else {
             if (!(proceed == PROCEED.PREVIOUS && _currentLevel.value == 0)) {
                 _reloadState.update { false }
                 getMokStepsForm(proceed)
-
             } else {
                 storeStepForm()
-
             }
         }
-
-
     }
 
 

@@ -143,7 +143,50 @@ fun TaskStepResponse.toStepDetailsEntity(ticketNumber: String): List<StepsEntity
 
 
 fun StepsEntity.toActivityDomain(): ActivityDomain {
-    val json = Json { ignoreUnknownKeys = true }
+    val json = Json { 
+        ignoreUnknownKeys = true
+        isLenient = true
+    }
+
+    // Add debugging and error handling for JSON parsing
+    val formStructDomain = try {
+        if (this.formStructure.isBlank()) {
+            // Return default empty FormStructDomain if JSON is blank
+            FormStructDomain()
+        } else {
+            // Check if the data looks like toString() output instead of JSON
+            if (this.formStructure.startsWith("FormStruct(") || 
+                this.formStructure.contains("ConditionalDomain(") ||
+                !this.formStructure.trim().startsWith("{")) {
+                
+                println("Detected malformed JSON (toString format) for StepsEntity ${this.pk}")
+                println("Corrupted data: ${this.formStructure.take(100)}...")
+                
+                // Return a minimal valid FormStructDomain for corrupted data
+                FormStructDomain(
+                    id = "corrupted_${this.pk}",
+                    type = "form",
+                    components = emptyList(),
+                    schemaVersion = 11
+                )
+            } else {
+                // Try to parse as proper JSON
+                json.decodeFromString<FormStruct>(this.formStructure).toFormStructDomain()
+            }
+        }
+    } catch (e: Exception) {
+        // Log the error and return default FormStructDomain
+        println("JSON parsing failed for StepsEntity ${this.pk}: ${e.message}")
+        println("Raw content length: ${this.formStructure.length}")
+        
+        // Return a default FormStructDomain to prevent crashes
+        FormStructDomain(
+            id = "error_${this.pk}",
+            type = "form",
+            components = emptyList(),
+            schemaVersion = 11
+        )
+    }
 
     return ActivityDomain(
         id = this.activityId,
@@ -151,10 +194,7 @@ fun StepsEntity.toActivityDomain(): ActivityDomain {
         process_id = this.activityId.toInt(),
         task = 0,
         kind = "",
-        form = FormDomain(
-            form_structure = json.decodeFromString<FormStruct>(this.formStructure)
-                .toFormStructDomain()
-        ),
+        form = FormDomain(form_structure = formStructDomain),
         form_id = this.pk.toInt(),
         tag = this.tag,
         edited = this.edited

@@ -22,7 +22,11 @@ data class TaskEntity(
 
 
 
-@Entity
+@Entity(
+    indices = [
+        androidx.room.Index(value = ["ticket_number"], unique = true)
+    ]
+)
 data class TaskEntity(
     @PrimaryKey(autoGenerate = true) val ticket_id: Int,
     val ticket_type_id:Int,

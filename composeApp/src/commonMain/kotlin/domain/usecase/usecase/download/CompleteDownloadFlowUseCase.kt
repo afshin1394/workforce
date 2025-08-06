@@ -22,6 +22,8 @@ import io.github.aakira.napier.Napier
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import utils.LoggingConfig
 
 data class DownloadProgressUpdate(
@@ -295,25 +297,46 @@ class CompleteDownloadFlowUseCase(
         
         // Process steps from this chunk (only unmodified tasks)
         val stepsEntities = tasksToProcess.flatMap { taskData ->
-            taskData.steps?.map { stepData ->
-                // Convert ChunkStepData to StepDetailDomain
-                val stepDetailDomain = stepData.toStepDetailDomain()
-                
-                // Convert to StepsEntity
-                StepsEntity(
-                    ticketNumber = taskData.instanceTicketsNumber,
-                    activityId = stepDetailDomain.activity_id,
-                    formStructure = stepDetailDomain.form_structure.toString(),
-                    // Fields from StepDetailDomain
-                    activityTitle = stepDetailDomain.activity_title,
-                    activityProcessId = stepDetailDomain.activity_process_id,
-                    activityTaskGroup = stepDetailDomain.activity_task_group,
-                    activityKind = stepDetailDomain.activity_kind,
-                    activityForm = stepDetailDomain.activity_form,
-                    workflowActivityTagsId = stepDetailDomain.workflow_activity_tags_id,
-                    formName = stepDetailDomain.form_name
-                )
-            } ?: emptyList()
+            val steps = taskData.steps
+            if (steps.isNullOrEmpty()) {
+                LoggingConfig.logUseCase("CompleteDownloadFlow", 
+                    "Task ${taskData.instanceTicketsNumber} has no steps - skipping steps creation")
+                emptyList<StepsEntity>()
+            } else {
+                steps.map { stepData ->
+                    // Use the FormStruct directly from ChunkStepData, which should already be properly structured
+                    val formStructureJson = if (stepData.formStructure != null) {
+                        try {
+                            // Properly serialize the FormStruct to JSON
+                            Json.encodeToString(stepData.formStructure)
+                        } catch (e: Exception) {
+                            LoggingConfig.logUseCase("CompleteDownloadFlow", 
+                                "Failed to serialize form structure for task ${taskData.instanceTicketsNumber}, activity ${stepData.activityId}: ${e.message}")
+                            // Fallback to empty form structure
+                            Json.encodeToString(data.network.response.task.FormStruct())
+                        }
+                    } else {
+                        LoggingConfig.logUseCase("CompleteDownloadFlow", 
+                            "No form structure found for task ${taskData.instanceTicketsNumber}, activity ${stepData.activityId}")
+                        // Create minimal valid JSON structure
+                        Json.encodeToString(data.network.response.task.FormStruct())
+                    }
+                    
+                    StepsEntity(
+                        ticketNumber = taskData.instanceTicketsNumber,
+                        activityId = stepData.activityId,
+                        formStructure = formStructureJson,
+                        // Fields from ChunkStepData directly
+                        activityTitle = stepData.activityTitle,
+                        activityProcessId = stepData.activityProcessId,
+                        activityTaskGroup = stepData.activityTaskGroup,
+                        activityKind = stepData.activityKind,
+                        activityForm = stepData.activityForm,
+                        workflowActivityTagsId = stepData.workflowActivityTagsId,
+                        formName = stepData.formName
+                    )
+                }
+            }
         }
         
         // Insert steps incrementally
@@ -342,6 +365,8 @@ class CompleteDownloadFlowUseCase(
             // Find the first activity ID for this task (initial step)
             val firstActivityId = taskData.steps?.firstOrNull()?.activityId ?: taskData.activityId
             
+            println("CompleteDownloadFlow: Creating StepPointer for ticket '${taskData.instanceTicketsNumber}' with firstActivityId: $firstActivityId")
+            
             StepPointerEntity(
                 pk = 0, // Let Room auto-generate
                 ticketNumber = taskData.instanceTicketsNumber,
@@ -352,11 +377,23 @@ class CompleteDownloadFlowUseCase(
         
         // Insert step pointers incrementally
         if (stepPointerEntities.isNotEmpty()) {
+            println("CompleteDownloadFlow: Inserting ${stepPointerEntities.size} StepPointer entities")
             stepPointerRepository.insertAll(stepPointerEntities)
+            println("CompleteDownloadFlow: Successfully inserted StepPointer entities")
+        } else {
+            println("CompleteDownloadFlow: No StepPointer entities to insert")
         }
         
         LoggingConfig.logUseCase("CompleteDownloadFlow", 
             "Chunk $currentChunk processed: ${taskEntities.size} tasks, ${initialFormEntities.size} forms, ${stepsEntities.size} steps, ${activityEntities.size} activities, ${stepPointerEntities.size} step pointers")
+        
+        // Log details about steps processing for debugging
+        val tasksWithSteps = tasksToProcess.count { it.steps?.isNotEmpty() == true }
+        val tasksWithoutSteps = tasksToProcess.size - tasksWithSteps
+        if (tasksWithoutSteps > 0) {
+            LoggingConfig.logUseCase("CompleteDownloadFlow", 
+                "Warning: $tasksWithoutSteps out of ${tasksToProcess.size} tasks had no steps data")
+        }
         
         return tasksToProcess.size
     }

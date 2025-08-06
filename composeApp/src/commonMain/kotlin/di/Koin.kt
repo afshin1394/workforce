@@ -71,7 +71,6 @@ import domain.usecase.usecase.suspendTask.StoreSuspendTaskUseCase
 import domain.usecase.usecase.ticket.GetActivityListUseCase
 import domain.usecase.usecase.ticket.UpdateTaskUseCase
 import domain.usecase.usecase.ticket.GetTasksUseCase
-import domain.usecase.usecase.ticket.GetTasksPaginatedUseCase
 import domain.usecase.usecase.ticket.GetTicketDetailsUseCase
 import domain.usecase.usecase.upload.SendFileToServerUseCase
 import domain.usecase.usecase.version.GetVersionOfServerUseCase
@@ -172,7 +171,6 @@ fun useCaseModule() = module {
     factory { GetAvailabilityObjectIdUseCase() }
     factory { LoginUseCase(get()) }
     factory { GetTasksUseCase(get()) }
-    factory { GetTasksPaginatedUseCase(get()) }
     factory { GetActivityListUseCase(get()) }
     factory { UpdateTaskUseCase(get(), get(), get(), get(), get()) }
     factory { LoginUseCase(get()) }
@@ -336,7 +334,6 @@ fun viewModelModule() = module {
     viewModelDefinition { AboutScreenVM(get()) }
     viewModelDefinition {
         MainScreenVM(
-            get(),
             get(),
             get(),
             get(),

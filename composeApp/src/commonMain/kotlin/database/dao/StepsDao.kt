@@ -47,4 +47,12 @@ interface StepsDao {
     @Query("DELETE FROM StepsEntity WHERE ticketNumber IN (:ticketNumbers)")
     suspend fun deleteSpecific(ticketNumbers: List<String>)
 
+    // Cleanup method for corrupted JSON data
+    @Query("DELETE FROM StepsEntity WHERE formStructure NOT LIKE '{%' OR formStructure LIKE '%ConditionalDomain(%' OR formStructure LIKE 'FormStruct(%'")
+    suspend fun cleanupCorruptedJsonData()
+
+    // Method to identify corrupted entries for logging
+    @Query("SELECT * FROM StepsEntity WHERE formStructure NOT LIKE '{%' OR formStructure LIKE '%ConditionalDomain(%' OR formStructure LIKE 'FormStruct(%'")
+    suspend fun findCorruptedEntries(): List<StepsEntity>
+
 }

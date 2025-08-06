@@ -28,10 +28,10 @@ import database.entity.SuspendTaskEntity
 import database.entity.TaskEntity
 import database.type_converter.InitFormTypeConverter
 
-//update in database version due to PhotoEntity migration ----> angle : String -> Float
+//update in database version 8 due to unique constraints on duplicate prevention
 @Database(
     entities = [ProfileEntity::class, RoleEntity::class, GeneralLocationEntity::class, TaskEntity::class, SuspendTaskEntity::class, InitialFormEntity::class, PhotoEntity::class, StepsEntity::class,StepPointerEntity::class,SendStepsEntity::class,ActivityListEntity::class],
-    version = 7
+    version = 8
 )
 @TypeConverters(InitFormTypeConverter::class)
 abstract class AppDatabase : RoomDatabase(), DB {

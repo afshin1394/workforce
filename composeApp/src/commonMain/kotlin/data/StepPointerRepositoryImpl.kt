@@ -8,7 +8,19 @@ import domain.repository.IStepPointerRepository
 
 class StepPointerRepositoryImpl(private val db : AppDatabase) : IStepPointerRepository {
     override suspend fun insertAll(pointers: List<StepPointerEntity>) {
-        db.stepPointerDao().insertAll(pointers)
+        println("StepPointerRepository: insertAll called with ${pointers.size} entities")
+        pointers.forEach { pointer ->
+            println("StepPointerRepository: Inserting - ticketNumber: '${pointer.ticketNumber}', activeActivity: ${pointer.activeActivity}, edited: ${pointer.edited}")
+        }
+        
+        try {
+            db.stepPointerDao().insertAll(pointers)
+            println("StepPointerRepository: Successfully inserted ${pointers.size} StepPointer entities")
+        } catch (e: Exception) {
+            println("StepPointerRepository: Error inserting entities: ${e.message}")
+            e.printStackTrace()
+            throw e
+        }
     }
 
     override suspend fun deleteAll(editedAvailableTickets : List<String>) {
@@ -24,11 +36,33 @@ class StepPointerRepositoryImpl(private val db : AppDatabase) : IStepPointerRepo
     }
 
     override suspend fun getActiveActivityByTicketNumber(ticketNumber: String) : StepPointerDomain {
-       return db.stepPointerDao().selectActiveActivityByTicketNumber(ticketNumber).toStepPointerDomain()
+        val stepPointer = db.stepPointerDao().selectActiveActivityByTicketNumber(ticketNumber)
+        return stepPointer?.toStepPointerDomain() ?: StepPointerDomain(ticketNumber, 0, false)
     }
 
     override suspend fun checkIfTicketIsEdited(ticketNumber: String) : Boolean {
-        return db.stepPointerDao().selectActiveActivityByTicketNumber(ticketNumber).toStepPointerDomain().edited
+        return try {
+            println("StepPointerRepository: Checking if ticket '$ticketNumber' is edited")
+            
+            // First, let's see all records in the table
+            val allRecords = db.stepPointerDao().selectAll()
+            println("StepPointerRepository: Total records in StepPointerEntity table: ${allRecords.size}")
+            allRecords.forEach { record ->
+                println("StepPointerRepository: Record - ticketNumber: '${record.ticketNumber}', activeActivity: ${record.activeActivity}, edited: ${record.edited}")
+            }
+            
+            val stepPointer = db.stepPointerDao().selectActiveActivityByTicketNumber(ticketNumber)
+            println("StepPointerRepository: Query result for ticket '$ticketNumber': $stepPointer")
+            
+            val result = stepPointer?.toStepPointerDomain()?.edited ?: false
+            println("StepPointerRepository: Ticket '$ticketNumber' edited status: $result")
+            
+            result
+        } catch (e: Exception) {
+            println("StepPointerRepository: Exception when checking ticket '$ticketNumber': ${e.message}")
+            e.printStackTrace()
+            false
+        }
     }
 
     override suspend fun resetEntitySequence() {
@@ -39,8 +73,22 @@ class StepPointerRepositoryImpl(private val db : AppDatabase) : IStepPointerRepo
         db.stepPointerDao().updateActiveActivity(ticketNumber,activeActivity)
     }
 
-    override suspend fun updateIsEdited(ticketNumber: String,isEdited : Boolean) {
-        db.stepPointerDao().updateIsEdited(ticketNumber,isEdited)
+    override suspend fun updateIsEdited(ticketNumber: String, isEdited: Boolean) {
+        // First check if a record exists
+        val existingRecord = db.stepPointerDao().selectActiveActivityByTicketNumber(ticketNumber)
+        
+        if (existingRecord == null) {
+            // Create a new record with default values
+            val newStepPointer = StepPointerEntity(
+                ticketNumber = ticketNumber,
+                activeActivity = 0, // Default to first activity
+                edited = isEdited
+            )
+            db.stepPointerDao().insert(newStepPointer)
+        } else {
+            // Update existing record
+            db.stepPointerDao().updateIsEdited(ticketNumber, isEdited)
+        }
     }
 
     override suspend fun deleteAllExcept(ticketNumbers: List<String>) {
@@ -59,6 +107,17 @@ class StepPointerRepositoryImpl(private val db : AppDatabase) : IStepPointerRepo
 
     override suspend fun getModifiedTicketNumbers(): List<String> {
         return db.stepPointerDao().selectModifiedTicketNumbers()
+    }
+
+    suspend fun removeDuplicateRecords() {
+        println("StepPointerRepository: Removing duplicate records")
+        try {
+            db.stepPointerDao().removeDuplicates()
+            println("StepPointerRepository: Successfully removed duplicate records")
+        } catch (e: Exception) {
+            println("StepPointerRepository: Error removing duplicates: ${e.message}")
+            e.printStackTrace()
+        }
     }
 
 }

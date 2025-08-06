@@ -25,6 +25,7 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.datetime.Clock
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import presentation.model.ExtractLogicsModel
@@ -36,8 +37,12 @@ class LogicCalculation(
     val getTicketDetailsUseCase: GetTicketDetailsUseCase by inject()
     lateinit var ticketId: String
     val validationErrorList = mutableListOf<ExtractLogicsModel>()
-
     val affectedComponents = mutableListOf<ComponentDomain>()
+    
+    // Optimize: Add caching for auto-fill results
+    private val autoFillCache = mutableMapOf<String, String>()
+    private val cacheExpirationMs = 300000L // 5 minutes cache
+    private val cacheTimestamps = mutableMapOf<String, Long>()
 
 
     suspend fun extractRequiredAndValidateLogics(component: ComponentDomain): MutableList<ExtractLogicsModel> = coroutineScope {
@@ -231,107 +236,146 @@ class LogicCalculation(
     }
 
     suspend fun extractValueModifierLogics(component: ComponentDomain) {
-        var shouldBreak = false
         component.logics?.forEach { logic ->
             when (logic.logicType) {
-
                 LogicType.Ticket_Auto_Fill -> {
                     if (!component.processLogicDomain.value.shouldHide) {
-
-
-                        for (logic in component.logics) {
-
-                            for (option in logic.ticketAutoFillLogicDomain?.options.orEmpty()) {
-                                if(shouldBreak) break
-                                val phaseName = option.phaseName
-                                val property = option.property
-
-                                if (phaseName != null && property != null) {
-                                    // Set isAutoFillLoading to true
-                                    component.updateProcessLogicDomain(
-                                        component.processLogicDomain.value.copy(
-                                            isAutoFillLoading = true
-                                        )
-                                    )
-
-
-                                        getTicketDetailsUseCase(
-                                            Pair(
-                                                ticketId,
-                                                TicketDetailRequestDomain(
-                                                    listOf(PhaseDomain(phaseName, property))
-                                                )
-                                            )
-                                        ).collect { result ->
-
-                                            when (result.status) {
-                                                AsyncStatus.EMPTY -> {
-                                                    // Handle empty case if needed
-                                                }
-
-                                                AsyncStatus.ERROR -> {
-                                                    // Handle error case if needed
-                                                }
-
-                                                AsyncStatus.LOADING -> {
-                                                    // Handle loading case if needed
-                                                }
-
-                                                AsyncStatus.SUCCESS -> {
-                                                    result.data?.keys?.forEach { key ->
-                                                        result.data[key]?.let { resultData ->
-                                                            var value = resultData
-
-                                                            if (resultData.isNotEmpty()) {
-                                                                if (component.type == FormViewerTypes.Datetime ||
-                                                                    component.type == FormViewerTypes.Time ||
-                                                                    component.type == FormViewerTypes.Date
-                                                                ) {
-                                                                    value =
-                                                                        resultData.parsServerDateTime()
-                                                                }
-
-                                                                val updatedValueDomain =
-                                                                    updateValueDomain(
-                                                                        component.values?.get(0)
-                                                                            ?: ValueDomain(),
-                                                                        value
-                                                                    )
-
-                                                                // Update component values
-                                                                component.updateValues(
-                                                                    listOf(updatedValueDomain)
-                                                                )
-
-                                                                // Update process logic domain
-                                                                component.updateProcessLogicDomain(
-                                                                    component.processLogicDomain.value.copy(
-                                                                        calculatedValue = value,
-                                                                    )
-                                                                )
-                                                                shouldBreak = true
-                                                                // Set flag to break out of all loops
-                                                                return@collect
-                                                            }
-                                                        }
-                                                    }
-                                                }
-
-                                        }
-
-                                }
-                            }
-                        }
-
-
-                        component.updateProcessLogicDomain(
-                            component.processLogicDomain.value.copy(
-                                isAutoFillLoading = false,
-                            )
-                        )
+                        processAutoFillLogic(component)
                     }
                 }
+            }
+        }
+    }
+
+    // Optimize: Extract auto-fill logic to separate method for better performance
+    private suspend fun processAutoFillLogic(component: ComponentDomain) {
+        // Set loading state
+        component.updateProcessLogicDomain(
+            component.processLogicDomain.value.copy(isAutoFillLoading = true)
+        )
+
+        try {
+            // Find the first valid auto-fill option to avoid unnecessary iterations
+            val autoFillOption = component.logics
+                ?.asSequence()
+                ?.mapNotNull { it.ticketAutoFillLogicDomain }
+                ?.flatMap { it.options?.asSequence() ?: emptySequence() }
+                ?.firstOrNull { it.phaseName != null && it.property != null }
+
+            autoFillOption?.let { option ->
+                val phaseName = option.phaseName!!
+                val property = option.property!!
+                val cacheKey = "${ticketId}_${phaseName}_${property}"
+                
+                // Check cache first
+                val currentTime = Clock.System.now().toEpochMilliseconds()
+                val cachedValue = autoFillCache[cacheKey]
+                val cacheTime = cacheTimestamps[cacheKey] ?: 0L
+                
+                if (cachedValue != null && (currentTime - cacheTime) < cacheExpirationMs) {
+                    // Use cached value
+                    Napier.log(LogLevel.DEBUG, tag = "AutoFill", message = "Using cached auto-fill value for ${component.key}")
+                    applyCachedAutoFillValue(component, cachedValue)
+                    return
                 }
+
+                // Use async to prevent blocking UI
+                coroutineScope {
+                    launch(Dispatchers.IO) {
+                        try {
+                            getTicketDetailsUseCase(
+                                Pair(
+                                    ticketId,
+                                    TicketDetailRequestDomain(
+                                        listOf(PhaseDomain(phaseName, property))
+                                    )
+                                )
+                            ).collect { result ->
+                                when (result.status) {
+                                    AsyncStatus.SUCCESS -> {
+                                        result.data?.entries?.firstOrNull()?.let { (_, resultData) ->
+                                            if (resultData.isNotEmpty()) {
+                                                // Cache the result
+                                                autoFillCache[cacheKey] = resultData
+                                                cacheTimestamps[cacheKey] = currentTime
+                                            }
+                                        }
+                                        processAutoFillResult(component, result.data)
+                                    }
+                                    AsyncStatus.ERROR -> {
+                                        Napier.log(LogLevel.WARNING, 
+                                            tag = "AutoFill", 
+                                            message = "Auto-fill failed for component ${component.key}: ${result.message}")
+                                    }
+                                    else -> { /* Handle other states if needed */ }
+                                }
+                            }
+                        } catch (e: Exception) {
+                            Napier.log(LogLevel.ERROR, 
+                                tag = "AutoFill", 
+                                message = "Auto-fill error for component ${component.key}: ${e.message}")
+                        }
+                    }
+                }
+            }
+        } finally {
+            // Always reset loading state
+            component.updateProcessLogicDomain(
+                component.processLogicDomain.value.copy(isAutoFillLoading = false)
+            )
+        }
+    }
+    
+    // Optimize: Apply cached auto-fill value without API call
+    private fun applyCachedAutoFillValue(component: ComponentDomain, cachedValue: String) {
+        var value = cachedValue
+        
+        // Handle date/time formatting
+        if (component.type in listOf(FormViewerTypes.Datetime, FormViewerTypes.Time, FormViewerTypes.Date)) {
+            value = cachedValue.parsServerDateTime()
+        }
+        
+        val updatedValueDomain = updateValueDomain(
+            component.values?.getOrNull(0) ?: ValueDomain(),
+            value
+        )
+        
+        // Update component values
+        component.updateValues(listOf(updatedValueDomain))
+        
+        // Update process logic domain
+        component.updateProcessLogicDomain(
+            component.processLogicDomain.value.copy(calculatedValue = value)
+        )
+    }
+
+    // Optimize: Separate result processing for better readability and performance
+    private fun processAutoFillResult(component: ComponentDomain, data: Map<String, String>?) {
+        data?.entries?.firstOrNull()?.let { (_, resultData) ->
+            if (resultData.isNotEmpty()) {
+                var value = resultData
+
+                // Handle date/time formatting
+                if (component.type in listOf(FormViewerTypes.Datetime, FormViewerTypes.Time, FormViewerTypes.Date)) {
+                    value = resultData.parsServerDateTime()
+                }
+
+                val updatedValueDomain = updateValueDomain(
+                    component.values?.getOrNull(0) ?: ValueDomain(),
+                    value
+                )
+
+                // Update component values
+                component.updateValues(listOf(updatedValueDomain))
+
+                // Update process logic domain
+                component.updateProcessLogicDomain(
+                    component.processLogicDomain.value.copy(calculatedValue = value)
+                )
+
+                Napier.log(LogLevel.DEBUG, 
+                    tag = "AutoFill", 
+                    message = "Successfully auto-filled component ${component.key} with value: $value")
             }
         }
     }

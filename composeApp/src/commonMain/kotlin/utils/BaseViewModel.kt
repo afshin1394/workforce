@@ -22,6 +22,7 @@ import irancell.nwg.wfm.provideAppContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
@@ -72,6 +73,7 @@ sealed class NetworkStates {
     data object NetworkConnectionNONE : NetworkStates()
     data object NetworkConnectionWIFI : NetworkStates()
     data object NetworkConnectionCELLULAR : NetworkStates()
+    data object NetworkConnectionUNKNOWN : NetworkStates()
 }
 
 
@@ -126,31 +128,38 @@ open class BaseViewModel : ViewModel(), KoinComponent {
 
     private fun collectServiceState() {
         viewModelScope.launch {
-            BackgroundServiceApp.serviceState.collect {
-                Napier.log(LogLevel.ASSERT, tag = "autoLogoutUseCase", message = it.toString())
-                when (it) {
-                    is ServiceState.Faulty -> {
-                        autoLogoutUseCase(Unit).collect {
-                            val result = it
-                            when {
-                                result.status == AsyncStatus.SUCCESS -> {
-                                    _serviceState.update { ServiceState.Faulty(MR.strings.unauthorized) }
+            BackgroundServiceApp.serviceState.collect { newState ->
+                Napier.log(LogLevel.ASSERT, tag = "serviceState", message = newState.toString())
+                
+                // FIXED: Only update if state actually changed to prevent loops
+                if (_serviceState.value != newState) {
+                    when (newState) {
+                        is ServiceState.Faulty -> {
+                            _serviceState.update { newState }
+                            autoLogoutUseCase(Unit).collect { result ->
+                                when {
+                                    result.status == AsyncStatus.SUCCESS -> {
+                                        // Already updated above, no need to update again
+                                    }
                                 }
                             }
                         }
-                    }
 
-                    ServiceState.NotRunning -> {
-                        _serviceState.update { ServiceState.NotRunning }
-                        updateAvailabilityState(AvailabilityStatus.NotRunning)
-                    }
+                        ServiceState.NotRunning -> {
+                            _serviceState.update { newState }
+                            updateAvailabilityState(AvailabilityStatus.NotRunning)
+                        }
 
-                    ServiceState.Normal -> {
-                        _serviceState.update { ServiceState.Normal }
-                        updateAvailabilityState(AvailabilityStatus.Available)
-                    }
+                        ServiceState.Normal -> {
+                            _serviceState.update { newState }
+                            updateAvailabilityState(AvailabilityStatus.Available)
+                        }
 
-                    else -> {}
+                        ServiceState.Suspend -> {
+                            _serviceState.update { newState }
+                            // Don't change availability status for suspend
+                        }
+                    }
                 }
             }
         }
@@ -214,55 +223,51 @@ open class BaseViewModel : ViewModel(), KoinComponent {
     }
 
     private fun traceLocation() {
-        GPS.registerGps(provideAppContext()) {
-            if (it)
-                _gpsState.update { GpsState.Enabled }
-            else
-                _gpsState.update { GpsState.Disabled }
+        GPS.registerGps(provideAppContext()) { isEnabled ->
+            val newGpsState = if (isEnabled) GpsState.Enabled else GpsState.Disabled
+            // FIXED: Only update if state actually changed
+            if (_gpsState.value != newGpsState) {
+                _gpsState.update { newGpsState }
+            }
         }
-        when (GPS.getLocationsState()) {
-            true -> {
-                _gpsState.update { GpsState.Enabled }
-            }
-
-            false -> {
-                _gpsState.update { GpsState.Disabled }
-            }
+        
+        // Initialize GPS state
+        val initialGpsState = if (GPS.getLocationsState()) GpsState.Enabled else GpsState.Disabled
+        if (_gpsState.value != initialGpsState) {
+            _gpsState.update { initialGpsState }
         }
     }
 
 
     private fun traceOrientation() {
-        Orientation.orientationState(provideAppContext()) {
-            when (it) {
-                "landscape" -> {
-                    _orientationState.update { OrientationState.Landscape }
-                }
-
-                "portrait" -> {
-                    _orientationState.update { OrientationState.Portrait }
-                }
+        Orientation.orientationState(provideAppContext()) { orientationString ->
+            val newOrientationState = when (orientationString) {
+                "landscape" -> OrientationState.Landscape
+                "portrait" -> OrientationState.Portrait
+                else -> OrientationState.Default
+            }
+            // FIXED: Only update if state actually changed
+            if (_orientationState.value != newOrientationState) {
+                _orientationState.update { newOrientationState }
             }
         }
     }
 
     private fun traceNetwork() {
         viewModelScope.launch(Dispatchers.Main) {
-            konnectivity.currentNetworkConnectionState.collect { connection ->
-                when (connection) {
-                    NetworkConnection.NONE -> {
-                        _networkState.update { NetworkStates.NetworkConnectionNONE }
+            konnectivity.currentNetworkConnectionState
+                .collect { connection ->
+                    val networkState = when (connection) {
+                        NetworkConnection.NONE -> NetworkStates.NetworkConnectionNONE
+                        NetworkConnection.WIFI -> NetworkStates.NetworkConnectionWIFI
+                        NetworkConnection.CELLULAR -> NetworkStates.NetworkConnectionCELLULAR
+                        else -> NetworkStates.NetworkConnectionUNKNOWN
                     }
-
-                    NetworkConnection.WIFI -> {
-                        _networkState.update { NetworkStates.NetworkConnectionWIFI }
-                    }
-
-                    NetworkConnection.CELLULAR -> {
-                        _networkState.update { NetworkStates.NetworkConnectionCELLULAR }
+                    // OPTIMIZED: Only update if state actually changed
+                    if (_networkState.value != networkState) {
+                        _networkState.update { networkState }
                     }
                 }
-            }
         }
     }
 
@@ -324,7 +329,9 @@ open class BaseViewModel : ViewModel(), KoinComponent {
     }
 
     fun updateServiceState(serviceState: ServiceState) {
-
-        _serviceState.update { serviceState }
+        // FIXED: Only update if state actually changed to prevent infinite loops
+        if (_serviceState.value != serviceState) {
+            _serviceState.update { serviceState }
+        }
     }
 }

@@ -58,30 +58,15 @@ fun ticketCard(
     onMoreOptionsClick: () -> Unit = {}
 ) {
     val initialCount = min(2, task.properties.size)
-
-    var showMore by remember { mutableStateOf(false) }
-
-    var currentlyVisibleCount by remember { mutableStateOf(initialCount) }
-
-    LaunchedEffect(showMore) {
-        if (showMore) {
-            for (i in currentlyVisibleCount until task.properties.size) {
-                delay(80)
-                currentlyVisibleCount = i + 1
-            }
-        } else {
-
-            for (i in currentlyVisibleCount downTo (initialCount + 1)) {
-                delay(80)
-                currentlyVisibleCount = i - 1
-            }
-        }
-    }
-
-
+    
+    // OPTIMIZED: Single state variable eliminates multiple recompositions
+    var showMore by remember(task.ticket_id) { mutableStateOf(false) }
+    
+    // OPTIMIZED: Simple animation without complex coroutines
     val rotation by animateFloatAsState(
         targetValue = if (showMore) 180f else 0f,
-        animationSpec = tween(durationMillis = 300, easing = LinearOutSlowInEasing)
+        animationSpec = tween(durationMillis = 200, easing = LinearOutSlowInEasing),
+        label = "expand_rotation"
     )
 
     Card(
@@ -114,19 +99,26 @@ fun ticketCard(
 
             Spacer(modifier = Modifier.padding(vertical = spacing05X))
 
-     
-            task.properties.forEachIndexed { index, property ->
-                AnimatedVisibility(
-                    visible = index < currentlyVisibleCount,
-                    enter = fadeIn() + expandVertically(),
-                    exit = shrinkVertically() + fadeOut()
-                ) {
-                    PropertyItem(property)
+            // OPTIMIZED: Show initial properties without complex animations
+            task.properties.take(initialCount).forEach { property ->
+                PropertyItem(property)
+            }
+            
+            // OPTIMIZED: Simple AnimatedVisibility for remaining properties
+            AnimatedVisibility(
+                visible = showMore,
+                enter = fadeIn(tween(200)) + expandVertically(tween(200)),
+                exit = fadeOut(tween(150)) + shrinkVertically(tween(150))
+            ) {
+                Column {
+                    task.properties.drop(initialCount).forEach { property ->
+                        PropertyItem(property)
+                    }
                 }
             }
 
 
-            if (task.properties.size > 2) {
+            if (task.properties.size > initialCount) {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -148,7 +140,7 @@ fun ticketCard(
                             )
                             Icon(
                                 imageVector = Icons.Default.ExpandMore,
-                                contentDescription = null,
+                                contentDescription = if (showMore) "Show less" else "Show more",
                                 tint = surfaceBrandDefault,
                                 modifier = Modifier
                                     .padding(start = 4.dp)
@@ -223,11 +215,10 @@ fun ticketCard(
 
 
 @Composable
-fun PropertyItem(property: PropertiesDomain) {
+private fun PropertyItem(property: PropertiesDomain) {
     Column(
         modifier = Modifier.padding(vertical = spacing05X)
     ) {
-
         androidx.compose.material3.Text(
             text = property.key,
             style = body_small_strong,

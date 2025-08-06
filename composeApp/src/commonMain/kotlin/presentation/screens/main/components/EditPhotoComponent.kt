@@ -53,6 +53,7 @@ import presentation.screens.main.components.formViewer.draw.red
 import presentation.screens.main.components.formViewer.draw.yellow
 import presentation.theme.surfaceDefault
 
+
 @Composable
 fun EditPhotoComponent(
     angle: Float,
@@ -64,19 +65,17 @@ fun EditPhotoComponent(
 ) {
 
 
+    // Individual remember states for edit photo functionality
     val undoVisibility = remember { mutableStateOf(false) }
     val redoVisibility = remember { mutableStateOf(false) }
     val colorBarVisibility = remember { mutableStateOf(false) }
     val sizeBarVisibility = remember { mutableStateOf(false) }
     val currentColor = remember { mutableStateOf(DrawController.getColor()) }
-    val bg = androidx.compose.material.MaterialTheme.colors.background
-    val currentBgColor = remember { mutableStateOf(bg) }
+    val currentBgColor = remember { mutableStateOf(Color.White) }
     val currentSize = remember { mutableStateOf(10) }
     val colorIsBg = remember { mutableStateOf(false) }
     val drawBottomMenu = remember { mutableStateOf(true) }
     val changePhoto = remember { mutableStateOf(false) }
-
-
     val savedImageUri = remember { mutableStateOf("") }
     val savedImageUriCheck = remember { mutableStateOf(false) }
 

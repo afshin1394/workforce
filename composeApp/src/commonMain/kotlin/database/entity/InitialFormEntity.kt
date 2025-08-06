@@ -6,8 +6,12 @@ import data.network.response.task.task.InitForm
 import data.network.response.task.task.InstanceTicketsBasicInformationValues
 import domain.models.task.InstanceTicketsBasicInformationValuesDomain
 
-@Entity
- data class InitialFormEntity(
+@Entity(
+    indices = [
+        androidx.room.Index(value = ["ticket_number"], unique = true)
+    ]
+)
+data class InitialFormEntity(
     @PrimaryKey(autoGenerate = true) val pk: Long = 0,
     val ticket_number: String,
     val initForms: List<InstanceTicketsBasicInformationValues>,
